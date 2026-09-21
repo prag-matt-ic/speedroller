@@ -4,7 +4,7 @@ import { type Vector3Tuple } from 'three'
 import { useGameStore } from '@/components/GameProvider'
 import { FloatingHeading } from '@/components/platform/floatingHeadings/floatingHeading/FloatingHeading'
 import { HEADINGS_CONTENT } from '@/resources/content'
-import { HEADING_HEIGHT, HEADING_WIDTH } from '@/utils/platform/floatingHeading'
+import { HEADING_HEIGHT, HEADING_POSITION_OFFSET_Z, HEADING_WIDTH } from '@/utils/platform/floatingHeading'
 import { HIDDEN_POSITION, type RowData } from '@/utils/tiles'
 
 import useDynamicMeshes from '../useDynamicMeshes'
@@ -21,7 +21,7 @@ type Props = {
 }
 
 // Offset because the text is in a cylinder, causing it to appear further away that it should be.
-const HEADING_POSITION_OFFSET: Vector3Tuple = [0, 0, 7]
+const HEADING_POSITION_OFFSET: Vector3Tuple = [0, 0, HEADING_POSITION_OFFSET_Z]
 
 const FloatingHeadings: FC<Props> = ({ ref, onReadyChange }) => {
   const totalCount = useGameStore((s) => s.totalCounts.headings)

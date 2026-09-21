@@ -11,19 +11,20 @@ import {
   normalView,
   positionGeometry,
   positionView,
-  positionWorld,
   smoothstep,
   sin,
   time,
   vec3,
+  vertexStage,
 } from 'three/tsl'
 import { Color, Float32BufferAttribute, OctahedronGeometry, type Vector3Tuple } from 'three'
 import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import { CollectibleID } from '@/model/schema'
 import { GEMS_COLOURS_BY_ID } from '@/resources/colours'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 
 import Particles from './particles/Particles'
 
@@ -139,6 +140,7 @@ const Gem: FC<GemShellProps> = ({
       const scoped = scopedUniforms.scope<GemShellUniforms & GemShellConfigUniforms>(
         gemShellScope,
       )
+      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
       const surfaceColorNode = vec3(surfaceColor.r, surfaceColor.g, surfaceColor.b)
       const lineColorNode = vec3(lineColor.r, lineColor.g, lineColor.b)
@@ -176,8 +178,10 @@ const Gem: FC<GemShellProps> = ({
         float(1),
       ).mul(revealFactor).mul(pulseScale)
 
+      // The shell's own z — the anchor the particles ride on — so the gem and its burst ramp in
+      // together.
       const alpha: Node<'float'> = useDistanceFade
-        ? baseAlpha.mul(fadeDistance(positionWorld.z))
+        ? baseAlpha.mul(vertexStage(fadeInOut(uPlayerWorldPos.z)))
         : baseAlpha
 
       return {

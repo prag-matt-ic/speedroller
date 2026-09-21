@@ -5,16 +5,31 @@ export const TILE_SIZE = 1.0
 export const TILE_THICKNESS = 0.08
 export const TILE_PLAYER_HIGHLIGHT_ROW_COUNT = 4
 export const TILE_PLAYER_FADE_FULL_ROWS = 8
-export const TILE_PLAYER_FADE_MIN_ROWS = 14
+export const TILE_PLAYER_FADE_MIN_ROWS = 18
 export const TILE_PLAYER_FADE_MIN_ALPHA = 0
 export const TILE_PLAYER_HIGHLIGHT_RADIUS = TILE_PLAYER_HIGHLIGHT_ROW_COUNT * TILE_SIZE
 export const TILE_PLAYER_FADE_FULL_RADIUS = TILE_PLAYER_FADE_FULL_ROWS * TILE_SIZE
 export const TILE_PLAYER_FADE_MIN_RADIUS = TILE_PLAYER_FADE_MIN_ROWS * TILE_SIZE
 
+// Rows live in a window around the player, and it is deliberately lopsided: it runs well past the
+// tiles' fade radius ahead, and only as far behind as the camera can still see the track.
 const ROW_VISIBILITY_BUFFER_ROWS = 6
 const ROW_VISIBILITY_BUFFER_RADIUS = ROW_VISIBILITY_BUFFER_ROWS * TILE_SIZE
-export const ROW_VISIBILITY_HALF_SPAN =
+
+// Ahead: the tiles' visible run plus the buffer the fade-in needs. See `fadeInOut.ts`.
+export const ROW_VISIBILITY_AHEAD_SPAN =
   TILE_PLAYER_FADE_MIN_RADIUS + ROW_VISIBILITY_BUFFER_RADIUS
+
+// Behind: the camera trails the player by 8 and pulls back at most 5 with input, and it only sees
+// the ground ~5 units in front of itself, so nothing past this is ever on screen. Rows further back
+// would be behind the lens, costing tiles and per-frame moves for nothing.
+export const ROW_VISIBILITY_BEHIND_SPAN = 16
+
+// How far ahead/behind the player a row's elements are placed — the start of an element's life, and
+// the fade window `fadeInOut.ts` fades in over. One tile inside each span, so a row is never placed
+// exactly on the window edge it wraps at.
+export const ELEMENT_PLACEMENT_AHEAD_SPAN = ROW_VISIBILITY_AHEAD_SPAN - TILE_SIZE
+export const ELEMENT_PLACEMENT_BEHIND_SPAN = ROW_VISIBILITY_BEHIND_SPAN - TILE_SIZE
 
 const EXIT_LOWER_DURATION_ROWS = 6
 const PLATFORM_MAX_Z = TILE_SIZE * 8
@@ -29,7 +44,10 @@ export const EPSILON = {
 
 // Grid configuration
 export const COLUMNS = 33 // odd number so that there is a center column
-export const ROWS_RENDERED = 40
+
+// The pool is exactly the window above: rows wrap through it by ROWS_RENDERED, so anything else
+// leaves gaps or overlap. Widening the visible track by N rows costs N pool rows here.
+export const ROWS_RENDERED = ROW_VISIBILITY_AHEAD_SPAN + ROW_VISIBILITY_BEHIND_SPAN
 
 // Heights
 export const RAISED_Y = -TILE_SIZE / 2 // top of tile at y=0

@@ -8,7 +8,6 @@ import {
   mix,
   normalLocal,
   positionGeometry,
-  positionWorld,
   sin,
   time,
   vec3,
@@ -18,7 +17,8 @@ import { Color } from 'three'
 import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 
 // Normalized direction from (0.46, 0.8, 0.5) — carried over from ring.vert.
 const LIGHT_DIR = /*#__PURE__*/ vec3(0.4383, 0.7622, 0.4764).toConst()
@@ -78,11 +78,10 @@ const Ring: FC<Props> = ({
     uniformScope,
   )
 
-  // Port of ring.vert + ring.frag. The GLSL did all its work in the vertex stage and the fragment
-  // merely passed vColor through, so rotation, lift, lighting and fade all live in one node graph.
   const createNodes = useCallback(
     ({ uniforms }: CreatorState) => {
       const scoped = uniforms.scope<AllRingUniforms>(uniformScope)
+      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
       const angle = time
         .mul(scoped.uRotationSpeed)
@@ -111,14 +110,20 @@ const Ring: FC<Props> = ({
       const lighting = vertexStage(
         float(0.5).add(rotatedNormal.dot(LIGHT_DIR).max(0).mul(0.5)),
       )
-      // positionWorld already accounts for the mesh transform.
-      const fade = vertexStage(fadeDistance(positionWorld.z))
-      const finalFade: Node<'float'> = mix(float(1), fade, scoped.uDistanceFadeEnabled)
+      // The ring's own z, so it ramps in as a whole. Rings fade over the floating tiles' longer
+      // window, so they are already at full strength by the time they are near enough to read.
+      // uExitProgress and the fade toggle are uniforms, so the whole product is a per-draw
+      // constant and evaluates alongside the fade in the vertex stage.
+      const finalFade: Node<'float'> = vertexStage(
+        float(1).sub(scoped.uExitProgress).mul(
+          mix(float(1), fadeInOut(uPlayerWorldPos.z), scoped.uDistanceFadeEnabled),
+        ),
+      )
 
       return {
         positionNode: rotatedPosition,
         colorNode: color(RING_COLOR).mul(lighting).add(color(RING_EMISSIVE).mul(0.4)),
-        opacityNode: float(1).sub(scoped.uExitProgress).mul(finalFade),
+        opacityNode: finalFade,
       }
     },
     [uniformScope],

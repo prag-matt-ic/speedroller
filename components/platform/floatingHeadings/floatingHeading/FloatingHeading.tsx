@@ -7,7 +7,6 @@ import { type CreatorState, useLocalNodes,useThree } from '@react-three/fiber/we
 import gsap from 'gsap'
 import { type FC, type RefObject, useCallback, useEffect, useMemo } from 'react'
 import {
-  cameraPosition,
   clamp,
   cos,
   float,
@@ -42,7 +41,8 @@ import {
 } from '@/hooks/useTextCanvas'
 
 import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
-import { cameraFadeNear } from '@/resources/tsl/cameraFadeNear'
+import { fadeInOut, objectWorldZ } from '@/resources/tsl/fadeInOut'
+import { HEADING_POSITION_OFFSET_Z } from '@/utils/platform/floatingHeading'
 
 gsap.registerPlugin(useGSAP)
 
@@ -109,14 +109,17 @@ export const FloatingHeading: FC<Props> = ({
       // The three toggles are build-time props, so a JavaScript branch picks the graph and the
       // unused half never reaches the shader.
       //
-      // The GLSL read this as `uHeadingCenterXZ.y`, where that uniform was a Vector2 set from the
-      // heading's (x, z) — so the component is world Z, not world Y. cameraFadeNear already ramps
-      // 0 -> 1 as the heading recedes, which is the whole fade, so the old `fadeDistance` factor is
-      // gone: the two were inverses over the same 8 -> 14 band and multiplied to a constant zero.
-      // vCameraFade was a varying in the GLSL; hoist the smoothstep to the vertex stage so the
-      // fragment only reads the interpolated result.
+      // The fade reads the row's own z, which is the centre the GLSL passed in as uHeadingCenterXZ,
+      // so the whole arc fades as one: it materialises from the distance and fades back out on the
+      // approach to the camera. The mesh is parked a cylinder behind its row, so the offset is
+      // subtracted again here. vCameraFade was a varying in the GLSL; hoist the fade to the vertex
+      // stage so the fragment only reads the interpolated result.
       const cameraFade = useDistanceFade
-        ? vertexStage(cameraFadeNear(cameraPosition.z, headingCenter.z))
+        ? vertexStage(
+            fadeInOut(uPlayerWorldPos.z, objectWorldZ().sub(HEADING_POSITION_OFFSET_Z), {
+              fadeOut: true,
+            }),
+          )
         : float(1)
 
       const texel = texture(textTextureNode, mirroredUv)

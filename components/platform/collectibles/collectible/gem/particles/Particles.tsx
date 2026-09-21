@@ -10,11 +10,12 @@ import {
 } from '@react-three/fiber/webgpu'
 import gsap from 'gsap'
 import { type FC, useCallback, useEffect, useId, useMemo, useRef } from 'react'
-import { float, positionWorld, time } from 'three/tsl'
+import { float, time, vertexStage } from 'three/tsl'
 import { AdditiveBlending, Color, type Vector3Tuple } from 'three'
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import {
   createGemParticleBuffers,
   createGemParticleRenderNodes,
@@ -23,7 +24,7 @@ import {
 } from '@/components/platform/collectibles/collectible/gem/particles/gemParticleSimulation'
 import { CollectibleID } from '@/model/schema'
 import { GEMS_COLOURS_BY_ID, GOLD_PARTICLE_PALETTE } from '@/resources/colours'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 
 const GEM_PARTICLE_UNIFORM_SCOPE = 'gemParticles'
 
@@ -58,15 +59,6 @@ const toLinearPalette = (palette: readonly string[]): readonly (readonly [number
 
 /**
  * Gem particles: a burst that lifts out of the tile and settles into a floating cloud inside the gem.
- *
- * The GLSL ran this as `<points>` with all the motion evaluated per vertex every frame. Three things
- * changed shape:
- *
- * - points became instanced quads, because WebGPU rasterises point primitives at one pixel;
- * - the per-vertex motion moved into a compute kernel that advances a storage buffer once per
- *   particle, which is then read back as an attribute (the shape Threenix's Fireflies uses);
- * - `uDpr` and the perspective attenuation both went, since a quad is sized in world units.
- *
  * The static per-particle data is seeded once on the CPU when the buffers are created.
  */
 const Particles: FC<Props> = ({
@@ -80,6 +72,7 @@ const Particles: FC<Props> = ({
   isVisible,
 }) => {
   const particleCount = usePerformanceStore((s) => s.sceneConfig.gem.particleCount)
+  const particleFps = usePerformanceStore((s) => s.sceneConfig.particles.fps)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
   const renderer = useThree((s) => s.renderer)
 
@@ -103,6 +96,7 @@ const Particles: FC<Props> = ({
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<GemParticleUniforms>(particleScope)
+      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
       const buffers = createGemParticleBuffers({
         count: particleCount,
         gemScale,
@@ -122,7 +116,8 @@ const Particles: FC<Props> = ({
         render: createGemParticleRenderNodes({
           buffers,
           motion,
-          distanceFade: useDistanceFade ? fadeDistance(positionWorld.z) : float(1),
+          // The emitter's own z, shared with the shell it bursts out of.
+          distanceFade: useDistanceFade ? vertexStage(fadeInOut(uPlayerWorldPos.z)) : float(1),
           palette,
         }),
       }
@@ -180,14 +175,18 @@ const Particles: FC<Props> = ({
     }
   }, [])
 
-  useFrame(() => {
-    if (!isVisible) return
-    uBurstProgress.value = progress.current.value
-    // Once the burst has settled (progress 1) the render node derives the settled float from
-    // `time` alone and ignores the burst buffer, so skip the compute pass until the next burst.
-    if (progress.current.value >= 1) return
-    renderer.compute(simulation.updateParticles)
-  })
+  // The burst is a pure function of `uBurstProgress`, so a capped update rate trades only
+  // smoothness for compute time — no state is integrated across steps.
+  useFrame(
+    () => {
+      uBurstProgress.value = progress.current.value
+      // Once the burst has settled (progress 1) the render node derives the settled float from
+      // `time` alone and ignores the burst buffer, so skip the compute pass until the next burst.
+      if (progress.current.value >= 1) return
+      renderer.compute(simulation.updateParticles)
+    },
+    { fps: particleFps === 0 ? undefined : particleFps, enabled: isVisible },
+  )
 
   return (
     <instancedMesh

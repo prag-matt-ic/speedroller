@@ -17,7 +17,6 @@ import {
   useRef,
 } from 'react'
 import {
-  cameraPosition,
   clamp as tslClamp,
   float,
   floor,
@@ -39,6 +38,7 @@ import {
   createFloatingTilesBuffers,
   createFloatingTilesSimulation,
 } from '@/components/floatingTiles/floatingTilesSimulation'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import { COLUMNS, ROWS_RENDERED, type RowData, TILE_SIZE, clamp } from '@/utils/tiles'
 
@@ -57,8 +57,6 @@ const TILE_THICKNESS = 0.1
 const BOX_SIZE_SCALE = 0.5
 const Y_MIN = -8
 const Y_MAX = 8
-const Z_FADE_START = 16
-const Z_FADE_END = 32
 const MAX_DELTA_TIME = 0.05
 
 /** Spawn-mask values: 1 where a floating tile may respawn, 0 where a platform tile blocks it. */
@@ -205,7 +203,7 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
   // coordinate from the tile's world position, and the alpha from the tile's Y and Z.
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
-      const { uScrollZ } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uScrollZ, uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
       // The storage buffer has to exist before the graph that reads it is built, so the simulation
       // is created here rather than in an effect — the shape the gem particles use too.
@@ -259,9 +257,8 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
       const bandAlpha = smoothstep(float(0), float(0.2), normalizedY).mul(
         smoothstep(float(0), float(0.2), float(1).sub(normalizedY)),
       )
-      const zFade = float(1).sub(
-        smoothstep(Z_FADE_START, Z_FADE_END, worldZ.sub(cameraPosition.z).abs()),
-      )
+      // The row's own z — one value per instance — so each tile ramps in as a whole.
+      const zFade = fadeInOut(uPlayerWorldPos.z, worldZ)
       const alpha = bandAlpha.mul(zFade)
 
       const noiseValue = mx_noise_float(noiseCoord)

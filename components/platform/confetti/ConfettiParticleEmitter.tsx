@@ -10,7 +10,6 @@ import {
   fract,
   mix,
   positionGeometry,
-  positionWorld,
   smoothstep,
   sin,
   time,
@@ -22,12 +21,13 @@ import { AdditiveBlending, Color, InstancedBufferAttribute, type Vector3Tuple } 
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import {
   CONFETTI_PARTICLE_COLOURS_GOLD,
   CONFETTI_PARTICLE_COLOURS_GREEN,
   CONFETTI_PARTICLE_COLOURS_TEAL,
 } from '@/resources/colours'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { softCircleMask, softEdgeRadius } from '@/resources/tsl/particleQuad'
 
 const CONFETTI_UNIFORM_SCOPE = 'confettiEmitter'
@@ -50,8 +50,8 @@ const createConfettiUniforms = () => ({
 const PARTICLE_QUAD_SIZE = 0.08
 
 /** Per-particle scale range applied to {@link PARTICLE_QUAD_SIZE}, as in the GLSL's size seed. */
-const MIN_PARTICLE_SCALE = 0.6
-const MAX_PARTICLE_SCALE = 1.5
+const MIN_PARTICLE_SCALE = 0.25
+const MAX_PARTICLE_SCALE = 1.0
 
 const CONFETTI_GRAVITY = -6
 const BURST_DURATION_SECONDS = 1.8
@@ -206,6 +206,7 @@ const ConfettiParticleEmitter = forwardRef<ConfettiParticleEmitterHandle, Props>
     const createNodes = useCallback(
       ({ uniforms: scopedUniforms }: CreatorState) => {
         const scoped = scopedUniforms.scope<ConfettiUniforms>(emitterScope)
+        const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
         const spawnPosition = attribute<'vec3'>('spawnPosition')
         const driftVelocity = attribute<'vec3'>('driftVelocity')
@@ -265,11 +266,9 @@ const ConfettiParticleEmitter = forwardRef<ConfettiParticleEmitterHandle, Props>
           fract(seed.mul(31)),
         )
 
-        // The fade depends only on the emitter's world position, so the vertex stage evaluates it
-        // once per quad and the fragment stage reads the varying.
-        const distanceFade = useDistanceFade
-          ? vertexStage(fadeDistance(positionWorld.z))
-          : float(1)
+        // The fade depends only on the emitter's own z, so it is one value for the whole burst:
+        // the vertex stage evaluates it once per quad and the fragment stage reads the varying.
+        const distanceFade = useDistanceFade ? vertexStage(fadeInOut(uPlayerWorldPos.z)) : float(1)
 
         return {
           positionNode: particlePosition.add(positionGeometry.mul(particleScale)),

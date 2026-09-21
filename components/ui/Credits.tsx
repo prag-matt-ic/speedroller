@@ -16,13 +16,20 @@ const Credits: FC<Props> = ({ className, show }) => {
         show && 'opacity-100 delay-500',
         className,
       )}>
-      <span className="text-teal-50/40">By</span>
+      <span className="text-teal-50/50">Built by</span>
       <a
         href="https://threenix.io"
         target="_blank"
         rel="noopener noreferrer"
         className="font-semibold hover:text-teal-100">
         Threenix.io
+      </a>
+      <span className="text-teal-50/50">|</span>
+      <a href="https://github.com/prag-matt-ic/speedroller"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold hover:text-teal-100">
+        Github
       </a>
     </div>
   )

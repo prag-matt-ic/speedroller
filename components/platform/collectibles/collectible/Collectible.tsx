@@ -5,17 +5,18 @@ import { CuboidCollider, RapierRigidBody, RigidBody } from '@react-three/rapier'
 import { type FC, type RefObject, useId, useMemo, useRef } from 'react'
 import { DataTexture, FloatType, Group, Mesh, RGBAFormat, Vector3 } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
-import { clamp, float, mix, positionWorld, select, uv, vec2, vec3 } from 'three/tsl'
+import { clamp, float, mix, select, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import Gem, { type GemShellRef } from '@/components/platform/collectibles/collectible/gem/Gem'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { useConfirmationProgress } from '@/hooks/useConfirmationProgress'
 import useGameFrame from '@/hooks/useGameFrame'
 import { CollectibleID, type CollectibleUserData } from '@/model/schema'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { paintCorners } from '@/resources/tsl/paintCorners'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { HIDDEN_POSITION, TILE_SIZE } from '@/utils/tiles'
@@ -84,6 +85,7 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
   // fade were varyings in the GLSL; here they are recomputed inside the fragment node graph.
   const { colorNode, opacityNode } = useLocalNodes(({ uniforms }: CreatorState) => {
     const scoped = uniforms.scope<CollectibleTileUniforms>(tileUniformScope)
+    const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
     // vHeightSpacePosition: centred UV with the aspect ratio applied to x.
     const centeredUv = uv().sub(0.5)
@@ -115,10 +117,10 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
       animatedCornerLength,
     )
 
-    // vDistanceFade: fadeDistance(worldZ) when enabled, otherwise 1.0. Built as a JS branch so the
-    // fade is omitted from the graph when the toggle is off.
+    // The tile's own z, so the brackets ramp in as a whole. Built as a JS branch so the fade is
+    // omitted from the graph when the toggle is off.
     const mask: Node<'float'> = useDistanceFade
-      ? bracketMask.mul(fadeDistance(positionWorld.z))
+      ? bracketMask.mul(vertexStage(fadeInOut(uPlayerWorldPos.z)))
       : bracketMask
 
     return { colorNode: vec3(1), opacityNode: mask }

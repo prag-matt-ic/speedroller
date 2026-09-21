@@ -25,17 +25,18 @@ import {
 } from 'react'
 import { Transition } from 'react-transition-group'
 import { twMerge } from 'tailwind-merge'
-import { float, mix, positionWorld, uv, vec2, vec3 } from 'three/tsl'
+import { float, mix, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import { type Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { PointerProvider } from '@/components/ui/PointerProvider'
 import { InfoZoneUserData, type RigidBodyUserData } from '@/model/schema'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut, objectWorldZ } from '@/resources/tsl/fadeInOut'
 import { paintCorners } from '@/resources/tsl/paintCorners'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import {
@@ -120,6 +121,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
   const createNodes = useCallback(
     ({ uniforms }: CreatorState) => {
       const scoped = uniforms.scope<InfoZoneUniforms>(zoneKey)
+      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
       // Height-space UV: centred, with the aspect ratio applied to x.
       const centeredUvSource = uv().sub(0.5)
       const centeredUv: Node<'vec2'> = vec2(
@@ -142,8 +144,12 @@ export const InfoZone: FC<InfoZoneProps> = ({
       )
 
       // uOpacity was declared in the GLSL but never set from JS, so it stayed at its initial 1.
+      // The fade reads the zone's own z, so the whole 5-tile panel ramps as one rather than wiping
+      // in across its depth.
       const opacityNode: Node<'float'> = useDistanceFade
-        ? bracketMask.mul(fadeDistance(positionWorld.z))
+        ? bracketMask.mul(
+            vertexStage(fadeInOut(uPlayerWorldPos.z, objectWorldZ(), { fadeOut: true })),
+          )
         : bracketMask
       return { colorNode: vec3(1), opacityNode }
     },

@@ -24,7 +24,9 @@ import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { getRingKey } from '@/utils/rings'
 import { HIDDEN_POSITION, ON_TILE_Y, type RowData, colToX } from '@/utils/tiles'
 
-const MAX_RING_INSTANCES = 20
+// The busiest 38 rows of the track carry 17 rings at once, which is the whole placement window;
+// the rest is headroom for widening it again.
+const MAX_RING_INSTANCES = 24
 const instancesArray = Array.from({ length: MAX_RING_INSTANCES }, (_, i) => i)
 const RING_MAJOR_RADIUS = 0.32
 const RING_TUBE_RADIUS = 0.06

@@ -47,6 +47,10 @@ export type SceneConfig = {
   postProcessing: {
     blurSamples: number
   }
+  particles: {
+    /** Burst simulation updates per second (0 = every rendered frame). */
+    fps: number
+  }
 }
 
 const logPerformanceDebug = (...payload: unknown[]) => {
@@ -67,6 +71,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     infoZoneSphere: { segments: 64, enableVeins: true },
     confetti: { particleCount: 240 },
     postProcessing: { blurSamples: 24 },
+    particles: { fps: 0 },
   },
   [SceneQuality.HIGH]: {
     isDistanceFadeEnabled: true,
@@ -80,6 +85,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     infoZoneSphere: { segments: 48, enableVeins: true },
     confetti: { particleCount: 160 },
     postProcessing: { blurSamples: 16 },
+    particles: { fps: 60 },
   },
   [SceneQuality.MEDIUM]: {
     isDistanceFadeEnabled: true,
@@ -93,6 +99,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     infoZoneSphere: { segments: 32, enableVeins: false },
     confetti: { particleCount: 80 },
     postProcessing: { blurSamples: 8 },
+    particles: { fps: 30 },
   },
   [SceneQuality.LOW]: {
     isDistanceFadeEnabled: false,
@@ -106,6 +113,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     infoZoneSphere: { segments: 20, enableVeins: false },
     confetti: { particleCount: 48 },
     postProcessing: { blurSamples: 0 },
+    particles: { fps: 30 },
   },
 }
 

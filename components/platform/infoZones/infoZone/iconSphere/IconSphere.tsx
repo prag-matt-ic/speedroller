@@ -14,21 +14,22 @@ import {
   normalView,
   positionGeometry,
   positionView,
-  positionWorld,
   smoothstep,
   sqrt,
   texture,
   time,
   vec2,
   vec3,
+  vertexStage,
 } from 'three/tsl'
 import { AdditiveBlending, Color, SpriteMaterial, type Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import noise from '@/assets/textures/iconSphere/noise.webp'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import { INFO_ZONE_SPHERE_COLOUR } from '@/resources/colours'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut, objectWorldZ } from '@/resources/tsl/fadeInOut'
 
 const ICON_SPHERE_RADIUS = 1
 const ICON_SPHERE_GLOW_STRENGTH = 4.0
@@ -98,6 +99,7 @@ const IconSphere: FC<IconSphereProps> = ({ iconSrc, shouldHide, isVisible, zoneK
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
         const scoped = scopedUniforms.scope<IconSphereUniforms>(sphereScope)
+        const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
         const visibility = float(1).sub(smoothstep(float(0), float(1), scoped.uHiddenProgress))
         const scale = mix(float(0.33), float(1), visibility)
@@ -140,8 +142,11 @@ const IconSphere: FC<IconSphereProps> = ({ iconSrc, shouldHide, isVisible, zoneK
         const finalColor = litSurface.add(glowColor.mul(0.2)).add(veinContribution)
 
         const baseAlpha = float(ICON_SPHERE_OPACITY)
+        // The sphere's own z, so it ramps in and out with the zone it floats over.
         const fadedAlpha = isDistanceFadeEnabled
-          ? baseAlpha.mul(fadeDistance(positionWorld.z))
+          ? baseAlpha.mul(
+              vertexStage(fadeInOut(uPlayerWorldPos.z, objectWorldZ(), { fadeOut: true })),
+            )
           : baseAlpha
         const withEffects = clamp(
           fadedAlpha.add(veinAlphaContribution).add(glowContribution.mul(0.15)),

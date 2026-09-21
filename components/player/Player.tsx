@@ -185,8 +185,10 @@ const Player: FC = () => {
     return () => clearTimeout(timeout)
   }, [playerRespawnTick, isRespawning, isPlatformReady, onRespawnComplete, spawnPosition])
 
-  if (!isPlatformReady) return null
-
+  // Mounted with the rest of the physics content, so the marble is already in the scene when
+  // SceneWarmup compiles it. Placement is not this component's mount: `playerStatus` keeps the body
+  // parked at PLAYER_INITIAL_POSITION, the shader's Y fade keeps it invisible there, and the drop-in
+  // is the respawn LandingOverlay triggers once it closes.
   return (
     <RigidBody
       ref={bodyRef}

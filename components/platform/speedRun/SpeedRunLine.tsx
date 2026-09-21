@@ -1,4 +1,4 @@
-import { useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
@@ -7,14 +7,15 @@ import {
   RigidBody,
 } from '@react-three/rapier'
 import { type FC, type RefObject, useCallback, useMemo, useRef } from 'react'
-import { float, floor, fract, mix, positionWorld, step, uv, vec2, vec3, vertexStage } from 'three/tsl'
+import { float, floor, fract, mix, step, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import type { RigidBodyUserData, SpeedRunLineUserData } from '@/model/schema'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { GameMode, Overlay, SpeedRunStage } from '@/stores/types'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { HIDDEN_POSITION, TILE_SIZE } from '@/utils/tiles'
@@ -64,7 +65,8 @@ const createLineSurfaceNodes = ({
   uTilesX,
   uTilesY,
   uDistanceFadeEnabled,
-}: SpeedRunLineUniforms): LineSurfaceNodes => {
+  uPlayerWorldPos,
+}: SpeedRunLineUniforms & Pick<CoreUniforms, 'uPlayerWorldPos'>): LineSurfaceNodes => {
   const lineUv = uv()
   const tileCoord: Node<'vec2'> = lineUv.mul(vec2(uTilesX, uTilesY))
   // TILE_EPS keeps floor() clear of exact tile boundaries, as in the GLSL.
@@ -72,9 +74,12 @@ const createLineSurfaceNodes = ({
   const checkerPhase: Node<'float'> = fract(tileFloor.x.add(tileFloor.y).mul(0.5))
 
   // The GLSL handed the fade across as a varying; hoist it to the vertex stage so the fragment
-  // stage reads the interpolated result instead of re-deriving it.
-  const fade: Node<'float'> = vertexStage(fadeDistance(positionWorld.z))
-  const distanceFade: Node<'float'> = mix(float(1), fade, uDistanceFadeEnabled)
+  // stage reads the interpolated result instead of re-deriving it. It reads the line's own z, so
+  // the whole line ramps as one. The fade toggle is a uniform, so the mix collapses to a constant
+  // just like the fade it scales and belongs in the same stage.
+  const distanceFade: Node<'float'> = vertexStage(
+    mix(float(1), fadeInOut(uPlayerWorldPos.z), uDistanceFadeEnabled),
+  )
 
   return { lineUv, checkerPhase, distanceFade }
 }
@@ -156,14 +161,23 @@ const SpeedRunLine: FC<Props> = ({ ref, width, height }) => {
 
   // Port of finishLine.vert + finishLine.frag + startLine.frag. The two fragment variants are built
   // together off the one shared vertex stage, and the material picks the pair it needs.
-  const createNodes = useCallback(() => {
-    const surfaceNodes = createLineSurfaceNodes({ uTilesX, uTilesY, uDistanceFadeEnabled })
+  const createNodes = useCallback(
+    ({ uniforms }: CreatorState) => {
+      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const surfaceNodes = createLineSurfaceNodes({
+        uTilesX,
+        uTilesY,
+        uDistanceFadeEnabled,
+        uPlayerWorldPos,
+      })
 
-    return {
-      finishLineNodes: createFinishLineNodes(surfaceNodes),
-      startLineNodes: createStartLineNodes(surfaceNodes),
-    }
-  }, [uTilesX, uTilesY, uDistanceFadeEnabled])
+      return {
+        finishLineNodes: createFinishLineNodes(surfaceNodes),
+        startLineNodes: createStartLineNodes(surfaceNodes),
+      }
+    },
+    [uTilesX, uTilesY, uDistanceFadeEnabled],
+  )
 
   const { finishLineNodes, startLineNodes } = useLocalNodes(createNodes)
 

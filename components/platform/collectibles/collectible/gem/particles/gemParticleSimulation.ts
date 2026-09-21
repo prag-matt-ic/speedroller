@@ -21,22 +21,6 @@ import {
 } from 'three/tsl'
 import type { ComputeNode, Node, StorageBufferNode, UniformNode } from 'three/webgpu'
 
-// Port of gem/particles/point.vert + point.frag as a compute-driven instanced particle system,
-// following the shape of Threenix's Fireflies: storage buffers created once, a compute kernel that
-// advances them, and node graphs that read the buffers back through `toAttribute()`.
-//
-// Two things had to change shape rather than syntax:
-//
-// 1. WebGPU rasterises point primitives at one pixel, so `<points>` with `gl_PointSize` cannot work.
-//    The particles render as instanced quads and `gl_PointCoord` becomes the quad's own uv.
-// 2. `gl_PointSize` was in pixels, so it needed the device pixel ratio and a perspective attenuation
-//    term. A quad sized in world units needs neither, which drops the uDpr uniform entirely.
-//
-// The per-particle data the GLSL carried as attributes splits by how often it changes: the spawn
-// point, gem-interior target, seed and colour are constant, while the burst position advances every
-// frame. Only the burst needs a kernel — the settled float is a pure function of time.
-
-// Carried over from point.vert.
 const EPSILON = 1e-5
 const GEM_INTERIOR_SCALE = 0.9
 const OCTA_INV_SQRT3 = 0.57735027

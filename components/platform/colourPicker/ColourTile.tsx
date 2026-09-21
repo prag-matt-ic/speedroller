@@ -9,7 +9,6 @@ import {
   max,
   mix,
   mx_noise_float,
-  positionWorld,
   smoothstep,
   time,
   uv,
@@ -21,9 +20,10 @@ import { type Vector3Tuple } from 'three'
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { type ColourTileUserData } from '@/model/schema'
-import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { getColourFromPalette } from '@/resources/tsl/playerPalette'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { COLOUR_TILE_SIZE } from '@/utils/platform/homeSection'
@@ -72,11 +72,12 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive, ref }) => {
   const colourTileUniformScope = `colourTile${option.index}`
   useUniforms(createColourTileUniforms(option.index, isActive), colourTileUniformScope)
 
-  // Port of colourTile.vert + colourTile.frag. vUv and vDistanceFade are recomputed in-graph from
-  // the plane's uv and positionWorld, so no varying is needed.
+  // Port of colourTile.vert + colourTile.frag. vUv is recomputed in-graph from the plane's uv, so
+  // no varying is needed for it.
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<ColourTileUniforms>(colourTileUniformScope)
+      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
       const tileUv = uv()
       const centredUv = tileUv.sub(0.5)
@@ -110,8 +111,9 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive, ref }) => {
 
       return {
         colorNode: mix(baseColour, borderColour, borderMask),
-        // The fade toggle is a graph constant; hoist the fade to the vertex stage when enabled.
-        opacityNode: useDistanceFade ? vertexStage(fadeDistance(positionWorld.z)) : float(1),
+        // The tile's own z, so it ramps in as a whole. The fade toggle is a graph constant; hoist
+        // the fade to the vertex stage when enabled.
+        opacityNode: useDistanceFade ? vertexStage(fadeInOut(uPlayerWorldPos.z)) : float(1),
       }
     },
     [colourTileUniformScope, useDistanceFade, useNoise],
@@ -136,7 +138,7 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive, ref }) => {
         sensor={true}
         collisionGroups={COLLISION_GROUPS.colourTileSensor}
       />
-      <mesh>
+      <mesh renderOrder={1}>
         <planeGeometry args={[COLOUR_TILE_SIZE, COLOUR_TILE_SIZE]} />
         <meshBasicNodeMaterial
           colorNode={colorNode}

@@ -31,15 +31,14 @@ import useStage from '@/hooks/useStage'
 import { GameMode } from '@/stores/types'
 import {
   COLUMNS,
+  ELEMENT_PLACEMENT_AHEAD_SPAN,
+  ELEMENT_PLACEMENT_BEHIND_SPAN,
   EPSILON,
   ROWS_RENDERED,
-  ROW_VISIBILITY_HALF_SPAN,
+  ROW_VISIBILITY_AHEAD_SPAN,
+  ROW_VISIBILITY_BEHIND_SPAN,
   type RowData,
-  TILE_PLAYER_FADE_FULL_RADIUS,
-  TILE_PLAYER_FADE_MIN_ALPHA,
-  TILE_PLAYER_FADE_MIN_RADIUS,
   TILE_SIZE,
-  clamp,
   colToX,
   lerp,
   raisedMaskToY,
@@ -59,41 +58,18 @@ const EMPTY_ROW_DATA: RowData = {
   rowIndex: EMPTY_ROW_INDEX,
 }
 
-const FADE_FULL_RADIUS_SQ = TILE_PLAYER_FADE_FULL_RADIUS * TILE_PLAYER_FADE_FULL_RADIUS
-const FADE_MIN_RADIUS_SQ = TILE_PLAYER_FADE_MIN_RADIUS * TILE_PLAYER_FADE_MIN_RADIUS
-const ROW_FADE_DENOM = Math.max(EPSILON.SMALL, FADE_MIN_RADIUS_SQ - FADE_FULL_RADIUS_SQ)
+// The pool is the window: rows wrap through it by exactly this distance.
 const ROW_CYCLE_DISTANCE = ROWS_RENDERED * TILE_SIZE
-const ROWS_COVERAGE_HALF_SPAN = (ROWS_RENDERED - 1) * TILE_SIZE * 0.5
-const VISIBILITY_WINDOW_SPAN = ROW_VISIBILITY_HALF_SPAN * 2
-const INITIAL_ROW_BACK_OFFSET_ROWS = 16
-const INITIAL_ROW_BACK_OFFSET = INITIAL_ROW_BACK_OFFSET_ROWS * TILE_SIZE
 
-const warnVisibilityCoverageIfNeeded = (() => {
-  let hasWarned = false
-  return () => {
-    if (hasWarned || !IS_DEV_ENV) return
-    if (VISIBILITY_WINDOW_SPAN > ROW_CYCLE_DISTANCE) {
-      console.warn(
-        `[Platform] Visibility span (${VISIBILITY_WINDOW_SPAN.toFixed(
-          2,
-        )}) exceeds instanced coverage (${ROW_CYCLE_DISTANCE.toFixed(
-          2,
-        )}). Expect reduced buffer or inc rease ROWS_RENDERED.`,
-      )
-    }
-    hasWarned = true
-  }
-})()
+// Where a run starts: track row 0 sits this far behind the player, so the spawn drop, the runway and
+// the first heading (row 10) land where they always have. Deliberately independent of the window
+// above — deriving it from the window silently walked the spawn forward every time the window grew.
+// The stretch behind the layout is filled by rows wrapping round from the front edge.
+const INITIAL_ROW_START_Z = 3.5 * TILE_SIZE
 
-function getRowAlpha(rowZ: number, playerZ: number): number {
-  // Rows in front of the player (z >= 0) are either behind the camera or immediately adjacent,
-  // so skip distance-based fading to save per-frame math.
-  if (rowZ > 0) return 1
-  const dz = rowZ - playerZ
-  const distSq = dz * dz
-  const fadeT = clamp((distSq - FADE_FULL_RADIUS_SQ) / ROW_FADE_DENOM, 0, 1)
-  return lerp(1, TILE_PLAYER_FADE_MIN_ALPHA, fadeT)
-}
+/** Whether a row's elements belong in the pool: placed inside the window, one tile in from its edges. */
+const isRowWithinPlacementSpan = (rowZ: number): boolean =>
+  rowZ < ELEMENT_PLACEMENT_BEHIND_SPAN && rowZ > -ELEMENT_PLACEMENT_AHEAD_SPAN
 
 // The core uniforms as `GameUniforms` registered them. Module scope keeps the creator identity
 // stable, so `useLocalNodes` only re-runs it when the registry itself changes.
@@ -181,16 +157,16 @@ const Platform: FC = () => {
     const tileInstances: InstancedRigidBodyProps[] = []
 
     const playerZ = 0
-    const initialHalfSpan = Math.min(ROW_VISIBILITY_HALF_SPAN, ROWS_COVERAGE_HALF_SPAN)
-    const nextStartZ = playerZ + initialHalfSpan - INITIAL_ROW_BACK_OFFSET
+    const nextStartZ = playerZ + INITIAL_ROW_START_Z
     if (IS_DEV_ENV) {
       console.warn(
         `[Platform] Initializing rows around playerZ=${playerZ.toFixed(
           2,
-        )} with startZ=${nextStartZ.toFixed(2)} (halfSpan=${initialHalfSpan.toFixed(2)}).`,
+        )} with startZ=${nextStartZ.toFixed(2)} (ahead=${ROW_VISIBILITY_AHEAD_SPAN.toFixed(
+          2,
+        )}, behind=${ROW_VISIBILITY_BEHIND_SPAN.toFixed(2)}).`,
       )
     }
-    warnVisibilityCoverageIfNeeded()
 
     let nextRowZ = nextStartZ
 
@@ -438,8 +414,8 @@ const Platform: FC = () => {
   function updateTiles() {
     if (!tiles.current?.rigidBodies) return
     const cycleDistance = ROW_CYCLE_DISTANCE
-    const maxZ = ROW_VISIBILITY_HALF_SPAN
-    const minZ = -ROW_VISIBILITY_HALF_SPAN
+    const maxZ = ROW_VISIBILITY_BEHIND_SPAN
+    const minZ = -ROW_VISIBILITY_AHEAD_SPAN
     let rowBasesChanged = false
 
     for (let rowIndex = 0; rowIndex < ROWS_RENDERED; rowIndex++) {
@@ -473,8 +449,7 @@ const Platform: FC = () => {
       }
 
       const wasVisible = rowIsVisible.current[rowIndex] === true
-      const rowAlpha = getRowAlpha(rowZ, 0)
-      const isVisible = rowAlpha > TILE_PLAYER_FADE_MIN_ALPHA
+      const isVisible = isRowWithinPlacementSpan(rowZ)
       if (wasVisible !== isVisible) {
         rowIsVisible.current[rowIndex] = isVisible
         if (isVisible) {

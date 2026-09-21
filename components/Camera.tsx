@@ -1,17 +1,14 @@
 'use client'
 
-import { CameraControls, CameraControlsImpl } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber/webgpu'
-// import { useControls } from 'leva'
 import { type FC, useCallback, useEffect, useRef } from 'react'
 
 import { Stage, useGameStore } from '@/components/GameProvider'
+import useCameraControls from '@/hooks/cameraControls/useCameraControls'
 import { usePlayerInput } from '@/hooks/usePlayerInput'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import useStage from '@/hooks/useStage'
 import { Overlay } from '@/stores/types'
-
-const { ACTION } = CameraControlsImpl
 
 type StageCameraPosition = {
   y: number
@@ -37,100 +34,76 @@ export const CAMERA_ZOOM_FOR_STAGE_MOBILE: Record<Stage, number> = {
   [Stage.SPEED_RUN_FINISH]: 1.6,
 }
 
+const LOOK_AT_HEIGHT = 3
+const LOOK_AT_X_RANGE = 1.5
+const INPUT_UP_Z_OFFSET = 3
+const INPUT_DOWN_Z_OFFSET = 5
+const OVERLAY_Y_OFFSET = 5
+const OVERLAY_Z_OFFSET = 5
+const COLLECTIBLE_ZOOM_OFFSET = 0.3
+
+type SetZoom = (zoom: number, transition?: boolean) => void
+
+/**
+ * Zoom policy for the hook that owns the lens: the stage picks the base zoom, and an on-screen
+ * collectible confirmation nudges it. `useCameraControls` eases toward each goal.
+ */
+const useStageZoom = (setZoom: SetZoom, zoomForStage: Record<Stage, number>) => {
+  const isConfirmingCollectible = useGameStore((s) => !!s.confirmingCollectible)
+  const stageZoom = useRef(zoomForStage[Stage.HOME])
+
+  const handleStageChange = useCallback(
+    (nextStage: Stage) => {
+      stageZoom.current = zoomForStage[nextStage]
+      setZoom(stageZoom.current, true)
+    },
+    [setZoom, zoomForStage],
+  )
+
+  useStage(handleStageChange)
+
+  useEffect(() => {
+    const confirmationOffset = isConfirmingCollectible ? COLLECTIBLE_ZOOM_OFFSET : 0
+    setZoom(stageZoom.current + confirmationOffset, true)
+  }, [isConfirmingCollectible, setZoom])
+}
+
 type Props = {
   isMobile: boolean
   position: StageCameraPosition
 }
 
 const Camera: FC<Props> = ({ isMobile, position }) => {
-  const cameraControls = useRef<CameraControls>(null)
+  const { setLookAt, setZoom } = useCameraControls()
   const { playerPosition } = usePlayerPosition()
   const cameraLookAtPosition = useGameStore((s) => s.cameraLookAtPosition)
-  const isConfirmingCollectible = useGameStore((s) => !!s.confirmingCollectible)
-
   const isOverlayOpen = useGameStore((s) => s.overlay !== Overlay.NONE)
-  const overlayZOffset = isOverlayOpen ? 5.0 : 0
-  const overlayYOffset = isOverlayOpen ? 5.0 : 0
-
-  const cameraZoomForStage = isMobile
-    ? CAMERA_ZOOM_FOR_STAGE_MOBILE
-    : CAMERA_ZOOM_FOR_STAGE_DESKTOP
-
-  const currentZoom = useRef<number>(cameraZoomForStage[Stage.HOME])
 
   const { input } = usePlayerInput()
 
-  // useControls(() => ({
-  //   cameraZoom: {
-  //     value: currentZoom.current,
-  //     min: 0,
-  //     max: 2,
-  //     onChange: (value: number) => {
-  //       currentZoom.current = value
-  //       if (!cameraControls.current) return
-  //       cameraControls.current.zoomTo(value, false)
-  //     },
-  //   },
-  // }))
-
-  const handleStageChange = useCallback(
-    (nextStage: Stage) => {
-      if (!cameraControls.current) return
-      const zoom = cameraZoomForStage[nextStage]
-      currentZoom.current = zoom
-      cameraControls.current.zoomTo(zoom, true)
-    },
-    [cameraZoomForStage],
-  )
-
-  useStage(handleStageChange)
-
-  useEffect(() => {
-    if (!cameraControls.current) return
-    if (isConfirmingCollectible) {
-      cameraControls.current.zoomTo(currentZoom.current + 0.3, true)
-    } else {
-      cameraControls.current.zoomTo(currentZoom.current, true)
-    }
-  }, [isConfirmingCollectible])
+  useStageZoom(setZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
 
   useFrame(() => {
-    if (!cameraControls.current) return
-
     const lookAt = cameraLookAtPosition ?? playerPosition.current
-    // Adjust the position based on player input
-    const positionZOffset = input.current.down * 5.0 - input.current.up * -3.0
+    // Offset the camera along z from player input
+    const inputZOffset =
+      input.current.down * INPUT_DOWN_Z_OFFSET + input.current.up * INPUT_UP_Z_OFFSET
     // Look left or right based on player input
-    const lookAtX = lookAt[0] + (input.current.right - input.current.left) * 1.5
+    const lookAtX = lookAt[0] + (input.current.right - input.current.left) * LOOK_AT_X_RANGE
 
-    cameraControls.current.setLookAt(
+    // Ease toward the moving goal rather than snapping the camera onto it each frame
+    setLookAt(
       playerPosition.current[0],
-      position.y + overlayYOffset,
-      position.z + positionZOffset + overlayZOffset,
+      position.y + (isOverlayOpen ? OVERLAY_Y_OFFSET : 0),
+      position.z + inputZOffset + (isOverlayOpen ? OVERLAY_Z_OFFSET : 0),
       lookAtX,
-      3,
+      LOOK_AT_HEIGHT,
       lookAt[2],
       true,
     )
   })
 
-  return (
-    <CameraControls
-      ref={cameraControls}
-      makeDefault={true}
-      mouseButtons={{
-        left: ACTION.NONE,
-        middle: ACTION.NONE,
-        right: ACTION.NONE,
-        wheel: ACTION.NONE,
-      }}
-      touches={{
-        one: ACTION.NONE,
-        two: ACTION.NONE,
-        three: ACTION.NONE,
-      }}
-    />
-  )
+  return null
 }
 
 export default Camera

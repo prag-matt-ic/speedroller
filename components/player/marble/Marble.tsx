@@ -16,6 +16,7 @@ import {
   smoothstep,
   vec3,
   vec4,
+  vertexStage,
 } from 'three/tsl'
 import { Mesh } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
@@ -185,17 +186,21 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
           .add(specular.mul(SPECULAR_STRENGTH))
       }
 
-      // Respawn fade from the mesh's world-space height.
+      // Respawn fade from the mesh's world-space height. The model matrix is one value for the
+      // whole draw, so the clamp is a per-draw constant: hoist it to the vertex stage rather than
+      // re-evaluating it per fragment.
       const worldCentre = modelWorldMatrix.mul(vec4(0, 0, 0, 1))
-      const respawnFade = clamp(
-        float(RESPAWN_FADE_START_Y).sub(worldCentre.y).div(RESPAWN_FADE_RANGE),
-        float(0),
-        float(1),
+      const respawnFade: Node<'float'> = vertexStage(
+        clamp(
+          float(RESPAWN_FADE_START_Y).sub(worldCentre.y).div(RESPAWN_FADE_RANGE),
+          float(0),
+          float(1),
+        ),
       )
 
       return {
         colorNode: litSurface,
-        opacityNode: respawnFade as Node<'float'>,
+        opacityNode: respawnFade,
       }
     },
     [enableVeins, isFlat],
