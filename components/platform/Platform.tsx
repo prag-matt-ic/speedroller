@@ -1,9 +1,12 @@
 'use client'
 
+import { type CreatorState, useLocalNodes } from '@react-three/fiber/webgpu'
+import { type Vector3Tuple } from 'three'
 import { type InstancedRigidBodyProps } from '@react-three/rapier'
-import { type FC, memo, useCallback, useEffect, useRef } from 'react'
+import { type FC, memo, useCallback, useRef } from 'react'
 
 import { Stage, useGameStore } from '@/components/GameProvider'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import FloatingTiles, {
   type FloatingTilesHandle,
 } from '@/components/floatingTiles/FloatingTiles'
@@ -22,6 +25,7 @@ import Rings, { type RingsHandle } from '@/components/platform/rings/Rings'
 import { PlatformTiles, type TilesHandle } from '@/components/platform/tiles/Tiles'
 import { useGameFrame } from '@/hooks/useGameFrame'
 import { usePlayerInput } from '@/hooks/usePlayerInput'
+import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import usePlayerSpeed from '@/hooks/usePlayerSpeed'
 import useStage from '@/hooks/useStage'
 import { GameMode } from '@/stores/types'
@@ -91,6 +95,13 @@ function getRowAlpha(rowZ: number, playerZ: number): number {
   return lerp(1, TILE_PLAYER_FADE_MIN_ALPHA, fadeT)
 }
 
+// The core uniforms as `GameUniforms` registered them. Module scope keeps the creator identity
+// stable, so `useLocalNodes` only re-runs it when the registry itself changes.
+const readCoreUniforms = ({ uniforms }: CreatorState) => {
+  const { uScrollZ, uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+  return { uScrollZ, uPlayerWorldPos }
+}
+
 const Platform: FC = () => {
   const resetPlatformTick = useGameStore((s) => s.resetPlatformTick)
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
@@ -102,8 +113,20 @@ const Platform: FC = () => {
   const rowsData = useGameStore((s) => s.rowsData)
   const stageRef = useStage()
 
+  usePlayerPosition((newPosition: Vector3Tuple) => {
+    coreUniforms.uPlayerWorldPos.value.set(newPosition[0], newPosition[1], newPosition[2])
+  })
+
   const { input } = usePlayerInput()
   const { speedUnits: playerSpeedUnits } = usePlayerSpeed()
+
+  // Owns the per-frame world state the tile, floating-tile and heading graphs read.
+  //
+  // Read through `CreatorState` rather than `useUniforms(scope)`. The reader form only sees the
+  // committed store, and `GameUniforms` stages the core scope until its layout effect runs, so a
+  // reader here comes back empty on the first render — which `usePlayerPosition`'s mount callback
+  // would then be handed. `CreatorState` overlays the staged registry, so the nodes exist already.
+  const coreUniforms = useLocalNodes(readCoreUniforms)
 
   // Deterministic scrolling state
   const currentScrollPosition = useRef(0)
@@ -215,7 +238,6 @@ const Platform: FC = () => {
 
     tilesHandle.setTileInstances(tileInstances)
     floatingTilesHandle.current?.setRowWorldPositions(rowBaseWithoutScroll.current)
-    floatingTilesHandle.current?.setScrollOffset(currentScrollPosition.current)
     nextRowDataIndex.current = ROWS_RENDERED
     markInstanceAttributesDirty()
     setIsPlatformReady(true)
@@ -476,7 +498,7 @@ const Platform: FC = () => {
 
   useGameFrame((_, delta) => {
     if (!isPlatformReady) return
-    if (!tiles.current?.shader) return
+    if (!coreUniforms?.uScrollZ) return
     if (!ringsHandle.current || !confettiHandle.current) return
     if (!speedRunElements.current) return
 
@@ -484,7 +506,7 @@ const Platform: FC = () => {
     if (!isSpeedRunMode && !collectibles.current) return
     if (!isSpeedRunMode && !infoZones.current) return
 
-    tiles.current.shader.uScrollZ = currentScrollPosition.current
+    coreUniforms.uScrollZ.value = currentScrollPosition.current
 
     const inputDirectionZ = input.current.up - input.current.down
     const speedUnits = playerSpeedUnits.current
@@ -510,7 +532,6 @@ const Platform: FC = () => {
     const totalScrollDelta = currentScrollPosition.current - previousScroll
 
     updateTiles()
-    floatingTilesHandle.current?.setScrollOffset(currentScrollPosition.current)
     floatingTilesHandle.current?.step(delta)
 
     if (Math.abs(totalScrollDelta) < EPSILON.SMALL) return
@@ -526,10 +547,6 @@ const Platform: FC = () => {
     confettiHandle.current.moveElements(totalScrollDelta)
     speedRunElements.current.moveElements(totalScrollDelta)
   })
-
-  useEffect(() => {
-    floatingTilesHandle.current?.reset()
-  }, [])
 
   return (
     <group>

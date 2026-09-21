@@ -1,13 +1,12 @@
 'use client'
 
-import { shaderMaterial, useTexture } from '@react-three/drei'
-import { extend } from '@react-three/fiber'
+import { useTexture } from '@react-three/drei'
+import { useLocalNodes } from '@react-three/fiber/webgpu'
 import { type FC, useLayoutEffect, useRef } from 'react'
-import { BufferAttribute, type PlaneGeometry, Texture } from 'three'
+import { float, smoothstep, texture, uv, vec2 } from 'three/tsl'
+import { BufferAttribute, type PlaneGeometry } from 'three'
 
 import backdrop from '@/assets/textures/backdrop/bg-03.webp'
-import fragmentShader from '@/components/backdrop/backdrop.frag'
-import vertexShader from '@/components/backdrop/backdrop.vert'
 import { TILE_SIZE } from '@/utils/tiles'
 
 const BACKDROP_SEGMENT_COUNT = 6
@@ -20,17 +19,9 @@ const BACKDROP_DEPTH = TILE_SIZE * BACKDROP_DEPTH_TILES
 const BACKDROP_POSITION: [number, number, number] = [0, -5, -14]
 const BACKDROP_ROTATION: [number, number, number] = [-Math.PI / 2, 0, Math.PI / 2]
 
-type BackdropShaderUniforms = {
-  uBackdrop: Texture | null
-}
-
-const INITIAL_BACKDROP_UNIFORMS: BackdropShaderUniforms = {
-  uBackdrop: null,
-}
-
-const BackdropShader = shaderMaterial(INITIAL_BACKDROP_UNIFORMS, vertexShader, fragmentShader)
-
-const BackdropShaderMaterial = extend(BackdropShader)
+// Tuning constants carried over from backdrop.frag.
+const DARKNESS = 0.1
+const EDGE_FADE = 0.2
 
 const easeInExpo = (value: number) =>
   value <= 0 ? 0 : Math.pow(2, 10 * Math.min(value, 1) - 10)
@@ -38,6 +29,19 @@ const easeInExpo = (value: number) =>
 const Backdrop: FC = () => {
   const backdropColour = useTexture(backdrop.src)
   const geometryRef = useRef<PlaneGeometry | null>(null)
+
+  // Port of backdrop.frag: sample the backdrop, darken it, then fade both U edges.
+  const { colorNode } = useLocalNodes(() => {
+    const backdropUv = uv()
+    const sampled = texture(backdropColour, backdropUv).rgb.mul(1 - DARKNESS)
+    const fadeWidth = float(Math.max(EDGE_FADE, 1e-4))
+    const edgeMask = smoothstep(
+      vec2(0),
+      vec2(fadeWidth),
+      vec2(backdropUv.x, backdropUv.x.oneMinus()),
+    )
+    return { colorNode: sampled.mul(edgeMask.x.mul(edgeMask.y)) }
+  })
 
   useLayoutEffect(() => {
     const geometry = geometryRef.current
@@ -49,7 +53,7 @@ const Backdrop: FC = () => {
     let i = 0
     const offset = 0.5
     const position = geometry.attributes.position as BufferAttribute
-    const uv = geometry.attributes.uv as BufferAttribute
+    const uvAttribute = geometry.attributes.uv as BufferAttribute
     const rowLength = segmentCount + 1
     const arcLengths: number[] = new Array(rowLength).fill(0)
 
@@ -94,11 +98,11 @@ const Backdrop: FC = () => {
       for (let y = 0; y <= segmentCount; y++) {
         const index = x * rowLength + y
         const u = y / segmentCount
-        uv.setXY(index, u, v)
+        uvAttribute.setXY(index, u, v)
       }
     }
     position.needsUpdate = true
-    uv.needsUpdate = true
+    uvAttribute.needsUpdate = true
     geometry.computeVertexNormals()
   }, [])
 
@@ -108,11 +112,7 @@ const Backdrop: FC = () => {
         ref={geometryRef}
         args={[1, 1, BACKDROP_SEGMENT_COUNT, BACKDROP_SEGMENT_COUNT]}
       />
-      <BackdropShaderMaterial
-        depthTest={false}
-        key={BackdropShader.key}
-        uBackdrop={backdropColour}
-      />
+      <meshBasicNodeMaterial colorNode={colorNode} depthTest={false} toneMapped={false} />
     </mesh>
   )
 }

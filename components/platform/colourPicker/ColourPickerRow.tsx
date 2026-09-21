@@ -179,7 +179,6 @@ const ColourPickerRow: FC<Props> = ({ ref, onReadyChange }) => {
           key={option.index}
           option={option}
           isActive={option.index === paletteIndex}
-          isOutOfView={isOutOfView}
         />
       ))}
       <Text

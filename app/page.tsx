@@ -131,7 +131,7 @@ const StructuredData: FC = () => {
             operatingSystem: 'WEB',
             browserRequirements: 'Requires WebGL 2.0 and JavaScript enabled',
             description:
-              'A free 3D endless runner quiz game for the web. Navigate a marble over terrain, answering multiple-choice questions as you go.',
+              'A free 3D speedrolling game for the web. Navigate a marble over terrain, collect rings, and race the clock to the finish line.',
             image: [`${BASE_URL}/screenshots/home.jpg`],
             genre: ['Arcade', 'Trivia', 'Educational'],
             inLanguage: 'en-GB',

@@ -18,19 +18,11 @@ const Credits: FC<Props> = ({ className, show }) => {
       )}>
       <span className="text-teal-50/40">By</span>
       <a
-        href="https://github.com/prag-matt-ic"
+        href="https://threenix.io"
         target="_blank"
         rel="noopener noreferrer"
         className="font-semibold hover:text-teal-100">
-        Pragmattic
-      </a>
-      <span className="text-teal-50/40">and</span>
-      <a
-        href="https://loopspeed.co.uk"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-semibold hover:text-teal-100">
-        Loopspeed
+        Threenix.io
       </a>
     </div>
   )

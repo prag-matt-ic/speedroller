@@ -195,6 +195,9 @@ export type GameSlice = {
   isPlatformReady: boolean
   setIsPlatformReady: (isReady: boolean) => void
 
+  isWarmupComplete: boolean
+  setIsWarmupComplete: (isComplete: boolean) => void
+
   htmlPortal: undefined | React.RefObject<HTMLDivElement>
   setHtmlPortal: (ref: undefined | React.RefObject<HTMLDivElement>) => void
 

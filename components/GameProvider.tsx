@@ -37,6 +37,7 @@ export const GameProvider: FC<Props> = ({ children, isMobile, insertSpeedRun }) 
       switchBackgroundTrack,
     }),
   )
+  
   return <GameContext value={store}>{children}</GameContext>
 }
 

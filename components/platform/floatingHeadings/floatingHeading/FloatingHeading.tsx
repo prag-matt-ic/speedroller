@@ -1,24 +1,38 @@
+/* eslint-disable react-hooks/immutability */
 'use client'
 
 import { useGSAP } from '@gsap/react'
-import { shaderMaterial, useTexture } from '@react-three/drei'
-import { extend, useThree } from '@react-three/fiber'
+import { useTexture } from '@react-three/drei'
+import { type CreatorState, useLocalNodes,useThree } from '@react-three/fiber/webgpu'
 import gsap from 'gsap'
-import { type FC, type RefObject, useEffect, useMemo, useRef } from 'react'
+import { type FC, type RefObject, useCallback, useEffect, useMemo } from 'react'
+import {
+  cameraPosition,
+  clamp,
+  cos,
+  float,
+  mat2,
+  mix,
+  positionLocal,
+  positionWorld,
+  sin,
+  smoothstep,
+  texture,
+  uniformTexture,
+  uv,
+  vec2,
+  vec3,
+  vertexStage,
+} from 'three/tsl'
 import {
   BackSide,
   Mesh,
   RepeatWrapping,
-  type Texture,
-  Vector2,
-  Vector3,
   type Vector3Tuple,
 } from 'three'
 
 import floatingHeadingNoise from '@/assets/textures/platform/heading-noise.webp'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import useGameFrame from '@/hooks/useGameFrame'
-import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import { UNBOUNDED_FONT_FAMILY } from '@/components/platform/fonts'
 import {
   TEXT_CANVAS_SCALE,
@@ -27,8 +41,8 @@ import {
   useTextCanvas,
 } from '@/hooks/useTextCanvas'
 
-import fragmentShader from './floatingHeading.frag'
-import vertexShader from './floatingHeading.vert'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { cameraFadeNear } from '@/resources/tsl/cameraFadeNear'
 
 gsap.registerPlugin(useGSAP)
 
@@ -42,35 +56,11 @@ type Props = {
   textCanvasOptions?: Partial<TextCanvasOptions>
 }
 
-type FloatingHeadingUniforms = {
-  uTexture: Texture
-  uNoiseTexture: Texture
-  uPlayerXZ: Vector2
-  uHeadingCenterXZ: Vector2
-  uCameraZ: number
-  uEnableRotation: number
-  uDistanceFadeEnabled: number
-  uUseNoiseFade: number
-}
-
-const FLOATING_HEADING_UNIFORMS: FloatingHeadingUniforms = {
-  uTexture: TRANSPARENT_TEXTURE,
-  uNoiseTexture: TRANSPARENT_TEXTURE,
-  uPlayerXZ: new Vector2(0, 0),
-  uHeadingCenterXZ: new Vector2(0, 0),
-  uCameraZ: 0,
-  uEnableRotation: 1,
-  uDistanceFadeEnabled: 1,
-  uUseNoiseFade: 1,
-}
-
-const FloatingHeadingShader = shaderMaterial(
-  FLOATING_HEADING_UNIFORMS,
-  vertexShader,
-  fragmentShader,
-)
-
-const FloatingHeadingMaterial = extend(FloatingHeadingShader)
+// Tuning carried over from floatingHeading.vert / .frag.
+const HEADING_MAX_ANGLE = 0.4
+const HEADING_LATERAL_RANGE = 6.0
+const ALPHA_EPSILON = 0.001
+const DISSOLVE_WIDTH = 0.2
 
 const DEFAULT_FONT_SIZE = 64
 const DEFAULT_LINE_HEIGHT_MULTIPLIER = 1.25
@@ -90,26 +80,83 @@ export const FloatingHeading: FC<Props> = ({
   textCanvasOptions = {},
   ref,
 }) => {
-  const shaderRef = useRef<typeof FloatingHeadingMaterial & FloatingHeadingUniforms>(null)
-  const tmpWorldPosition = useRef(new Vector3())
   const { shouldRotate, useNoiseFade } = usePerformanceStore(
     (s) => s.sceneConfig.floatingHeading,
   )
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled) // for distance faded
 
-  const onPlayerPositionChange = (newPosition: Vector3Tuple) => {
-    if (!shaderRef.current) return
-    shaderRef.current.uPlayerXZ.set(newPosition[0], newPosition[2])
-  }
-
-  usePlayerPosition(onPlayerPositionChange)
-
   const dpr = useThree((s) => s.viewport.dpr)
-  const materialTextureRef = useRef<Texture>(TRANSPARENT_TEXTURE)
+
   const dissolveNoiseTexture = useTexture(floatingHeadingNoise.src, (texture) => {
     texture.wrapS = RepeatWrapping
     texture.wrapT = RepeatWrapping
   })
+
+  const textTextureNode = useMemo(() => uniformTexture(TRANSPARENT_TEXTURE), [])
+
+  // Port of floatingHeading.vert + floatingHeading.frag.
+  //
+  // The GLSL carried vMirroredUv and vCameraFade across as varyings. Both are recomputed here:
+  // vMirroredUv from the geometry uv, and vCameraFade from the mesh's own world position, which is
+  // the heading centre the GLSL passed in as uHeadingCenterXZ.
+  const createNodes = useCallback(
+    ({ uniforms: scopedUniforms }: CreatorState) => {
+      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+
+      const mirroredUv = vec2(uv().x.oneMinus(), uv().y)
+      const headingCenter = positionWorld
+
+      // The three toggles are build-time props, so a JavaScript branch picks the graph and the
+      // unused half never reaches the shader.
+      //
+      // The GLSL read this as `uHeadingCenterXZ.y`, where that uniform was a Vector2 set from the
+      // heading's (x, z) — so the component is world Z, not world Y. cameraFadeNear already ramps
+      // 0 -> 1 as the heading recedes, which is the whole fade, so the old `fadeDistance` factor is
+      // gone: the two were inverses over the same 8 -> 14 band and multiplied to a constant zero.
+      // vCameraFade was a varying in the GLSL; hoist the smoothstep to the vertex stage so the
+      // fragment only reads the interpolated result.
+      const cameraFade = useDistanceFade
+        ? vertexStage(cameraFadeNear(cameraPosition.z, headingCenter.z))
+        : float(1)
+
+      const texel = texture(textTextureNode, mirroredUv)
+
+      const noiseSample = texture(dissolveNoiseTexture, mirroredUv).r
+      const noiseEdge = noiseSample.mul(0.3)
+      const noiseStrength = mix(float(0.65), float(1), noiseSample)
+      const dissolve = useNoiseFade
+        ? smoothstep(
+            noiseEdge.sub(DISSOLVE_WIDTH),
+            noiseEdge.add(DISSOLVE_WIDTH),
+            cameraFade.mul(noiseStrength),
+          )
+        : cameraFade
+
+      const alpha = texel.a.mul(dissolve)
+
+      // Lane-style lateral tilt about the heading's own centre.
+      const lateralOffset = uPlayerWorldPos.x.sub(headingCenter.x)
+      const tiltT = clamp(lateralOffset.div(HEADING_LATERAL_RANGE), float(-1), float(1))
+      const headingRotation = float(HEADING_MAX_ANGLE).mul(tiltT)
+      const sine = sin(headingRotation)
+      const cosine = cos(headingRotation)
+      const rotation = mat2(cosine, sine.negate(), sine, cosine)
+      const centeredXZ = positionLocal.xz.sub(headingCenter.xz)
+      const tiltedXZ = rotation.mul(centeredXZ).add(headingCenter.xz)
+      const rotatedPosition = shouldRotate
+        ? vec3(tiltedXZ.x, positionLocal.y, tiltedXZ.y)
+        : positionLocal
+
+      return {
+        positionNode: rotatedPosition,
+        colorNode: texel.rgb,
+        opacityNode: alpha,
+      }
+    },
+    [useDistanceFade, useNoiseFade, shouldRotate, textTextureNode, dissolveNoiseTexture],
+  )
+
+  const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes)
 
   const textCanvasOptionsWithDefaults = useMemo<TextCanvasOptions>(() => {
     const baseFontSize = textCanvasOptions?.fontSize ?? DEFAULT_FONT_SIZE
@@ -142,25 +189,8 @@ export const FloatingHeading: FC<Props> = ({
   }, [width])
 
   useEffect(() => {
-    const nextTexture = canvasState?.texture ?? TRANSPARENT_TEXTURE
-    materialTextureRef.current = nextTexture
-    if (shaderRef.current) {
-      shaderRef.current.uTexture = nextTexture
-    }
-  }, [canvasState])
-
-  useGameFrame((state) => {
-    if (!shaderRef.current || !isVisible) return
-    shaderRef.current.uCameraZ = state.camera.position.z
-
-    if (!ref?.current) return
-    if (!useDistanceFade) return
-    ref.current.getWorldPosition(tmpWorldPosition.current)
-    shaderRef.current.uHeadingCenterXZ.set(
-      tmpWorldPosition.current.x,
-      tmpWorldPosition.current.z,
-    )
-  })
+    textTextureNode.value = canvasState?.texture ?? TRANSPARENT_TEXTURE
+  }, [canvasState, textTextureNode])
 
   return (
     <mesh
@@ -170,14 +200,12 @@ export const FloatingHeading: FC<Props> = ({
       renderOrder={2}
       rotation={[0, Math.PI / 2, 0]}>
       <cylinderGeometry args={[radius, radius, height, 32, 1, true, thetaStart, thetaLength]} />
-      <FloatingHeadingMaterial
-        key={FloatingHeadingShader.key}
-        ref={shaderRef}
-        uEnableRotation={shouldRotate ? 1 : 0}
-        uDistanceFadeEnabled={useDistanceFade ? 1 : 0}
-        uUseNoiseFade={useNoiseFade ? 1 : 0}
-        uNoiseTexture={dissolveNoiseTexture}
-        transparent={true}
+      <meshBasicNodeMaterial
+        colorNode={colorNode}
+        opacityNode={opacityNode}
+        positionNode={positionNode}
+        transparent
+        alphaTest={ALPHA_EPSILON}
         depthTest={false}
         depthWrite={false}
         toneMapped={false}

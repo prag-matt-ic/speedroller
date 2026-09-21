@@ -1,11 +1,12 @@
 'use client'
 
-import { shaderMaterial } from '@react-three/drei'
-import { extend } from '@react-three/fiber'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import { CuboidCollider, RapierRigidBody, RigidBody } from '@react-three/rapier'
-import { type FC, type RefObject, useMemo, useRef } from 'react'
+import { type FC, type RefObject, useId, useMemo, useRef } from 'react'
 import { DataTexture, FloatType, Group, Mesh, RGBAFormat, Vector3 } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
+import { clamp, float, mix, positionWorld, select, uv, vec2, vec3 } from 'three/tsl'
+import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -14,43 +15,39 @@ import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { useConfirmationProgress } from '@/hooks/useConfirmationProgress'
 import useGameFrame from '@/hooks/useGameFrame'
 import { CollectibleID, type CollectibleUserData } from '@/model/schema'
+import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { paintCorners } from '@/resources/tsl/paintCorners'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { HIDDEN_POSITION, TILE_SIZE } from '@/utils/tiles'
 
-import fragmentShader from './collectibleTile.frag'
-import vertexShader from './collectibleTile.vert'
+// Corner bracket tuning, carried over from collectibleTile.frag.
+const BORDER_THICKNESS_TILES = 0.25
+const CORNER_LENGTH_TILES = 0.5
+const CORNER_LENGTH_CONFIRM_TILES = 2.5
 
-// Sample the surface of the gem model to position particles within it.
+const COLLECTIBLE_TILE_UNIFORM_SCOPE = 'collectibleTile'
 
-type TileShaderUniforms = {
-  uConfirmingProgress: number
-  uIsConfirming: number
-  uWasConfirmed: number
-  uTime: number
-  uAspect: number
-  uTilesX: number
-  uTilesY: number
-  uDistanceFadeEnabled: number
+type CollectibleTileUniforms = {
+  uConfirmingProgress: UniformNode<'float', number>
+  uIsConfirming: UniformNode<'float', number>
+  uWasConfirmed: UniformNode<'float', number>
+  uAspect: UniformNode<'float', number>
+  uTilesX: UniformNode<'float', number>
+  uTilesY: UniformNode<'float', number>
 }
 
-const INITIAL_ANSWER_TILE_UNIFORMS: TileShaderUniforms = {
-  uConfirmingProgress: 0,
-  uIsConfirming: 0,
-  uWasConfirmed: 0,
-  uTime: 0,
-  uAspect: 1,
-  uTilesX: 5,
-  uTilesY: 5,
-  uDistanceFadeEnabled: 1,
-}
-
-const CollectibleTileShader = shaderMaterial(
-  INITIAL_ANSWER_TILE_UNIFORMS,
-  vertexShader,
-  fragmentShader,
-)
-
-const CollectibleTileShaderMaterial = extend(CollectibleTileShader)
+// The progress uniforms are animated per frame and the tile metrics come from props, so every
+// collectible registers its own scope: a shared scope would make all tiles animate together.
+// `uTime` is gone because neither tile shader ever declared it (only the gem shell uses it).
+const createCollectibleTileUniforms =
+  (aspect: number, tilesX: number, tilesY: number) => () => ({
+    uConfirmingProgress: 0,
+    uIsConfirming: 0,
+    uWasConfirmed: 0,
+    uAspect: aspect,
+    uTilesX: tilesX,
+    uTilesY: tilesY,
+  })
 
 type Props = {
   ref: RefObject<RapierRigidBody | null>
@@ -65,15 +62,69 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
   const isConfirming = useGameStore((s) => s.confirmingCollectible === id)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
 
-  const shader = useRef<typeof CollectibleTileShaderMaterial & TileShaderUniforms>(null)
   const gemShaderRef = useRef<GemShellRef>(null)
   const localProgress = useRef(0)
   const gemRotationGroupRef = useRef<Group>(null)
   const { confirmationProgress } = useConfirmationProgress()
 
+  const tileAspect = width / height
+  const tilesX = width / TILE_SIZE
+  const tilesY = height / TILE_SIZE
+
+  // React ids are not valid WGSL identifiers, so keep only the alphanumeric characters.
+  const instanceId = useId().replace(/[^a-zA-Z0-9]/g, '')
+  const tileUniformScope = `${COLLECTIBLE_TILE_UNIFORM_SCOPE}_${instanceId}`
+
+  const { uConfirmingProgress, uIsConfirming, uWasConfirmed } = useUniforms(
+    createCollectibleTileUniforms(tileAspect, tilesX, tilesY),
+    tileUniformScope,
+  )
+
+  // Port of collectibleTile.vert + collectibleTile.frag. The height-space UV and the distance
+  // fade were varyings in the GLSL; here they are recomputed inside the fragment node graph.
+  const { colorNode, opacityNode } = useLocalNodes(({ uniforms }: CreatorState) => {
+    const scoped = uniforms.scope<CollectibleTileUniforms>(tileUniformScope)
+
+    // vHeightSpacePosition: centred UV with the aspect ratio applied to x.
+    const centeredUv = uv().sub(0.5)
+    const heightSpacePosition: Node<'vec2'> = vec2(
+      centeredUv.x.mul(scoped.uAspect),
+      centeredUv.y,
+    )
+
+    const progress: Node<'float'> = clamp(scoped.uConfirmingProgress, float(0), float(1))
+    const shouldBeExtended: Node<'bool'> = scoped.uIsConfirming
+      .greaterThan(0.5)
+      .or(scoped.uWasConfirmed.greaterThan(0.5))
+    const targetCornerLength: Node<'float'> = select(
+      shouldBeExtended,
+      float(CORNER_LENGTH_CONFIRM_TILES),
+      float(CORNER_LENGTH_TILES),
+    )
+    const animatedCornerLength: Node<'float'> = mix(
+      float(CORNER_LENGTH_TILES),
+      targetCornerLength,
+      progress,
+    )
+
+    const bracketMask: Node<'float'> = paintCorners(
+      heightSpacePosition,
+      scoped.uAspect,
+      vec2(scoped.uTilesX, scoped.uTilesY),
+      float(BORDER_THICKNESS_TILES),
+      animatedCornerLength,
+    )
+
+    // vDistanceFade: fadeDistance(worldZ) when enabled, otherwise 1.0. Built as a JS branch so the
+    // fade is omitted from the graph when the toggle is off.
+    const mask: Node<'float'> = useDistanceFade
+      ? bracketMask.mul(fadeDistance(positionWorld.z))
+      : bracketMask
+
+    return { colorNode: vec3(1), opacityNode: mask }
+  })
+
   useGameFrame((state, delta) => {
-    const { clock } = state
-    if (!shader.current) return
     if (!isVisible) return
     const globalProgress = confirmationProgress.current
 
@@ -89,23 +140,19 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
       localProgress.current = 1.0
     }
 
-    shader.current.uConfirmingProgress = localProgress.current
-    shader.current.uIsConfirming = isConfirming ? 1 : 0
-    shader.current.uWasConfirmed = isCollected ? 1 : 0
-    shader.current.uTime = clock.elapsedTime
+    /* eslint-disable react-hooks/immutability */
+    uConfirmingProgress.value = localProgress.current
+    uIsConfirming.value = isConfirming ? 1 : 0
+    uWasConfirmed.value = isCollected ? 1 : 0
+    /* eslint-enable react-hooks/immutability */
 
     if (gemShaderRef.current) {
-      gemShaderRef.current.uConfirmingProgress = isCollected ? 1.0 : localProgress.current
-      gemShaderRef.current.uTime = clock.elapsedTime
+      gemShaderRef.current.uConfirmingProgress.value = isCollected ? 1.0 : localProgress.current
     }
 
     if (!gemRotationGroupRef?.current) return
     gemRotationGroupRef.current.rotation.y += delta * 0.4
   })
-
-  const tileAspect = width / height
-  const tilesX = width / TILE_SIZE
-  const tilesY = height / TILE_SIZE
 
   const userData = useMemo<CollectibleUserData>(
     () => ({
@@ -137,18 +184,12 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
       {/* Tile mesh: shader renders corner brackets and confirmation progress bar */}
       <mesh position={[0, 0, 0.01]} renderOrder={2} visible={isVisible}>
         <planeGeometry args={[width, height]} />
-        <CollectibleTileShaderMaterial
-          key={CollectibleTileShader.key}
-          ref={shader}
+        <meshBasicNodeMaterial
+          colorNode={colorNode}
+          opacityNode={opacityNode}
           transparent={true}
           depthTest={true}
           depthWrite={false}
-          uConfirmingProgress={0}
-          uIsConfirming={0}
-          uAspect={tileAspect}
-          uTilesX={tilesX}
-          uTilesY={tilesY}
-          uDistanceFadeEnabled={useDistanceFade ? 1 : 0}
         />
       </mesh>
 

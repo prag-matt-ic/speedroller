@@ -1,7 +1,12 @@
+/* eslint-disable react-hooks/immutability */
 'use client'
-/* eslint-disable react-hooks/refs */
-import { shaderMaterial } from '@react-three/drei'
-import { extend, useThree } from '@react-three/fiber'
+
+import {
+  type CreatorState,
+  useLocalNodes,
+  useThree,
+  useUniforms,
+} from '@react-three/fiber/webgpu'
 import {
   type FC,
   type Ref,
@@ -10,43 +15,40 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
 } from 'react'
 import {
-  DataTexture,
-  FloatType,
-  InstancedMesh,
-  Matrix4,
-  NearestFilter,
-  RedFormat,
-  Texture,
-} from 'three'
-import {
-  GPUComputationRenderer,
-  type Variable,
-} from 'three/addons/misc/GPUComputationRenderer.js'
+  cameraPosition,
+  clamp as tslClamp,
+  float,
+  floor,
+  fract,
+  mx_noise_float,
+  positionGeometry,
+  smoothstep,
+  texture,
+  vec2,
+  vec3,
+} from 'three/tsl'
+import { DataTexture, FloatType, InstancedMesh, Matrix4, NearestFilter, RedFormat } from 'three'
+import type { Node } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import floatingTilesFragment from '@/components/floatingTiles/shaders/floatingTiles.frag'
-import floatingTilesVertex from '@/components/floatingTiles/shaders/floatingTiles.vert'
-import positionFragmentShader from '@/components/floatingTiles/shaders/position.frag'
+import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import {
+  createFloatingTilesBuffers,
+  createFloatingTilesSimulation,
+} from '@/components/floatingTiles/floatingTilesSimulation'
+import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import { COLUMNS, ROWS_RENDERED, type RowData, TILE_SIZE, clamp } from '@/utils/tiles'
 
-type FloatingTilesUniforms = {
-  uMix: number
-  uPositionTexture: Texture | null
-  uRowWorldPositions: Texture | null
-  uGridCols: number
-  uTileSize: number
-  uYMin: number
-  uYMax: number
-  uZFadeStart: number
-  uZFadeEnd: number
-  uCameraZ: number
-  uRowCount: number
-  uScrollZ: number
-}
+const FLOATING_TILE_UNIFORM_SCOPE = 'floatingTiles'
+
+// Carried over from floatingTiles.vert / floatingTiles.frag.
+const NOISE_SCALE = 0.12
+const EPSILON = 1e-5
+const COLUMN_JITTER_RANGE = 0.6
+const PALETTE_MIX = 0.4
 
 const EXTRA_SIDE_COLUMNS = 4
 const GRID_COLS = COLUMNS + EXTRA_SIDE_COLUMNS * 2
@@ -58,37 +60,62 @@ const Y_MAX = 8
 const Z_FADE_START = 16
 const Z_FADE_END = 32
 const MAX_DELTA_TIME = 0.05
-const SPEED_MIN = 0.4
-const SPEED_RANGE = 0.8
 
-const INITIAL_FLOATING_TILE_UNIFORMS: FloatingTilesUniforms = {
-  uMix: 0.4,
-  uPositionTexture: null,
-  uRowWorldPositions: null,
-  uGridCols: 0,
-  uTileSize: TILE_SIZE,
-  uYMin: Y_MIN,
-  uYMax: Y_MAX,
-  uZFadeStart: Z_FADE_START,
-  uZFadeEnd: Z_FADE_END,
-  uCameraZ: 0,
-  uRowCount: ROWS_RENDERED,
-  uScrollZ: 0,
+/** Spawn-mask values: 1 where a floating tile may respawn, 0 where a platform tile blocks it. */
+const SPAWNABLE = 1
+const BLOCKED = 0
+const SPAWN_MASK_THRESHOLD = 0.5
+
+// The simulation reads a clamped frame delta off this uniform. TSL's `time` node cannot stand in
+// for it: the kernel is stepped from the game loop, not once per rendered frame.
+const createFloatingTilesUniforms = () => ({ uDeltaTime: 0 })
+
+/**
+ * Writes one row of the spawn mask from the platform's row data: raised columns block respawn,
+ * while the side margins and the sunken columns stay open.
+ *
+ * Returns whether anything changed, so the caller only re-uploads the mask texture when it has to.
+ */
+const writeRowSpawnMask = (
+  spawnMask: Float32Array,
+  rowIndex: number,
+  isRaised: readonly (0 | 1)[] | undefined,
+): boolean => {
+  const rowStart = rowIndex * GRID_COLS
+  let hasChanged = false
+
+  for (let col = 0; col < GRID_COLS; col++) {
+    const column = col - GRID_OFFSET
+    const isPlatformTile = column >= 0 && column < COLUMNS && isRaised?.[column] === 1
+    const value = isPlatformTile ? BLOCKED : SPAWNABLE
+    const index = rowStart + col
+
+    if (spawnMask[index] !== value) {
+      spawnMask[index] = value
+      hasChanged = true
+    }
+  }
+
+  return hasChanged
 }
 
-const CustomFloatingTilesMaterial = shaderMaterial(
-  INITIAL_FLOATING_TILE_UNIFORMS,
-  floatingTilesVertex,
-  floatingTilesFragment,
-)
-const FloatingTilesMaterial = extend(CustomFloatingTilesMaterial)
+/** Row-major indices of every cell a floating tile may spawn into. */
+const collectSpawnableCells = (spawnMask: Float32Array): number[] => {
+  const cells: number[] = []
+
+  for (let index = 0; index < spawnMask.length; index++) {
+    if (spawnMask[index] > SPAWN_MASK_THRESHOLD) {
+      cells.push(index)
+    }
+  }
+
+  return cells
+}
 
 export type FloatingTilesHandle = {
   setRowData: (rowIndex: number, rowData: RowData | null) => void
   setRowWorldPositions: (rowPositions: number[]) => void
-  setScrollOffset: (scrollZ: number) => void
   step: (delta: number) => void
-  reset: () => void
 }
 
 type FloatingTilesProps = {
@@ -121,371 +148,196 @@ const createRowPositionsTexture = (data: Float32Array) => {
 const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
   const count = usePerformanceStore((s) => s.sceneConfig.floatingTiles.instanceCount)
   const rowsData = useGameStore((s) => s.rowsData)
-  const renderer = useThree((s) => s.gl)
-  const camera = useThree((s) => s.camera)
+  const renderer = useThree((s) => s.renderer)
 
-  const [simToken, setSimToken] = useState(0)
   const isDisabled = count === 0
 
-  const textureSize = useMemo(
-    () => Math.max(1, Math.ceil(Math.sqrt(Math.max(1, count)))),
-    [count],
-  )
-  const instanceCount = useMemo(
-    () => Math.min(count, textureSize * textureSize),
-    [count, textureSize],
-  )
-  const textureSlotCount = useMemo(() => textureSize * textureSize, [textureSize])
-
   const meshRef = useRef<InstancedMesh>(null)
-  const materialRef = useRef<typeof FloatingTilesMaterial & FloatingTilesUniforms>(null)
-  const gpuCompute = useRef<GPUComputationRenderer | null>(null)
-  const positionVariable = useRef<Variable | null>(null)
 
-  const positionTextureRef = useRef<DataTexture | null>(null)
-  const textureBufferRef = useRef<Float32Array>(new Float32Array(textureSlotCount * 4))
+  // Registered once here and read back by the same component: the graph that consumes it is built
+  // below, and `step` writes it from the game loop.
+  const { uDeltaTime } = useUniforms(createFloatingTilesUniforms, FLOATING_TILE_UNIFORM_SCOPE)
 
-  const spawnMaskDataRef = useRef<Float32Array | null>(null)
-  if (spawnMaskDataRef.current == null) {
-    spawnMaskDataRef.current = new Float32Array(GRID_COLS * ROWS_RENDERED)
+  // Both textures are mutated in place, so the array, the texture and every callback that owns one
+  // have to agree on a single object for the lifetime of the component.
+  const spawnMaskRef = useRef<Float32Array | null>(null)
+  if (spawnMaskRef.current === null) {
+    spawnMaskRef.current = new Float32Array(GRID_COLS * ROWS_RENDERED)
   }
   const spawnMaskTextureRef = useRef<DataTexture | null>(null)
-  if (spawnMaskTextureRef.current == null) {
-    spawnMaskTextureRef.current = createSpawnMaskTexture(spawnMaskDataRef.current)
+  if (spawnMaskTextureRef.current === null) {
+    spawnMaskTextureRef.current = createSpawnMaskTexture(spawnMaskRef.current!)
   }
-  const rowPositionsDataRef = useRef<Float32Array | null>(null)
-  if (rowPositionsDataRef.current == null) {
-    rowPositionsDataRef.current = new Float32Array(ROWS_RENDERED)
-  }
-  const hasInitializedSpawnMaskRef = useRef(false)
-  const rowPositionsTextureRef = useRef<DataTexture | null>(null)
-  if (rowPositionsTextureRef.current == null) {
-    rowPositionsTextureRef.current = createRowPositionsTexture(rowPositionsDataRef.current)
-  }
-  const spawnMaskData = spawnMaskDataRef.current!
-  const rowPositionsData = rowPositionsDataRef.current!
-  const spawnableCellsRef = useRef<number[]>([])
-  const spawnableCellsDirtyRef = useRef(false)
-  const rowColumnSpawnableRef = useRef<Int8Array | null>(null)
-  if (rowColumnSpawnableRef.current == null) {
-    rowColumnSpawnableRef.current = new Int8Array(ROWS_RENDERED * COLUMNS)
-    rowColumnSpawnableRef.current.fill(-1)
-  }
-  const rowColumnSpawnable = rowColumnSpawnableRef.current
+  const spawnMaskTexture = spawnMaskTextureRef.current!
 
-  const textureUvs = useMemo(() => {
-    const uvs = new Float32Array(instanceCount * 2)
-    for (let i = 0; i < instanceCount; i++) {
-      const tx = i % textureSize
-      const ty = Math.floor(i / textureSize)
-      const x = (tx + 0.5) / textureSize
-      const y = (ty + 0.5) / textureSize
-      uvs[i * 2] = x
-      uvs[i * 2 + 1] = y
-    }
-    return uvs
-  }, [instanceCount, textureSize])
+  const rowWorldPositionsRef = useRef<Float32Array | null>(null)
+  if (rowWorldPositionsRef.current === null) {
+    rowWorldPositionsRef.current = new Float32Array(ROWS_RENDERED)
+  }
+  const rowWorldPositionsTextureRef = useRef<DataTexture | null>(null)
+  if (rowWorldPositionsTextureRef.current === null) {
+    rowWorldPositionsTextureRef.current = createRowPositionsTexture(rowWorldPositionsRef.current!)
+  }
+  const rowWorldPositions = rowWorldPositionsRef.current!
+  const rowWorldPositionsTexture = rowWorldPositionsTextureRef.current!
 
-  const ensureTextureBufferSize = useCallback(() => {
-    const expectedSize = textureSlotCount * 4
-    if (textureBufferRef.current.length === expectedSize) return
-    textureBufferRef.current = new Float32Array(expectedSize)
-  }, [textureSlotCount])
+  // The mask the platform rewrites row by row through the handle, replayed from scratch whenever a
+  // whole new platform layout arrives. Doing it here rather than in an effect keeps the seeded
+  // buffers below and the kernel that samples the mask built from the same snapshot.
+  const spawnMask = useMemo(() => {
+    const mask = spawnMaskRef.current!
+    let hasChanged = false
 
-  const rebuildSpawnableCells = useCallback(() => {
-    const mask = spawnMaskData
-    const cells: number[] = []
     for (let row = 0; row < ROWS_RENDERED; row++) {
-      const rowStart = row * GRID_COLS
-      for (let col = 0; col < GRID_COLS; col++) {
-        if (mask[rowStart + col] > 0.5) {
-          cells.push(row * GRID_COLS + col)
-        }
+      if (writeRowSpawnMask(mask, row, rowsData?.[row]?.isRaised)) {
+        hasChanged = true
       }
     }
-    spawnableCellsRef.current = cells
-    spawnableCellsDirtyRef.current = false
-  }, [spawnMaskData])
 
-  const pickRandomSpawnCell = useCallback(() => {
-    const cells = spawnableCellsRef.current
-    if (cells.length === 0) {
+    if (hasChanged) {
+      spawnMaskTexture.needsUpdate = true
+    }
+
+    return mask
+  }, [rowsData, spawnMaskTexture])
+
+  // Port of floatingTiles.vert + floatingTiles.frag. The varyings recompute in-graph: the noise
+  // coordinate from the tile's world position, and the alpha from the tile's Y and Z.
+  const createNodes = useCallback(
+    ({ uniforms: scopedUniforms }: CreatorState) => {
+      const { uScrollZ } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+
+      // The storage buffer has to exist before the graph that reads it is built, so the simulation
+      // is created here rather than in an effect — the shape the gem particles use too.
+      const buffers = createFloatingTilesBuffers({
+        instanceCount: count,
+        gridCols: GRID_COLS,
+        yMin: Y_MIN,
+        yMax: Y_MAX,
+        spawnableCells: collectSpawnableCells(spawnMask),
+      })
+      const simulation = createFloatingTilesSimulation({
+        buffers,
+        spawnMask: spawnMaskTexture,
+        uDeltaTime,
+        gridCols: GRID_COLS,
+        rowCount: ROWS_RENDERED,
+        yMin: Y_MIN,
+        yMax: Y_MAX,
+      })
+
+      // Particle state is read straight off the simulation's storage buffer, keyed by instance.
+      const positionData = buffers.positions.toAttribute()
+      const columnValue = positionData.x
+      const tileY = positionData.y
+      const rowIndex = positionData.z
+
+      const columnIndex = floor(columnValue.add(0.5))
+      const jitter = fract(columnValue)
+      const columnOffset = jitter.sub(0.5).mul(COLUMN_JITTER_RANGE * TILE_SIZE)
+
+      const worldX = columnIndex
+        .sub(float(GRID_COLS * 0.5))
+        .add(0.5)
+        .mul(float(TILE_SIZE))
+        .add(columnOffset)
+
+      // Row world Z, read from the row positions texture at this row's texel centre.
+      const rowSampleU = tslClamp(rowIndex, float(0), float(ROWS_RENDERED - 1))
+        .add(0.5)
+        .div(float(ROWS_RENDERED))
+      const worldZ = texture(rowWorldPositionsTexture, vec2(rowSampleU, 0.5)).r.add(uScrollZ)
+
+      const tileWorldPosition = vec3(worldX, tileY, worldZ)
+      const noiseCoord = positionGeometry.add(tileWorldPosition).mul(NOISE_SCALE)
+
+      const normalizedY = tslClamp(
+        tileY.sub(Y_MIN).div(Math.max(Y_MAX - Y_MIN, EPSILON)),
+        float(0),
+        float(1),
+      )
+      const bandAlpha = smoothstep(float(0), float(0.2), normalizedY).mul(
+        smoothstep(float(0), float(0.2), float(1).sub(normalizedY)),
+      )
+      const zFade = float(1).sub(
+        smoothstep(Z_FADE_START, Z_FADE_END, worldZ.sub(cameraPosition.z).abs()),
+      )
+      const alpha = bandAlpha.mul(zFade)
+
+      const noiseValue = mx_noise_float(noiseCoord)
+      const paletteT = tslClamp(noiseValue.mul(0.5).add(0.5), float(0), float(1))
+
       return {
-        row: 0,
-        col: GRID_OFFSET,
+        simulation,
+        positionNode: positionGeometry.add(tileWorldPosition),
+        colorNode: sampleTilesPalette(paletteT).mul(PALETTE_MIX),
+        opacityNode: alpha as Node<'float'>,
       }
-    }
-    const id = cells[Math.floor(Math.random() * cells.length)]
-    return {
-      row: Math.floor(id / GRID_COLS),
-      col: id % GRID_COLS,
-    }
-  }, [])
-
-  const seedInstance = useCallback(
-    (instanceIndex: number) => {
-      const base = instanceIndex * 4
-      const spawn = pickRandomSpawnCell()
-      const jitter = Math.random()
-      const y = Y_MIN + Math.random() * (Y_MAX - Y_MIN)
-      const speed = SPEED_MIN + Math.random() * SPEED_RANGE
-      textureBufferRef.current[base + 0] = spawn.col + clamp(jitter, 0, 0.9999)
-      textureBufferRef.current[base + 1] = y
-      textureBufferRef.current[base + 2] = spawn.row
-      textureBufferRef.current[base + 3] = speed
     },
-    [pickRandomSpawnCell],
+    [count, rowWorldPositionsTexture, spawnMask, spawnMaskTexture, uDeltaTime],
   )
 
-  const seedAllInstances = useCallback(() => {
-    ensureTextureBufferSize()
-    if (spawnableCellsDirtyRef.current || spawnableCellsRef.current.length === 0) {
-      rebuildSpawnableCells()
-    }
-    for (let i = 0; i < instanceCount; i++) {
-      seedInstance(i)
-    }
-    for (let i = instanceCount; i < textureSlotCount; i++) {
-      const base = i * 4
-      textureBufferRef.current[base + 0] = 0
-      textureBufferRef.current[base + 1] = Y_MIN
-      textureBufferRef.current[base + 2] = 0
-      textureBufferRef.current[base + 3] = SPEED_MIN
-    }
-  }, [
-    ensureTextureBufferSize,
-    instanceCount,
-    rebuildSpawnableCells,
-    seedInstance,
-    textureSlotCount,
-  ])
-
-  const writeBufferToTexture = useCallback((texture: DataTexture) => {
-    const target = texture.image.data as Float32Array
-    target.set(textureBufferRef.current)
-    texture.needsUpdate = true
-  }, [])
-
-  const initializeSpawnMaskDefaults = useCallback(() => {
-    const mask = spawnMaskData
-    const columnStates = rowColumnSpawnable
-    if (!columnStates) return
-
-    for (let row = 0; row < ROWS_RENDERED; row++) {
-      const rowStart = row * GRID_COLS
-      const columnStateOffset = row * COLUMNS
-      const rowData = rowsData?.[row]
-
-      for (let col = 0; col < GRID_OFFSET; col++) {
-        mask[rowStart + col] = 1
-      }
-
-      for (let col = 0; col < COLUMNS; col++) {
-        const isRaised = rowData?.isRaised?.[col] === 1 ? 1 : 0
-        const isSpawnable = isRaised === 1 ? 0 : 1
-        const stateIndex = columnStateOffset + col
-        columnStates[stateIndex] = isSpawnable
-        mask[rowStart + GRID_OFFSET + col] = isSpawnable
-      }
-
-      for (let col = GRID_OFFSET + COLUMNS; col < GRID_COLS; col++) {
-        mask[rowStart + col] = 1
-      }
-    }
-    spawnMaskTextureRef.current!.needsUpdate = true
-    spawnableCellsDirtyRef.current = false
-    rebuildSpawnableCells()
-  }, [rebuildSpawnableCells, rowColumnSpawnable, rowsData, spawnMaskData])
-
-  const initializeSimulation = useCallback(() => {
-    if (!renderer || isDisabled) return
-    seedAllInstances()
-
-    const compute = new GPUComputationRenderer(textureSize, textureSize, renderer)
-    const positionTexture = compute.createTexture()
-    writeBufferToTexture(positionTexture)
-
-    const variable = compute.addVariable(
-      'texturePosition',
-      positionFragmentShader,
-      positionTexture,
-    )
-    compute.setVariableDependencies(variable, [variable])
-
-    const uniforms = variable.material.uniforms as {
-      uDeltaTime: { value: number }
-      uYMin: { value: number }
-      uYMax: { value: number }
-      uGridCols: { value: number }
-      uRowCount: { value: number }
-      uSpawnMask: { value: Texture | null }
-      uSpawnMaskSize: { value: [number, number] }
-    }
-
-    uniforms.uDeltaTime = { value: 0.0 }
-    uniforms.uYMin = { value: Y_MIN }
-    uniforms.uYMax = { value: Y_MAX }
-    uniforms.uGridCols = { value: GRID_COLS }
-    uniforms.uRowCount = { value: ROWS_RENDERED }
-    uniforms.uSpawnMask = { value: spawnMaskTextureRef.current }
-    uniforms.uSpawnMaskSize = { value: [GRID_COLS, ROWS_RENDERED] }
-
-    const error = compute.init()
-    if (error !== null) throw new Error(error)
-
-    gpuCompute.current = compute
-    positionVariable.current = variable
-    positionTextureRef.current = positionTexture
-    if (materialRef.current) {
-      materialRef.current.uPositionTexture = compute.getCurrentRenderTarget(variable).texture
-    }
-  }, [isDisabled, renderer, seedAllInstances, textureSize, writeBufferToTexture])
+  const { colorNode, opacityNode, positionNode, simulation } = useLocalNodes(createNodes)
 
   useEffect(() => {
-    if (hasInitializedSpawnMaskRef.current) return
-    hasInitializedSpawnMaskRef.current = true
-    initializeSpawnMaskDefaults()
-  }, [initializeSpawnMaskDefaults])
-
-  useEffect(() => {
-    let mounted = true
-    try {
-      if (!isDisabled) initializeSimulation()
-      if (mounted) onReadyChange(true)
-    } catch (error) {
-      console.error('Failed to initialize FloatingTiles simulation', error)
-      onReadyChange(false)
-    }
-
     return () => {
-      mounted = false
-      onReadyChange(false)
-      gpuCompute.current?.dispose()
-      gpuCompute.current = null
-      positionVariable.current = null
+      simulation.dispose()
     }
-  }, [initializeSimulation, isDisabled, onReadyChange, simToken])
+  }, [simulation])
+
+  useEffect(() => {
+    onReadyChange(true)
+    return () => {
+      onReadyChange(false)
+    }
+  }, [onReadyChange])
 
   useEffect(() => {
     if (!meshRef.current) return
-    meshRef.current.count = instanceCount
-    for (let i = 0; i < instanceCount; i++) {
-      meshRef.current.setMatrixAt(i, identityMatrix)
+    meshRef.current.count = count
+    for (let index = 0; index < count; index++) {
+      meshRef.current.setMatrixAt(index, identityMatrix)
     }
     meshRef.current.instanceMatrix.needsUpdate = true
-  }, [instanceCount])
-
-  useEffect(() => {
-    if (!materialRef.current) return
-    materialRef.current.uRowWorldPositions = rowPositionsTextureRef.current ?? null
-  }, [])
+  }, [count])
 
   const updateRowMask = useCallback(
     (rowIndex: number, rowData: RowData | null) => {
       if (rowIndex < 0 || rowIndex >= ROWS_RENDERED) return
-      const mask = spawnMaskData
-      const rowStart = rowIndex * GRID_COLS
-      const raisedMask = rowData?.isRaised ?? []
-      const columnStates = rowColumnSpawnable
-      if (!columnStates) return
-
-      let maskChanged = false
-
-      for (let col = 0; col < GRID_OFFSET; col++) {
-        const index = rowStart + col
-        if (mask[index] !== 1) {
-          mask[index] = 1
-          maskChanged = true
-        }
-      }
-
-      const columnStateOffset = rowIndex * COLUMNS
-      for (let col = 0; col < COLUMNS; col++) {
-        const isRaised = (raisedMask[col] ?? 0) === 1 ? 1 : 0
-        const isSpawnable = isRaised === 1 ? 0 : 1
-        const stateIndex = columnStateOffset + col
-        const prevState = columnStates[stateIndex]
-
-        if (prevState !== isSpawnable) {
-          columnStates[stateIndex] = isSpawnable
-          maskChanged = true
-        }
-
-        const maskIndex = rowStart + GRID_OFFSET + col
-        if (mask[maskIndex] !== isSpawnable) {
-          mask[maskIndex] = isSpawnable
-          maskChanged = true
-        }
-      }
-
-      for (let col = GRID_OFFSET + COLUMNS; col < GRID_COLS; col++) {
-        const index = rowStart + col
-        if (mask[index] !== 1) {
-          mask[index] = 1
-          maskChanged = true
-        }
-      }
-
-      if (maskChanged) {
-        spawnMaskTextureRef.current!.needsUpdate = true
-        spawnableCellsDirtyRef.current = true
-        // Performance optimization:
-        // We defer rebuildSpawnableCells() to the next reseed so the JS-side list
-        // stays current without doing a full grid scan on every row update.
-        // rebuildSpawnableCells()
+      if (writeRowSpawnMask(spawnMask, rowIndex, rowData?.isRaised)) {
+        spawnMaskTexture.needsUpdate = true
       }
     },
-    [rowColumnSpawnable, spawnMaskData], // Removed rebuildSpawnableCells from dependency array
+    [spawnMask, spawnMaskTexture],
   )
 
   const updateRowWorldPositions = useCallback(
     (rowPositions: number[]) => {
-      const target = rowPositionsData
-      let changed = false
-      for (let i = 0; i < Math.min(rowPositions.length, ROWS_RENDERED); i++) {
-        const value = rowPositions[i]
+      let hasChanged = false
+
+      for (let index = 0; index < Math.min(rowPositions.length, ROWS_RENDERED); index++) {
+        const value = rowPositions[index]
         if (!Number.isFinite(value)) continue
-        if (target[i] !== value) {
-          target[i] = value
-          changed = true
+        if (rowWorldPositions[index] !== value) {
+          rowWorldPositions[index] = value
+          hasChanged = true
         }
       }
-      if (changed) {
-        rowPositionsTextureRef.current!.needsUpdate = true
-        if (materialRef.current) {
-          materialRef.current.uRowWorldPositions = rowPositionsTextureRef.current!
-        }
+
+      if (hasChanged) {
+        rowWorldPositionsTexture.needsUpdate = true
       }
     },
-    [rowPositionsData],
+    [rowWorldPositions, rowWorldPositionsTexture],
   )
 
   const stepSimulation = useCallback(
     (delta: number) => {
-      if (
-        isDisabled ||
-        !gpuCompute.current ||
-        !positionVariable.current ||
-        !materialRef.current
-      ) {
-        return
-      }
-
-      const clampedDelta = clamp(delta, 0, MAX_DELTA_TIME)
-      const uniforms = positionVariable.current.material.uniforms as {
-        uDeltaTime: { value: number }
-      }
-      uniforms.uDeltaTime.value = clampedDelta
-      materialRef.current.uCameraZ = camera.position.z
-
-      gpuCompute.current.compute()
-
-      const texture = gpuCompute.current.getCurrentRenderTarget(
-        positionVariable.current,
-      ).texture
-      materialRef.current.uPositionTexture = texture
+      if (isDisabled) return
+      uDeltaTime.value = clamp(delta, 0, MAX_DELTA_TIME)
+      renderer.compute(simulation)
     },
-    [camera, isDisabled],
+    [isDisabled, renderer, simulation, uDeltaTime],
   )
 
   useImperativeHandle(
@@ -499,17 +351,8 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
         if (isDisabled) return
         updateRowWorldPositions(positions)
       },
-      setScrollOffset: (scrollZ) => {
-        if (isDisabled || !materialRef.current) return
-        materialRef.current.uScrollZ = scrollZ
-      },
       step: (delta) => {
-        if (isDisabled) return
         stepSimulation(delta)
-      },
-      reset: () => {
-        if (isDisabled) return
-        setSimToken((prev) => prev + 1)
       },
     }),
     [isDisabled, stepSimulation, updateRowMask, updateRowWorldPositions],
@@ -524,26 +367,17 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
   return (
     <instancedMesh
       ref={meshRef}
-      args={[undefined, undefined, instanceCount]}
+      args={[undefined, undefined, count]}
       frustumCulled={false}
-      count={instanceCount}>
-      <boxGeometry args={[BOX_W, BOX_H, BOX_D]}>
-        <instancedBufferAttribute attach="attributes-textureUv" args={[textureUvs, 2]} />
-      </boxGeometry>
-      <FloatingTilesMaterial
-        key={(CustomFloatingTilesMaterial as unknown as { key: string }).key}
-        ref={materialRef}
-        transparent={true}
-        depthTest={true}
+      count={count}>
+      <boxGeometry args={[BOX_W, BOX_H, BOX_D]} />
+      <meshBasicNodeMaterial
+        colorNode={colorNode}
+        opacityNode={opacityNode}
+        positionNode={positionNode}
+        transparent
+        depthTest
         depthWrite={false}
-        uGridCols={GRID_COLS}
-        uTileSize={TILE_SIZE}
-        uYMin={Y_MIN}
-        uYMax={Y_MAX}
-        uZFadeStart={Z_FADE_START}
-        uZFadeEnd={Z_FADE_END}
-        uRowCount={ROWS_RENDERED}
-        uScrollZ={0}
       />
     </instancedMesh>
   )

@@ -2,14 +2,15 @@
 
 import { useGSAP } from '@gsap/react'
 import { PerformanceMonitor, Stats } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import gsap from 'gsap'
 import { type FC, Suspense, useMemo } from 'react'
 
 import Camera, { CAMERA_POSITION_DESKTOP, CAMERA_POSITION_MOBILE } from '@/components/Camera'
+import GameUniforms from '@/components/GameUniforms'
 import InputSmoother from '@/components/InputSmoother'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
+import WebGPUCanvas from '@/components/WebGPUCanvas'
 import Backdrop from '@/components/backdrop/Backdrop'
 import OutOfBounds from '@/components/platform/OutOfBounds'
 import Platform from '@/components/platform/Platform'
@@ -32,6 +33,19 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
 
   const cameraPosition = isMobile ? CAMERA_POSITION_MOBILE : CAMERA_POSITION_DESKTOP
 
+  // The WebGPU renderer takes its options through `rendererProps`; these carry over the WebGL
+  // `gl` settings this canvas used previously (antialias off on mobile, low-power in dev).
+  const rendererProps = useMemo(
+    () => ({
+      antialias: !isMobile,
+      powerPreference:
+        process.env.NODE_ENV === 'development'
+          ? ('low-power' as const)
+          : ('high-performance' as const),
+    }),
+    [isMobile],
+  )
+
   const dpr = useMemo<number>(() => {
     if (typeof window === 'undefined') return 1
     if (!!maxDPR) return Math.min(window.devicePixelRatio ?? 1, maxDPR)
@@ -39,20 +53,14 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
   }, [maxDPR])
 
   return (
-    <Canvas
+    <WebGPUCanvas
       className="fixed! inset-0! h-dvh! w-full"
-      onContextMenu={(e) => e.preventDefault()}
       dpr={dpr}
+      rendererProps={rendererProps}
       camera={{
         position: [0, cameraPosition.y, cameraPosition.z],
         far: process.env.NODE_ENV === 'development' ? 100 : 40,
         fov: 65,
-      }}
-      gl={{
-        alpha: false,
-        antialias: !isMobile,
-        powerPreference:
-          process.env.NODE_ENV === 'development' ? 'low-power' : 'high-performance',
       }}>
       <PerformanceMonitor
         // Create an upper/lower FPS band relative to device refresh rate
@@ -64,21 +72,21 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
         {/* <ambientLight intensity={1.0} /> */}
 
         <Suspense>
-          <PostProcessing>
-            <InputSmoother />
-            {/* <OrbitControls /> */}
-            <Camera isMobile={isMobile} position={cameraPosition} />
-            {isDebug && <Stats />}
-            <Backdrop />
-            <Physics debug={isPhysicsDebug} timeStep={physicsTimeStep}>
-              <OutOfBounds />
-              <Platform />
-              <Player />
-            </Physics>
-          </PostProcessing>
+          <GameUniforms />
+          <InputSmoother />
+          {/* <OrbitControls /> */}
+          <Camera isMobile={isMobile} position={cameraPosition} />
+          {isDebug && <Stats />}
+          <Backdrop />
+          <Physics debug={isPhysicsDebug} timeStep={physicsTimeStep}>
+            <OutOfBounds />
+            <Platform />
+            <Player />
+          </Physics>
+          <PostProcessing />
         </Suspense>
       </PerformanceMonitor>
-    </Canvas>
+    </WebGPUCanvas>
   )
 }
 

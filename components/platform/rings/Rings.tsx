@@ -15,12 +15,10 @@ import {
   useRef,
   useState,
 } from 'react'
-import { type ShaderMaterial } from 'three'
 
 import { type RingIndex, useGameStore } from '@/components/GameProvider'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
-import Ring, { type RingUniforms } from '@/components/platform/rings/ring/Ring'
-import useGameFrame from '@/hooks/useGameFrame'
+import Ring, { type RingMaterial } from '@/components/platform/rings/ring/Ring'
 import type { RigidBodyUserData, RingUserData } from '@/model/schema'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { getRingKey } from '@/utils/rings'
@@ -49,6 +47,20 @@ export type RingsHandle = {
   hideElementsIfNeeded: (row: RowData) => void
 }
 
+/**
+ * One pool slot: the ring it holds, and where that ring belongs in the world.
+ *
+ * Keeping the target here rather than only on the rigid body is what lets the pool be reconciled
+ * every frame — see {@link Rings}'s `applySlot`.
+ */
+type RingSlot = {
+  indexes: RingIndex
+  /** World X of the ring's column, from `colToX`. */
+  x: number
+  /** Target world Z. The platform scroll advances it. */
+  z: number
+}
+
 type Props = {
   ref: RefObject<RingsHandle | null>
   onReadyChange: (isReady: boolean) => void
@@ -63,21 +75,47 @@ const Rings: FC<Props> = ({ ref, onReadyChange }) => {
     instancesArray.map(() => createRef<RapierRigidBody | null>()),
   )
 
-  const [shaderRefs] = useState<RefObject<(ShaderMaterial & RingUniforms) | null>[]>(() =>
-    instancesArray.map(() => createRef<ShaderMaterial & RingUniforms>()),
+  const [shaderRefs] = useState<RefObject<RingMaterial | null>[]>(() =>
+    instancesArray.map(() => createRef<RingMaterial | null>()),
   )
 
-  const slotAssignments = useRef<(RingIndex | null)[]>(Array(MAX_RING_INSTANCES).fill(null))
+  const slotAssignments = useRef<(RingSlot | null)[]>(Array(MAX_RING_INSTANCES).fill(null))
+  // Render reads occupancy to decide what each slot draws. The ref stays the source of truth for the
+  // imperative pool, and this mirror keeps render from reading a ref.
+  const [occupiedSlots, setOccupiedSlots] = useState<(RingIndex | null)[]>(() =>
+    Array(MAX_RING_INSTANCES).fill(null),
+  )
   const rowToSlots = useRef<Map<number, number[]>>(new Map())
   const translation = useRef({ x: 0, y: 0, z: 0 })
 
-  const setBodyTranslation = useCallback(
-    (slotIndex: number, x: number, y: number, z: number) => {
+  /**
+   * Pushes a slot's target onto its rigid body.
+   *
+   * Every write goes through the slot rather than through its own running total, so a slot whose
+   * body was not available when it was claimed — or whose body was moved behind its back — is put
+   * back on target by the next frame's scroll instead of staying at `HIDDEN_POSITION` forever with
+   * the pool still counting it as placed.
+   */
+  const applySlot = useCallback(
+    (slotIndex: number) => {
+      const slot = slotAssignments.current[slotIndex]
+      const body = rigidBodyRefs[slotIndex].current
+      if (!slot || !body) return
+      translation.current.x = slot.x
+      translation.current.y = RING_WORLD_Y
+      translation.current.z = slot.z
+      body.setTranslation(translation.current, true)
+    },
+    [rigidBodyRefs],
+  )
+
+  const hideSlot = useCallback(
+    (slotIndex: number) => {
       const body = rigidBodyRefs[slotIndex].current
       if (!body) return
-      translation.current.x = x
-      translation.current.y = y
-      translation.current.z = z
+      translation.current.x = HIDDEN_POSITION[0]
+      translation.current.y = HIDDEN_POSITION[1]
+      translation.current.z = HIDDEN_POSITION[2]
       body.setTranslation(translation.current, true)
     },
     [rigidBodyRefs],
@@ -90,37 +128,34 @@ const Rings: FC<Props> = ({ ref, onReadyChange }) => {
       if (!slots) return
       slots.forEach((slotIndex) => {
         slotAssignments.current[slotIndex] = null
-        setBodyTranslation(
-          slotIndex,
-          HIDDEN_POSITION[0],
-          HIDDEN_POSITION[1],
-          HIDDEN_POSITION[2],
-        )
+        setOccupiedSlots((previous) => {
+          const next = [...previous]
+          next[slotIndex] = null
+          return next
+        })
+        hideSlot(slotIndex)
       })
       rowToSlots.current.delete(rowIndex)
     },
-    [setBodyTranslation],
+    [hideSlot],
   )
 
   const ensureRingForColumn = useCallback(
     (rowIndex: number, columnIndex: number, rowZ: number) => {
       if (rowIndex < 0) return
-      const existingSlot = slotAssignments.current.findIndex((assignment) => {
-        if (!assignment) return false
-        return assignment[0] === rowIndex && assignment[1] === columnIndex
-      })
-
       const x = colToX(columnIndex)
-      const z = rowZ
+
+      const existingSlot = slotAssignments.current.findIndex(
+        (slot) => slot !== null && slot.indexes[0] === rowIndex && slot.indexes[1] === columnIndex,
+      )
 
       if (existingSlot >= 0) {
-        setBodyTranslation(existingSlot, x, RING_WORLD_Y, z)
+        slotAssignments.current[existingSlot] = { indexes: [rowIndex, columnIndex], x, z: rowZ }
+        applySlot(existingSlot)
         return
       }
 
-      const availableSlot = slotAssignments.current.findIndex(
-        (assignment) => assignment === null,
-      )
+      const availableSlot = slotAssignments.current.findIndex((slot) => slot === null)
       if (availableSlot === -1) {
         if (IS_DEV_ENV) {
           console.error(
@@ -130,13 +165,19 @@ const Rings: FC<Props> = ({ ref, onReadyChange }) => {
         return
       }
 
-      slotAssignments.current[availableSlot] = [rowIndex, columnIndex]
+      const indexes: RingIndex = [rowIndex, columnIndex]
+      slotAssignments.current[availableSlot] = { indexes, x, z: rowZ }
+      setOccupiedSlots((previous) => {
+        const next = [...previous]
+        next[availableSlot] = indexes
+        return next
+      })
       const slotsForRow = rowToSlots.current.get(rowIndex) ?? []
       slotsForRow.push(availableSlot)
       rowToSlots.current.set(rowIndex, slotsForRow)
-      setBodyTranslation(availableSlot, x, RING_WORLD_Y, z)
+      applySlot(availableSlot)
     },
-    [setBodyTranslation],
+    [applySlot],
   )
 
   const positionElementsIfNeeded = useCallback(
@@ -165,19 +206,15 @@ const Rings: FC<Props> = ({ ref, onReadyChange }) => {
     (zStep: number) => {
       if (zStep === 0) return
       for (let slotIndex = 0; slotIndex < slotAssignments.current.length; slotIndex++) {
-        if (!slotAssignments.current[slotIndex]) continue
-        const body = rigidBodyRefs[slotIndex].current
-        if (!body) continue
-        const currentTranslation = body.translation()
-        setBodyTranslation(
-          slotIndex,
-          currentTranslation.x,
-          currentTranslation.y,
-          currentTranslation.z + zStep,
-        )
+        const slot = slotAssignments.current[slotIndex]
+        if (!slot) continue
+        // The slot carries its own Z rather than integrating the body's, so a slot whose body was
+        // never written still advances from where it belongs.
+        slot.z += zStep
+        applySlot(slotIndex)
       }
     },
-    [rigidBodyRefs, setBodyTranslation],
+    [applySlot],
   )
 
   useImperativeHandle(
@@ -202,54 +239,33 @@ const Rings: FC<Props> = ({ ref, onReadyChange }) => {
     if (!otherUserData) return
     if (otherUserData.type !== 'player') return
     const slotIndex = (event.target.rigidBodyObject?.userData as RingUserData).slotIndex
-    const indexes = slotAssignments.current[slotIndex]
-    if (!indexes) return
+    const slot = slotAssignments.current[slotIndex]
+    if (!slot) return
 
-    if (collectedRings[getRingKey(indexes[0], indexes[1])]) return
+    if (collectedRings[getRingKey(slot.indexes[0], slot.indexes[1])]) return
 
     const material = shaderRefs[slotIndex].current
     if (!material) return
 
     playSoundFX(SoundFX.RING_COLLECTED)
     // Animate the ring out then mark it as collected
-    gsap.to(material, {
-      uExitProgress: 1,
+    gsap.to(material.uExitProgress, {
+      value: 1,
       duration: 0.4,
       ease: 'power1.out',
       onComplete: () => {
-        onRingCollected(indexes)
+        onRingCollected(slot.indexes)
         setTimeout(() => {
-          material.uExitProgress = 0
+          material.uExitProgress.value = 0
         }, 100)
       },
     })
   }
 
-  useGameFrame(({ clock }) => {
-    const time = clock.elapsedTime
-    const assignments = slotAssignments.current
-
-    for (let index = 0; index < shaderRefs.length; index++) {
-      const assignment = assignments[index]
-      if (!assignment) continue
-
-      const [rowIndex, colIndex] = assignment
-      const ringKey = getRingKey(rowIndex, colIndex)
-      if (collectedRings[ringKey]) continue
-
-      const material = shaderRefs[index].current
-      if (!material) continue
-      // eslint-disable-next-line react-hooks/immutability
-      material.uTime = time
-    }
-  })
-
-  const slots = slotAssignments.current
-
   return (
     <>
       {rigidBodyRefs.map((rigidBody, slotIndex) => {
-        const assignedIndexes = slots[slotIndex]
+        const assignedIndexes = occupiedSlots[slotIndex]
         const ringKey = !!assignedIndexes
           ? getRingKey(assignedIndexes[0], assignedIndexes[1])
           : null
@@ -277,6 +293,7 @@ const Rings: FC<Props> = ({ ref, onReadyChange }) => {
             <Ring
               isVisible={!isCollected}
               shaderRef={shaderRefs[slotIndex]}
+              uniformScope={`ringSlot${slotIndex}`}
               rotationSpeed={rotationSpeed}
               rotationPhase={rotationPhase}
               radius={RING_MAJOR_RADIUS}

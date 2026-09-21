@@ -1,40 +1,41 @@
-import { shaderMaterial } from '@react-three/drei'
-import { extend, useThree } from '@react-three/fiber'
+/* eslint-disable react-hooks/immutability */
+'use client'
+
+import {
+  type CreatorState,
+  useFrame,
+  useLocalNodes,
+  useThree,
+  useUniforms,
+} from '@react-three/fiber/webgpu'
 import gsap from 'gsap'
-import { type FC, useEffect, useMemo, useRef } from 'react'
-import { AdditiveBlending, BufferAttribute, Color, Vector3, type Vector3Tuple } from 'three'
+import { type FC, useCallback, useEffect, useId, useMemo, useRef } from 'react'
+import { float, positionWorld, time } from 'three/tsl'
+import { AdditiveBlending, Color, type Vector3Tuple } from 'three'
+import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import useGameFrame from '@/hooks/useGameFrame'
+import {
+  createGemParticleBuffers,
+  createGemParticleRenderNodes,
+  createGemParticleSimulation,
+  GEM_PARTICLE_QUAD_SIZE,
+} from '@/components/platform/collectibles/collectible/gem/particles/gemParticleSimulation'
 import { CollectibleID } from '@/model/schema'
 import { GEMS_COLOURS_BY_ID, GOLD_PARTICLE_PALETTE } from '@/resources/colours'
-import { EPSILON } from '@/utils/tiles'
+import { fadeDistance } from '@/resources/tsl/fadeDistance'
 
-import particleFragment from './point.frag'
-import particleVertex from './point.vert'
+const GEM_PARTICLE_UNIFORM_SCOPE = 'gemParticles'
 
-type PointsShaderUniforms = {
-  uBurstProgress: number
-  uGemPosition: Vector3
-  uGemScale: number
-  uTime: number
-  uDpr: number
+type GemParticleUniforms = {
+  uBurstProgress: UniformNode<'float', number>
+  uGemScale: UniformNode<'float', number>
 }
 
-const INITIAL_POINTS_UNIFORMS: PointsShaderUniforms = {
+const createGemParticleUniforms = (gemScale: number) => () => ({
   uBurstProgress: 0,
-  uGemPosition: new Vector3(),
-  uGemScale: 1,
-  uTime: 0,
-  uDpr: 1,
-}
-
-const CustomPointsShaderMaterial = shaderMaterial(
-  INITIAL_POINTS_UNIFORMS,
-  particleVertex,
-  particleFragment,
-)
-const PointsShaderMaterial = extend(CustomPointsShaderMaterial)
+  uGemScale: gemScale,
+})
 
 type Props = {
   id: CollectibleID
@@ -47,45 +48,27 @@ type Props = {
   isVisible: boolean
 }
 
-const createRandomSeeds = (count: number): Float32Array => {
-  const values = new Float32Array(count)
-  for (let i = 0; i < count; i++) {
-    values[i] = Math.random()
-  }
-  return values
-}
-
 const tempColour = new Color()
 
-const createRandomColours = (count: number, palette: readonly string[]): Float32Array => {
-  const values = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    const offset = i * 3
-    const colourIndex = Math.floor(Math.random() * palette.length)
-    tempColour.set(palette[colourIndex])
-    values[offset] = tempColour.r
-    values[offset + 1] = tempColour.g
-    values[offset + 2] = tempColour.b
-  }
-  return values
-}
+const toLinearPalette = (palette: readonly string[]): readonly (readonly [number, number, number])[] =>
+  palette.map((hex) => {
+    tempColour.set(hex)
+    return [tempColour.r, tempColour.g, tempColour.b] as const
+  })
 
-const sampleOctaPoint = () => {
-  const signedRand = {
-    x: Math.random() * 2 - 1,
-    y: Math.random() * 2 - 1,
-    z: Math.random() * 2 - 1,
-  }
-  const normalization =
-    Math.abs(signedRand.x) + Math.abs(signedRand.y) + Math.abs(signedRand.z) || EPSILON.TINY
-  const radius = Math.pow(Math.random(), 0.55)
-  return {
-    x: (signedRand.x / normalization) * radius,
-    y: (signedRand.y / normalization) * radius,
-    z: (signedRand.z / normalization) * radius,
-  }
-}
-
+/**
+ * Gem particles: a burst that lifts out of the tile and settles into a floating cloud inside the gem.
+ *
+ * The GLSL ran this as `<points>` with all the motion evaluated per vertex every frame. Three things
+ * changed shape:
+ *
+ * - points became instanced quads, because WebGPU rasterises point primitives at one pixel;
+ * - the per-vertex motion moved into a compute kernel that advances a storage buffer once per
+ *   particle, which is then read back as an attribute (the shape Threenix's Fireflies uses);
+ * - `uDpr` and the perspective attenuation both went, since a quad is sized in world units.
+ *
+ * The static per-particle data is seeded once on the CPU when the buffers are created.
+ */
 const Particles: FC<Props> = ({
   id,
   tileWidth,
@@ -98,89 +81,69 @@ const Particles: FC<Props> = ({
 }) => {
   const particleCount = usePerformanceStore((s) => s.sceneConfig.gem.particleCount)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
-  const dpr = useThree((s) => s.viewport.dpr)
-  const materialRef = useRef<(typeof PointsShaderMaterial & PointsShaderUniforms) | null>(null)
+  const renderer = useThree((s) => s.renderer)
 
   const progress = useRef({ value: 0 })
   const progressTween = useRef<GSAPTween | null>(null)
   const hasMounted = useRef(false)
   const previouslyConfirmed = useRef(false)
 
-  const [gemX, gemY, gemZ] = gemPosition
-  const gemParentPosition = useMemo(() => new Vector3(gemX, gemY, gemZ), [gemX, gemY, gemZ])
-  // Geometry buffers
-  const positionComponentCount = particleCount * 3
-  const initialPositions = useMemo(
-    () => new Float32Array(positionComponentCount),
-    [positionComponentCount],
-  )
-  const spawnPositions = useMemo(
-    () => new Float32Array(positionComponentCount),
-    [positionComponentCount],
-  )
-  const gemTargets = useMemo(
-    () => new Float32Array(positionComponentCount),
-    [positionComponentCount],
-  )
-  const seeds = useMemo(() => createRandomSeeds(particleCount), [particleCount])
   const particlePalette = GEMS_COLOURS_BY_ID[id]?.particlesPalette ?? GOLD_PARTICLE_PALETTE
-  const colours = useMemo(
-    () => createRandomColours(particleCount, particlePalette),
-    [particleCount, particlePalette],
+  const palette = useMemo(() => toLinearPalette(particlePalette), [particlePalette])
+
+  // One burst system per gem: a shared scope would let one gem drive every gem's particles.
+  const particleScope = `${GEM_PARTICLE_UNIFORM_SCOPE}_${useId().replace(/[^a-zA-Z0-9]/g, '')}`
+
+  const uniforms = useUniforms(
+    createGemParticleUniforms(gemScale),
+    particleScope,
+  )
+  const { uBurstProgress } = uniforms
+
+  const createNodes = useCallback(
+    ({ uniforms: scopedUniforms }: CreatorState) => {
+      const scoped = scopedUniforms.scope<GemParticleUniforms>(particleScope)
+      const buffers = createGemParticleBuffers({
+        count: particleCount,
+        gemScale,
+        tileWidth,
+        tileHeight,
+        origin: gemPosition,
+        palette,
+      })
+      const motion = {
+        uBurstProgress: scoped.uBurstProgress,
+        uTime: time,
+        uGemScale: scoped.uGemScale,
+      }
+
+      return {
+        simulation: createGemParticleSimulation(buffers, motion),
+        render: createGemParticleRenderNodes({
+          buffers,
+          motion,
+          distanceFade: useDistanceFade ? fadeDistance(positionWorld.z) : float(1),
+          palette,
+        }),
+      }
+    },
+    [gemPosition, gemScale, particleCount, particleScope, palette, tileHeight, tileWidth, useDistanceFade],
   )
 
-  const spawnAttribute = useRef<BufferAttribute>(null)
-  const gemTargetAttribute = useRef<BufferAttribute>(null)
-  const seedAttribute = useRef<BufferAttribute>(null)
-  const colourAttribute = useRef<BufferAttribute>(null)
+  const { simulation, render } = useLocalNodes(createNodes)
 
   useEffect(() => {
-    const initializeStaticParticleData = () => {
-      /* eslint-disable react-hooks/immutability */
-      for (let i = 0; i < particleCount; i++) {
-        const spawnIndex = i * 3
-        // Spawn within tile footprint (local space)
-        spawnPositions[spawnIndex] = (Math.random() - 0.5) * tileWidth
-        spawnPositions[spawnIndex + 1] = 0
-        spawnPositions[spawnIndex + 2] = (Math.random() - 0.5) * tileHeight
-
-        const target = sampleOctaPoint()
-        gemTargets[spawnIndex] = target.x
-        gemTargets[spawnIndex + 1] = target.y
-        gemTargets[spawnIndex + 2] = target.z
-      }
-      /* eslint-enable react-hooks/immutability */
-      if (spawnAttribute.current) {
-        spawnAttribute.current.needsUpdate = true
-      }
-      if (gemTargetAttribute.current) {
-        gemTargetAttribute.current.needsUpdate = true
-      }
+    return () => {
+      simulation.updateParticles.dispose()
     }
-    initializeStaticParticleData()
-  }, [gemTargets, particleCount, spawnPositions, tileHeight, tileWidth])
+  }, [simulation])
 
   useEffect(() => {
-    if (seedAttribute.current) {
-      seedAttribute.current.needsUpdate = true
-    }
-  }, [seeds])
-
-  useEffect(() => {
-    if (colourAttribute.current) {
-      colourAttribute.current.needsUpdate = true
-    }
-  }, [colours])
-
-  useEffect(() => {
-    const material = materialRef.current
-    if (!hasMounted.current || !material) {
+    if (!hasMounted.current) {
       hasMounted.current = true
       previouslyConfirmed.current = wasConfirmed
       progress.current.value = wasConfirmed ? 1 : 0
-      if (material) {
-        material.uBurstProgress = progress.current.value
-      }
+      uBurstProgress.value = progress.current.value
       return
     }
 
@@ -191,14 +154,14 @@ const Particles: FC<Props> = ({
       if (!wasConfirmed && progress.current.value !== 0) {
         progressTween.current?.kill()
         progress.current.value = 0
-        material.uBurstProgress = 0
+        uBurstProgress.value = 0
       }
       return
     }
 
     progressTween.current?.kill()
     progress.current.value = 0
-    material.uBurstProgress = 0
+    uBurstProgress.value = 0
 
     progressTween.current = gsap.to(progress.current, {
       value: 1,
@@ -206,10 +169,10 @@ const Particles: FC<Props> = ({
       ease: 'power2.out',
       onComplete: () => {
         progress.current.value = 1
-        material.uBurstProgress = 1
+        uBurstProgress.value = 1
       },
     })
-  }, [wasConfirmed])
+  }, [wasConfirmed, uBurstProgress])
 
   useEffect(() => {
     return () => {
@@ -217,67 +180,32 @@ const Particles: FC<Props> = ({
     }
   }, [])
 
-  useGameFrame(({ clock }) => {
-    const material = materialRef.current
-    if (!material) return
+  useFrame(() => {
     if (!isVisible) return
-
-    material.uBurstProgress = progress.current.value
-    material.uTime = clock.elapsedTime
+    uBurstProgress.value = progress.current.value
+    // Once the burst has settled (progress 1) the render node derives the settled float from
+    // `time` alone and ignores the burst buffer, so skip the compute pass until the next burst.
+    if (progress.current.value >= 1) return
+    renderer.compute(simulation.updateParticles)
   })
 
   return (
-    <points position={position} dispose={null} frustumCulled={false} visible={isVisible}>
-      <bufferGeometry attach="geometry">
-        <bufferAttribute
-          attach="attributes-position"
-          args={[initialPositions, 3]}
-          count={initialPositions.length / 3}
-          itemSize={3}
-        />
-        <bufferAttribute
-          ref={spawnAttribute}
-          attach="attributes-spawnPosition"
-          args={[spawnPositions, 3]}
-          count={spawnPositions.length / 3}
-          itemSize={3}
-        />
-        <bufferAttribute
-          ref={gemTargetAttribute}
-          attach="attributes-gemTarget"
-          args={[gemTargets, 3]}
-          count={gemTargets.length / 3}
-          itemSize={3}
-        />
-        <bufferAttribute
-          ref={seedAttribute}
-          attach="attributes-seed"
-          args={[seeds, 1]}
-          count={seeds.length}
-          itemSize={1}
-        />
-        <bufferAttribute
-          ref={colourAttribute}
-          attach="attributes-colour"
-          args={[colours, 3]}
-          count={colours.length / 3}
-          itemSize={3}
-        />
-      </bufferGeometry>
-
-      <PointsShaderMaterial
-        key={CustomPointsShaderMaterial.key}
-        ref={materialRef}
-        {...INITIAL_POINTS_UNIFORMS}
-        uDpr={dpr}
-        uGemPosition={gemParentPosition}
-        uGemScale={gemScale}
-        transparent={true}
+    <instancedMesh
+      position={position}
+      args={[undefined, undefined, particleCount]}
+      count={particleCount}
+      frustumCulled={false}
+      visible={isVisible}>
+      <planeGeometry args={[GEM_PARTICLE_QUAD_SIZE, GEM_PARTICLE_QUAD_SIZE]} />
+      <meshBasicNodeMaterial
+        colorNode={render.colorNode}
+        opacityNode={render.opacityNode}
+        positionNode={render.positionNode}
+        transparent
         depthTest={false}
         blending={AdditiveBlending}
-        defines={{ USE_DISTANCE_FADE: useDistanceFade ? 1 : 0 }}
       />
-    </points>
+    </instancedMesh>
   )
 }
 

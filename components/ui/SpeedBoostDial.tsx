@@ -61,8 +61,9 @@ export const SpeedBoostDial: FC<SpeedBoostDialProps> = ({
     path.style.strokeDashoffset = `${length}`
 
     return () => {
-      if (!!pendingFrame.current) {
+      if (pendingFrame.current !== null) {
         cancelAnimationFrame(pendingFrame.current)
+        pendingFrame.current = null
       }
     }
   }, [])

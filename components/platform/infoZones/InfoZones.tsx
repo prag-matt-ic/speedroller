@@ -95,6 +95,7 @@ const InfoZones: FC<Props> = ({ ref, onReadyChange }) => {
         return (
           <InfoZone
             key={`info-zone-${index}`}
+            zoneKey={`infoZone${index}`}
             ref={ref}
             isVisible={isVisibleStates[index]}
             {...getInfoZoneProps(index)}>

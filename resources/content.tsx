@@ -3,13 +3,11 @@ import {
   BotIcon,
   BoxIcon,
   CompassIcon,
-  DownloadCloud,
   HandshakeIcon,
   LightbulbIcon,
   type LucideIcon,
   PaletteIcon,
 } from 'lucide-react'
-import Link from 'next/link'
 import { type ReactNode } from 'react'
 
 import Panel from '@/components/ui/panel/Panel'
@@ -31,18 +29,16 @@ export const COLLECTIBLES_CONTENT: Record<
     content: (
       <>
         <a
-          href="https://pragmattic-design-tools.vercel.app/mode/gradient"
+          href="https://developers.threenix.io/"
           target="_blank"
           className="flex items-center gap-2 font-bold underline-offset-3 hover:underline lg:text-lg"
           rel="noopener noreferrer">
-          Pragmattic Design Tools
+          Threenix Developer Resources
           <ArrowUpRight />
         </a>
         <span className="mt-1 block text-sm font-medium text-neutral-300">
-          A set of design tools developed alongside this project.
-          <br />
-          Used for generating gradients, subtle colour variations, and grainy noise-based
-          textures.
+          Free, open-source Agent Skills and components for Three.js, React Three Fiber, WebGPU
+          and TSL.
         </span>
       </>
     ),
@@ -51,17 +47,17 @@ export const COLLECTIBLES_CONTENT: Record<
     Icon: BotIcon,
     content: (
       <>
-        <Link
-          href="/bonuses/prompts.md"
+        <a
+          href="https://github.com/prag-matt-ic/threenix-plugin/tree/main#review--refactor"
           target="_blank"
           className="flex items-center gap-2 font-bold underline-offset-3 hover:underline lg:text-lg"
           rel="noopener noreferrer">
-          Clean Code Prompts (Typescript/GLSL)
-          <DownloadCloud />
-        </Link>
+          Three.js Optimization Prompts
+          <ArrowUpRight />
+        </a>
         <span className="mt-1 block text-sm font-medium text-white/80">
-          Instructions to help an AI refactor existing code for readability, best practices and
-          performance. Useful for keeping code clean and efficient whilst you move quickly.
+          Catch performance problems, remove unnecessary complexity, and make Three.js, R3F, and
+          TSL code easier to maintain.
         </span>
       </>
     ),
@@ -71,7 +67,7 @@ export const COLLECTIBLES_CONTENT: Record<
     content: (
       <>
         <a
-          href="https://www.loopspeed.co.uk/"
+          href="https://cal.com/threenix/15min"
           target="_blank"
           className="flex items-center gap-2 font-bold underline-offset-3 hover:underline lg:text-lg"
           rel="noopener noreferrer">
@@ -79,7 +75,7 @@ export const COLLECTIBLES_CONTENT: Record<
           <ArrowUpRight />
         </a>
         <span className="mt-1 block text-sm font-medium text-white/80">
-          Our team at Loopspeed would love to discuss your 3D or AI web project. Get in touch
+          Our team at Threenix would love to discuss your 3D or AI web project. Get in touch
           via the website.
         </span>
       </>

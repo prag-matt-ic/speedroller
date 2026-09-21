@@ -1,16 +1,20 @@
-import { type RootState, useFrame } from '@react-three/fiber'
+import { type FrameTimingState, type RootState, useFrame } from '@react-three/fiber/webgpu'
 import { useRef } from 'react'
 
 import { useGameStore } from '@/components/GameProvider'
 import { type RapierSimFPS, usePerformanceStore } from '@/components/PerformanceProvider'
 import { Overlay } from '@/stores/types'
 
+// R3F v10 supplies frame timing (`elapsed`, `delta`, `frame`) alongside RootState, and no longer
+// exposes `clock`. Callers read `state.elapsed` for shader time.
+type GameFrameState = RootState & FrameTimingState
+
 // Calls the callback at a target simulation FPS (0 = uncapped).
 // - Accumulates real frame time and steps the callback at fixed dt when capped.
 // - Limits substeps per render to avoid spiral-of-death on slow frames.
 // - Avoids per-frame allocations by reusing refs.
 export function useGameFrame(
-  callback: (state: RootState, fixedDt: number) => void,
+  callback: (state: GameFrameState, fixedDt: number) => void,
   priority = 0,
 ) {
   const isOverlayOpen = useGameStore((s) => s.overlay !== Overlay.NONE)
@@ -40,7 +44,7 @@ export function useGameFrame(
       accumulator.current -= step
       steps++
     }
-  }, priority)
+  }, { priority: priority, fps: undefined, drop: true})
 }
 
 export default useGameFrame

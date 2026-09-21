@@ -1,7 +1,7 @@
 'use client'
 
 import { CameraControls, CameraControlsImpl } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber/webgpu'
 // import { useControls } from 'leva'
 import { type FC, useCallback, useEffect, useRef } from 'react'
 

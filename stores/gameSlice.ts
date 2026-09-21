@@ -39,6 +39,7 @@ export const RESET_GAME_STATE = {
   currentRow: 0,
   cameraLookAtPosition: null,
   isPlatformReady: false,
+  isWarmupComplete: false,
   rowsData: DEFAULT_PLATFORM_DATA.rowsData,
 }
 
@@ -76,8 +77,11 @@ export const createGameSlice =
     setIsPlatformReady: (isPlatformReady) => {
       set({ isPlatformReady })
     },
+    setIsWarmupComplete: (isWarmupComplete) => {
+      set({ isWarmupComplete })
+    },
     setRowsData: (rowsData, totalCounts) => {
-      set({ rowsData, totalCounts, isPlatformReady: false })
+      set({ rowsData, totalCounts, isPlatformReady: false, isWarmupComplete: false })
     },
     goToStage: (newStage: Stage) => {
       if (newStage === Stage.HOME) {

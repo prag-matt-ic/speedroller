@@ -3,9 +3,8 @@
 
 import { useGSAP } from '@gsap/react'
 import { Html } from '@react-three/drei'
-import { shaderMaterial } from '@react-three/drei'
-import { type HtmlProps } from '@react-three/drei/web/Html'
-import { extend } from '@react-three/fiber'
+import { type HtmlProps } from '@react-three/drei/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
@@ -20,12 +19,15 @@ import {
   type PropsWithChildren,
   type RefObject,
   Suspense,
+  useCallback,
   useRef,
   useState,
 } from 'react'
 import { Transition } from 'react-transition-group'
 import { twMerge } from 'tailwind-merge'
+import { float, mix, positionWorld, uv, vec2, vec3 } from 'three/tsl'
 import { type Vector3Tuple } from 'three'
+import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -33,6 +35,8 @@ import { SoundFX, useSoundStore } from '@/components/SoundProvider'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { PointerProvider } from '@/components/ui/PointerProvider'
 import { InfoZoneUserData, type RigidBodyUserData } from '@/model/schema'
+import { fadeDistance } from '@/resources/tsl/fadeDistance'
+import { paintCorners } from '@/resources/tsl/paintCorners'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import {
   INFO_ZONE_COLS,
@@ -43,34 +47,31 @@ import {
 import { HIDDEN_POSITION } from '@/utils/tiles'
 
 import IconSphere from './iconSphere/IconSphere'
-import fragmentShader from './infoZone.frag'
-import vertexShader from './infoZone.vert'
 
 gsap.registerPlugin(EasePack)
 
-type InfoZoneShaderUniforms = {
-  uAspect: number
-  uOpacity: number
-  uTilesX: number
-  uTilesY: number
-  uShowProgress: number
-  uDistanceFadeEnabled: number
+// Corner bracket tuning, carried over from infoZone.frag.
+const BORDER_THICKNESS_TILES = 0.25
+const CORNER_LENGTH_TILES = 0.5
+
+type InfoZoneUniforms = {
+  uAspect: UniformNode<'float', number>
+  uTilesX: UniformNode<'float', number>
+  uTilesY: UniformNode<'float', number>
+  uShowProgress: UniformNode<'float', number>
 }
 
-const INITIAL_UNIFORMS: InfoZoneShaderUniforms = {
-  uAspect: 1,
-  uOpacity: 1,
-  uTilesX: 1,
-  uTilesY: 1,
+const createInfoZoneUniforms = (aspect: number, tilesX: number, tilesY: number) => () => ({
+  uAspect: aspect,
+  uTilesX: tilesX,
+  uTilesY: tilesY,
   uShowProgress: 0,
-  uDistanceFadeEnabled: 1,
-}
-
-const InfoZoneShader = shaderMaterial(INITIAL_UNIFORMS, vertexShader, fragmentShader)
-const InfoZoneShaderMaterial = extend(InfoZoneShader)
+})
 
 export type InfoZoneProps = PropsWithChildren<{
   ref: RefObject<RapierRigidBody | null>
+  /** Stable, unique per zone: its uniforms are registered under this scope. */
+  zoneKey: string
   isVisible: boolean
   infoContainerClassName?: string
   infoPositionOffset?: Vector3Tuple
@@ -86,6 +87,7 @@ const userData: InfoZoneUserData = {
 // Shows HTML content when the player enters the zone
 export const InfoZone: FC<InfoZoneProps> = ({
   ref,
+  zoneKey,
   isVisible,
   infoContainerClassName,
   children,
@@ -102,7 +104,53 @@ export const InfoZone: FC<InfoZoneProps> = ({
 
   const [showInfo, setShowInfo] = useState(alwaysShowInfo)
   const infoContainer = useRef<HTMLDivElement>(null)
-  const tileShader = useRef<typeof InfoZoneShaderMaterial & InfoZoneShaderUniforms>(null)
+
+  // Registers the zone's uniforms. The graph reads them back off the same scope; uShowProgress is
+  // also held here because the enter/exit tweens animate it directly.
+  // Corner brackets are drawn per grid cell, so the tile metrics come from the zone dimensions
+  // rather than a shared 1×1 default (which made brackets ~5× too large on the 5×5 zone).
+  const tileAspect = INFO_ZONE_WIDTH / INFO_ZONE_HEIGHT
+  const tilesX = INFO_ZONE_COLS
+  const tilesY = INFO_ZONE_ROWS
+
+  const { uShowProgress } = useUniforms(createInfoZoneUniforms(tileAspect, tilesX, tilesY), zoneKey)
+
+  // Port of infoZone.vert + infoZone.frag. Height-space UV and the distance fade are recomputed
+  // per stage rather than carried across as varyings.
+  const createNodes = useCallback(
+    ({ uniforms }: CreatorState) => {
+      const scoped = uniforms.scope<InfoZoneUniforms>(zoneKey)
+      // Height-space UV: centred, with the aspect ratio applied to x.
+      const centeredUvSource = uv().sub(0.5)
+      const centeredUv: Node<'vec2'> = vec2(
+        centeredUvSource.x.mul(scoped.uAspect),
+        centeredUvSource.y,
+      )
+
+      const animatedCornerLength = mix(
+        float(CORNER_LENGTH_TILES),
+        float(CORNER_LENGTH_TILES * 6),
+        scoped.uShowProgress,
+      )
+
+      const bracketMask = paintCorners(
+        centeredUv,
+        scoped.uAspect,
+        vec2(scoped.uTilesX, scoped.uTilesY),
+        float(BORDER_THICKNESS_TILES),
+        animatedCornerLength,
+      )
+
+      // uOpacity was declared in the GLSL but never set from JS, so it stayed at its initial 1.
+      const opacityNode: Node<'float'> = useDistanceFade
+        ? bracketMask.mul(fadeDistance(positionWorld.z))
+        : bracketMask
+      return { colorNode: vec3(1), opacityNode }
+    },
+    [useDistanceFade, zoneKey],
+  )
+
+  const { colorNode, opacityNode } = useLocalNodes(createNodes)
 
   const lookAtInfo = () => {
     if (!isVisible) return
@@ -151,9 +199,9 @@ export const InfoZone: FC<InfoZoneProps> = ({
         ease: 'expoScale(0.8,1.0,power1.out)',
       },
     )
-    gsap.to(tileShader.current, {
+    gsap.to(uShowProgress, {
       duration: 0.5,
-      uShowProgress: 1,
+      value: 1,
       ease: 'power2.out',
     })
   })
@@ -165,16 +213,13 @@ export const InfoZone: FC<InfoZoneProps> = ({
       duration: 0.24,
       ease: 'expoScale(0.8,1.0,power1.out)',
     })
-    gsap.to(tileShader.current, {
+    gsap.to(uShowProgress, {
       duration: 0.3,
-      uShowProgress: 0,
+      value: 0,
       ease: 'power2.in',
     })
   })
 
-  const aspect = INFO_ZONE_WIDTH / INFO_ZONE_HEIGHT
-  const tilesX = INFO_ZONE_COLS
-  const tilesY = INFO_ZONE_ROWS
 
   return (
     <RigidBody
@@ -201,14 +246,10 @@ export const InfoZone: FC<InfoZoneProps> = ({
         {/* Floor tile */}
         <mesh position={[0, 0, 0.01]} renderOrder={2}>
           <planeGeometry args={[INFO_ZONE_WIDTH, INFO_ZONE_HEIGHT]} />
-          <InfoZoneShaderMaterial
-            ref={tileShader}
-            key={InfoZoneShader.key}
-            transparent={true}
-            uAspect={aspect}
-            uTilesX={tilesX}
-            uTilesY={tilesY}
-            uDistanceFadeEnabled={useDistanceFade ? 1 : 0}
+          <meshBasicNodeMaterial
+            colorNode={colorNode}
+            opacityNode={opacityNode}
+            transparent
           />
         </mesh>
 
@@ -218,6 +259,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
             iconSrc={iconSrc}
             isVisible={isVisible}
             shouldHide={showInfo}
+            zoneKey={zoneKey}
           />
         </Suspense>
       </group>

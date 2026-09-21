@@ -23,12 +23,13 @@ const LandingOverlay: FC<Props> = ({ isMobile }) => {
   const setOverlay = useGameStore((s) => s.setOverlay)
   const isHydrated = useGameStore((s) => s._isHydrated)
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
+  const isWarmupComplete = useGameStore((s) => s.isWarmupComplete)
   const respawnPlayer = useGameStore((s) => s.respawnPlayer)
   const inputType = useGameStore((s) => s.inputType)
 
   const [isExiting, setIsExiting] = useState(false)
 
-  const isLoaded = isHydrated && isPlatformReady
+  const isLoaded = isHydrated && isPlatformReady && isWarmupComplete
 
   const onStart = () => {
     setIsExiting(true)
