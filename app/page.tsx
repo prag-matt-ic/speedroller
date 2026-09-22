@@ -35,11 +35,6 @@ export default async function Home(props: PageProps) {
           </QueryProvider>
         </SoundProvider>
       </main>
-      {/* <button
-        onClick={deleteAllSpeedRuns}
-        className="fixed bottom-4 left-4 z-50 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-        Delete All Speedruns
-      </button> */}
       <StructuredData />
     </>
   )
@@ -61,7 +56,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'Which devices and browsers are supported?',
     answer:
-      'Any modern desktop or mobile browser that supports WebGL 2 and JavaScript. Chrome is the recommended browser.',
+      'Any modern desktop or mobile browser that supports WebGPU and JavaScript. Chrome is the recommended browser.',
   },
   {
     question: 'What is the goal of the game?',
@@ -80,11 +75,11 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'What technologies power the 3D web game?',
     answer:
-      'Next.js, React Three Fiber, Rapier physics, custom WebGL/GLSL materials, Zustand for state, GSAP for animation, and Tailwind for UI.',
+      'Next.js, React Three Fiber, Rapier physics, custom WebGPU shader materials, Zustand for state, GSAP for animation, and Tailwind for UI.',
   },
   {
     question: 'Who designed Speedroller?',
-    answer: 'Matthew Frawley aka Pragmattic',
+    answer: 'Threenix developers. Learn more about them here at https://threenix.io',
   },
 ]
 
@@ -129,9 +124,9 @@ const StructuredData: FC = () => {
             url: BASE_URL,
             applicationCategory: 'GameApplication',
             operatingSystem: 'WEB',
-            browserRequirements: 'Requires WebGL 2.0 and JavaScript enabled',
+            browserRequirements: 'Requires WebGPU and JavaScript enabled',
             description:
-              'A free 3D speedrolling game for the web. Navigate a marble over terrain, collect rings, and race the clock to the finish line.',
+              'A free 3D speedrolling game for the web. Navigate a marble over challenging terrain, collect rings, and race the clock to the finish line.',
             image: [`${BASE_URL}/screenshots/home.jpg`],
             genre: ['Arcade', 'Trivia', 'Educational'],
             inLanguage: 'en-GB',
