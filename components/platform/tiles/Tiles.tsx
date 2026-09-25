@@ -39,6 +39,7 @@ import {
   uv,
   vec2,
   vec3,
+  vertexStage,
 } from 'three/tsl'
 import {
   type InstancedBufferAttribute,
@@ -273,7 +274,9 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
       // Detail noise, one of three maps per instance. All three are sampled and the result is
       // selected, which keeps the graph branch-free at the cost of two extra taps.
       const detailUv = uv()
-      const detailIndex = floor(hashFloat(tileSeed.mul(438.54)).mul(3))
+      // The index depends only on the per-instance seed, so the sin/fract/floor inside hashFloat
+      // runs once per vertex and the fragment stage just reads the varying.
+      const detailIndex = vertexStage(floor(hashFloat(tileSeed.mul(438.54)).mul(3)))
       const detailNoise = select(
         detailIndex.lessThan(0.5),
         texture(detailNoiseTextures[0], detailUv).r,

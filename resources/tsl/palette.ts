@@ -1,4 +1,4 @@
-import { PI2, cos, vec3 } from 'three/tsl'
+import { PI2, cos } from 'three/tsl'
 import type { Node } from 'three/webgpu'
 
 import { createTSLFn } from '@/resources/tsl/createTSLFn'
@@ -19,7 +19,8 @@ export const cosinePalette = /*#__PURE__*/ createTSLFn(
     d: Node<'vec3'>,
   ]) => {
     const angle = c.mul(t).add(d).mul(PI2)
-    const cosine = vec3(cos(angle.x), cos(angle.y), cos(angle.z))
+    // TSL's `cos` is elementwise, so a single vec3 node replaces three scalar cos nodes.
+    const cosine = cos(angle)
     return a.add(b.mul(cosine))
   },
 ).setLayout({

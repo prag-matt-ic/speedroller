@@ -113,9 +113,14 @@ const IconSphere: FC<IconSphereProps> = ({ iconSrc, shouldHide, isVisible, zoneK
         const lambert = normalView.y.max(0)
 
         const unitLocalPosition = positionGeometry.normalize()
-        const noiseUv = vec2(
-          unitLocalPosition.z.atan(unitLocalPosition.x).mul(0.15915494).add(0.5),
-          unitLocalPosition.y.mul(0.5).add(0.5),
+        // Equirectangular mapping of the local direction: the atan/normalize math depends only on
+        // geometry, so it is computed per vertex and the fragment stage just samples with the
+        // interpolated UV.
+        const noiseUv = vertexStage(
+          vec2(
+            unitLocalPosition.z.atan(unitLocalPosition.x).mul(0.15915494).add(0.5),
+            unitLocalPosition.y.mul(0.5).add(0.5),
+          ),
         )
         const noiseFactor = texture(noiseTexture, noiseUv).r
 
