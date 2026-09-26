@@ -71,6 +71,8 @@ const Particles: FC<Props> = ({
   const progressTween = useRef<GSAPTween | null>(null)
   const hasMounted = useRef(false)
   const previouslyConfirmed = useRef(false)
+  // Written by the mesh's onFramed callback; false until the first frame reports it.
+  const isFramedRef = useRef(false)
 
   const particlePalette = GEMS_COLOURS_BY_ID[id]?.particlesPalette ?? GOLD_PARTICLE_PALETTE
 
@@ -165,10 +167,15 @@ const Particles: FC<Props> = ({
     }
   }, [])
 
+  const onFramed = useCallback((inView: boolean) => {
+    isFramedRef.current = inView
+  }, [])
+
   // The burst is a pure function of `uBurstProgress`, so a capped update rate trades only
   // smoothness for compute time — no state is integrated across steps.
   useFrame(
     () => {
+      if (!isFramedRef.current) return
       uBurstProgress.value = progress.current.value
       // Before collection particles are transparent; after the burst the render node derives
       // their settled float from `time`. Only the active burst needs a compute dispatch.
@@ -191,6 +198,7 @@ const Particles: FC<Props> = ({
       args={[undefined, undefined, particleCount]}
       position={position}
       count={particleCount}
+      onFramed={onFramed}
       visible={isVisible}>
       <planeGeometry args={[1, 1]} />
       <spriteNodeMaterial

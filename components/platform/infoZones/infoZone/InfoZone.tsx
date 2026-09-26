@@ -5,7 +5,7 @@ import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { useGSAP } from '@gsap/react'
 import { Html } from '@react-three/drei'
 import { type HtmlProps } from '@react-three/drei/webgpu'
-import { type CreatorState, useFrame, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
@@ -28,7 +28,7 @@ import {
 import { Transition } from 'react-transition-group'
 import { twMerge } from 'tailwind-merge'
 import { float, mix, uv, vec2, vec3, vertexStage } from 'three/tsl'
-import { Frustum, Matrix4, Sphere, Vector3, type Vector3Tuple } from 'three'
+import { type Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
@@ -107,23 +107,13 @@ export const InfoZone: FC<InfoZoneProps> = ({
   const [showInfo, setShowInfo] = useState(alwaysShowInfo)
   const infoContainer = useRef<HTMLDivElement>(null)
   const [isInView, setIsInView] = useState(false)
-  const previousInView = useRef(false)
-  const frustum = useRef(new Frustum())
-  const viewProjection = useRef(new Matrix4())
-  const panelBounds = useMemo(() => new Sphere(
-    // The rigid body rotates the floor plane -PI/2 around X.
-    new Vector3(position[0] + infoPositionOffset[0], position[1] + infoPositionOffset[2], position[2] - infoPositionOffset[1]),
-    INFO_ZONE_WIDTH,
-  ), [position, infoPositionOffset])
 
-  useFrame(({ camera }) => {
-    viewProjection.current.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
-    frustum.current.setFromProjectionMatrix(viewProjection.current, camera.coordinateSystem)
-    const visible = frustum.current.intersectsSphere(panelBounds)
-    if (visible === previousInView.current) return
-    previousInView.current = visible
-    setIsInView(visible)
-  })
+  // onFramed fires only on frustum transitions, so this updates React state only when it changes.
+  // The floor tile's natural bounds are enough: the tile is framed whenever the player is anywhere
+  // near the zone, which is the only time the Html content floating above it is shown.
+  const onFramed = useCallback((inView: boolean) => {
+    setIsInView(inView)
+  }, [])
 
   // Registers the zone's uniforms. The graph reads them back off the same scope; uShowProgress is
   // also held here because the enter/exit tweens animate it directly.
@@ -267,7 +257,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
       />
       <group>
         {/* Floor tile */}
-        <mesh position={[0, 0, 0.01]} renderOrder={2}>
+        <mesh position={[0, 0, 0.01]} renderOrder={2} onFramed={onFramed}>
           <planeGeometry args={[INFO_ZONE_WIDTH, INFO_ZONE_HEIGHT]} />
           <meshBasicNodeMaterial
             colorNode={colorNode}

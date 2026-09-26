@@ -22,7 +22,6 @@ import {
   Box3,
   DataTexture,
   FloatType,
-  Frustum,
   InstancedMesh,
   Matrix4,
   NearestFilter,
@@ -115,8 +114,8 @@ const FloatingBatch: FC<{
   const renderer = useThree((state) => state.renderer)
   const isPlatformReady = useGameStore((state) => state.isPlatformReady)
   const meshRef = useRef<InstancedMesh>(null)
-  const frustum = useRef(new Frustum())
-  const viewProjection = useRef(new Matrix4())
+  // Written by the mesh's onFramed callback; false until the first frame reports it.
+  const isFramedRef = useRef(false)
   const spawnData = useMemo(() => createSpawnData(batch.rows), [batch.rows])
   const originZ = rowToWorldZ(batch.startRow)
 
@@ -206,16 +205,14 @@ const FloatingBatch: FC<{
   useEffect(() => () => simulation.dispose(), [simulation])
   useEffect(() => () => spawnData.texture.dispose(), [spawnData])
 
-  useGameFrame(({ camera }) => {
-    const mesh = meshRef.current
-    if (!isPlatformReady || !mesh) return
-    viewProjection.current.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
-    frustum.current.setFromProjectionMatrix(
-      viewProjection.current,
-      camera.coordinateSystem,
-      camera.reversedDepth,
-    )
-    if (!frustum.current.intersectsObject(mesh)) return
+  const onFramed = useCallback((inView: boolean) => {
+    isFramedRef.current = inView
+  }, [])
+
+  // The GPU sim is dispatched only while this batch is framed; out of view its tiles are invisible,
+  // so freezing their simulation costs nothing.
+  useGameFrame(() => {
+    if (!isPlatformReady || !isFramedRef.current) return
     renderer.compute(simulation)
   })
 
@@ -225,6 +222,7 @@ const FloatingBatch: FC<{
       args={[undefined, undefined, batch.count]}
       position={[0, 0, originZ]}
       count={batch.count}
+      onFramed={onFramed}
       frustumCulled>
       <boxGeometry args={[BOX_WIDTH, BOX_HEIGHT, BOX_WIDTH]} />
       <meshBasicNodeMaterial

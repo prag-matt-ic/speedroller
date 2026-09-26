@@ -3,8 +3,8 @@
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
-import { type FC, useId, useMemo, useRef } from 'react'
-import { DataTexture, FloatType, Group, Mesh, RGBAFormat, Vector3, type Vector3Tuple } from 'three'
+import { type FC, useCallback, useId, useMemo, useRef } from 'react'
+import { DataTexture, FloatType, Group, type Mesh, RGBAFormat, Vector3, type Vector3Tuple } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
 import { clamp, float, mix, select, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import type { Node, UniformNode } from 'three/webgpu'
@@ -68,6 +68,15 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
   const gemRotationGroupRef = useRef<Group>(null)
   const { confirmationProgress } = useConfirmationProgress()
 
+  // Written by the tile's onFramed callback; false until the first frame reports it. The tile is
+  // framed whenever the player is anywhere near the collectible, so its natural bounds are enough
+  // to gate the gem animation floating above it.
+  const isFramedRef = useRef(false)
+
+  const onFramed = useCallback((inView: boolean) => {
+    isFramedRef.current = inView
+  }, [])
+
   const tileAspect = width / height
   const tilesX = width / TILE_SIZE
   const tilesY = height / TILE_SIZE
@@ -126,7 +135,8 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
     return { colorNode: vec3(1), opacityNode: mask }
   })
 
-  useGameFrame((state, delta) => {
+  useGameFrame((_, delta) => {
+    if (!isFramedRef.current) return
     const globalProgress = confirmationProgress.current
 
     if (isConfirming) {
@@ -180,7 +190,7 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
       />
 
       {/* Tile mesh: shader renders corner brackets and confirmation progress bar */}
-      <mesh position={[0, 0, 0.01]} renderOrder={2}>
+      <mesh position={[0, 0, 0.01]} renderOrder={2} onFramed={onFramed}>
         <planeGeometry args={[width, height]} />
         <meshBasicNodeMaterial
           colorNode={colorNode}

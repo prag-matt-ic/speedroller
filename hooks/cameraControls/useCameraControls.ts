@@ -28,6 +28,9 @@ type CameraState = {
   currentZoom: number
   goalZoom: number
   isPointerEnabled: boolean
+  /** Per-transition damping override for the z axis, blended toward it by zDampingBlend. */
+  zDampingOverride: number | undefined
+  zDampingBlend: number
 }
 
 const supportsZoom = (camera: unknown): camera is ZoomCamera =>
@@ -68,6 +71,8 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
       currentZoom: initialZoom,
       goalZoom: initialZoom,
       isPointerEnabled: true,
+      zDampingOverride: undefined,
+      zDampingBlend: 1,
     }
   }
 
@@ -80,10 +85,15 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
       targetY: number,
       targetZ: number,
       transition = false,
+      zDampingOverride?: number,
+      zDampingBlend = 1,
     ) => {
       const cameraState = cameraStateRef.current!
       cameraState.goalPosition.set(positionX, positionY, positionZ)
       cameraState.goalTarget.set(targetX, targetY, targetZ)
+      // The frame loop reads these back; with no override the z axis eases like the others.
+      cameraState.zDampingOverride = zDampingOverride
+      cameraState.zDampingBlend = zDampingBlend
       if (transition) return
       cameraState.currentPosition.copy(cameraState.goalPosition)
       cameraState.currentTarget.copy(cameraState.goalTarget)
@@ -124,8 +134,28 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
       Math.max(MIN_TRANSITION_SPEED, transitionDistance * TRANSITION_DISTANCE_SCALE),
     )
     const transitionAlpha = 1 - Math.exp(-transitionSpeed * delta)
-    cameraState.currentPosition.lerp(cameraState.goalPosition, transitionAlpha)
-    cameraState.currentTarget.lerp(cameraState.goalTarget, transitionAlpha)
+    const { zDampingOverride, zDampingBlend } = cameraState
+    if (zDampingOverride === undefined || zDampingBlend <= 0) {
+      cameraState.currentPosition.lerp(cameraState.goalPosition, transitionAlpha)
+      cameraState.currentTarget.lerp(cameraState.goalTarget, transitionAlpha)
+    } else {
+      const zDamping =
+        transitionSpeed + (zDampingOverride - transitionSpeed) * zDampingBlend
+      const zTransitionAlpha = 1 - Math.exp(-zDamping * delta)
+
+      cameraState.currentPosition.x +=
+        (cameraState.goalPosition.x - cameraState.currentPosition.x) * transitionAlpha
+      cameraState.currentPosition.y +=
+        (cameraState.goalPosition.y - cameraState.currentPosition.y) * transitionAlpha
+      cameraState.currentPosition.z +=
+        (cameraState.goalPosition.z - cameraState.currentPosition.z) * zTransitionAlpha
+      cameraState.currentTarget.x +=
+        (cameraState.goalTarget.x - cameraState.currentTarget.x) * transitionAlpha
+      cameraState.currentTarget.y +=
+        (cameraState.goalTarget.y - cameraState.currentTarget.y) * transitionAlpha
+      cameraState.currentTarget.z +=
+        (cameraState.goalTarget.z - cameraState.currentTarget.z) * zTransitionAlpha
+    }
 
     if (pointerLookAt) {
       const pointerAlpha = 1 - Math.exp(-pointerLookAt.speed * delta)

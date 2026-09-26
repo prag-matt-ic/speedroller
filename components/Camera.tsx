@@ -37,7 +37,9 @@ export const CAMERA_ZOOM_FOR_STAGE_MOBILE: Record<Stage, number> = {
 const LOOK_AT_HEIGHT = 3
 const LOOK_AT_X_RANGE = 1.5
 const INPUT_UP_Z_OFFSET = 3
-const INPUT_DOWN_Z_OFFSET = 5
+const INPUT_DOWN_Z_OFFSET = 7
+const INPUT_DOWN_LOOK_AT_Z_OFFSET = 2
+const INPUT_DOWN_Z_DAMPING = 8
 const OVERLAY_Y_OFFSET = 5
 const OVERLAY_Z_OFFSET = 5
 const COLLECTIBLE_ZOOM_OFFSET = 0.3
@@ -85,11 +87,15 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
 
   useFrame(() => {
     const lookAt = cameraLookAtPosition ?? playerPosition.current
+    const backwardInput = Math.max(input.current.down - input.current.up, 0)
+    const forwardInput = Math.max(input.current.up - input.current.down, 0)
     // Offset the camera along z from player input
     const inputZOffset =
-      input.current.down * INPUT_DOWN_Z_OFFSET + input.current.up * INPUT_UP_Z_OFFSET
+      backwardInput * INPUT_DOWN_Z_OFFSET + forwardInput * INPUT_UP_Z_OFFSET
     // Look left or right based on player input
     const lookAtX = lookAt[0] + (input.current.right - input.current.left) * LOOK_AT_X_RANGE
+    const backwardLookAtOffset =
+      cameraLookAtPosition === null ? backwardInput * INPUT_DOWN_LOOK_AT_Z_OFFSET : 0
 
     // Ease toward the moving goal rather than snapping the camera onto it each frame
     setLookAt(
@@ -101,8 +107,10 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
         (isOverlayOpen ? OVERLAY_Z_OFFSET : 0),
       lookAtX,
       LOOK_AT_HEIGHT,
-      lookAt[2],
+      lookAt[2] + backwardLookAtOffset,
       true,
+      INPUT_DOWN_Z_DAMPING,
+      backwardInput,
     )
   })
 
