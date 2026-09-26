@@ -55,7 +55,6 @@ const Player: FC = () => {
   // Preallocated vectors for physics calculations (performance optimization)
   const frameDisplacement = useRef(new Vector3())
   const playerVelocity = useRef(new Vector3())
-  const terrainDisplacement = useRef(new Vector3())
   const rollAxis = useRef(new Vector3())
   const worldScale = useRef(new Vector3())
 
@@ -68,12 +67,11 @@ const Player: FC = () => {
       !bodyRef.current ||
       !controllerRef.current ||
       !ballColliderRef.current ||
-      !sphereMeshRef.current ||
-      !controllerRef.current
+      !sphereMeshRef.current
     )
       return
 
-    if (playerStatus === 'idle') return
+    if (!isPlatformReady || playerStatus === 'idle' || playerStatus === 'out-of-bounds') return
 
     const speedUnits = playerSpeedUnits.current
     const currentPosition = bodyRef.current.translation()
@@ -81,14 +79,14 @@ const Player: FC = () => {
     // Resolve player input into a clamped direction vector
     const inputDirectionX = input.current.right - input.current.left
     const inputDirectionZ = input.current.down - input.current.up
-    const platformScrollDirection = input.current.up - input.current.down
     const canMove = playerStatus === 'safe'
-    const resolvedDirection = resolveInputDirection(inputDirectionX, inputDirectionZ, canMove)
+    const inputMagnitude = Math.hypot(inputDirectionX, inputDirectionZ)
+    const movementScale = canMove ? (speedUnits * deltaTime) / Math.max(1, inputMagnitude) : 0
 
     // Calculate desired movement including gravity
-    desiredMovement.current.x = resolvedDirection.x * speedUnits * deltaTime
+    desiredMovement.current.x = inputDirectionX * movementScale
     desiredMovement.current.y = GRAVITY_ACCELERATION * deltaTime
-    desiredMovement.current.z = resolvedDirection.z * speedUnits * deltaTime
+    desiredMovement.current.z = inputDirectionZ * movementScale
 
     // Use character controller to compute collision-aware movement
     controllerRef.current.computeColliderMovement(
@@ -99,38 +97,30 @@ const Player: FC = () => {
 
     const correctedMovement = controllerRef.current.computedMovement()
 
-    // Platform scroll input shifts the ground underneath the player; capture that displacement
-    terrainDisplacement.current.set(0, 0, platformScrollDirection * speedUnits * deltaTime)
-
     // Apply corrected movement to kinematic rigid body
     nextPosition.current.x = currentPosition.x + correctedMovement.x
     nextPosition.current.y = currentPosition.y + correctedMovement.y
+    nextPosition.current.z = currentPosition.z + correctedMovement.z
 
     bodyRef.current.setNextKinematicTranslation(nextPosition.current)
 
     // Calculate physics for rolling animation
     frameDisplacement.current.set(
       correctedMovement.x,
-      correctedMovement.y,
-      correctedMovement.z - terrainDisplacement.current.z,
+      0,
+      correctedMovement.z,
     )
-    const maxFrameDistance = speedUnits * deltaTime
-    const frameDistance = frameDisplacement.current.length()
-    if (frameDistance > maxFrameDistance && frameDistance > EPSILON.SMALL) {
-      frameDisplacement.current.multiplyScalar(maxFrameDistance / frameDistance)
-    }
 
     calculatePlayerVelocity(frameDisplacement.current, deltaTime, playerVelocity.current)
-    playerVelocity.current.y = 0
 
     // Apply rolling physics to sphere mesh
-    applyRollingPhysics({
-      sphereMesh: sphereMeshRef.current,
-      velocity: playerVelocity.current,
+    applyRollingPhysics(
+      sphereMeshRef.current,
+      playerVelocity.current,
       deltaTime,
-      worldScale: worldScale.current,
-      rollAxis: rollAxis.current,
-    })
+      worldScale.current,
+      rollAxis.current,
+    )
 
     // Update global player position in store (immutable update)
     setPlayerPosition(nextPosition.current)
@@ -175,15 +165,24 @@ const Player: FC = () => {
 
   useEffect(() => {
     if (!isPlatformReady || !isRespawning || !bodyRef.current || !spawnPosition) return
-    bodyRef.current.setTranslation(
-      { x: spawnPosition[0], y: spawnPosition[1], z: spawnPosition[2] },
-      true,
-    )
+    nextPosition.current.x = spawnPosition[0]
+    nextPosition.current.y = spawnPosition[1]
+    nextPosition.current.z = spawnPosition[2]
+    bodyRef.current.setTranslation(nextPosition.current, true)
+    bodyRef.current.setNextKinematicTranslation(nextPosition.current)
+    setPlayerPosition(nextPosition.current)
     const timeout = setTimeout(() => {
       onRespawnComplete()
     }, 200)
     return () => clearTimeout(timeout)
-  }, [playerRespawnTick, isRespawning, isPlatformReady, onRespawnComplete, spawnPosition])
+  }, [
+    playerRespawnTick,
+    isRespawning,
+    isPlatformReady,
+    onRespawnComplete,
+    setPlayerPosition,
+    spawnPosition,
+  ])
 
   // Mounted with the rest of the physics content, so the marble is already in the scene when
   // SceneWarmup compiles it. Placement is not this component's mount: `playerStatus` keeps the body
@@ -211,28 +210,6 @@ const Player: FC = () => {
 
 export default Player
 
-// Helper functions for player movement calculation
-function resolveInputDirection(
-  inputX: number,
-  inputZ: number,
-  canMove: boolean,
-): { x: number; z: number } {
-  const magnitude = Math.hypot(inputX, inputZ)
-  if (magnitude === 0 || !canMove) {
-    return { x: 0, z: 0 }
-  }
-
-  if (magnitude <= 1) {
-    return { x: inputX, z: inputZ }
-  }
-
-  const inverseMagnitude = 1 / magnitude
-  return {
-    x: inputX * inverseMagnitude,
-    z: inputZ * inverseMagnitude,
-  }
-}
-
 function calculatePlayerVelocity(
   displacement: Vector3,
   deltaTime: number,
@@ -241,19 +218,13 @@ function calculatePlayerVelocity(
   targetVelocity.copy(displacement).divideScalar(Math.max(deltaTime, EPSILON.SMALL))
 }
 
-function applyRollingPhysics({
-  sphereMesh,
-  velocity,
-  deltaTime,
-  worldScale,
-  rollAxis,
-}: {
-  sphereMesh: Object3D
-  velocity: Vector3
-  deltaTime: number
-  worldScale: Vector3
-  rollAxis: Vector3
-}): void {
+function applyRollingPhysics(
+  sphereMesh: Object3D,
+  velocity: Vector3,
+  deltaTime: number,
+  worldScale: Vector3,
+  rollAxis: Vector3,
+): void {
   sphereMesh.getWorldScale(worldScale)
   // Assume uniform scale for a sphere
   const effectiveRadius = PLAYER_RADIUS * worldScale.x

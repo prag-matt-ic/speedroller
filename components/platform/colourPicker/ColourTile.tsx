@@ -1,7 +1,8 @@
 'use client'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
-import { CuboidCollider, type RapierRigidBody, RigidBody } from '@react-three/rapier'
-import { type FC, type RefObject, useCallback } from 'react'
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
+import { type FC, useCallback, useId } from 'react'
 import {
   clamp,
   float,
@@ -53,23 +54,21 @@ const createColourTileUniforms =
 export type ColourTileOption = {
   index: number
   position: Vector3Tuple
-  relativeZ: number
   userData: ColourTileUserData
 }
 
 type ColourTileProps = {
   option: ColourTileOption
   isActive: boolean
-  ref: RefObject<RapierRigidBody | null>
 }
 
-const ColourTile: FC<ColourTileProps> = ({ option, isActive, ref }) => {
+const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
   const useNoise = usePerformanceStore((s) => s.sceneConfig.colourTile.useNoise)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
 
   // Each tile in the picker row owns its own palette index and active state, so the uniforms are
   // scoped per tile rather than shared across the row.
-  const colourTileUniformScope = `colourTile${option.index}`
+  const colourTileUniformScope = `colourTile${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   useUniforms(createColourTileUniforms(option.index, isActive), colourTileUniformScope)
 
   // Port of colourTile.vert + colourTile.frag. vUv is recomputed in-graph from the plane's uv, so
@@ -123,12 +122,7 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive, ref }) => {
 
   return (
     <RigidBody
-      ref={ref}
-      // KEEP DYNAMIC
-      type="dynamic"
-      gravityScale={0}
-      friction={0}
-      mass={0}
+      type="fixed"
       position={option.position}
       rotation={[-Math.PI / 2, 0, 0]}
       colliders={false}
@@ -136,6 +130,7 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive, ref }) => {
       <CuboidCollider
         args={[COLOUR_TILE_SIZE / 2, COLOUR_TILE_SIZE / 2, PLAYER_RADIUS * 2]}
         sensor={true}
+        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
         collisionGroups={COLLISION_GROUPS.colourTileSensor}
       />
       <mesh renderOrder={1}>

@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --test tests/*.test.mjs",
     "build-platform": "tsc --project scripts/tsconfig.platform.json && node .tmp/platformRows/scripts/buildPlatformRows.js"
   },
   "dependencies": {

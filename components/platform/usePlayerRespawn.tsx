@@ -1,275 +1,29 @@
-import { type RefObject, useCallback, useRef } from 'react'
+import { useEffect } from 'react'
 
 import { PLAYER_INITIAL_POSITION, useGameStore } from '@/components/GameProvider'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
-import usePlayerStatus from '@/hooks/usePlayerStatus'
-import { type PlayerStatus } from '@/stores/types'
-import { COLUMNS, ROWS_RENDERED, type RowData, TILE_SIZE, colToX } from '@/utils/tiles'
-
-export const EMPTY_ROW_INDEX = 10000
-const CENTER_COL_INDEX = Math.floor(COLUMNS / 2)
-const UNSAFE_ROW_SHIFT = 1
-const MIN_RESPAWN_ABSOLUTE_ROW = UNSAFE_ROW_SHIFT
-
-type SafeRowSelection = {
-  rowIndex: number
-  safeX: number
-  rowZ: number
-  absoluteRowIndex: number
-}
-
-/**
- * Optimized to find the safe column closest to preferredX without iterating all columns.
- * It calculates the target column index and expands outwards.
- */
-function findSafeColumnX(row: RowData, preferredX: number): number | null {
-  const fallbackX = colToX(CENTER_COL_INDEX)
-  const targetX = Number.isFinite(preferredX) ? preferredX : fallbackX
-
-  // Calculate the column index closest to the target X
-  // col = (x / size) + (columns / 2) - 0.5
-  const rawColIndex = targetX / TILE_SIZE + COLUMNS / 2 - 0.5
-  const startColIndex = Math.max(0, Math.min(COLUMNS - 1, Math.round(rawColIndex)))
-
-  // Check the target column first
-  if ((row.isRaised[startColIndex] ?? 0) === 1) {
-    return colToX(startColIndex)
-  }
-
-  // Expand outwards: check left and right neighbors
-  let offset = 1
-  while (true) {
-    const leftIndex = startColIndex - offset
-    const rightIndex = startColIndex + offset
-
-    // If both are out of bounds, no safe column exists
-    if (leftIndex < 0 && rightIndex >= COLUMNS) {
-      return null
-    }
-
-    // Check left
-    if (leftIndex >= 0) {
-      if ((row.isRaised[leftIndex] ?? 0) === 1) {
-        return colToX(leftIndex)
-      }
-    }
-
-    // Check right
-    if (rightIndex < COLUMNS) {
-      if ((row.isRaised[rightIndex] ?? 0) === 1) {
-        return colToX(rightIndex)
-      }
-    }
-
-    offset++
-  }
-}
-
-function getClosestRowIndex(rowZByIndex: number[], playerZ: number): number {
-  let bestIndex = -1
-  let minDistance = Infinity
-
-  for (let i = 0; i < ROWS_RENDERED; i++) {
-    const currentZ = rowZByIndex[i]
-    if (typeof currentZ !== 'number') continue
-    const dist = Math.abs(currentZ - playerZ)
-    if (dist < minDistance) {
-      minDistance = dist
-      bestIndex = i
-    }
-  }
-  return bestIndex
-}
-
-function selectSafeRow(
-  rows: RowData[],
-  zValues: number[],
-  rowIndex: number,
-  preferredX: number,
-): SafeRowSelection | null {
-  if (rowIndex < 0 || rowIndex >= ROWS_RENDERED) return null
-  const row = rows[rowIndex]
-  if (!row || (row.rowIndex ?? EMPTY_ROW_INDEX) >= EMPTY_ROW_INDEX) return null
-
-  const safeX = findSafeColumnX(row, preferredX)
-  if (safeX === null) return null
-
-  const rowZ = zValues[rowIndex]
-  if (typeof rowZ !== 'number') return null
-
-  const absoluteRowIndex = row.rowIndex ?? EMPTY_ROW_INDEX
-  return { rowIndex, safeX, rowZ, absoluteRowIndex }
-}
-
-function findSlotIndexForRow(rows: RowData[], targetRowIndex: number): number {
-  if (!Number.isFinite(targetRowIndex)) return -1
-  for (let i = 0; i < ROWS_RENDERED; i++) {
-    const row = rows[i]
-    if (!row) continue
-    if (row.rowIndex === targetRowIndex) return i
-  }
-  return -1
-}
-
-function selectRowByAbsoluteIndex(
-  rows: RowData[],
-  zValues: number[],
-  absoluteRowIndex: number,
-  preferredX: number,
-): SafeRowSelection | null {
-  const slotIndex = findSlotIndexForRow(rows, absoluteRowIndex)
-  if (slotIndex === -1) return null
-  return selectSafeRow(rows, zValues, slotIndex, preferredX)
-}
-
-function ensureMinimumRowSelection(
-  selection: SafeRowSelection | null,
-  rows: RowData[],
-  zValues: number[],
-  preferredX: number,
-): SafeRowSelection | null {
-  if (!selection) return null
-  if (selection.absoluteRowIndex >= MIN_RESPAWN_ABSOLUTE_ROW) return selection
-  const offsetSelection = selectRowByAbsoluteIndex(
-    rows,
-    zValues,
-    selection.absoluteRowIndex + UNSAFE_ROW_SHIFT,
-    preferredX,
-  )
-  return offsetSelection ?? selection
-}
-
-function getBestSafeRowSelection(
-  rows: RowData[],
-  zValues: number[],
-  playerZ: number,
-  preferredX: number,
-): SafeRowSelection | null {
-  let bestSelection: SafeRowSelection | null = null
-  let minDistance = Infinity
-
-  for (let i = 0; i < ROWS_RENDERED; i++) {
-    const selection = selectSafeRow(rows, zValues, i, preferredX)
-    if (!selection) continue
-    const distance = Math.abs(selection.rowZ - playerZ)
-    if (distance < minDistance) {
-      minDistance = distance
-      bestSelection = selection
-    }
-  }
-
-  return bestSelection
-}
+import { findSafeRespawnPosition } from '@/utils/platform/playerRespawn'
+import type { RowData } from '@/utils/tiles'
 
 export function usePlayerRespawn({
-  activeRowsData,
-  rowZByIndex,
-  currentScrollPosition,
+  rows,
   isPlatformReady,
 }: {
-  activeRowsData: RefObject<RowData[]>
-  rowZByIndex: RefObject<number[]>
-  currentScrollPosition: RefObject<number>
+  rows: readonly RowData[]
   isPlatformReady: boolean
 }) {
   const respawnPlayer = useGameStore((s) => s.respawnPlayer)
-  const targetScrollPosition = useRef<number | null>(null)
-  const pendingRespawnX = useRef<number | null>(null)
-  const preferredRespawnX = useRef(PLAYER_INITIAL_POSITION[0])
+  const playerStatus = useGameStore((s) => s.playerStatus)
+  const { playerPosition } = usePlayerPosition()
 
-  usePlayerPosition((pos) => {
-    preferredRespawnX.current = pos[0]
-  })
-
-  const onOutOfBounds = () => {
-    const rows = activeRowsData.current
-    const zValues = rowZByIndex.current
-    const scrollPos = currentScrollPosition.current
-
-    if (!rows || !zValues) return
-
-    targetScrollPosition.current = null
-    pendingRespawnX.current = null
-
-    const playerZ = PLAYER_INITIAL_POSITION[2]
-    const preferredX = preferredRespawnX.current
-
-    // 1. Try to find the closest row (current row)
-    const closestRowIndex = getClosestRowIndex(zValues, playerZ)
-
-    const queueRespawn = (selection: SafeRowSelection) => {
-      const diff = playerZ - selection.rowZ
-      const targetScroll = scrollPos + diff
-      targetScrollPosition.current = targetScroll
-      pendingRespawnX.current = selection.safeX
-    }
-
-    if (closestRowIndex !== -1) {
-      const currentRowSelection = ensureMinimumRowSelection(
-        selectSafeRow(rows, zValues, closestRowIndex, preferredX),
-        rows,
-        zValues,
-        preferredX,
-      )
-      if (currentRowSelection) {
-        queueRespawn(currentRowSelection)
-        return
-      }
-
-      const shiftedSelection = selectSafeRow(
-        rows,
-        zValues,
-        findSlotIndexForRow(
-          rows,
-          (rows[closestRowIndex]?.rowIndex ?? EMPTY_ROW_INDEX) + UNSAFE_ROW_SHIFT,
-        ),
-        preferredX,
-      )
-
-      if (shiftedSelection) {
-        queueRespawn(shiftedSelection)
-        return
-      }
-    }
-
-    // 2. Current row is not safe (or invalid). Find the nearest safe row.
-    // We scan all rows to ensure we find the spatially closest one,
-    // rather than relying on index proximity which might be misleading in a ring buffer.
-    const bestSelection = ensureMinimumRowSelection(
-      getBestSafeRowSelection(rows, zValues, playerZ, preferredX),
+  useEffect(() => {
+    if (!isPlatformReady || playerStatus !== 'out-of-bounds') return
+    const position = findSafeRespawnPosition(
       rows,
-      zValues,
-      preferredX,
-    )
-
-    if (!bestSelection) {
-      // Fallback to current position
-      targetScrollPosition.current = scrollPos
-      pendingRespawnX.current = 0
-      return
-    }
-
-    queueRespawn(bestSelection)
-  }
-
-  const onPlayerStatusChange = (playerStatus: PlayerStatus) => {
-    if (!isPlatformReady) return
-    if (playerStatus === 'out-of-bounds') onOutOfBounds()
-  }
-
-  usePlayerStatus(onPlayerStatusChange)
-
-  const onRespawnScrollComplete = useCallback(() => {
-    targetScrollPosition.current = null
-    if (pendingRespawnX.current === null) return
-
-    respawnPlayer([
-      pendingRespawnX.current,
+      playerPosition.current[0],
+      playerPosition.current[2],
       PLAYER_INITIAL_POSITION[1],
-      PLAYER_INITIAL_POSITION[2],
-    ])
-    pendingRespawnX.current = null
-  }, [respawnPlayer])
-
-  return { targetScrollPosition, onRespawnScrollComplete }
+    )
+    if (position) respawnPlayer(position)
+  }, [isPlatformReady, playerPosition, playerStatus, respawnPlayer, rows])
 }

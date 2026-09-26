@@ -151,8 +151,10 @@ export const createPlayerSlice =
       },
       playerPosition: PLAYER_INITIAL_POSITION,
       setPlayerPosition: (position) => {
-        set({
-          playerPosition: [position.x, position.y, position.z],
+        set((state) => {
+          const [x, y, z] = state.playerPosition
+          if (x === position.x && y === position.y && z === position.z) return state
+          return { playerPosition: [position.x, position.y, position.z] }
         })
       },
       setPaletteIndex: (paletteIndex: number) => {
@@ -256,6 +258,7 @@ export const createPlayerSlice =
         confirmationTween?.kill()
         confirmationTween = null
         confirmationTweenTarget.value = 0
+        stopSoundFX(SoundFX.CHANGE_COLOUR)
         set({
           confirmingCollectible: null,
           confirmingPaletteIndex: null,
@@ -263,10 +266,12 @@ export const createPlayerSlice =
         })
       },
       respawnPlayer: (position, hud) => {
+        get().stopConfirmation()
         set((s) => ({
           playerStatus: 'respawning',
           playerRespawnTick: s.playerRespawnTick + 1,
           spawnPosition: position,
+          cameraLookAtPosition: null,
           hudIndicator: hud ?? s.hudIndicator,
         }))
       },
@@ -276,6 +281,9 @@ export const createPlayerSlice =
         })
       },
       onOutOfBounds: () => {
+        const status = get().playerStatus
+        if (status === 'out-of-bounds' || status === 'idle') return
+        get().stopConfirmation()
         playSoundFX(SoundFX.OUT_OF_BOUNDS)
         resetSpeed()
         const mode = get().mode
@@ -285,6 +293,7 @@ export const createPlayerSlice =
         set((s) => ({
           playerStatus: 'out-of-bounds',
           spawnPosition: null, // Calculated in usePlayerRespawn hook
+          cameraLookAtPosition: null,
           hudIndicator: outOfBoundsMessage,
           outOfBoundsEvents: [
             ...s.outOfBoundsEvents,

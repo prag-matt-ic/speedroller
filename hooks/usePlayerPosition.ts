@@ -14,10 +14,10 @@ export function usePlayerPosition(onPlayerPositionChange?: (pos: Vector3Tuple) =
     const unsubscribe = gameStoreAPI.subscribe(
       (s) => s.playerPosition,
       (newPosition) => {
-        const [newX, newY] = newPosition
-        const [prevX, prevY] = playerPosition.current
+        const [newX, newY, newZ] = newPosition
+        const [prevX, prevY, prevZ] = playerPosition.current
 
-        if (newX === prevX && newY === prevY) return
+        if (newX === prevX && newY === prevY && newZ === prevZ) return
 
         playerPosition.current = newPosition
         onPlayerPositionChange?.(newPosition)

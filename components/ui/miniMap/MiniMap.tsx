@@ -4,7 +4,6 @@ import { type FC, forwardRef, useEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
-import { EMPTY_ROW_INDEX } from '@/components/platform/usePlayerRespawn'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import { PLATFORM_VERSION } from '@/resources/rowsData'
 import { GameMode, InputType } from '@/stores/types'
@@ -90,13 +89,12 @@ const MiniMap: FC = () => {
   }, [mapTileSizePx, totalRows])
 
   useEffect(() => {
-    let currentRow = 3
+    let currentRow = gameStoreAPI.getState().currentRow
     let lastXRef = 0
     let lastYRef = 0
     let lastProgressRef = -1
 
     const updateProgress = (row: number) => {
-      if (row === EMPTY_ROW_INDEX) return // fallen off front or back of the platform
       if (!progressRef.current) return
       const rowsProgress = Math.min(
         1,
@@ -113,7 +111,6 @@ const MiniMap: FC = () => {
 
     const updateMapTransform = (row: number, playerX: number) => {
       if (!mapRef.current) return
-      if (row === EMPTY_ROW_INDEX) return
 
       const clampedRow = Math.min(maxRowIndexRef.current, Math.max(0, row))
       const translateY = clampedRow * rowsToPixelsRef.current - playerIndicatorYOffsetPx

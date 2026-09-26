@@ -7,15 +7,7 @@ import {
   useThree,
   useUniforms,
 } from '@react-three/fiber/webgpu'
-import {
-  type FC,
-  type Ref,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from 'react'
+import { type FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   clamp as tslClamp,
   float,
@@ -24,12 +16,21 @@ import {
   mx_noise_float,
   positionGeometry,
   smoothstep,
-  texture,
-  vec2,
   vec3,
 } from 'three/tsl'
-import { DataTexture, FloatType, InstancedMesh, Matrix4, NearestFilter, RedFormat } from 'three'
-import type { Node } from 'three/webgpu'
+import {
+  Box3,
+  DataTexture,
+  FloatType,
+  Frustum,
+  InstancedMesh,
+  Matrix4,
+  NearestFilter,
+  RedFormat,
+  Sphere,
+  Vector3,
+} from 'three'
+import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -38,217 +39,126 @@ import {
   createFloatingTilesBuffers,
   createFloatingTilesSimulation,
 } from '@/components/floatingTiles/floatingTilesSimulation'
+import { useGameFrame } from '@/hooks/useGameFrame'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
-import { COLUMNS, ROWS_RENDERED, type RowData, TILE_SIZE, clamp } from '@/utils/tiles'
+import {
+  COLUMNS,
+  PLATFORM_BATCH_ROWS,
+  type RowData,
+  TILE_SIZE,
+  clamp,
+  rowToWorldZ,
+} from '@/utils/tiles'
 
 const FLOATING_TILE_UNIFORM_SCOPE = 'floatingTiles'
-
-// Carried over from floatingTiles.vert / floatingTiles.frag.
+const DENSITY_REFERENCE_ROWS = 40
 const NOISE_SCALE = 0.12
 const EPSILON = 1e-5
 const COLUMN_JITTER_RANGE = 0.6
 const PALETTE_MIX = 0.4
-
 const EXTRA_SIDE_COLUMNS = 4
 const GRID_COLS = COLUMNS + EXTRA_SIDE_COLUMNS * 2
-const GRID_OFFSET = EXTRA_SIDE_COLUMNS
 const TILE_THICKNESS = 0.1
 const BOX_SIZE_SCALE = 0.5
 const Y_MIN = -8
 const Y_MAX = 8
 const MAX_DELTA_TIME = 0.05
-
-/** Spawn-mask values: 1 where a floating tile may respawn, 0 where a platform tile blocks it. */
+const BOX_WIDTH = TILE_SIZE * BOX_SIZE_SCALE
+const BOX_HEIGHT = TILE_THICKNESS * BOX_SIZE_SCALE
 const SPAWNABLE = 1
 const BLOCKED = 0
-const SPAWN_MASK_THRESHOLD = 0.5
 
-// The simulation reads a clamped frame delta off this uniform. TSL's `time` node cannot stand in
-// for it: the kernel is stepped from the game loop, not once per rendered frame.
+// Registered once by the parent and shared by all independently culled simulation batches.
 const createFloatingTilesUniforms = () => ({ uDeltaTime: 0 })
 
-/**
- * Writes one row of the spawn mask from the platform's row data: raised columns block respawn,
- * while the side margins and the sunken columns stay open.
- *
- * Returns whether anything changed, so the caller only re-uploads the mask texture when it has to.
- */
-const writeRowSpawnMask = (
-  spawnMask: Float32Array,
-  rowIndex: number,
-  isRaised: readonly (0 | 1)[] | undefined,
-): boolean => {
-  const rowStart = rowIndex * GRID_COLS
-  let hasChanged = false
-
-  for (let col = 0; col < GRID_COLS; col++) {
-    const column = col - GRID_OFFSET
-    const isPlatformTile = column >= 0 && column < COLUMNS && isRaised?.[column] === 1
-    const value = isPlatformTile ? BLOCKED : SPAWNABLE
-    const index = rowStart + col
-
-    if (spawnMask[index] !== value) {
-      spawnMask[index] = value
-      hasChanged = true
-    }
-  }
-
-  return hasChanged
-}
-
-/** Row-major indices of every cell a floating tile may spawn into. */
-const collectSpawnableCells = (spawnMask: Float32Array): number[] => {
-  const cells: number[] = []
-
-  for (let index = 0; index < spawnMask.length; index++) {
-    if (spawnMask[index] > SPAWN_MASK_THRESHOLD) {
-      cells.push(index)
-    }
-  }
-
-  return cells
-}
-
-export type FloatingTilesHandle = {
-  setRowData: (rowIndex: number, rowData: RowData | null) => void
-  setRowWorldPositions: (rowPositions: number[]) => void
-  step: (delta: number) => void
-}
-
 type FloatingTilesProps = {
-  ref: Ref<FloatingTilesHandle>
+  rows: readonly RowData[]
   onReadyChange: (isReady: boolean) => void
 }
 
-const identityMatrix = new Matrix4()
+type FloatingBatchData = {
+  startRow: number
+  rows: readonly RowData[]
+  count: number
+}
 
-const createSpawnMaskTexture = (data: Float32Array) => {
-  const texture = new DataTexture(data, GRID_COLS, ROWS_RENDERED, RedFormat, FloatType)
+const createSpawnData = (rows: readonly RowData[]) => {
+  const mask = new Float32Array(GRID_COLS * rows.length)
+  const spawnableCells: number[] = []
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    for (let column = 0; column < GRID_COLS; column++) {
+      const platformColumn = column - EXTRA_SIDE_COLUMNS
+      const isPlatformTile =
+        platformColumn >= 0 &&
+        platformColumn < COLUMNS &&
+        rows[rowIndex].isRaised[platformColumn] === 1
+      const index = rowIndex * GRID_COLS + column
+      mask[index] = isPlatformTile ? BLOCKED : SPAWNABLE
+      if (!isPlatformTile) spawnableCells.push(index)
+    }
+  }
+
+  const texture = new DataTexture(mask, GRID_COLS, rows.length, RedFormat, FloatType)
   texture.needsUpdate = true
   texture.minFilter = NearestFilter
   texture.magFilter = NearestFilter
   texture.generateMipmaps = false
   texture.flipY = false
-  return texture
+  return { texture, spawnableCells }
 }
 
-const createRowPositionsTexture = (data: Float32Array) => {
-  const texture = new DataTexture(data, ROWS_RENDERED, 1, RedFormat, FloatType)
-  texture.needsUpdate = true
-  texture.minFilter = NearestFilter
-  texture.magFilter = NearestFilter
-  texture.generateMipmaps = false
-  texture.flipY = false
-  return texture
-}
-
-const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
-  const count = usePerformanceStore((s) => s.sceneConfig.floatingTiles.instanceCount)
-  const rowsData = useGameStore((s) => s.rowsData)
-  const renderer = useThree((s) => s.renderer)
-
-  const isDisabled = count === 0
-
+const FloatingBatch: FC<{
+  batch: FloatingBatchData
+  uDeltaTime: UniformNode<'float', number>
+}> = ({ batch, uDeltaTime }) => {
+  const renderer = useThree((state) => state.renderer)
+  const isPlatformReady = useGameStore((state) => state.isPlatformReady)
   const meshRef = useRef<InstancedMesh>(null)
+  const frustum = useRef(new Frustum())
+  const viewProjection = useRef(new Matrix4())
+  const spawnData = useMemo(() => createSpawnData(batch.rows), [batch.rows])
+  const originZ = rowToWorldZ(batch.startRow)
 
-  // Registered once here and read back by the same component: the graph that consumes it is built
-  // below, and `step` writes it from the game loop.
-  const { uDeltaTime } = useUniforms(createFloatingTilesUniforms, FLOATING_TILE_UNIFORM_SCOPE)
-
-  // Both textures are mutated in place, so the array, the texture and every callback that owns one
-  // have to agree on a single object for the lifetime of the component.
-  const spawnMaskRef = useRef<Float32Array | null>(null)
-  if (spawnMaskRef.current === null) {
-    spawnMaskRef.current = new Float32Array(GRID_COLS * ROWS_RENDERED)
-  }
-  const spawnMaskTextureRef = useRef<DataTexture | null>(null)
-  if (spawnMaskTextureRef.current === null) {
-    spawnMaskTextureRef.current = createSpawnMaskTexture(spawnMaskRef.current!)
-  }
-  const spawnMaskTexture = spawnMaskTextureRef.current!
-
-  const rowWorldPositionsRef = useRef<Float32Array | null>(null)
-  if (rowWorldPositionsRef.current === null) {
-    rowWorldPositionsRef.current = new Float32Array(ROWS_RENDERED)
-  }
-  const rowWorldPositionsTextureRef = useRef<DataTexture | null>(null)
-  if (rowWorldPositionsTextureRef.current === null) {
-    rowWorldPositionsTextureRef.current = createRowPositionsTexture(rowWorldPositionsRef.current!)
-  }
-  const rowWorldPositions = rowWorldPositionsRef.current!
-  const rowWorldPositionsTexture = rowWorldPositionsTextureRef.current!
-
-  // The mask the platform rewrites row by row through the handle, replayed from scratch whenever a
-  // whole new platform layout arrives. Doing it here rather than in an effect keeps the seeded
-  // buffers below and the kernel that samples the mask built from the same snapshot.
-  const spawnMask = useMemo(() => {
-    const mask = spawnMaskRef.current!
-    let hasChanged = false
-
-    for (let row = 0; row < ROWS_RENDERED; row++) {
-      if (writeRowSpawnMask(mask, row, rowsData?.[row]?.isRaised)) {
-        hasChanged = true
-      }
-    }
-
-    if (hasChanged) {
-      spawnMaskTexture.needsUpdate = true
-    }
-
-    return mask
-  }, [rowsData, spawnMaskTexture])
-
-  // Port of floatingTiles.vert + floatingTiles.frag. The varyings recompute in-graph: the noise
-  // coordinate from the tile's world position, and the alpha from the tile's Y and Z.
   const createNodes = useCallback(
-    ({ uniforms: scopedUniforms }: CreatorState) => {
-      const { uScrollZ, uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
-
-      // The storage buffer has to exist before the graph that reads it is built, so the simulation
-      // is created here rather than in an effect — the shape the gem particles use too.
+    ({ uniforms }: CreatorState) => {
+      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
       const buffers = createFloatingTilesBuffers({
-        instanceCount: count,
+        instanceCount: batch.count,
         gridCols: GRID_COLS,
         yMin: Y_MIN,
         yMax: Y_MAX,
-        spawnableCells: collectSpawnableCells(spawnMask),
+        spawnableCells: spawnData.spawnableCells,
       })
       const simulation = createFloatingTilesSimulation({
         buffers,
-        spawnMask: spawnMaskTexture,
+        spawnMask: spawnData.texture,
         uDeltaTime,
         gridCols: GRID_COLS,
-        rowCount: ROWS_RENDERED,
+        rowCount: batch.rows.length,
         yMin: Y_MIN,
         yMax: Y_MAX,
       })
 
-      // Particle state is read straight off the simulation's storage buffer, keyed by instance.
       const positionData = buffers.positions.toAttribute()
       const columnValue = positionData.x
       const tileY = positionData.y
       const rowIndex = positionData.z
-
-      const columnIndex = floor(columnValue.add(0.5))
+      const columnIndex = floor(columnValue)
       const jitter = fract(columnValue)
       const columnOffset = jitter.sub(0.5).mul(COLUMN_JITTER_RANGE * TILE_SIZE)
-
       const worldX = columnIndex
-        .sub(float(GRID_COLS * 0.5))
+        .sub(GRID_COLS * 0.5)
         .add(0.5)
-        .mul(float(TILE_SIZE))
+        .mul(TILE_SIZE)
         .add(columnOffset)
 
-      // Row world Z, read from the row positions texture at this row's texel centre.
-      const rowSampleU = tslClamp(rowIndex, float(0), float(ROWS_RENDERED - 1))
-        .add(0.5)
-        .div(float(ROWS_RENDERED))
-      const worldZ = texture(rowWorldPositionsTexture, vec2(rowSampleU, 0.5)).r.add(uScrollZ)
-
-      const tileWorldPosition = vec3(worldX, tileY, worldZ)
-      const noiseCoord = positionGeometry.add(tileWorldPosition).mul(NOISE_SCALE)
-
+      // The simulation's rows stay local to this fixed batch. The mesh transform supplies the
+      // world origin; only distance fades and world noise need to add it explicitly.
+      const localZ = rowIndex.mul(-TILE_SIZE)
+      const worldZ = localZ.add(originZ)
+      const localPosition = vec3(worldX, tileY, localZ)
+      const noiseCoord = positionGeometry.add(vec3(worldX, tileY, worldZ)).mul(NOISE_SCALE)
       const normalizedY = tslClamp(
         tileY.sub(Y_MIN).div(Math.max(Y_MAX - Y_MIN, EPSILON)),
         float(0),
@@ -257,117 +167,66 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
       const bandAlpha = smoothstep(float(0), float(0.2), normalizedY).mul(
         smoothstep(float(0), float(0.2), float(1).sub(normalizedY)),
       )
-      // The row's own z — one value per instance — so each tile ramps in as a whole.
-      const zFade = fadeInOut(uPlayerWorldPos.z, worldZ)
-      const alpha = bandAlpha.mul(zFade)
-
+      const alpha = bandAlpha.mul(fadeInOut(uPlayerWorldPos.z, worldZ))
       const noiseValue = mx_noise_float(noiseCoord)
       const paletteT = tslClamp(noiseValue.mul(0.5).add(0.5), float(0), float(1))
 
       return {
         simulation,
-        positionNode: positionGeometry.add(tileWorldPosition),
+        positionNode: positionGeometry.add(localPosition),
         colorNode: sampleTilesPalette(paletteT).mul(PALETTE_MIX),
         opacityNode: alpha as Node<'float'>,
       }
     },
-    [count, rowWorldPositionsTexture, spawnMask, spawnMaskTexture, uDeltaTime],
+    [batch.count, batch.rows.length, originZ, spawnData, uDeltaTime],
   )
 
   const { colorNode, opacityNode, positionNode, simulation } = useLocalNodes(createNodes)
 
-  useEffect(() => {
-    return () => {
-      simulation.dispose()
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    const identityMatrix = new Matrix4()
+    for (let index = 0; index < batch.count; index++) {
+      mesh.setMatrixAt(index, identityMatrix)
     }
-  }, [simulation])
+    mesh.instanceMatrix.needsUpdate = true
 
-  useEffect(() => {
-    onReadyChange(true)
-    return () => {
-      onReadyChange(false)
-    }
-  }, [onReadyChange])
+    // GPU positions are absent from the instance matrices. Bounds cover every spawn cell,
+    // jittered edge and the full vertical simulation range, independently of current particles.
+    const halfWidth = ((GRID_COLS - 1) * TILE_SIZE + COLUMN_JITTER_RANGE * TILE_SIZE + BOX_WIDTH) / 2
+    mesh.boundingBox = new Box3(
+      new Vector3(-halfWidth, Y_MIN - BOX_HEIGHT / 2, -(batch.rows.length - 1) * TILE_SIZE - BOX_WIDTH / 2),
+      new Vector3(halfWidth, Y_MAX + BOX_HEIGHT / 2, BOX_WIDTH / 2),
+    )
+    mesh.boundingSphere = mesh.boundingBox.getBoundingSphere(new Sphere())
+    mesh.updateWorldMatrix(true, false)
+  }, [batch])
 
-  useEffect(() => {
-    if (!meshRef.current) return
-    meshRef.current.count = count
-    for (let index = 0; index < count; index++) {
-      meshRef.current.setMatrixAt(index, identityMatrix)
-    }
-    meshRef.current.instanceMatrix.needsUpdate = true
-  }, [count])
+  useEffect(() => () => simulation.dispose(), [simulation])
+  useEffect(() => () => spawnData.texture.dispose(), [spawnData])
 
-  const updateRowMask = useCallback(
-    (rowIndex: number, rowData: RowData | null) => {
-      if (rowIndex < 0 || rowIndex >= ROWS_RENDERED) return
-      if (writeRowSpawnMask(spawnMask, rowIndex, rowData?.isRaised)) {
-        spawnMaskTexture.needsUpdate = true
-      }
-    },
-    [spawnMask, spawnMaskTexture],
-  )
-
-  const updateRowWorldPositions = useCallback(
-    (rowPositions: number[]) => {
-      let hasChanged = false
-
-      for (let index = 0; index < Math.min(rowPositions.length, ROWS_RENDERED); index++) {
-        const value = rowPositions[index]
-        if (!Number.isFinite(value)) continue
-        if (rowWorldPositions[index] !== value) {
-          rowWorldPositions[index] = value
-          hasChanged = true
-        }
-      }
-
-      if (hasChanged) {
-        rowWorldPositionsTexture.needsUpdate = true
-      }
-    },
-    [rowWorldPositions, rowWorldPositionsTexture],
-  )
-
-  const stepSimulation = useCallback(
-    (delta: number) => {
-      if (isDisabled) return
-      uDeltaTime.value = clamp(delta, 0, MAX_DELTA_TIME)
-      renderer.compute(simulation)
-    },
-    [isDisabled, renderer, simulation, uDeltaTime],
-  )
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      setRowData: (rowIndex, rowData) => {
-        if (isDisabled) return
-        updateRowMask(rowIndex, rowData)
-      },
-      setRowWorldPositions: (positions) => {
-        if (isDisabled) return
-        updateRowWorldPositions(positions)
-      },
-      step: (delta) => {
-        stepSimulation(delta)
-      },
-    }),
-    [isDisabled, stepSimulation, updateRowMask, updateRowWorldPositions],
-  )
-
-  if (isDisabled) return null
-
-  const BOX_W = TILE_SIZE * BOX_SIZE_SCALE
-  const BOX_H = TILE_THICKNESS * BOX_SIZE_SCALE
-  const BOX_D = TILE_SIZE * BOX_SIZE_SCALE
+  useGameFrame(({ camera }) => {
+    const mesh = meshRef.current
+    if (!isPlatformReady || !mesh) return
+    viewProjection.current.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    frustum.current.setFromProjectionMatrix(
+      viewProjection.current,
+      camera.coordinateSystem,
+      camera.reversedDepth,
+    )
+    if (!frustum.current.intersectsObject(mesh)) return
+    renderer.compute(simulation)
+  })
 
   return (
     <instancedMesh
       ref={meshRef}
-      args={[undefined, undefined, count]}
-      frustumCulled={false}
-      count={count}>
-      <boxGeometry args={[BOX_W, BOX_H, BOX_D]} />
+      args={[undefined, undefined, batch.count]}
+      position={[0, 0, originZ]}
+      count={batch.count}
+      frustumCulled>
+      <boxGeometry args={[BOX_WIDTH, BOX_HEIGHT, BOX_WIDTH]} />
       <meshBasicNodeMaterial
         colorNode={colorNode}
         opacityNode={opacityNode}
@@ -377,6 +236,42 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ ref, onReadyChange }) => {
         depthWrite={false}
       />
     </instancedMesh>
+  )
+}
+
+const FloatingTiles: FC<FloatingTilesProps> = ({ rows, onReadyChange }) => {
+  const densityCount = usePerformanceStore((state) => state.sceneConfig.floatingTiles.instanceCount)
+  const { uDeltaTime } = useUniforms(createFloatingTilesUniforms, FLOATING_TILE_UNIFORM_SCOPE)
+  const batches = useMemo(() => {
+    const result: FloatingBatchData[] = []
+    if (densityCount === 0) return result
+    for (let startRow = 0; startRow < rows.length; startRow += PLATFORM_BATCH_ROWS) {
+      const batchRows = rows.slice(startRow, startRow + PLATFORM_BATCH_ROWS)
+      result.push({
+        startRow,
+        rows: batchRows,
+        count: Math.max(1, Math.round((densityCount * batchRows.length) / DENSITY_REFERENCE_ROWS)),
+      })
+    }
+    return result
+  }, [rows, densityCount])
+
+  useGameFrame((_, delta) => {
+    uDeltaTime.value = clamp(delta, 0, MAX_DELTA_TIME)
+  }, -1)
+
+  // Child bounds and GPU buffers are initialized before this passive effect runs.
+  useEffect(() => {
+    onReadyChange(true)
+    return () => onReadyChange(false)
+  }, [batches, onReadyChange])
+
+  return (
+    <group>
+      {batches.map((batch) => (
+        <FloatingBatch key={batch.startRow} batch={batch} uDeltaTime={uDeltaTime} />
+      ))}
+    </group>
   )
 }
 

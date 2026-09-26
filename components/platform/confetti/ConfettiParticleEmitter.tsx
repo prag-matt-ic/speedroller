@@ -17,7 +17,7 @@ import {
   shapeCircle,
   vertexStage,
 } from 'three/tsl'
-import { AdditiveBlending, Color, InstancedBufferAttribute, type Vector3Tuple } from 'three'
+import { AdditiveBlending, Color, InstancedBufferAttribute, type InstancedMesh, Sphere, Vector3, type Vector3Tuple } from 'three'
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -327,12 +327,18 @@ const ConfettiParticleEmitter = forwardRef<ConfettiParticleEmitterHandle, Props>
       if (!isVisible) reset()
     }, [isVisible, reset])
 
+    const setAnimationBounds = useCallback((mesh: InstancedMesh | null) => {
+      if (!mesh) return
+      // Covers the full 1.8-second ballistic arc, drift, spawn spread and quad size.
+      mesh.boundingSphere = new Sphere(new Vector3(0, 4, 0), 8)
+    }, [])
+
     return (
       <instancedMesh
+        ref={setAnimationBounds}
         position={position}
         args={[undefined, undefined, particleCount]}
         count={particleCount}
-        frustumCulled={false}
         visible={isVisible}>
         <planeGeometry args={[1, 1]}>
           <instancedBufferAttribute

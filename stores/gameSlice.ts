@@ -81,7 +81,16 @@ export const createGameSlice =
       set({ isWarmupComplete })
     },
     setRowsData: (rowsData, totalCounts) => {
-      set({ rowsData, totalCounts, isPlatformReady: false, isWarmupComplete: false })
+      get().stopConfirmation()
+      set((state) => ({
+        rowsData,
+        totalCounts,
+        resetPlatformTick: state.resetPlatformTick + 1,
+        isPlatformReady: false,
+        isWarmupComplete: false,
+        cameraLookAtPosition: null,
+        hudIndicator: null,
+      }))
     },
     goToStage: (newStage: Stage) => {
       if (newStage === Stage.HOME) {
@@ -122,6 +131,8 @@ export const createGameSlice =
           ...RESET_PLAYER_STATE,
           ...RESET_TIME_STATE,
           ...getResetInputState(),
+          stage: Stage.HOME,
+          hudIndicator: null,
           mode: targetMode,
           rowsData: isModeChange ? nextModeData.rowsData : s.rowsData,
           totalCounts: isModeChange ? nextModeData.totalCounts : s.totalCounts,

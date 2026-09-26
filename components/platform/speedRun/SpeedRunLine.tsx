@@ -1,13 +1,14 @@
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
   type IntersectionExitHandler,
-  RapierRigidBody,
   RigidBody,
 } from '@react-three/rapier'
-import { type FC, type RefObject, useCallback, useMemo, useRef } from 'react'
+import { type FC, useCallback, useEffect, useId, useMemo, useRef } from 'react'
 import { float, floor, fract, mix, step, uv, vec2, vec3, vertexStage } from 'three/tsl'
+import type { Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
@@ -18,7 +19,7 @@ import type { RigidBodyUserData, SpeedRunLineUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { GameMode, Overlay, SpeedRunStage } from '@/stores/types'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
-import { HIDDEN_POSITION, TILE_SIZE } from '@/utils/tiles'
+import { TILE_SIZE } from '@/utils/tiles'
 
 // Tuning constants carried over from finishLine.vert, finishLine.frag and startLine.frag.
 const TILE_EPS = 1e-4
@@ -135,12 +136,12 @@ const StartLineMaterial: FC<LineNodes> = ({ colorNode, opacityNode }) => (
 )
 
 type Props = {
-  ref?: RefObject<RapierRigidBody | null>
+  position: Vector3Tuple
   width: number
   height: number
 }
 
-const SpeedRunLine: FC<Props> = ({ ref, width, height }) => {
+const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
   const mode = useGameStore((s) => s.mode)
   const speedRunStage = useGameStore((s) => s.speedRunStage)
   const finishSpeedRun = useGameStore((s) => s.finishSpeedRun)
@@ -154,9 +155,10 @@ const SpeedRunLine: FC<Props> = ({ ref, width, height }) => {
     [],
   )
 
+  const uniformScope = `${SPEED_RUN_LINE_UNIFORM_SCOPE}${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   const { uTilesX, uTilesY, uDistanceFadeEnabled } = useUniforms(
     createSpeedRunLineUniforms(width, height, useDistanceFade),
-    SPEED_RUN_LINE_UNIFORM_SCOPE,
+    uniformScope,
   )
 
   // Port of finishLine.vert + finishLine.frag + startLine.frag. The two fragment variants are built
@@ -183,6 +185,9 @@ const SpeedRunLine: FC<Props> = ({ ref, width, height }) => {
 
   const hasTriggeredStart = useRef(false)
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => {
+    if (timeout.current) clearTimeout(timeout.current)
+  }, [])
   const isSpeedRunMode = mode === GameMode.SPEEDRUN
   const isStartLine = !isSpeedRunMode
 
@@ -194,8 +199,11 @@ const SpeedRunLine: FC<Props> = ({ ref, width, height }) => {
       if (speedRunStage !== SpeedRunStage.RUNNING) return
       finishSpeedRun()
     } else {
+      if (timeout.current) clearTimeout(timeout.current)
+      timeout.current = null
       if (hasTriggeredStart.current) return
       timeout.current = setTimeout(() => {
+        timeout.current = null
         hasTriggeredStart.current = true
         setOverlay(Overlay.SPEEDRUN_START)
       }, 500)
@@ -223,19 +231,15 @@ const SpeedRunLine: FC<Props> = ({ ref, width, height }) => {
 
   return (
     <RigidBody
-      ref={ref}
-      // KEEP DYNAMIC
-      type="dynamic"
-      gravityScale={0}
-      friction={0}
-      mass={0}
-      position={HIDDEN_POSITION}
+      type="fixed"
+      position={position}
       rotation={[-Math.PI / 2, 0, 0]}
       colliders={false}
       userData={userData}>
       <CuboidCollider
         args={[width / 2, height / 2, PLAYER_RADIUS * 2]}
         sensor={true}
+        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
         mass={0}
         friction={0}
         onIntersectionEnter={onIntersectionEnter}

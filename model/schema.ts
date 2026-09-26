@@ -10,7 +10,8 @@ export type OutOfBoundsUserData = {
 
 export type RingUserData = {
   type: 'ring'
-  slotIndex: number
+  rowIndex: number
+  columnIndex: number
 }
 
 export enum CollectibleID {

@@ -5,7 +5,7 @@ import { useGSAP } from '@gsap/react'
 import { useTexture } from '@react-three/drei'
 import { type CreatorState, useLocalNodes,useThree } from '@react-three/fiber/webgpu'
 import gsap from 'gsap'
-import { type FC, type RefObject, useCallback, useEffect, useMemo } from 'react'
+import { type FC, useCallback, useEffect, useMemo } from 'react'
 import {
   clamp,
   cos,
@@ -13,7 +13,7 @@ import {
   mat2,
   mix,
   positionLocal,
-  positionWorld,
+  modelWorldMatrix,
   sin,
   smoothstep,
   texture,
@@ -21,11 +21,14 @@ import {
   uv,
   vec2,
   vec3,
+  vec4,
   vertexStage,
 } from 'three/tsl'
 import {
   BackSide,
-  Mesh,
+  type CylinderGeometry,
+  Sphere,
+  Vector3,
   RepeatWrapping,
   type Vector3Tuple,
 } from 'three'
@@ -47,7 +50,6 @@ import { HEADING_POSITION_OFFSET_Z } from '@/utils/platform/floatingHeading'
 gsap.registerPlugin(useGSAP)
 
 type Props = {
-  ref: RefObject<Mesh | null>
   text: string
   position: Vector3Tuple
   width: number
@@ -76,9 +78,8 @@ export const FloatingHeading: FC<Props> = ({
   position,
   width,
   height,
-  isVisible = false,
+  isVisible = true,
   textCanvasOptions = {},
-  ref,
 }) => {
   const { shouldRotate, useNoiseFade } = usePerformanceStore(
     (s) => s.sceneConfig.floatingHeading,
@@ -104,7 +105,7 @@ export const FloatingHeading: FC<Props> = ({
       const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
       const mirroredUv = vec2(uv().x.oneMinus(), uv().y)
-      const headingCenter = positionWorld
+      const headingCenter = modelWorldMatrix.mul(vec4(0, 0, 0, 1))
 
       // The three toggles are build-time props, so a JavaScript branch picks the graph and the
       // unused half never reaches the shader.
@@ -144,8 +145,7 @@ export const FloatingHeading: FC<Props> = ({
       const sine = sin(headingRotation)
       const cosine = cos(headingRotation)
       const rotation = mat2(cosine, sine.negate(), sine, cosine)
-      const centeredXZ = positionLocal.xz.sub(headingCenter.xz)
-      const tiltedXZ = rotation.mul(centeredXZ).add(headingCenter.xz)
+      const tiltedXZ = rotation.mul(positionLocal.xz)
       const rotatedPosition = shouldRotate
         ? vec3(tiltedXZ.x, positionLocal.y, tiltedXZ.y)
         : positionLocal
@@ -195,14 +195,18 @@ export const FloatingHeading: FC<Props> = ({
     textTextureNode.value = canvasState?.texture ?? TRANSPARENT_TEXTURE
   }, [canvasState, textTextureNode])
 
+  const setAnimationBounds = useCallback((geometry: CylinderGeometry | null) => {
+    if (!geometry) return
+    geometry.boundingSphere = new Sphere(new Vector3(), Math.hypot(radius, height / 2))
+  }, [height, radius])
+
   return (
     <mesh
-      ref={ref}
       visible={isVisible}
       position={position}
       renderOrder={2}
       rotation={[0, Math.PI / 2, 0]}>
-      <cylinderGeometry args={[radius, radius, height, 32, 1, true, thetaStart, thetaLength]} />
+      <cylinderGeometry ref={setAnimationBounds} args={[radius, radius, height, 32, 1, true, thetaStart, thetaLength]} />
       <meshBasicNodeMaterial
         colorNode={colorNode}
         opacityNode={opacityNode}

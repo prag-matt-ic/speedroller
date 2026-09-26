@@ -1,190 +1,29 @@
-import {
-  type FC,
-  type RefObject,
-  createRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { type FC, useEffect } from 'react'
 
-import { useGameStore } from '@/components/GameProvider'
-import {
-  type ConfettiParticleEmitterHandle,
-} from '@/components/platform/confetti/ConfettiParticleEmitter'
 import ConfettiRow from '@/components/platform/confetti/ConfettiRow'
-import useDynamicRigidBodies from '@/components/platform/useDynamicRigidBodies'
-import { HIDDEN_POSITION, type RowData } from '@/utils/tiles'
-
-export type ConfettiHandle = {
-  moveElements: (zStep: number) => void
-  positionElementsIfNeeded: (row: RowData, rowZ: number) => void
-  hideElementsIfNeeded: (row: RowData) => void
-}
+import { type RowData, rowToWorldZ } from '@/utils/tiles'
 
 type Props = {
-  ref: RefObject<ConfettiHandle | null>
+  rows: readonly RowData[]
   onReadyChange: (isReady: boolean) => void
 }
 
-type EmitterPair = [
-  RefObject<ConfettiParticleEmitterHandle | null>,
-  RefObject<ConfettiParticleEmitterHandle | null>,
-]
-
-const createEmitterPairs = (count: number): EmitterPair[] =>
-  Array.from({ length: count }, () => [createRef(), createRef()])
-
-const createDimensionState = (count: number): number[] => Array.from({ length: count }, () => 1)
-
-const ConfettiRows: FC<Props> = ({ ref, onReadyChange }) => {
-  const totalCount = useGameStore((s) => s.totalCounts.confetti)
-
-  const { refs, isVisibleStates, translation, applyPlacement, hideRigidBodyAtIndex } =
-    useDynamicRigidBodies(totalCount)
-
-  const [emitterRefs, setEmitterRefs] = useState<EmitterPair[]>(() =>
-    createEmitterPairs(totalCount),
-  )
-  const [widthByIndex, setWidthByIndex] = useState<number[]>(() =>
-    createDimensionState(totalCount),
-  )
-  const [depthByIndex, setDepthByIndex] = useState<number[]>(() =>
-    createDimensionState(totalCount),
-  )
-
-  useEffect(() => {
-    if (emitterRefs.length === totalCount) return
-    setEmitterRefs(createEmitterPairs(totalCount))
-    setWidthByIndex(createDimensionState(totalCount))
-    setDepthByIndex(createDimensionState(totalCount))
-  }, [emitterRefs.length, totalCount])
-
-  const setDimensionsForIndex = useCallback((index: number, width: number, depth: number) => {
-    setWidthByIndex((prev) => {
-      if (prev[index] === width) return prev
-      const next = [...prev]
-      next[index] = width
-      return next
-    })
-    setDepthByIndex((prev) => {
-      if (prev[index] === depth) return prev
-      const next = [...prev]
-      next[index] = depth
-      return next
-    })
-  }, [])
-
-  const resetEmittersForIndex = useCallback(
-    (index: number) => {
-      const pair = emitterRefs[index]
-      if (!pair) return
-      pair[0].current?.reset()
-      pair[1].current?.reset()
-    },
-    [emitterRefs],
-  )
-
-  const positionElementsIfNeeded = useCallback(
-    (row: RowData, rowZ: number) => {
-      if (!row.confettiPlacements?.length) return
-
-      row.confettiPlacements.forEach((placement) => {
-        const { position, width, depth, contentIndex } = placement
-        if (contentIndex < 0 || contentIndex >= refs.length) {
-          return
-        }
-
-        const indexedPlacement: [number, number, number, number] = [
-          position[0],
-          position[1],
-          position[2],
-          contentIndex,
-        ]
-        applyPlacement(indexedPlacement, rowZ)
-        setDimensionsForIndex(contentIndex, width, depth)
-        resetEmittersForIndex(contentIndex)
-      })
-    },
-    [applyPlacement, refs.length, resetEmittersForIndex, setDimensionsForIndex],
-  )
-
-  const hideElementsIfNeeded = useCallback(
-    (row: RowData) => {
-      if (!row.confettiPlacements?.length) return
-
-      row.confettiPlacements.forEach((placement) => {
-        const contentIndex = placement.contentIndex
-        if (contentIndex == null) return
-        hideRigidBodyAtIndex(contentIndex)
-        resetEmittersForIndex(contentIndex)
-      })
-    },
-    [hideRigidBodyAtIndex, resetEmittersForIndex],
-  )
-
-  const moveElements = useCallback(
-    (zStep: number) => {
-      if (zStep === 0) return
-      let sample: { index: number; fromZ: number; toZ: number } | null = null
-      isVisibleStates.forEach((isVisible, index) => {
-        if (!isVisible) return
-        const body = refs[index]
-        if (!body?.current) return
-        const currentPosition = body.current.translation()
-        const currentZ = currentPosition?.z ?? HIDDEN_POSITION[2]
-        translation.current.x = currentPosition?.x ?? HIDDEN_POSITION[0]
-        translation.current.y = currentPosition?.y ?? HIDDEN_POSITION[1]
-        translation.current.z = currentZ + zStep
-        body.current.setTranslation(translation.current, true)
-        if (sample === null) {
-          sample = { index, fromZ: currentZ, toZ: translation.current.z }
-        }
-      })
-    },
-    [isVisibleStates, refs, translation],
-  )
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      moveElements,
-      positionElementsIfNeeded,
-      hideElementsIfNeeded,
-    }),
-    [hideElementsIfNeeded, moveElements, positionElementsIfNeeded],
-  )
-
+const ConfettiRows: FC<Props> = ({ rows, onReadyChange }) => {
   useEffect(() => {
     onReadyChange(true)
-    return () => {
-      onReadyChange(false)
-    }
+    return () => onReadyChange(false)
   }, [onReadyChange])
 
-  const emitterRefsMemo = useMemo(() => emitterRefs, [emitterRefs])
-
-  return (
-    <>
-      {refs.map((bodyRef, index) => {
-        const emitters = emitterRefsMemo[index] ?? emitterRefsMemo[0]
-        const width = widthByIndex[index] ?? 1
-        const depth = depthByIndex[index] ?? 1
-        return (
-          <ConfettiRow
-            key={`confetti-${index}`}
-            ref={bodyRef}
-            emitterRefs={emitters}
-            isVisible={isVisibleStates[index]}
-            width={width}
-            depth={depth}
-            index={index}
-          />
-        )
-      })}
-    </>
+  return rows.flatMap((row, rowIndex) =>
+    (row.confettiPlacements ?? []).map(({ position: [x, y, relativeZ], width, depth, contentIndex }) => (
+      <ConfettiRow
+        key={`${rowIndex}-${contentIndex}`}
+        position={[x, y, rowToWorldZ(rowIndex) + relativeZ]}
+        width={width}
+        depth={depth}
+        index={contentIndex}
+      />
+    )),
   )
 }
 

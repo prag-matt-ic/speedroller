@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 export type ReadyState = {
   tiles: boolean
@@ -12,6 +12,7 @@ export type ReadyState = {
   colourPicker: boolean
 }
 export type ReadyStateKey = keyof ReadyState
+
 type ReadyChangeHandler = (isReady: boolean) => void
 
 const INITIAL_READY_STATE: ReadyState = {
@@ -26,39 +27,26 @@ const INITIAL_READY_STATE: ReadyState = {
   colourPicker: false,
 }
 
-const READY_STATE_KEYS: ReadyStateKey[] = Object.keys(INITIAL_READY_STATE) as ReadyStateKey[]
+const READY_STATE_KEYS = Object.keys(INITIAL_READY_STATE) as ReadyStateKey[]
 
+/** A fresh set of callbacks owns each layout's readiness, including Strict Mode remounts. */
 export default function useReadyState(
-  onStateChange?: (readyState: ReadyState) => void,
-  resetDependencies: unknown[] = [],
+  onStateChange: (readyState: ReadyState) => void,
+  revision: unknown,
 ) {
-  const readyState = useRef<ReadyState>(INITIAL_READY_STATE)
+  const readyState = useRef({ revision, values: INITIAL_READY_STATE })
+  const readyChangeHandlers = useMemo(() => {
+    return Object.fromEntries(READY_STATE_KEYS.map((key) => [key, (isReady: boolean) => {
+      const previous = readyState.current.revision === revision
+        ? readyState.current.values
+        : INITIAL_READY_STATE
+      if (previous[key] === isReady) return
+      const values = { ...previous, [key]: isReady }
+      readyState.current = { revision, values }
+      onStateChange(values)
+    }])) as Record<ReadyStateKey, ReadyChangeHandler>
+    // A layout replacement needs its own readiness even if its callback is unchanged.
+  }, [onStateChange, revision])
 
-  // Reset ready state when dependencies change
-  useEffect(() => {
-    readyState.current = INITIAL_READY_STATE
-    // We don't necessarily need to notify change here if the consumer
-    // also resets their logic based on the same dependencies.
-    // But let's be safe.
-    onStateChange?.(INITIAL_READY_STATE)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, resetDependencies)
-
-  const readyChangeHandlers = useMemo<Record<ReadyStateKey, ReadyChangeHandler>>(
-    () =>
-      READY_STATE_KEYS.reduce(
-        (handlers, key) => {
-          handlers[key] = (isReady: boolean) => {
-            if (readyState.current[key] === isReady) return
-            readyState.current = { ...readyState.current, [key]: isReady }
-            onStateChange?.(readyState.current)
-          }
-          return handlers
-        },
-        {} as Record<ReadyStateKey, ReadyChangeHandler>,
-      ),
-    [onStateChange],
-  )
-
-  return { readyState: readyState.current, readyChangeHandlers }
+  return { readyChangeHandlers }
 }

@@ -1,9 +1,10 @@
 'use client'
 
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
-import { CuboidCollider, RapierRigidBody, RigidBody } from '@react-three/rapier'
-import { type FC, type RefObject, useId, useMemo, useRef } from 'react'
-import { DataTexture, FloatType, Group, Mesh, RGBAFormat, Vector3 } from 'three'
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
+import { type FC, useId, useMemo, useRef } from 'react'
+import { DataTexture, FloatType, Group, Mesh, RGBAFormat, Vector3, type Vector3Tuple } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
 import { clamp, float, mix, select, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import type { Node, UniformNode } from 'three/webgpu'
@@ -19,7 +20,7 @@ import { CollectibleID, type CollectibleUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { paintCorners } from '@/resources/tsl/paintCorners'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
-import { HIDDEN_POSITION, TILE_SIZE } from '@/utils/tiles'
+import { TILE_SIZE } from '@/utils/tiles'
 
 // Corner bracket tuning, carried over from collectibleTile.frag.
 const BORDER_THICKNESS_TILES = 0.25
@@ -51,14 +52,13 @@ const createCollectibleTileUniforms =
   })
 
 type Props = {
-  ref: RefObject<RapierRigidBody | null>
+  position: Vector3Tuple
   id: CollectibleID
-  isVisible: boolean
   width: number
   height: number
 }
 
-export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) => {
+export const Collectible: FC<Props> = ({ position, width, height, id }) => {
   const isCollected = useGameStore((s) => s.collectedCollectibles.includes(id))
   const isConfirming = useGameStore((s) => s.confirmingCollectible === id)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
@@ -127,7 +127,6 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
   })
 
   useGameFrame((state, delta) => {
-    if (!isVisible) return
     const globalProgress = confirmationProgress.current
 
     if (isConfirming) {
@@ -166,25 +165,22 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
 
   return (
     <RigidBody
-      ref={ref}
-      type="dynamic"
-      gravityScale={0}
-      friction={0}
-      mass={0}
-      position={HIDDEN_POSITION} // Overwritten dynamically in the parent
+      type="fixed"
+      position={position}
       rotation={[-Math.PI / 2, 0, 0]}
       colliders={false}
       userData={userData}>
       <CuboidCollider
         args={[width / 2, height / 2, PLAYER_RADIUS * 2]}
         sensor={true}
+        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
         mass={0}
         friction={0}
         collisionGroups={COLLISION_GROUPS.collectibleSensor}
       />
 
       {/* Tile mesh: shader renders corner brackets and confirmation progress bar */}
-      <mesh position={[0, 0, 0.01]} renderOrder={2} visible={isVisible}>
+      <mesh position={[0, 0, 0.01]} renderOrder={2}>
         <planeGeometry args={[width, height]} />
         <meshBasicNodeMaterial
           colorNode={colorNode}
@@ -203,7 +199,7 @@ export const Collectible: FC<Props> = ({ ref, width, height, id, isVisible }) =>
         tileWidth={width}
         tileHeight={height}
         id={id}
-        isVisible={isVisible}
+        isVisible={true}
       />
     </RigidBody>
   )

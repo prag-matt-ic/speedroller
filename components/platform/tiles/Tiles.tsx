@@ -1,19 +1,13 @@
 import { useTexture } from '@react-three/drei'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import {
-  InstancedRigidBodies,
-  type InstancedRigidBodyProps,
-  type RapierRigidBody,
-} from '@react-three/rapier'
-import {
-  type Dispatch,
   type FC,
-  type SetStateAction,
   Suspense,
   useEffect,
-  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
   useRef,
-  useState,
 } from 'react'
 import {
   attribute,
@@ -42,10 +36,7 @@ import {
   vec3,
   vertexStage,
 } from 'three/tsl'
-import {
-  type InstancedBufferAttribute,
-  Texture,
-} from 'three'
+import { InstancedMesh, Matrix4, Sphere, Texture } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import tileDetailNoise2 from '@/assets/textures/platform/tile-noise-2.webp'
@@ -53,10 +44,11 @@ import tileDetailNoise3 from '@/assets/textures/platform/tile-noise-3.webp'
 import tileDetailNoise1 from '@/assets/textures/platform/tile-noise.webp'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
 import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import {
-  COLUMNS,
-  ROWS_RENDERED,
+  type RowData,
+  rowToWorldZ,
   TILE_PLAYER_FADE_FULL_RADIUS,
   TILE_PLAYER_FADE_MIN_ALPHA,
   TILE_PLAYER_FADE_MIN_RADIUS,
@@ -64,8 +56,6 @@ import {
   TILE_SIZE,
   TILE_THICKNESS,
 } from '@/utils/tiles'
-
-const INSTANCE_COUNT = COLUMNS * ROWS_RENDERED
 
 const TILE_UNIFORM_SCOPE = 'platformTiles'
 
@@ -93,9 +83,7 @@ const DETAIL_NOISE_STRENGTH = 0.12
 // material graph built at React render time does not have, so the material's own alpha test does it.
 const ALPHA_TEST = 0.001
 
-// Only uPlayerWorldPos is owned here; uScrollZ is shared with the floating tiles. The remaining
-// values are scene settings that only change when the quality tier does, so they live on the same
-// creator rather than in a second scope.
+// One registration owns settings shared by every terrain batch.
 type TileShaderUniforms = {
   uHighlightRadiusSq: UniformNode<'float', number>
   uFadeFullRadiusSq: UniformNode<'float', number>
@@ -121,22 +109,76 @@ const createTileUniforms = ({ addDetailNoise, isLowQuality }: TileConfig) => () 
   uShadowEnabled: isLowQuality ? 0 : 1,
 })
 
-export type TilesHandle = {
-  rigidBodies: RapierRigidBody[] | null
-  visibilityAttribute: InstancedBufferAttribute | null
-  highlightedAttribute: InstancedBufferAttribute | null
-  visibilityData: Float32Array | null
-  seedData: Float32Array | null
-  highlightedData: Float32Array | null
-  setTileInstances: Dispatch<SetStateAction<InstancedRigidBodyProps[]>>
+type TileNodes = {
+  colorNode: Node<'vec3'>
+  opacityNode: Node<'float'>
+  positionNode: Node<'vec3'>
 }
 
 type PlatformTilesProps = {
-  ref: React.Ref<TilesHandle>
+  rows: readonly RowData[]
   onReadyChange: (isReady: boolean) => void
 }
 
-export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) => {
+const TerrainBatch: FC<{ batch: TileBatch; nodes: TileNodes }> = ({ batch, nodes }) => {
+  const meshRef = useRef<InstancedMesh>(null)
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    const matrix = new Matrix4()
+    for (let index = 0; index < batch.positions.length; index++) {
+      matrix.makeTranslation(...batch.positions[index])
+      mesh.setMatrixAt(index, matrix)
+    }
+    mesh.instanceMatrix.needsUpdate = true
+    mesh.computeBoundingBox()
+    // The GPU tilts each tile around its centre. Expand the CPU bounds by the largest possible
+    // vertex displacement so tilted edges cannot disappear at a frustum boundary.
+    const tileRadius = Math.hypot(TILE_SIZE, TILE_THICKNESS, TILE_SIZE) / 2
+    mesh.boundingBox!.expandByScalar(2 * tileRadius * Math.sin(TILE_FADE_ROTATE_MAX / 2))
+    mesh.boundingSphere = mesh.boundingBox!.getBoundingSphere(new Sphere())
+  }, [batch])
+
+  return (
+    <RigidBody
+      type="fixed"
+      colliders={false}
+      position={[0, 0, rowToWorldZ(batch.startRow)]}
+      userData={{ type: 'tile' }}
+      friction={0}>
+      {batch.positions.map((position, index) => (
+        <CuboidCollider
+          key={index}
+          position={position}
+          args={[TILE_SIZE / 2, TILE_THICKNESS / 2, TILE_SIZE / 2]}
+          friction={0}
+        />
+      ))}
+      <instancedMesh
+        ref={meshRef}
+        args={[undefined, undefined, batch.positions.length]}
+        count={batch.positions.length}
+        frustumCulled>
+        <boxGeometry args={[TILE_SIZE, TILE_THICKNESS, TILE_SIZE]}>
+          <instancedBufferAttribute attach="attributes-seed" args={[batch.seeds, 1]} />
+          <instancedBufferAttribute attach="attributes-isHighlighted" args={[batch.highlights, 1]} />
+        </boxGeometry>
+        <Suspense fallback={null}>
+          <meshBasicNodeMaterial
+            colorNode={nodes.colorNode}
+            opacityNode={nodes.opacityNode}
+            positionNode={nodes.positionNode}
+            transparent
+            alphaTest={ALPHA_TEST}
+          />
+        </Suspense>
+      </instancedMesh>
+    </RigidBody>
+  )
+}
+
+export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) => {
   const addDetailNoise = usePerformanceStore((s) => s.sceneConfig.platformTiles.addDetailNoise)
   const sceneQuality = usePerformanceStore((s) => s.sceneQuality)
   const detailNoiseTextures = useTexture([
@@ -144,16 +186,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
     tileDetailNoise2.src,
     tileDetailNoise3.src,
   ]) as [Texture, Texture, Texture]
-
-  const [instances, setTileInstances] = useState<InstancedRigidBodyProps[]>([])
-  const tileRigidBodies = useRef<RapierRigidBody[]>(null)
-
-  const visibilityData = useRef<Float32Array>(new Float32Array(INSTANCE_COUNT))
-  const highlightedData = useRef<Float32Array>(new Float32Array(INSTANCE_COUNT))
-  const seedData = useRef<Float32Array>(new Float32Array(INSTANCE_COUNT))
-
-  const visibilityAttribute = useRef<InstancedBufferAttribute>(null)
-  const highlightedAttribute = useRef<InstancedBufferAttribute>(null)
+  const batches = useMemo(() => createTileBatches(rows), [rows])
 
   useUniforms(
     createTileUniforms({
@@ -163,30 +196,6 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
     TILE_UNIFORM_SCOPE,
   )
 
-  useImperativeHandle(ref, () => {
-    return {
-      get rigidBodies() {
-        return tileRigidBodies.current
-      },
-      get visibilityData() {
-        return visibilityData.current
-      },
-      get visibilityAttribute() {
-        return visibilityAttribute.current
-      },
-      get highlightedData() {
-        return highlightedData.current
-      },
-      get highlightedAttribute() {
-        return highlightedAttribute.current
-      },
-      get seedData() {
-        return seedData.current
-      },
-      setTileInstances,
-    }
-  }, [])
-
   // Port of tile.vert + tile.frag.
   //
   // Every varying is recomputed in-graph: per-instance attributes are read directly, the sphere-side
@@ -195,9 +204,8 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
   const { colorNode, opacityNode, positionNode } = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
-      const { uScrollZ, uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
 
-      const tileVisibility = attribute<'float'>('visibility')
       const tileSeed = attribute<'float'>('seed')
       const tileIsHighlighted = attribute<'float'>('isHighlighted')
 
@@ -216,14 +224,13 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
         ),
       )
 
-      const visible = clamp(tileVisibility, float(0), float(1))
       const fadeAmount = smoothstep(
         scoped.uFadeFullRadiusSq,
         scoped.uFadeMinRadiusSq,
         distanceSquared,
       )
       const radialAlpha = mix(float(1), float(scoped.uFadeMinAlpha), fadeAmount)
-      const alpha = radialAlpha.mul(visible)
+      const alpha = radialAlpha
 
       // Per-instance tilt, suppressed for highlighted tiles. Rotation is about the tile's own
       // centre, so the offset is rotated in place and added back.
@@ -268,7 +275,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
       // --- fragment stage ---
       const backgroundNoisePosition = positionWorld
         .mul(0.06)
-        .add(vec3(tileSeed.mul(0.12), tileSeed.mul(-0.12), uScrollZ.mul(-0.06)))
+        .add(vec3(tileSeed.mul(0.12), tileSeed.mul(-0.12), 0))
 
       const backgroundNoise = mx_noise_float(backgroundNoisePosition).mul(0.5).add(0.5)
 
@@ -351,43 +358,17 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
     return () => {
       onReadyChange(false)
     }
-  }, [onReadyChange])
+  }, [batches, onReadyChange])
 
   return (
-    <InstancedRigidBodies
-      ref={tileRigidBodies}
-      instances={instances}
-      type="fixed"
-      sensor={false}
-      colliders="cuboid"
-      friction={0.0}>
-      <instancedMesh
-        args={[undefined, undefined, instances.length]}
-        frustumCulled={false}
-        count={instances.length}>
-        <boxGeometry args={[TILE_SIZE, TILE_THICKNESS, TILE_SIZE, 1, 1, 1]}>
-          <instancedBufferAttribute
-            ref={visibilityAttribute}
-            attach="attributes-visibility"
-            args={[visibilityData.current!, 1]}
-          />
-          <instancedBufferAttribute attach="attributes-seed" args={[seedData.current!, 1]} />
-          <instancedBufferAttribute
-            ref={highlightedAttribute}
-            attach="attributes-isHighlighted"
-            args={[highlightedData.current!, 1]}
-          />
-        </boxGeometry>
-        <Suspense fallback={null}>
-          <meshBasicNodeMaterial
-            colorNode={colorNode}
-            opacityNode={opacityNode}
-            positionNode={positionNode}
-            transparent
-            alphaTest={ALPHA_TEST}
-          />
-        </Suspense>
-      </instancedMesh>
-    </InstancedRigidBodies>
+    <group>
+      {batches.map((batch) => (
+        <TerrainBatch
+          key={batch.startRow}
+          batch={batch}
+          nodes={{ colorNode, opacityNode, positionNode }}
+        />
+      ))}
+    </group>
   )
 }

@@ -91,7 +91,7 @@ const FloatingMenu: FC<FloatingMenuProps> = ({
           <div
             data-status={status}
             className={twJoin(
-              'relative w-fit max-w-lg origin-top overflow-hidden rounded-xl bg-black p-4 shadow-2xl outline outline-1 outline-white/5 xl:p-6',
+              'relative w-fit max-w-lg origin-top overflow-hidden rounded-xl bg-black p-4 shadow-2xl outline outline-white/5 xl:p-6',
               'data-[status=initial]:scale-90 data-[status=initial]:opacity-0',
               'data-[status=open]:scale-100 data-[status=open]:opacity-100 data-[status=open]:duration-240',
               'data-[status=close]:scale-90 data-[status=close]:opacity-0 data-[status=close]:duration-200',

@@ -3,6 +3,18 @@ import { Stage } from '@/stores/types'
 // Tile dimensions
 export const TILE_SIZE = 1.0
 export const TILE_THICKNESS = 0.08
+export const PLATFORM_BATCH_ROWS = 16
+export const INITIAL_ROW_START_Z = 3.5 * TILE_SIZE
+
+/** Row coordinates are permanent; forward travel decreases world Z. */
+export const rowToWorldZ = (rowIndex: number): number =>
+  INITIAL_ROW_START_Z - rowIndex * TILE_SIZE
+
+/** Nearest course row, including when the player falls beyond either end. */
+export const worldZToRowIndex = (worldZ: number, rowCount: number): number => {
+  if (rowCount === 0) return -1
+  return Math.max(0, Math.min(rowCount - 1, Math.round((INITIAL_ROW_START_Z - worldZ) / TILE_SIZE)))
+}
 export const TILE_PLAYER_HIGHLIGHT_ROW_COUNT = 4
 export const TILE_PLAYER_FADE_FULL_ROWS = 8
 export const TILE_PLAYER_FADE_MIN_ROWS = 18
@@ -11,31 +23,7 @@ export const TILE_PLAYER_HIGHLIGHT_RADIUS = TILE_PLAYER_HIGHLIGHT_ROW_COUNT * TI
 export const TILE_PLAYER_FADE_FULL_RADIUS = TILE_PLAYER_FADE_FULL_ROWS * TILE_SIZE
 export const TILE_PLAYER_FADE_MIN_RADIUS = TILE_PLAYER_FADE_MIN_ROWS * TILE_SIZE
 
-// Rows live in a window around the player, and it is deliberately lopsided: it runs well past the
-// tiles' fade radius ahead, and only as far behind as the camera can still see the track.
-const ROW_VISIBILITY_BUFFER_ROWS = 6
-const ROW_VISIBILITY_BUFFER_RADIUS = ROW_VISIBILITY_BUFFER_ROWS * TILE_SIZE
-
-// Ahead: the tiles' visible run plus the buffer the fade-in needs. See `fadeInOut.ts`.
-export const ROW_VISIBILITY_AHEAD_SPAN =
-  TILE_PLAYER_FADE_MIN_RADIUS + ROW_VISIBILITY_BUFFER_RADIUS
-
-// Behind: the camera trails the player by 8 and pulls back at most 5 with input, and it only sees
-// the ground ~5 units in front of itself, so nothing past this is ever on screen. Rows further back
-// would be behind the lens, costing tiles and per-frame moves for nothing.
-export const ROW_VISIBILITY_BEHIND_SPAN = 16
-
-// How far ahead/behind the player a row's elements are placed — the start of an element's life, and
-// the fade window `fadeInOut.ts` fades in over. One tile inside each span, so a row is never placed
-// exactly on the window edge it wraps at.
-export const ELEMENT_PLACEMENT_AHEAD_SPAN = ROW_VISIBILITY_AHEAD_SPAN - TILE_SIZE
-export const ELEMENT_PLACEMENT_BEHIND_SPAN = ROW_VISIBILITY_BEHIND_SPAN - TILE_SIZE
-
-const EXIT_LOWER_DURATION_ROWS = 6
-const PLATFORM_MAX_Z = TILE_SIZE * 8
-
-export const ENTRY_END_Z = PLATFORM_MAX_Z - 16 * TILE_SIZE - EXIT_LOWER_DURATION_ROWS
-export const EXIT_START_Z = PLATFORM_MAX_Z - EXIT_LOWER_DURATION_ROWS * TILE_SIZE
+export const ELEMENT_FADE_DISTANCE = 23 * TILE_SIZE
 
 export const EPSILON = {
   SMALL: 1e-6,
@@ -45,18 +33,8 @@ export const EPSILON = {
 // Grid configuration
 export const COLUMNS = 33 // odd number so that there is a center column
 
-// The pool is exactly the window above: rows wrap through it by ROWS_RENDERED, so anything else
-// leaves gaps or overlap. Widening the visible track by N rows costs N pool rows here.
-export const ROWS_RENDERED = ROW_VISIBILITY_AHEAD_SPAN + ROW_VISIBILITY_BEHIND_SPAN
-
 // Heights
-export const RAISED_Y = -TILE_SIZE / 2 // top of tile at y=0
-export const UNRAISED_Y = -100 // sunken obstacles (out of sight)
-export const raisedMaskToY = (value: 0 | 1): number => (value === 1 ? RAISED_Y : UNRAISED_Y)
-
-const HIDE_POSITION_Y = -20 as const
-const HIDE_POSITION_Z = 10 as const
-export const HIDDEN_POSITION: [number, number, number] = [0, HIDE_POSITION_Y, HIDE_POSITION_Z]
+export const RAISED_Y = -TILE_SIZE / 2
 
 export const CONFETTI_ROW_DEPTH = TILE_SIZE
 

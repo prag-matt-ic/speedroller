@@ -95,7 +95,10 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
     setLookAt(
       playerPosition.current[0],
       position.y + (isOverlayOpen ? OVERLAY_Y_OFFSET : 0),
-      position.z + inputZOffset + (isOverlayOpen ? OVERLAY_Z_OFFSET : 0),
+      playerPosition.current[2] +
+        position.z +
+        inputZOffset +
+        (isOverlayOpen ? OVERLAY_Z_OFFSET : 0),
       lookAtX,
       LOOK_AT_HEIGHT,
       lookAt[2],

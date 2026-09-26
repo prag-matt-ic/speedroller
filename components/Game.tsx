@@ -59,7 +59,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
       rendererProps={rendererProps}
       camera={{
         position: [0, cameraPosition.y, cameraPosition.z],
-        far: process.env.NODE_ENV === 'development' ? 100 : 40,
+        far: 50,
         fov: 65,
       }}>
       <PerformanceMonitor

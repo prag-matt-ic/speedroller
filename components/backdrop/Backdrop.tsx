@@ -2,11 +2,12 @@
 
 import { useTexture } from '@react-three/drei'
 import { useLocalNodes } from '@react-three/fiber/webgpu'
-import { type FC, useLayoutEffect, useRef } from 'react'
+import { type FC, useCallback, useLayoutEffect, useRef } from 'react'
 import { float, smoothstep, texture, uv, vec2 } from 'three/tsl'
-import { BufferAttribute, type PlaneGeometry } from 'three'
+import { BufferAttribute, type Mesh, type PlaneGeometry, type Vector3Tuple } from 'three'
 
 import backdrop from '@/assets/textures/backdrop/bg-03.webp'
+import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import { TILE_SIZE } from '@/utils/tiles'
 
 const BACKDROP_SEGMENT_COUNT = 6
@@ -28,7 +29,14 @@ const easeInExpo = (value: number) =>
 
 const Backdrop: FC = () => {
   const backdropColour = useTexture(backdrop.src)
+  const meshRef = useRef<Mesh>(null)
   const geometryRef = useRef<PlaneGeometry | null>(null)
+  const followPlayer = useCallback((position: Vector3Tuple) => {
+    if (!meshRef.current) return
+    // This decorative horizon travels with the view while the playable course stays fixed.
+    meshRef.current.position.z = BACKDROP_POSITION[2] + position[2]
+  }, [])
+  usePlayerPosition(followPlayer)
 
   // Port of backdrop.frag: sample the backdrop, darken it, then fade both U edges.
   const { colorNode } = useLocalNodes(() => {
@@ -104,10 +112,12 @@ const Backdrop: FC = () => {
     position.needsUpdate = true
     uvAttribute.needsUpdate = true
     geometry.computeVertexNormals()
+    geometry.computeBoundingBox()
+    geometry.computeBoundingSphere()
   }, [])
 
   return (
-    <mesh position={BACKDROP_POSITION} rotation={BACKDROP_ROTATION}>
+    <mesh ref={meshRef} position={BACKDROP_POSITION} rotation={BACKDROP_ROTATION}>
       <planeGeometry
         ref={geometryRef}
         args={[1, 1, BACKDROP_SEGMENT_COUNT, BACKDROP_SEGMENT_COUNT]}

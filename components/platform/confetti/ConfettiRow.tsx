@@ -1,12 +1,12 @@
 'use client'
 
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
-  RapierRigidBody,
   RigidBody,
 } from '@react-three/rapier'
-import { type FC, type RefObject, useCallback, useEffect, useMemo } from 'react'
+import { type FC, useCallback, useMemo, useRef } from 'react'
 import { type Vector3Tuple } from 'three'
 
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
@@ -20,22 +20,18 @@ import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { TILE_SIZE } from '@/utils/tiles'
 
 type Props = {
-  ref: RefObject<RapierRigidBody | null>
-  isVisible: boolean
+  position: Vector3Tuple
   width: number
   depth: number
-  emitterRefs: readonly [
-    RefObject<ConfettiParticleEmitterHandle | null>,
-    RefObject<ConfettiParticleEmitterHandle | null>,
-  ]
   index: number
 }
 
 const EMITTER_EDGE_PADDING = TILE_SIZE * 0.5
 
-const ConfettiRow: FC<Props> = ({ ref, isVisible, width, depth, emitterRefs, index }) => {
+const ConfettiRow: FC<Props> = ({ position, width, depth, index }) => {
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
-  const [leftEmitterRef, rightEmitterRef] = emitterRefs
+  const leftEmitterRef = useRef<ConfettiParticleEmitterHandle>(null)
+  const rightEmitterRef = useRef<ConfettiParticleEmitterHandle>(null)
 
   const emitterOffset = useMemo(() => width * 0.5 + EMITTER_EDGE_PADDING, [width])
 
@@ -62,40 +58,25 @@ const ConfettiRow: FC<Props> = ({ ref, isVisible, width, depth, emitterRefs, ind
     playSoundFX(SoundFX.CONFETTI_BURST)
   }, [leftEmitterRef, rightEmitterRef, playSoundFX])
 
-  const resetEmitters = useCallback(() => {
-    leftEmitterRef.current?.reset()
-    rightEmitterRef.current?.reset()
-  }, [leftEmitterRef, rightEmitterRef])
-
   const onIntersectionEnter = useCallback<IntersectionEnterHandler>(
     (event) => {
-      if (!isVisible) return
       const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
       if (!otherUserData || otherUserData.type !== 'player') return
       triggerBurst()
     },
-    [isVisible, triggerBurst],
+    [triggerBurst],
   )
-
-  useEffect(() => {
-    if (!isVisible) {
-      resetEmitters()
-    }
-  }, [isVisible, resetEmitters])
 
   return (
     <RigidBody
-      ref={ref}
-      type="dynamic"
-      gravityScale={0}
-      friction={0}
-      mass={0}
-      position={[0, 0, 0]}
+      type="fixed"
+      position={position}
       colliders={false}
       userData={userData}>
       <CuboidCollider
         args={[width / 2, PLAYER_RADIUS, depth / 2]}
         sensor={true}
+        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
         mass={0}
         friction={0}
         collisionGroups={COLLISION_GROUPS.confettiSensor}
@@ -105,14 +86,14 @@ const ConfettiRow: FC<Props> = ({ ref, isVisible, width, depth, emitterRefs, ind
       <ConfettiParticleEmitter
         ref={leftEmitterRef}
         position={leftEmitterPosition}
-        isVisible={isVisible}
+        isVisible={true}
         confettiIndex={index}
         seedOffset={index * 2}
       />
       <ConfettiParticleEmitter
         ref={rightEmitterRef}
         position={rightEmitterPosition}
-        isVisible={isVisible}
+        isVisible={true}
         confettiIndex={index}
         seedOffset={index * 5 + 1}
       />

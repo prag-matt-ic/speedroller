@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/refs */
 'use client'
 
+import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { useGSAP } from '@gsap/react'
 import { Html } from '@react-three/drei'
 import { type HtmlProps } from '@react-three/drei/webgpu'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useFrame, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
   type IntersectionExitHandler,
-  RapierRigidBody,
   RigidBody,
 } from '@react-three/rapier'
 import gsap from 'gsap'
@@ -20,16 +20,18 @@ import {
   type RefObject,
   Suspense,
   useCallback,
+  useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
 import { Transition } from 'react-transition-group'
 import { twMerge } from 'tailwind-merge'
 import { float, mix, uv, vec2, vec3, vertexStage } from 'three/tsl'
-import { type Vector3Tuple } from 'three'
+import { Frustum, Matrix4, Sphere, Vector3, type Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
-import { useGameStore } from '@/components/GameProvider'
+import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
@@ -45,7 +47,6 @@ import {
   INFO_ZONE_ROWS,
   INFO_ZONE_WIDTH,
 } from '@/utils/platform/infoZoneDimensions'
-import { HIDDEN_POSITION } from '@/utils/tiles'
 
 import IconSphere from './iconSphere/IconSphere'
 
@@ -54,6 +55,7 @@ gsap.registerPlugin(EasePack)
 // Corner bracket tuning, carried over from infoZone.frag.
 const BORDER_THICKNESS_TILES = 0.25
 const CORNER_LENGTH_TILES = 0.5
+const DEFAULT_INFO_POSITION_OFFSET: Vector3Tuple = [0, 0, 3.5]
 
 type InfoZoneUniforms = {
   uAspect: UniformNode<'float', number>
@@ -70,10 +72,9 @@ const createInfoZoneUniforms = (aspect: number, tilesX: number, tilesY: number) 
 })
 
 export type InfoZoneProps = PropsWithChildren<{
-  ref: RefObject<RapierRigidBody | null>
+  position: Vector3Tuple
   /** Stable, unique per zone: its uniforms are registered under this scope. */
   zoneKey: string
-  isVisible: boolean
   infoContainerClassName?: string
   infoPositionOffset?: Vector3Tuple
   alwaysShowInfo?: boolean
@@ -87,16 +88,16 @@ const userData: InfoZoneUserData = {
 
 // Shows HTML content when the player enters the zone
 export const InfoZone: FC<InfoZoneProps> = ({
-  ref,
+  position,
   zoneKey,
-  isVisible,
   infoContainerClassName,
   children,
-  infoPositionOffset = [0, 0, 3.5],
+  infoPositionOffset = DEFAULT_INFO_POSITION_OFFSET,
   alwaysShowInfo = false,
   infoContentHtmlProps = {},
   iconSrc,
 }) => {
+  const gameStore = useGameStoreAPI()
   const isMobile = useGameStore((s) => s.isMobile)
   const htmlPortal = useGameStore((s) => s.htmlPortal)
   const setCameraLookAtPosition = useGameStore((s) => s.setCameraLookAtPosition)
@@ -105,6 +106,24 @@ export const InfoZone: FC<InfoZoneProps> = ({
 
   const [showInfo, setShowInfo] = useState(alwaysShowInfo)
   const infoContainer = useRef<HTMLDivElement>(null)
+  const [isInView, setIsInView] = useState(false)
+  const previousInView = useRef(false)
+  const frustum = useRef(new Frustum())
+  const viewProjection = useRef(new Matrix4())
+  const panelBounds = useMemo(() => new Sphere(
+    // The rigid body rotates the floor plane -PI/2 around X.
+    new Vector3(position[0] + infoPositionOffset[0], position[1] + infoPositionOffset[2], position[2] - infoPositionOffset[1]),
+    INFO_ZONE_WIDTH,
+  ), [position, infoPositionOffset])
+
+  useFrame(({ camera }) => {
+    viewProjection.current.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    frustum.current.setFromProjectionMatrix(viewProjection.current, camera.coordinateSystem)
+    const visible = frustum.current.intersectsSphere(panelBounds)
+    if (visible === previousInView.current) return
+    previousInView.current = visible
+    setIsInView(visible)
+  })
 
   // Registers the zone's uniforms. The graph reads them back off the same scope; uShowProgress is
   // also held here because the enter/exit tweens animate it directly.
@@ -158,23 +177,26 @@ export const InfoZone: FC<InfoZoneProps> = ({
 
   const { colorNode, opacityNode } = useLocalNodes(createNodes)
 
-  const lookAtInfo = () => {
-    if (!isVisible) return
-    if (!ref || !ref.current) return
-    const currentTranslation = ref.current.translation()
-    const targetPosition: Vector3Tuple = [
-      currentTranslation.x - infoPositionOffset[0],
-      currentTranslation.y - infoPositionOffset[1],
-      currentTranslation.z - infoPositionOffset[2],
-    ]
-    setCameraLookAtPosition(targetPosition)
-  }
+  const cameraTarget = useMemo<Vector3Tuple>(() => [
+    position[0] - infoPositionOffset[0],
+    position[1] - infoPositionOffset[1],
+    position[2] - infoPositionOffset[2],
+  ], [position, infoPositionOffset])
+
+  const clearCameraTarget = useCallback(() => {
+    // A late exit from this zone must not clear a newer zone's target.
+    if (gameStore.getState().cameraLookAtPosition === cameraTarget) {
+      setCameraLookAtPosition(null)
+    }
+  }, [cameraTarget, gameStore, setCameraLookAtPosition])
+
+  useEffect(() => clearCameraTarget, [clearCameraTarget])
 
   const onIntersectionEnter: IntersectionEnterHandler = (event) => {
     const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
     if (!otherUserData) return
     if (otherUserData.type !== 'player') return
-    lookAtInfo()
+    setCameraLookAtPosition(cameraTarget)
     if (alwaysShowInfo) return
     setShowInfo(true)
   }
@@ -183,8 +205,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
     const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
     if (!otherUserData) return
     if (otherUserData.type !== 'player') return
-    // Reset camera and hide info when exiting
-    setCameraLookAtPosition(null)
+    clearCameraTarget()
     if (alwaysShowInfo) return
     setShowInfo(false)
   }
@@ -229,26 +250,22 @@ export const InfoZone: FC<InfoZoneProps> = ({
 
   return (
     <RigidBody
-      ref={ref}
-      // KEEP DYNAMIC
-      type="dynamic"
-      gravityScale={0}
-      friction={0}
-      mass={0}
-      position={HIDDEN_POSITION} // Overwritten dynamically in the parent
+      type="fixed"
+      position={position}
       rotation={[-Math.PI / 2, 0, 0]}
       colliders={false}
       userData={userData}>
       <CuboidCollider
         args={[INFO_ZONE_WIDTH / 2, INFO_ZONE_HEIGHT / 2, PLAYER_RADIUS * 2]}
         sensor={true}
+        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
         mass={0}
         friction={0}
         onIntersectionEnter={onIntersectionEnter}
         onIntersectionExit={onIntersectionExit}
         collisionGroups={COLLISION_GROUPS.infoZoneSensor}
       />
-      <group visible={isVisible}>
+      <group>
         {/* Floor tile */}
         <mesh position={[0, 0, 0.01]} renderOrder={2}>
           <planeGeometry args={[INFO_ZONE_WIDTH, INFO_ZONE_HEIGHT]} />
@@ -263,7 +280,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
         <Suspense fallback={null}>
           <IconSphere
             iconSrc={iconSrc}
-            isVisible={isVisible}
+            isVisible={true}
             shouldHide={showInfo}
             zoneKey={zoneKey}
           />
@@ -276,7 +293,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
         </mesh> */}
 
       {/* Info Content */}
-      {isVisible && (
+      {isInView && (
         <Html
           sprite={true}
           center={true}

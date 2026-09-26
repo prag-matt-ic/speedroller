@@ -11,16 +11,10 @@ import { type UniformNode } from 'three/webgpu'
 export const CORE_UNIFORM_SCOPE = 'core'
 
 export type CoreUniforms = {
-  /** World-space Z the platform has scrolled to. Drives the tile and floating-tile noise fields. */
-  uScrollZ: UniformNode<'float', number>
-  /**
-   * Player position in world space. Written once by `Platform` from the store subscription that
-   * already exists there, rather than each consumer subscribing again.
-   */
+  /** Player world position, written once by GameUniforms for every material. */
   uPlayerWorldPos: UniformNode<'vec3', Vector3>
 }
 
 export const createCoreUniforms = () => ({
-  uScrollZ: 0,
   uPlayerWorldPos: new Vector3(),
 })

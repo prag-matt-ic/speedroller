@@ -13,7 +13,7 @@ import {
   vec3,
   vertexStage,
 } from 'three/tsl'
-import { Color } from 'three'
+import { Color, Sphere, type TorusGeometry, Vector3 } from 'three'
 import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -144,9 +144,16 @@ const Ring: FC<Props> = ({
     [shaderRef, uniforms.uExitProgress],
   )
 
+  const setAnimationBounds = useCallback((geometry: TorusGeometry | null) => {
+    if (!geometry) return
+    // Includes every rotation and the two-unit collection lift.
+    geometry.boundingSphere = new Sphere(new Vector3(0, 1, 0), radius + tubeRadius + 1)
+  }, [radius, tubeRadius])
+
   return (
     <mesh visible={isVisible}>
       <torusGeometry
+        ref={setAnimationBounds}
         args={[radius, tubeRadius, ringConfig.radialSegments, ringConfig.tubularSegments]}
       />
       <meshBasicNodeMaterial

@@ -11,7 +11,7 @@ import {
 import gsap from 'gsap'
 import { type FC, useCallback, useEffect, useId, useRef } from 'react'
 import { float, shapeCircle, time, vertexStage } from 'three/tsl'
-import { AdditiveBlending, type Vector3Tuple } from 'three'
+import { AdditiveBlending, type InstancedMesh, Sphere, Vector3, type Vector3Tuple } from 'three'
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -170,20 +170,29 @@ const Particles: FC<Props> = ({
   useFrame(
     () => {
       uBurstProgress.value = progress.current.value
-      // Once the burst has settled (progress 1) the render node derives the settled float from
-      // `time` alone and ignores the burst buffer, so skip the compute pass until the next burst.
-      if (progress.current.value >= 1) return
+      // Before collection particles are transparent; after the burst the render node derives
+      // their settled float from `time`. Only the active burst needs a compute dispatch.
+      if (progress.current.value <= 0 || progress.current.value >= 1) return
       renderer.compute(simulation.updateParticles)
     },
     { fps: particleFps === 0 ? undefined : particleFps, enabled: isVisible },
   )
 
+  const setAnimationBounds = useCallback((mesh: InstancedMesh | null) => {
+    if (!mesh) return
+    const horizontalExtent = Math.max(tileWidth, tileHeight) / 2 + gemScale * 8 * 0.25 + 1
+    const verticalExtent = Math.max(gemPosition[1] + gemScale, Math.max(0.5, gemScale * 10) * 1.4 * 0.25 + gemScale * 8 * 0.25) + 1
+    mesh.boundingSphere = new Sphere(new Vector3(), Math.hypot(horizontalExtent, verticalExtent, horizontalExtent))
+  }, [gemPosition, gemScale, tileHeight, tileWidth])
+
   return (
-    <sprite
+    <instancedMesh
+      ref={setAnimationBounds}
+      args={[undefined, undefined, particleCount]}
       position={position}
       count={particleCount}
-      frustumCulled={false}
       visible={isVisible}>
+      <planeGeometry args={[1, 1]} />
       <spriteNodeMaterial
         colorNode={render.colorNode}
         opacityNode={render.opacityNode}
@@ -194,7 +203,7 @@ const Particles: FC<Props> = ({
         depthTest={false}
         blending={AdditiveBlending}
       />
-    </sprite>
+    </instancedMesh>
   )
 }
 

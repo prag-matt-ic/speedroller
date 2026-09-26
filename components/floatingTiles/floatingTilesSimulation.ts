@@ -23,9 +23,8 @@ import type { ComputeNode, Node, StorageBufferNode, UniformNode } from 'three/we
 // old scheme needed: particle state is keyed by `instanceIndex` instead of a texture uv, so the
 // instance-to-texel mapping, the padded slot count and the per-frame texture read-back all go.
 //
-// The spawn mask stays a texture rather than becoming a storage buffer. It is rewritten row by row
-// while the platform streams, and a texture re-uploads on `needsUpdate`, where a storage buffer
-// would have been a one-off snapshot of the mask taken when the buffers were built.
+// Each fixed terrain batch owns an immutable spawn-mask texture, shared by its seeded buffers
+// and respawn kernel for the lifetime of that layout.
 
 /** Speed range a respawned particle picks up — the GLSL's respawn constants. */
 const RESPAWN_SPEED_MIN = 1.0
