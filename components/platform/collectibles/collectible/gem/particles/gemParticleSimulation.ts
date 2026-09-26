@@ -3,17 +3,16 @@
 import {
   Fn,
   clamp,
+  color,
   float,
   fract,
   instanceIndex,
   instancedArray,
-  positionGeometry,
   max,
   mix,
   select,
   sin,
   smoothstep,
-  uv,
   vec2,
   vec3,
   vec4,
@@ -64,10 +63,6 @@ const SETTLE_PULSE_OPACITY_MIN = 0.6
 const TRAIL_FADE_START = 0.6
 const TRAIL_FADE_END = 0.75
 const SPARKLE_SOFTNESS = 2.0
-const SPARKLE_SOFTNESS_THRESHOLD = 1.5
-const SHAPE_RADIUS = 0.5
-const SHAPE_SOFT_EDGE_MAX = 0.45
-const QUAD_UV_CENTER = 0.5
 
 /**
  * World-space quad edge length. The GLSL sized points in pixels, so this is a re-authoring rather
@@ -93,8 +88,8 @@ export type GemParticleSeedInput = {
    * stay at the component's `position` prop and the parent group's rotation keeps working.
    */
   origin: readonly [number, number, number]
-  /** Linear RGB triples, one per palette entry. */
-  palette: readonly (readonly [number, number, number])[]
+  /** sRGB hex strings, one per palette entry. */
+  palette: readonly string[]
 }
 
 /** Uniformly distributed point inside a unit octahedron, scaled by a biased radius. */
@@ -279,18 +274,18 @@ export const createGemParticleSimulation = (
  */
 const pickPaletteColour = (
   paletteIndex: Node<'float'>,
-  palette: readonly (readonly [number, number, number])[],
-): Node<'vec3'> => {
+  palette: readonly string[],
+): Node<'color'> => {
   const entries = PALETTE_LOOKUP_SIZE
   const colours = palette.slice(0, entries)
-  const fallback = colours[colours.length - 1] ?? ([1, 1, 1] as const)
+  const fallback = colours[colours.length - 1] ?? '#ffffff'
 
-  let resolved: Node<'vec3'> = vec3(fallback[0], fallback[1], fallback[2])
+  let resolved: Node<'color'> = color(fallback)
   for (let index = entries - 2; index >= 0; index--) {
     const colour = colours[index] ?? fallback
     resolved = select(
       paletteIndex.lessThan(index + 1),
-      vec3(colour[0], colour[1], colour[2]),
+      color(colour),
       resolved,
     )
   }
@@ -303,22 +298,24 @@ export type GemParticleRenderOptions = {
   motion: GemParticleMotionUniforms
   /** Distance fade toward the camera, applied by the caller so this module stays scene-agnostic. */
   distanceFade: Node<'float'>
-  /** The palette the seed data indexes into, in linear RGB. */
-  palette: readonly (readonly [number, number, number])[]
+  /** The palette the seed data indexes into, as sRGB hex strings. */
+  palette: readonly string[]
 }
 
 export type GemParticleRenderNodes = {
   positionNode: Node<'vec3'>
+  scaleNode: Node<'vec2'>
   colorNode: Node<'vec3'>
   opacityNode: Node<'float'>
 }
 
 /**
- * Builds the render nodes for the instanced quads.
+ * Builds the render nodes for the instanced, camera-facing sprites.
  *
- * The GLSL carried vColorAlpha and vSoftness across as varyings because the fragment stage had no
- * access to the vertex data. Here the buffers are readable from any stage, so both are computed once
- * and the quad only supplies its shape mask.
+ * The sprite material supplies the billboard and the `maskNode` circle, so the graph only has to
+ * produce the per-particle anchor, size, colour and opacity. The GLSL carried vColorAlpha and
+ * vSoftness across as varyings because the fragment stage had no access to the vertex data; here
+ * those are hoisted to the vertex stage so they run once per particle instead of per fragment.
  */
 export const createGemParticleRenderNodes = ({
   buffers,
@@ -413,27 +410,10 @@ export const createGemParticleRenderNodes = ({
   )
 
   return {
-    // positionGeometry is the plane's own [-0.5, 0.5] corner offset.
-    positionNode: particlePosition.add(positionGeometry.mul(baseSize)),
+    positionNode: particlePosition,
+    scaleNode: vec2(baseSize),
     colorNode: glowColor,
-    opacityNode: baseOpacity.mul(quadShapeMask(softness)),
+    opacityNode: baseOpacity,
   }
-}
-
-/** Distance from the quad's centre in uv space, spanning 0..~0.707. */
-const uvCentredLength = (): Node<'float'> => uv().sub(QUAD_UV_CENTER).length()
-
-/**
- * The quad's shape mask, matching point.frag's two branches: a soft-edged disc, or a pow2 falloff
- * for sparkles. Softness above 1.5 selects the sparkle form, exactly as the GLSL's sentinel did.
- */
-const quadShapeMask = (softness: Node<'float'>): Node<'float'> => {
-  const centredDistance = uvCentredLength()
-  const softEdge = mix(float(0), float(SHAPE_SOFT_EDGE_MAX), softness)
-  const hardRadius = float(SHAPE_RADIUS).sub(softEdge.mul(SHAPE_RADIUS))
-  const standard = float(1).sub(smoothstep(hardRadius.mul(2), float(1), centredDistance))
-  const falloff = float(1).sub(centredDistance.mul(4)).max(0)
-
-  return select(softness.greaterThan(SPARKLE_SOFTNESS_THRESHOLD), falloff.mul(falloff), standard)
 }
 

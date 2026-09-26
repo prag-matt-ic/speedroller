@@ -1,7 +1,5 @@
-import { PI2, cos } from 'three/tsl'
+import { PI2, cos, Fn } from 'three/tsl'
 import type { Node } from 'three/webgpu'
-
-import { createTSLFn } from '@/resources/tsl/createTSLFn'
 
 // Port of resources/glsl/palette.glsl
 //
@@ -10,7 +8,7 @@ import { createTSLFn } from '@/resources/tsl/createTSLFn'
 //   }
 //
 // https://iquilezles.org/articles/palettes/
-export const cosinePalette = /*#__PURE__*/ createTSLFn(
+export const cosinePalette = /*#__PURE__*/ Fn(
   ([t, a, b, c, d]: readonly [
     t: Node<'float'>,
     a: Node<'vec3'>,

@@ -1,7 +1,6 @@
-import { float, fwidth, max, smoothstep, vec2 } from 'three/tsl'
+import { float, fwidth, max, Fn,smoothstep, vec2 } from 'three/tsl'
 import type { Node } from 'three/webgpu'
 
-import { createTSLFn } from '@/resources/tsl/createTSLFn'
 import { sdBox } from '@/resources/tsl/sdBox'
 
 // Port of resources/glsl/paintCorners.glsl (which itself glslifies sdBox.glsl).
@@ -11,7 +10,7 @@ import { sdBox } from '@/resources/tsl/sdBox'
 
 const MIN_AA = 1e-4
 
-export const paintCorners = /*#__PURE__*/ createTSLFn(
+export const paintCorners = /*#__PURE__*/ Fn(
   ([
     heightSpacePosition,
     aspect,

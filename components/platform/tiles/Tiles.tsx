@@ -21,6 +21,8 @@ import {
   cross,
   dot,
   float,
+  Fn,
+  If,
   floor,
   fract,
   max,
@@ -30,7 +32,6 @@ import {
   positionGeometry,
   positionLocal,
   positionWorld,
-  select,
   sin,
   smoothstep,
   sqrt,
@@ -271,21 +272,25 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
 
       const backgroundNoise = mx_noise_float(backgroundNoisePosition).mul(0.5).add(0.5)
 
-      // Detail noise, one of three maps per instance. All three are sampled and the result is
-      // selected, which keeps the graph branch-free at the cost of two extra taps.
+      // Detail noise, one of three maps per instance. The index depends only on the per-instance
+      // seed, so the sin/fract/floor inside hashFloat runs once per vertex; the branch below is on
+      // that per-instance index, so a tile's fragments take the same path and only the selected
+      // texture is sampled — one fetch per fragment instead of three.
       const detailUv = uv()
-      // The index depends only on the per-instance seed, so the sin/fract/floor inside hashFloat
-      // runs once per vertex and the fragment stage just reads the varying.
       const detailIndex = vertexStage(floor(hashFloat(tileSeed.mul(438.54)).mul(3)))
-      const detailNoise = select(
-        detailIndex.lessThan(0.5),
-        texture(detailNoiseTextures[0], detailUv).r,
-        select(
-          detailIndex.lessThan(1.5),
-          texture(detailNoiseTextures[1], detailUv).r,
-          texture(detailNoiseTextures[2], detailUv).r,
-        ),
-      )
+      const detailNoise = Fn(() => {
+        const sample = float(0).toVar()
+        If(detailIndex.lessThan(0.5), () => {
+          sample.assign(texture(detailNoiseTextures[0], detailUv).r)
+        })
+          .ElseIf(detailIndex.lessThan(1.5), () => {
+            sample.assign(texture(detailNoiseTextures[1], detailUv).r)
+          })
+          .Else(() => {
+            sample.assign(texture(detailNoiseTextures[2], detailUv).r)
+          })
+        return sample
+      })()
 
       // The GLSL gated the subtraction behind its quality flag; the flag is 0 or 1, so multiplying
       // by it keeps the graph branch-free without changing the result.
@@ -293,10 +298,12 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ ref, onReadyChange }) =>
         detailNoise.mul(scoped.uAddDetailNoise).mul(DETAIL_NOISE_STRENGTH),
       )
 
-      const highlightedMix = mix(HIGHLIGHTED_MIX_MIN, HIGHLIGHTED_MIX_MAX, tileSeed)
-      const mixAmount = mix(REGULAR_MIX, highlightedMix, isHighlighted)
-
-      const proximityMixAmount = mix(PLAYER_PROXIMITY_MIX, mixAmount, isHighlighted)
+      // Per-instance scalar mixes derived only from the seed and highlight flag: hoist them to the
+      // vertex stage so the fragment stage reads two varyings instead of re-deriving them per pixel.
+      const mixAmount = vertexStage(
+        mix(REGULAR_MIX, mix(HIGHLIGHTED_MIX_MIN, HIGHLIGHTED_MIX_MAX, tileSeed), isHighlighted),
+      )
+      const proximityMixAmount = vertexStage(mix(PLAYER_PROXIMITY_MIX, mixAmount, isHighlighted))
       const proximityColour = mix(vec3(1), backgroundColour, proximityMixAmount)
       const background = mix(
         mix(vec3(1), backgroundColour, mixAmount),

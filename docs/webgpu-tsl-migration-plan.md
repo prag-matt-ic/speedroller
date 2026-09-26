@@ -297,26 +297,7 @@ order:
 | `paintCorners.glsl` | `paintCorners.ts` | `computeFwidth` collapses to TSL `fwidth`. |
 | `fadeDistance.glsl` | `fadeDistance.ts` | Feeds 10 GLSL vertex stages — ported first for leverage. |
 | `cameraFadeNear.glsl` | `cameraFadeNear.ts` | |
-| — | `createTSLFn.ts` | Shared `Fn` + `setLayout` typing helper. |
 
-**TSL authoring gotchas found while porting** — these cost real time, so do not rediscover them:
-
-- `@types/three` types TSL loosely. `abs` returns a generic `Node`, which then fails the *overload*
-  resolution of `smoothstep` and `select`. **Annotate params and returns explicitly** as
-  `Node<'float'>` / `Node<'vec2'>` / `Node<'vec3'>`, and give `reduce` an explicit generic.
-- `discard` is exported as **`Discard`** (capital D).
-- `uv()` is a node factory: call it once, bind the result. Repeated calls build redundant
-  sub-graphs.
-- Node materials **are** valid JSX (`<meshBasicNodeMaterial colorNode={...} />`) — verified by
-  compiling a probe inside this project. R3F v10's WebGPU entry auto-extends them.
-
-**Exit criteria (revised):** ~~each helper pinned against the GLSL reference values with a test~~.
-**Testing is deliberately deferred** — this repo has no test runner installed (no vitest/jest, no
-`test` script, no existing `.test.*` files), and adding one is out of scope for the migration. The
-palette helpers are therefore unverified against the GLSL numerically. Verification is visual,
-per-port, against the WebGL build. If drift does surface in the palettes later, the reference
-values are in `resources/glsl/*.glsl` and the port is a direct transliteration, so a retro-fit test
-is cheap. Run `optimize-tsl` over the helpers when convenient.
 
 ### Phase 2a — The TSL component pattern (established)
 Every port follows this shape, taken from the Threenix examples (`Garden.tsx`, `CurveDebris.tsx`,

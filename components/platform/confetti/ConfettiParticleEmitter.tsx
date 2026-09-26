@@ -265,6 +265,9 @@ const ConfettiParticleEmitter = forwardRef<ConfettiParticleEmitterHandle, Props>
           float(MAX_SOFT_EDGE),
           fract(seed.mul(31)),
         )
+        // hardRadius depends only on the per-particle seed: hoist it to the vertex stage so the
+        // fragment mask keeps only the uv-dependent smoothstep.
+        const hardRadius = vertexStage(softEdgeRadius(softEdge))
 
         // The fade depends only on the emitter's own z, so it is one value for the whole burst:
         // the vertex stage evaluates it once per quad and the fragment stage reads the varying.
@@ -274,7 +277,7 @@ const ConfettiParticleEmitter = forwardRef<ConfettiParticleEmitterHandle, Props>
           positionNode: particlePosition.add(positionGeometry.mul(particleScale)),
           colorNode: particleColour.mul(opacity),
           opacityNode: opacity
-            .mul(softCircleMask({ hardRadius: softEdgeRadius(softEdge) }))
+            .mul(softCircleMask({ hardRadius }))
             .mul(distanceFade),
         }
       },

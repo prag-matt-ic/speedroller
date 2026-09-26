@@ -9,9 +9,9 @@ import {
   useUniforms,
 } from '@react-three/fiber/webgpu'
 import gsap from 'gsap'
-import { type FC, useCallback, useEffect, useId, useMemo, useRef } from 'react'
-import { float, time, vertexStage } from 'three/tsl'
-import { AdditiveBlending, Color, type Vector3Tuple } from 'three'
+import { type FC, useCallback, useEffect, useId, useRef } from 'react'
+import { float, shapeCircle, time, vertexStage } from 'three/tsl'
+import { AdditiveBlending, type Vector3Tuple } from 'three'
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -20,7 +20,6 @@ import {
   createGemParticleBuffers,
   createGemParticleRenderNodes,
   createGemParticleSimulation,
-  GEM_PARTICLE_QUAD_SIZE,
 } from '@/components/platform/collectibles/collectible/gem/particles/gemParticleSimulation'
 import { CollectibleID } from '@/model/schema'
 import { GEMS_COLOURS_BY_ID, GOLD_PARTICLE_PALETTE } from '@/resources/colours'
@@ -49,14 +48,6 @@ type Props = {
   isVisible: boolean
 }
 
-const tempColour = new Color()
-
-const toLinearPalette = (palette: readonly string[]): readonly (readonly [number, number, number])[] =>
-  palette.map((hex) => {
-    tempColour.set(hex)
-    return [tempColour.r, tempColour.g, tempColour.b] as const
-  })
-
 /**
  * Gem particles: a burst that lifts out of the tile and settles into a floating cloud inside the gem.
  * The static per-particle data is seeded once on the CPU when the buffers are created.
@@ -82,7 +73,6 @@ const Particles: FC<Props> = ({
   const previouslyConfirmed = useRef(false)
 
   const particlePalette = GEMS_COLOURS_BY_ID[id]?.particlesPalette ?? GOLD_PARTICLE_PALETTE
-  const palette = useMemo(() => toLinearPalette(particlePalette), [particlePalette])
 
   // One burst system per gem: a shared scope would let one gem drive every gem's particles.
   const particleScope = `${GEM_PARTICLE_UNIFORM_SCOPE}_${useId().replace(/[^a-zA-Z0-9]/g, '')}`
@@ -103,7 +93,7 @@ const Particles: FC<Props> = ({
         tileWidth,
         tileHeight,
         origin: gemPosition,
-        palette,
+        palette: particlePalette,
       })
       const motion = {
         uBurstProgress: scoped.uBurstProgress,
@@ -118,11 +108,11 @@ const Particles: FC<Props> = ({
           motion,
           // The emitter's own z, shared with the shell it bursts out of.
           distanceFade: useDistanceFade ? vertexStage(fadeInOut(uPlayerWorldPos.z)) : float(1),
-          palette,
+          palette: particlePalette,
         }),
       }
     },
-    [gemPosition, gemScale, particleCount, particleScope, palette, tileHeight, tileWidth, useDistanceFade],
+    [gemPosition, gemScale, particleCount, particlePalette, particleScope, tileHeight, tileWidth, useDistanceFade],
   )
 
   const { simulation, render } = useLocalNodes(createNodes)
@@ -189,22 +179,22 @@ const Particles: FC<Props> = ({
   )
 
   return (
-    <instancedMesh
+    <sprite
       position={position}
-      args={[undefined, undefined, particleCount]}
       count={particleCount}
       frustumCulled={false}
       visible={isVisible}>
-      <planeGeometry args={[GEM_PARTICLE_QUAD_SIZE, GEM_PARTICLE_QUAD_SIZE]} />
-      <meshBasicNodeMaterial
+      <spriteNodeMaterial
         colorNode={render.colorNode}
         opacityNode={render.opacityNode}
         positionNode={render.positionNode}
+        scaleNode={render.scaleNode}
+        maskNode={shapeCircle()}
         transparent
         depthTest={false}
         blending={AdditiveBlending}
       />
-    </instancedMesh>
+    </sprite>
   )
 }
 

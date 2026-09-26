@@ -6,13 +6,14 @@ import { type FC, type RefObject, Suspense, useCallback, useRef } from 'react'
 import {
   clamp,
   float,
+  Fn,
+  If,
   mix,
   modelWorldMatrix,
   mx_noise_float,
   normalView,
   positionGeometry,
   positionView,
-  select,
   smoothstep,
   vec3,
   vec4,
@@ -124,23 +125,27 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
 
       const baseColor = getColourFromPalette(scoped.uPaletteIndex, paletteT)
 
-      // applyConfirmingReveal: the GLSL early-returns when there is no confirming palette, so the
-      // reveal collapses to a select against the base colour.
-      const confirmingColor = getColourFromPalette(scoped.uConfirmingPaletteIndex, paletteT)
-      const clampedProgress = clamp(scoped.uConfirmingProgress, float(0), float(1))
-      const height01 = unitLocalPosition.y.mul(0.5).add(0.5)
-      const revealSmoothness = REVEAL_SMOOTHNESS * 1.35
-      const revealEdgeLow = clamp(height01.sub(revealSmoothness), float(0), float(1))
-      const revealEdgeHigh = clamp(height01.add(revealSmoothness), float(0), float(1))
-      const reveal = smoothstep(revealEdgeLow, revealEdgeHigh, clampedProgress)
+      // applyConfirmingReveal: the GLSL early-returns when there is no confirming palette. The
+      // confirming lookup is a cosine palette (3 cos + 4 uniform loads) per fragment, so it moves
+      // behind a uniform branch: `hasConfirmingPalette` derives from uniforms, so the branch has no
+      // per-fragment divergence and skips the whole reveal subtree the rest of the time.
       const hasConfirmingPalette = scoped.uConfirmingPaletteIndex
         .greaterThanEqual(0)
         .and(scoped.uConfirmingProgress.greaterThan(0))
-      const baseMarbleColor = select(
-        hasConfirmingPalette,
-        mix(baseColor, confirmingColor, reveal),
-        baseColor,
-      )
+      const baseMarbleColor = Fn(() => {
+        const marble = baseColor.toVar()
+        If(hasConfirmingPalette, () => {
+          const confirmingColor = getColourFromPalette(scoped.uConfirmingPaletteIndex, paletteT)
+          const clampedProgress = clamp(scoped.uConfirmingProgress, float(0), float(1))
+          const height01 = unitLocalPosition.y.mul(0.5).add(0.5)
+          const revealSmoothness = REVEAL_SMOOTHNESS * 1.35
+          const revealEdgeLow = clamp(height01.sub(revealSmoothness), float(0), float(1))
+          const revealEdgeHigh = clamp(height01.add(revealSmoothness), float(0), float(1))
+          const reveal = smoothstep(revealEdgeLow, revealEdgeHigh, clampedProgress)
+          marble.assign(mix(baseColor, confirmingColor, reveal))
+        })
+        return marble
+      })()
 
       // enableVeins is a graph constant: branch at build time so disabling veins omits the noise
       // and pow instead of multiplying their result by zero.

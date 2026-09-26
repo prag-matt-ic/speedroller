@@ -120,7 +120,6 @@ const UI: FC<Props> = ({ isMobile }) => {
           />
         )}
       </Transition>
-      {/* bg-radial from-black/90 from-20% to-black/20 backdrop-blur-md transition-opacity ease-out xl:backdrop-blur-lg */}
 
       <Transition
         in={overlay === Overlay.DASHBOARD}
