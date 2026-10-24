@@ -4,6 +4,7 @@ import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import {
   type FC,
   Suspense,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -37,7 +38,7 @@ import {
   vertexStage,
 } from 'three/tsl'
 import { type InstancedBufferAttribute, InstancedMesh, Matrix4, Sphere, Texture } from 'three'
-import type { Node, UniformNode } from 'three/webgpu'
+import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import tileDetailNoise2 from '@/assets/textures/platform/tile-noise-2.webp'
 import tileDetailNoise3 from '@/assets/textures/platform/tile-noise-3.webp'
@@ -54,7 +55,6 @@ import {
   TILE_PLAYER_FADE_FULL_RADIUS,
   TILE_PLAYER_FADE_MIN_ALPHA,
   TILE_PLAYER_FADE_MIN_RADIUS,
-  TILE_PLAYER_HIGHLIGHT_RADIUS,
   TILE_SIZE,
   TILE_THICKNESS,
   TRAIL_FADE_SECONDS,
@@ -70,7 +70,6 @@ const DARKEN_FACTOR = 0.4
 const HIGHLIGHTED_MIX_MIN = 0.16
 const HIGHLIGHTED_MIX_MAX = 0.32
 const REGULAR_MIX = 0.55
-const PLAYER_PROXIMITY_MIX = 0.88
 const SHADOW_RADIUS = 0.9
 const SHADOW_RADIUS_MAX_SCALE = 1.5
 const SHADOW_RADIUS_MIN_SCALE = 1.0
@@ -82,10 +81,12 @@ const SHADOW_MIN_PLAYER_Y = -0.5
 
 const DETAIL_NOISE_STRENGTH = 0.12
 
-// Trail tint: the marble palette lightened toward white so it matches the tiles' lightness.
+// Trail tint: the marble palette darkened toward black so the trail reads as a painted shadow.
+// The emissive glow keeps the undarkened player colour so the bloom still picks the trail up.
 const TRAIL_PALETTE_T = 0.5
-const TRAIL_WHITEN = 0.55
+const TRAIL_DARKEN = 0.4
 const TRAIL_STRENGTH = 0.85
+const TRAIL_EMISSIVE_STRENGTH = 0.35
 
 // tile.frag's early `if (vAlpha <= 0.001) discard;`. A discard needs a statement stack, which a
 // material graph built at React render time does not have, so the material's own alpha test does it.
@@ -93,7 +94,6 @@ const ALPHA_TEST = 0.001
 
 // One registration owns settings shared by every terrain batch.
 type TileShaderUniforms = {
-  uHighlightRadiusSq: UniformNode<'float', number>
   uFadeFullRadiusSq: UniformNode<'float', number>
   uFadeMinRadiusSq: UniformNode<'float', number>
   uFadeMinAlpha: UniformNode<'float', number>
@@ -109,7 +109,6 @@ type TileConfig = {
 // Radii are squared on the CPU once per mount: the shader compares squared distances, so this
 // avoids re-squaring each radius per fragment and per vertex.
 const createTileUniforms = ({ addDetailNoise, isLowQuality }: TileConfig) => () => ({
-  uHighlightRadiusSq: TILE_PLAYER_HIGHLIGHT_RADIUS * TILE_PLAYER_HIGHLIGHT_RADIUS,
   uFadeFullRadiusSq: TILE_PLAYER_FADE_FULL_RADIUS * TILE_PLAYER_FADE_FULL_RADIUS,
   uFadeMinRadiusSq: TILE_PLAYER_FADE_MIN_RADIUS * TILE_PLAYER_FADE_MIN_RADIUS,
   uFadeMinAlpha: TILE_PLAYER_FADE_MIN_ALPHA,
@@ -121,6 +120,7 @@ type TileNodes = {
   colorNode: Node<'vec3'>
   opacityNode: Node<'float'>
   positionNode: Node<'vec3'>
+  emissiveNode: Node<'vec3'>
 }
 
 type PlatformTilesProps = {
@@ -136,6 +136,17 @@ type TerrainBatchProps = {
 
 const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) => {
   const meshRef = useRef<InstancedMesh>(null)
+
+  // MeshBasicNodeMaterial does not declare `emissiveNode`, but NodeMaterial reads it when building
+  // the lighting graph. Assign it after the material exists and let it recompile once.
+  const attachMaterial = useCallback(
+    (material: MeshBasicNodeMaterial | null) => {
+      if (!material) return
+      Object.assign(material, { emissiveNode: nodes.emissiveNode })
+      material.needsUpdate = true
+    },
+    [nodes.emissiveNode],
+  )
 
   useLayoutEffect(() => {
     const mesh = meshRef.current
@@ -181,6 +192,7 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
         </boxGeometry>
         <Suspense fallback={null}>
           <meshBasicNodeMaterial
+            ref={attachMaterial}
             colorNode={nodes.colorNode}
             opacityNode={nodes.opacityNode}
             positionNode={nodes.positionNode}
@@ -219,7 +231,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
   // Every varying is recomputed in-graph: per-instance attributes are read directly, the sphere-side
   // values are not needed, and world position comes from positionWorld, which already folds in the
   // instance matrix for an instanced mesh.
-  const { colorNode, opacityNode, positionNode } = useLocalNodes(
+  const { colorNode, opacityNode, positionNode, emissiveNode } = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
       const { uPlayerWorldPos, uTime, uPlayerPaletteIndex } =
@@ -233,16 +245,6 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
       const playerOffset = positionWorld.xz.sub(uPlayerWorldPos.xz)
       const distanceSquared = dot(playerOffset, playerOffset)
-
-      // edge0 > edge1 is undefined in GLSL/WGSL smoothstep; express the falloff as the equivalent
-      // well-defined 1 - smoothstep(0, r², d²) so the highlight is portable across backends.
-      const playerHighlight = float(1).sub(
-        smoothstep(
-          float(0),
-          scoped.uHighlightRadiusSq,
-          distanceSquared,
-        ),
-      )
 
       const fadeAmount = smoothstep(
         scoped.uFadeFullRadiusSq,
@@ -325,20 +327,14 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         detailNoise.mul(scoped.uAddDetailNoise).mul(DETAIL_NOISE_STRENGTH),
       )
 
-      // Per-instance scalar mixes derived only from the seed and highlight flag: hoist them to the
-      // vertex stage so the fragment stage reads two varyings instead of re-deriving them per pixel.
+      // Per-instance scalar mix derived only from the seed and highlight flag: hoist it to the
+      // vertex stage so the fragment stage reads a varying instead of re-deriving it per pixel.
       const mixAmount = vertexStage(
         mix(REGULAR_MIX, mix(HIGHLIGHTED_MIX_MIN, HIGHLIGHTED_MIX_MAX, tileSeed), isHighlighted),
       )
-      const proximityMixAmount = vertexStage(mix(PLAYER_PROXIMITY_MIX, mixAmount, isHighlighted))
-      const proximityColour = mix(vec3(1), backgroundColour, proximityMixAmount)
-      const background = mix(
-        mix(vec3(1), backgroundColour, mixAmount),
-        proximityColour,
-        playerHighlight,
-      )
+      const background = mix(vec3(1), backgroundColour, mixAmount)
 
-      // Trail: tiles the ball has just crossed keep a light player-colour tint. The tint and its
+      // Trail: tiles the ball has just crossed keep a darkened player-colour tint. The tint and its
       // fade are constant across a tile's fragments, so both are hoisted to the vertex stage like
       // the mixes above and the fragment stage pays for a single mix.
       const trailAge = uTime.sub(trailTouchedAt)
@@ -347,14 +343,18 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
           .sub(smoothstep(float(0), float(TRAIL_FADE_SECONDS), trailAge))
           .mul(TRAIL_STRENGTH),
       )
-      const trailColour = vertexStage(
-        mix(
-          samplePlayerPalette(float(TRAIL_PALETTE_T), uPlayerPaletteIndex.toInt()),
-          vec3(1),
-          float(TRAIL_WHITEN),
-        ),
+      const playerTrailColour = samplePlayerPalette(
+        float(TRAIL_PALETTE_T),
+        uPlayerPaletteIndex.toInt(),
       )
+      const trailColour = vertexStage(mix(playerTrailColour, vec3(0), float(TRAIL_DARKEN)))
       const backgroundWithTrail = mix(background, trailColour, trailAmount)
+
+      // The trail still publishes the undarkened player colour to the emissive MRT, so the bloom
+      // keeps a faint halo around it without whitening the painted tile.
+      const trailEmissive = vertexStage(
+        playerTrailColour.mul(trailAmount).mul(TRAIL_EMISSIVE_STRENGTH),
+      )
 
       // Player contact shadow. `distanceSquared` is already derived above, so reuse it instead of
       // recomputing the same sub + dot.
@@ -389,6 +389,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         positionNode: tiltedGeometry,
         colorNode: shadowed,
         opacityNode: alpha as Node<'float'>,
+        emissiveNode: trailEmissive,
       }
     },
     [detailNoiseTextures],
@@ -408,7 +409,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
           key={batch.startRow}
           batch={batch}
           trailAttribute={attribute}
-          nodes={{ colorNode, opacityNode, positionNode }}
+          nodes={{ colorNode, opacityNode, positionNode, emissiveNode }}
         />
       ))}
     </group>

@@ -26,6 +26,9 @@ const LIGHT_DIR = /*#__PURE__*/ vec3(0.4383, 0.7622, 0.4764).toConst()
 export const RING_COLOR = new Color('#ffe066')
 export const RING_EMISSIVE = new Color('#ffd43b')
 
+// Strong enough to bloom clearly through the emissive MRT pass; the ring still keeps its base colour.
+const RING_EMISSIVE_STRENGTH = 1.25
+
 // The only value Rings.tsx drives is `uExitProgress`, tweened by gsap on collect. Animation time
 // comes from TSL's built-in `time` node, which the renderer updates itself, so it needs no uniform.
 export type RingUniforms = {
@@ -120,28 +123,40 @@ const Ring: FC<Props> = ({
         ),
       )
 
+      // Bloom is fed from the emissive MRT attachment, so this glow is separate from the base colour
+      // and does not need to survive the speed post pass. Opacity (collection fade) is applied by
+      // the MRT setup, so the emissive node stays a flat per-draw colour.
+      const emissiveNode = color(RING_EMISSIVE).mul(RING_EMISSIVE_STRENGTH)
+
       return {
         positionNode: rotatedPosition,
         colorNode: color(RING_COLOR).mul(lighting).add(color(RING_EMISSIVE).mul(0.4)),
         opacityNode: finalFade,
+        emissiveNode,
       }
     },
     [uniformScope],
   )
 
-  const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes, [createNodes])
-
+  const { colorNode, opacityNode, positionNode, emissiveNode } = useLocalNodes(createNodes, [
+    createNodes,
+  ])
 
   // Rings.tsx tweens `shaderRef.current.uExitProgress` with gsap on collect, so hang that uniform
-  // node off the material rather than changing the contract.
+  // node off the material rather than changing the contract. MeshBasicNodeMaterial does not declare
+  // `emissiveNode`, but NodeMaterial reads it when building the lighting graph, so assign it at runtime.
   const attachUniforms = useCallback(
     (material: MeshBasicNodeMaterial | null) => {
       if (material) {
-        Object.assign(material, { uExitProgress: uniforms.uExitProgress })
+        Object.assign(material, {
+          uExitProgress: uniforms.uExitProgress,
+          emissiveNode,
+        })
+        material.needsUpdate = true
       }
       shaderRef.current = material as RingMaterial | null
     },
-    [shaderRef, uniforms.uExitProgress],
+    [shaderRef, uniforms.uExitProgress, emissiveNode],
   )
 
   const setAnimationBounds = useCallback((geometry: TorusGeometry | null) => {

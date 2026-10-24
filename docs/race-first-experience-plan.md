@@ -1,6 +1,6 @@
 # Race First Experience Implementation Plan
 
-Status: **Race flow agreed; course and speed design revised; implementation not started.**
+Status: **Race flow, Course draft C layout and bitmap artwork approved; runtime integration not started.**
 
 Decision date: **24 October 2026**
 
@@ -14,6 +14,10 @@ This is the race-flow implementation handoff for a new agent. Read
 preserved-course layout and introduces a longer branching course, 45–60-second runs,
 automatic forward movement, and braking to a complete stop with no reverse. Terrain
 remains flat for the course and speed stages; downhill work is deferred.
+
+The approved layout, exact ring/hole/decorative placements, coordinate mapping, and staged
+acceptance are in [the course design](race-course-and-speed-design.md). Its checked-in
+references under `docs/race-course/` are the visual baseline.
 
 The lobby/start/results product choices below remain settled.
 Unchecked items describe work still to do; check them only after implementing and verifying
@@ -77,10 +81,13 @@ Landing screen
 
 ### Versioned source copy
 
-Create a new version by copying the current source directory and leaving earlier versions
-untouched. Use `1.2.0` for the combined course/speed release if it has not already received
-public times. Author the lobby and redesigned course in that copy, using the six-section
-sequence in `docs/race-course-and-speed-design.md` instead of preserving the old track.
+The approved copy is already prepared at `docs/race-course/bitmaps/1.2.0/`. Use its seven
+`race-*.png` files in [manifest order](race-course/bitmaps/manifest.json), with the matching
+non-collidable masks in `docs/race-course/bitmaps/decoration/`. Follow the
+[staged file handoff](race-course/bitmaps/README.md#staged-implementation-handoff).
+Leave historical assets untouched. Use `1.2.0` for the combined course/speed release if it
+has not already received public times; otherwise choose a fresh release version.
+Do not include copied legacy filenames in the new public source list.
 
 Keep the existing bitmap colour conventions and generator. The lobby uses `Stage.HOME`;
 the public finish retains its finish marker and appropriate terrain stage. Keep `test.png`
@@ -88,9 +95,10 @@ available for development. Public information, bonus collectible, and promotiona
 markers are absent; the only colour picker is in the lobby. The old course's geometry and
 ring locations no longer constrain the new design.
 
-- [ ] Copy the source directory without modifying historical assets.
-- [ ] Add the new lobby before the existing course in the generator's source list.
-- [ ] Author the longer branching course and ring placements described in the companion design.
+- [x] Prepare and approve a source copy without modifying historical assets.
+- [ ] Integrate that approved copy when the generator and marker support are ready.
+- [ ] Add the new lobby before the redesigned course in the generator's source list.
+- [x] Author and approve the longer branching course, ring placements and bright-tile details.
 - [ ] Remove obsolete public interaction markers from the new playable layout.
 - [ ] Keep the development map available through developer controls.
 
@@ -106,13 +114,16 @@ All unspecified pixels are black void. Use exact RGB colours without antialiasin
 | Exit corridor | 12–20 inclusive | 24–31 inclusive | White floor, nine tiles wide |
 | Paint Shop | 16 | 12 | One orange marker, `#FF8000` |
 | Guidance path | 16 | 16–24 inclusive | Cyan highlight pixels, `#00FFFF` |
-| Start line | 16 | 27 | One new purple marker, `#8000FF` |
+| Start line | 16 | 32 (first launch row) | One new purple marker, `#8000FF` |
 
 Retain the initial world spawn `[0, 4, 0]` above the practice floor. The existing four colour
 tiles fit across the broad floor. Do not add lobby rings or obstacles. The nine-tile exit
 corridor supports the start line's complete footprint and connects to the new launch section.
 
-The start marker is at world X = 0 and Z = `rowToWorldZ(27)`, currently -23.5. Derive this
+The approved preview places START at s=0, global row 32, immediately after the 32-row lobby.
+This supersedes the earlier row-27 proposal. The nine-tile corridor continues across the
+section boundary so the complete nine-by-five line footprint has floor support.
+The start marker is at world X = 0 and Z = `rowToWorldZ(32)`, currently -28.5. Derive this
 from generated data at runtime rather than duplicating the coordinate in race logic.
 
 - [ ] Author the lobby floor, corridor, colour marker, highlights, and start marker.
@@ -384,9 +395,11 @@ Use this inventory to find the affected code; verify callers again before editin
 | Timing and submissions | `components/Timer.tsx`, `app/actions.ts`, `model/schema.ts` |
 | Tests and documentation | `tests/fixed-world.test.mjs`, `README.md`, this plan |
 
-Implement in this order so each phase has a concrete verification point:
+These steps implement the race-flow foundation alongside Stage 1 of the course design.
+Then complete Stage 2 speed/handling before public release; Stage 3 is a separate experiment.
+Implement the foundation in this order so each phase has a concrete verification point:
 
-1. Copy/author bitmaps, extend line metadata, and validate generated data.
+1. Integrate the approved bitmaps in manifest order, extend line metadata, ingest scenery separately, and validate generated data.
 2. Implement lifecycle, persistence, and attempt reset contracts with focused store tests.
 3. Wire physical lines, grid placement, controls, countdown, recovery, and ring resets.
 4. Implement timing/result guards and update HUD, camera, audio, minimap, and menu callers.

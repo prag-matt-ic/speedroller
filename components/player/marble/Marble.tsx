@@ -20,7 +20,7 @@ import {
   vertexStage,
 } from 'three/tsl'
 import { Mesh } from 'three'
-import type { Node, UniformNode } from 'three/webgpu'
+import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
@@ -50,6 +50,9 @@ const VEIN_BRIGHTEN_STRENGTH = 0.5
 const SPEED_DARKEN_MAX = 0.1
 const SPEED_VEIN_INTENSITY_BOOST = 0.35
 const SPEED_VEIN_BRIGHTEN_BOOST = 0.25
+
+// Subtle player-coloured bloom; the emissive MRT keeps it separate from the marble's lit surface.
+const BALL_EMISSIVE_STRENGTH = 0.35
 
 // normalize(vec3(1, 1, 1)), which GLSL folds at compile time.
 const LIGHT_DIR = /*#__PURE__*/ vec3(0.57735027, 0.57735027, 0.57735027).toConst()
@@ -210,12 +213,24 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
       return {
         colorNode: litSurface,
         opacityNode: respawnFade,
+        emissiveNode: baseMarbleColor.mul(BALL_EMISSIVE_STRENGTH),
       }
     },
     [enableVeins, isFlat],
   )
 
-  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
+  const { colorNode, opacityNode, emissiveNode } = useLocalNodes(createNodes, [createNodes])
+
+  // MeshBasicNodeMaterial does not declare `emissiveNode`, but NodeMaterial reads it when building
+  // the lighting graph, so assign it at runtime and let the material recompile once.
+  const attachMaterial = useCallback(
+    (material: MeshBasicNodeMaterial | null) => {
+      if (!material) return
+      Object.assign(material, { emissiveNode })
+      material.needsUpdate = true
+    },
+    [emissiveNode],
+  )
 
 
   useGameFrame((_, deltaTime) => {
@@ -246,6 +261,7 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
       <sphereGeometry args={[PLAYER_RADIUS, segments, segments]} />
       <Suspense fallback={null}>
         <meshBasicNodeMaterial
+          ref={attachMaterial}
           colorNode={colorNode}
           opacityNode={opacityNode}
           transparent

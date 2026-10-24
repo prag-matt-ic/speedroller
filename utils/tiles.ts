@@ -15,11 +15,9 @@ export const worldZToRowIndex = (worldZ: number, rowCount: number): number => {
   if (rowCount === 0) return -1
   return Math.max(0, Math.min(rowCount - 1, Math.round((INITIAL_ROW_START_Z - worldZ) / TILE_SIZE)))
 }
-export const TILE_PLAYER_HIGHLIGHT_ROW_COUNT = 4
 export const TILE_PLAYER_FADE_FULL_ROWS = 8
 export const TILE_PLAYER_FADE_MIN_ROWS = 18
 export const TILE_PLAYER_FADE_MIN_ALPHA = 0
-export const TILE_PLAYER_HIGHLIGHT_RADIUS = TILE_PLAYER_HIGHLIGHT_ROW_COUNT * TILE_SIZE
 export const TILE_PLAYER_FADE_FULL_RADIUS = TILE_PLAYER_FADE_FULL_ROWS * TILE_SIZE
 export const TILE_PLAYER_FADE_MIN_RADIUS = TILE_PLAYER_FADE_MIN_ROWS * TILE_SIZE
 

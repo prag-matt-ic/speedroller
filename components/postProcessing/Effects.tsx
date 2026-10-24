@@ -4,7 +4,8 @@
 import { useFrame, useTexture } from '@react-three/fiber'
 import { useRenderPipeline, useUniforms } from '@react-three/tsl'
 import { type RefObject, useEffect, useMemo, useRef, useState } from 'react'
-import { uniformTexture } from 'three/tsl'
+import BloomNode, { bloom } from 'three/addons/tsl/display/BloomNode.js'
+import { emissive, mrt, output, uniformTexture, vec4 } from 'three/tsl'
 import type { PassNode } from 'three/webgpu'
 
 import noiseTexture from '@/assets/textures/postprocessing/noise.webp'
@@ -18,6 +19,12 @@ import { SPEED_SMOOTH_HALF_LIFE, stepSmoothedSpeed } from '@/utils/smoothedSpeed
 
 const EFFECTS_UNIFORM_SCOPE = 'postProcessing'
 
+// Selective bloom. Materials publish their glow through the emissive MRT attachment, so only the
+// player, trail and rings contribute. BloomNode is three's half-resolution mip-chain bloom.
+const BLOOM_STRENGTH = 0.8
+const BLOOM_RADIUS = 0.25
+const BLOOM_THRESHOLD = 0
+
 // The only animated value: the blur, edge noise and vignette all scale off it. Registration is what
 // creates the node; the frame callback below writes it.
 const createEffectsUniforms = () => ({
@@ -25,7 +32,8 @@ const createEffectsUniforms = () => ({
 })
 
 /**
- * Speed-driven post-processing: radial blur, edge noise darkening and a vignette.
+ * Speed-driven post-processing: selective bloom from the emissive MRT, then radial blur, edge noise
+ * darkening and a vignette.
  *
  * R3F's default render job calls `state.renderPipeline.render()` when no user job claims the render
  * phase, so this deliberately registers no `useFrame` render job.
@@ -56,23 +64,56 @@ const PostProcessing = () => {
   const blurSamplesRef = useRef(blurSamples)
   blurSamplesRef.current = blurSamples
 
-  const { rebuild } = useRenderPipeline(({ renderPipeline, passes }) => {
-    setScenePassRef({ current: passes.scenePass })
-    renderPipeline.outputColorTransform = false
-    renderPipeline.outputNode = isEnabled
-      ? speedEffectsNode({
-          sceneColor: passes.scenePass.getTextureNode(),
-          uSpeed,
-          noiseTexture: noiseNode,
-          stepCount: blurSamplesRef.current,
-        })
-      : passes.scenePass
-  })
+  // BloomNode owns its mip-chain render targets, so a rebuilt graph must dispose the outgoing one.
+  const bloomNodeRef = useRef<BloomNode | null>(null)
+
+  const { renderPipeline, rebuild } = useRenderPipeline(
+    ({ renderPipeline: pipeline, passes }) => {
+      setScenePassRef({ current: passes.scenePass })
+      pipeline.outputColorTransform = false
+
+      bloomNodeRef.current?.dispose()
+      const bloomNode = bloom(
+        passes.scenePass.getTextureNode('emissive'),
+        BLOOM_STRENGTH,
+        BLOOM_RADIUS,
+        BLOOM_THRESHOLD,
+      )
+      bloomNodeRef.current = bloomNode
+
+      const sceneColor = passes.scenePass.getTextureNode('output')
+      const effects = isEnabled
+        ? speedEffectsNode({
+            sceneColor,
+            uSpeed,
+            noiseTexture: noiseNode,
+            stepCount: blurSamplesRef.current,
+          })
+        : sceneColor
+
+      // Add the bloom before the output transform so the halo shares the scene's colour space.
+      pipeline.outputNode = vec4(effects.rgb.add(bloomNode.rgb), effects.a)
+    },
+    // Selective bloom: the emissive attachment only receives materials that set an emissive node.
+    // Multiply by output alpha because non-output MRT attachments are unblended.
+    ({ passes }) => {
+      passes.scenePass.setMRT(mrt({ output, emissive: emissive.mul(output.a) }))
+    },
+  )
 
   // A change to the quality tier sizes the blur loop, which is a structural graph change.
   useEffect(() => {
     rebuild()
   }, [blurSamples, rebuild])
+
+  useEffect(() => {
+    if (!renderPipeline) return
+
+    return () => {
+      bloomNodeRef.current?.dispose()
+      bloomNodeRef.current = null
+    }
+  }, [renderPipeline])
 
   useFrame((_, delta) => {
     const inputZ = input.current.up - input.current.down

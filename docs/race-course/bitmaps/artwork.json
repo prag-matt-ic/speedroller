@@ -1,0 +1,12907 @@
+[
+  {
+    "x": -8,
+    "s": -30,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -30,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -29,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -29,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -28,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -28,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -27,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -27,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -26,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -26,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -20,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -20,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -19,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -19,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -18,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -18,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -17,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -17,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -16,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -16,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -10,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -10,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": -9,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": -9,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": -8,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": -8,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": -7,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": -7,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": -6,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": -6,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 0,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 0,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 2,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 2,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 3,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 3,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 4,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 4,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 10,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 10,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 11,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 11,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 12,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 12,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 13,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 13,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 14,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 14,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 20,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 20,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 21,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 21,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 22,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 22,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 23,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 23,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 24,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 24,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 30,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 30,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 31,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 31,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 32,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 32,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 33,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 33,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 34,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 34,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 40,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 40,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 41,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 41,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 42,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 42,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 43,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 43,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 44,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 44,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 50,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 50,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 51,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 51,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 52,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 52,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 53,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 53,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 54,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 54,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 60,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 60,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 61,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 61,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 62,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 62,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 63,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 63,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 64,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 64,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 70,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 70,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 71,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 71,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 72,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 72,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 73,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 73,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 74,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 74,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 80,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 80,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 81,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 81,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 82,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 82,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 83,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 83,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 84,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 84,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 90,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 90,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 91,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 91,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 92,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 92,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 93,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 93,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 94,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 94,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 100,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 100,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 101,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 101,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 102,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 102,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 103,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 103,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 104,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 104,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 110,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 110,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 111,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 111,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 112,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 112,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 113,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 113,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 114,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 114,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 120,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 120,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 121,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 121,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 122,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 122,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 123,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 123,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 124,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 124,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 130,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 130,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 131,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 131,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 132,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 132,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 133,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 133,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 134,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 134,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 140,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 140,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 141,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 141,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 142,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 142,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 143,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 143,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 144,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 144,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 150,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 150,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 151,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 151,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 152,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 152,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 153,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 153,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 154,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 154,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 160,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 160,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 161,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 161,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 162,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 162,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 163,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 163,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 164,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 164,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 170,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 170,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 171,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 171,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 172,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 172,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 173,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 173,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 174,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 174,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 180,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 180,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 181,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 181,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 182,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 182,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 183,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 183,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 184,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 184,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 190,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 190,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 191,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 191,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 192,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 192,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 193,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 193,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 194,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 194,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 200,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 200,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 201,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 201,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 202,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 202,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 203,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 203,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 204,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 204,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 210,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 210,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 211,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 211,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 212,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 212,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 213,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 213,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 214,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 214,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 220,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 220,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 221,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 221,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 222,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 222,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 223,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 223,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 224,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 224,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 230,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 230,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 231,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 231,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 232,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 232,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 233,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 233,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 234,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 234,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 240,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 240,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 241,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 241,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 242,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 242,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 243,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 243,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 244,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 244,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 250,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 250,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 251,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 251,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 252,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 252,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 253,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 253,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 254,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 254,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 260,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 260,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 261,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 261,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 262,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 262,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 262,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 262,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 263,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 263,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 263,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 263,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 264,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 264,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 264,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 264,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 270,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 270,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 270,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 270,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 271,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 271,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 271,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 271,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 272,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 272,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 272,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 272,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 273,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 273,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 273,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 273,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 274,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 274,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 274,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 274,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 280,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 280,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 280,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 280,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 281,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 281,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 281,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 281,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 282,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 282,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 282,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 14,
+    "s": 282,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 283,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 283,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 283,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 14,
+    "s": 283,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 284,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 284,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 284,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 14,
+    "s": 284,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 290,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 290,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 290,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 290,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 291,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 291,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 291,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 291,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 292,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 292,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 292,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 292,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 293,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 293,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 293,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 293,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 294,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 294,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 294,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 294,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 300,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 300,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 300,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 300,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 301,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 301,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 301,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 301,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 302,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 302,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 302,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 302,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 303,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 303,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 303,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 303,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 304,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 304,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 304,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 304,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 310,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 310,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 310,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 310,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 311,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 311,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 311,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 311,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 312,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 312,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 312,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 312,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 313,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 313,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 313,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 313,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 314,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 314,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 314,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 314,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 320,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 320,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 320,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 320,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 321,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 321,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 321,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 321,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 322,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 322,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 322,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 322,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 323,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 323,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 323,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 323,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 324,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 324,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 324,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 324,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 330,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 330,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 330,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 330,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 331,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 331,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 331,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 331,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 332,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 332,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 332,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 332,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 333,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 333,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 333,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 333,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 334,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 334,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 334,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 334,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 340,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 340,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 341,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 341,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 342,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 342,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 343,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 343,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 344,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 344,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 350,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 350,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 351,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 351,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 352,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 352,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 353,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 353,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 354,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 354,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 360,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 360,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 361,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 361,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 362,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 362,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 363,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 363,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 364,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 364,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 370,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 370,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 371,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 371,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 372,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 372,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 373,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 373,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 374,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 374,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 380,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 380,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 381,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 381,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 382,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 382,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 383,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 383,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 384,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 384,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 390,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 390,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 391,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 391,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 392,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 392,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 393,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 393,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 394,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 394,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 400,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 400,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 401,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 401,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 402,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 402,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 403,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 403,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 404,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 404,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 410,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 410,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 411,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 411,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 412,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 412,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 413,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 413,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 414,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 414,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 420,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 420,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 421,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 421,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 422,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 422,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 423,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 423,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 424,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 424,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 430,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 430,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 430,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 430,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 431,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 431,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 431,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 431,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 432,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 432,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 432,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 432,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 433,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 433,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 433,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 433,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 434,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 434,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 434,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 434,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 440,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 440,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 440,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 440,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 441,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 441,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 441,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 441,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 442,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 442,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 442,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 442,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 443,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 443,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 443,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 443,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 444,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 444,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 444,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 444,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 450,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 450,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 450,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 450,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 451,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 451,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 451,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 451,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 452,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 452,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 452,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 452,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 453,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 453,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 453,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 453,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 454,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 454,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 454,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 454,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 460,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 460,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 460,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 460,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 461,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 461,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 461,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 461,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 462,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 462,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 462,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 462,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 463,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 463,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 463,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 463,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 464,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 464,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 464,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 464,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 470,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 470,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 470,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 470,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 471,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 471,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 471,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 471,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 472,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 472,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 472,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 472,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 473,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 473,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 473,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 473,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 474,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 474,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 474,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 474,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 480,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 480,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 480,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 480,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -15,
+    "s": 481,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 481,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 481,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 481,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 482,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 482,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 482,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 482,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 483,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 483,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 483,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 483,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 484,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 484,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 484,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 484,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 490,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 490,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 490,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 490,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 491,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 491,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 491,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 491,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 492,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 492,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 492,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 492,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 493,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 493,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 493,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 493,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 494,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 494,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 494,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 494,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 500,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 500,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 500,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 500,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 501,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 501,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 501,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 501,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 502,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 502,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 502,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 502,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 503,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 503,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 503,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 503,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 504,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 504,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 504,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 504,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 510,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 510,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 510,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 510,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 511,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 511,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 511,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 511,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 512,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 512,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 512,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 512,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 513,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 513,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 513,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 513,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 514,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 514,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 514,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 514,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 520,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 520,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 520,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 520,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 521,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 521,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 521,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 521,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 522,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 522,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 522,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 522,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 523,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 523,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 523,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 523,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 524,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 524,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 524,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 524,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 530,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 530,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 530,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 530,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 531,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 531,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 531,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 531,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 532,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 532,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 532,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 532,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 533,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 533,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 533,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 533,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 534,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 534,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 534,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 534,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 540,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 540,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 540,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 540,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 541,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 541,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 541,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 541,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 542,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 542,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 542,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 542,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 543,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 543,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 543,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 543,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 544,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 544,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 544,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 544,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 550,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 550,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 550,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 550,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 551,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 551,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 551,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 551,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 552,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 552,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 552,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 552,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 553,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 553,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 553,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 553,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 554,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 554,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 554,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 554,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 560,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 560,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 560,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 560,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 561,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 561,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 561,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 561,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 562,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 562,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 562,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 562,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 563,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 563,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 563,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 563,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 564,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 564,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 570,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 570,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 571,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 571,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 572,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 572,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 573,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 573,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 574,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 574,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 580,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 580,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 581,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 581,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 582,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 582,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 583,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 583,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 584,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 584,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 590,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 590,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 591,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 591,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 592,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 592,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 593,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 593,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 594,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 594,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 600,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 600,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 601,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 601,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 602,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 602,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 603,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 603,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 604,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 604,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 610,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 610,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 611,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 611,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 612,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 612,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 613,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 613,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 614,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 614,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 620,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 620,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 621,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 621,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 622,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 622,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 622,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 622,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 623,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 623,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 623,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 623,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 624,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 624,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 624,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 624,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 630,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 630,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 630,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 630,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 631,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 631,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 631,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 631,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 632,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 632,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 632,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 632,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 633,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 633,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 634,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 634,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 640,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 640,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 641,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 641,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 642,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 642,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 643,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 643,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 644,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 644,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 650,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 650,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 651,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 651,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 652,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 652,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 653,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 653,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 654,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 654,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 660,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 660,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 661,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 661,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 662,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 662,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 663,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 663,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 664,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 664,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 670,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 670,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 670,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 670,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 671,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 671,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 671,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 671,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 672,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 672,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 672,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 672,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 673,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 673,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 673,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 673,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 674,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 674,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 674,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 674,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 680,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 680,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 681,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 681,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 682,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 682,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 683,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 683,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 684,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 684,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 690,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 690,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 691,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 691,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 692,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 692,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 693,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 693,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 694,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 694,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 700,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 700,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 701,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 701,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 702,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 702,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 703,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 703,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 704,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 704,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 710,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 710,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 711,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 711,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 712,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 712,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 713,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 713,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 714,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 714,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 720,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 720,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 720,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 720,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 721,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 721,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 721,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 721,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 722,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 722,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 722,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 722,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 723,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 723,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 723,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 723,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 724,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 724,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 724,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 724,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 730,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 730,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 730,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 730,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 731,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 731,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 731,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 731,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 732,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 732,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 733,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 733,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 734,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 734,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 740,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 740,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 741,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 741,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 742,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 742,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 743,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 743,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 744,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 744,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 750,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 750,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 751,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 751,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 752,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 752,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 753,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 753,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 754,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 754,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 762,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 762,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 763,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 763,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 764,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 764,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 765,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 765,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 768,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 768,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 769,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 769,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 770,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 770,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 771,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 771,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 774,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 774,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 775,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 775,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 776,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 776,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 777,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 777,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 780,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 780,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 781,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 781,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 782,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 782,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 783,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 783,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 786,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 786,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 787,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 787,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 788,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 788,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 789,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 789,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 792,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 792,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 793,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 793,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 794,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 794,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 795,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 795,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 798,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 798,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 799,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 799,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 800,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 800,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 801,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 801,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 804,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 804,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 805,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 805,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 806,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 806,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 807,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 807,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 810,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 810,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 811,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 811,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 812,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 812,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 813,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 813,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 816,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 816,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 817,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 817,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 818,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 818,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 819,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 819,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 822,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 822,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 822,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 822,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 822,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 822,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 823,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 823,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 823,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 823,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 823,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 823,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 824,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 824,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 824,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 824,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 824,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 824,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 825,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 825,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 825,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 825,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 825,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 825,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 828,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 828,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 828,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 828,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 828,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 828,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 829,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 829,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 829,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 829,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 829,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 829,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 830,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 830,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 830,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 830,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 830,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 830,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 831,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 831,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 831,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 831,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 831,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 831,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 834,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 834,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 834,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 834,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 834,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 834,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 835,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 835,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 835,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 835,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 835,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 835,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 836,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 836,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 836,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 836,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 836,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 836,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 837,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 837,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 837,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 837,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 837,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 837,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 840,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 840,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 840,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 840,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 840,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 840,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 841,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 841,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 841,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 841,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 841,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 841,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 842,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 842,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 842,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 842,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 842,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 842,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 843,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 843,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 843,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 843,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 843,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 843,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 846,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 846,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 846,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 846,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 846,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 846,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 847,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 847,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 847,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 847,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 847,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 847,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 848,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 848,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 848,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 848,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 848,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 848,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 849,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 849,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 849,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 849,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 849,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 849,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 852,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 852,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 852,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 852,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 852,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 852,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 853,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 853,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 853,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 853,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 853,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 853,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 854,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 854,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 854,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 854,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 854,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 854,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 855,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 855,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 855,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 855,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 855,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 855,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 858,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 858,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 858,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 858,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 858,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 858,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 859,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 859,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 859,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 859,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 859,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 859,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 860,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 860,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 860,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 860,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 860,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 860,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 861,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 861,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 861,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 861,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 861,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 861,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 864,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 864,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 864,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 864,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 864,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 864,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 865,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 865,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 865,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 865,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 865,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 865,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 866,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 866,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 866,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 866,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 866,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 866,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 867,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 867,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 867,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 867,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 867,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 867,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 870,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 870,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 870,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 870,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 870,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 870,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 871,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 871,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 871,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 871,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 871,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 871,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 872,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 872,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 872,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 872,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 872,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 872,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 873,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 873,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 873,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 873,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 873,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 873,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 876,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 876,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 876,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 876,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 876,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 876,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 877,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 877,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 877,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 877,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 877,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 877,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 878,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 878,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 878,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 878,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 878,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 878,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 879,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 879,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 879,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 879,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 879,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 879,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 882,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 882,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 882,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 882,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 882,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 882,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 883,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 883,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 883,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 883,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 883,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 883,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 884,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 884,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 884,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 884,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 884,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 884,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 885,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 885,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 885,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 885,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 885,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 885,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 888,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 888,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 888,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 888,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 888,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 888,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 889,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 889,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 889,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 889,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 889,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 889,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 890,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 890,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 890,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 890,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 890,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 890,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 891,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 891,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 891,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 891,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 891,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 891,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 894,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 894,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 894,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 894,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 894,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 894,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 895,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 895,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 895,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 895,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 895,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 895,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 896,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 896,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 896,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 896,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 896,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 896,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 897,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 897,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 897,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 897,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 897,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 897,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 900,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 900,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 900,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 900,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 900,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 900,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 901,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 901,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 901,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 901,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 901,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 901,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 902,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 902,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 902,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 902,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 902,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 902,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 903,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 903,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 903,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 903,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 903,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 903,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 906,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 906,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 906,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 906,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 906,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 906,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 907,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 907,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 907,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 907,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 907,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 907,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 908,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 908,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 908,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 908,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 908,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 908,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 909,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 909,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 909,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 909,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 909,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 909,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 912,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 912,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 912,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 912,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 912,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 912,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 913,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 913,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 913,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 913,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 913,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 913,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 914,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 914,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 914,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 914,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 915,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 915,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 915,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 915,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 918,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 918,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 918,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 918,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 919,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 919,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 919,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 919,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 920,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 920,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 920,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 920,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 921,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 921,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 921,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 921,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 921,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 921,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 924,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 924,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 924,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 924,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 924,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 924,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 925,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 925,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 925,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 925,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 925,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 925,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 926,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 926,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 926,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 926,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 926,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 926,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 927,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 927,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 927,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 927,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 927,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 927,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 930,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 930,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 930,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 930,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 930,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 930,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 931,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 931,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 931,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 931,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 931,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 931,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 932,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 932,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 932,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 932,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 932,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 932,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 933,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 933,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 933,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 933,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 933,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 933,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 936,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 936,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 936,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 936,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 936,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 936,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 937,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 937,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 937,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 937,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 937,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 937,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 938,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 938,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 938,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 938,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 938,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 938,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 939,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 939,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 939,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 939,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 939,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 939,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 942,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 942,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 942,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 942,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 942,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 942,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 943,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 943,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 943,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 943,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 943,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 943,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 944,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 944,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 944,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 944,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 944,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 944,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 945,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 945,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 945,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 945,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 945,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 945,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 948,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 948,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 948,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 948,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 948,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 948,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 949,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 949,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 949,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 949,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 949,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 949,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 950,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 950,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 950,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 950,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 950,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 950,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 951,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 951,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 951,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 951,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 951,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 951,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 954,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 954,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 954,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 954,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 954,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 954,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 955,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 955,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 955,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 955,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 955,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 955,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 956,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 956,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 956,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 956,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 956,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 956,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 957,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 957,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 957,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 957,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 957,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 957,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 960,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 960,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 960,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 960,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 960,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 960,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 961,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 961,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 961,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 961,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 961,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 961,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 962,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 962,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 962,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 962,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 962,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 962,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 963,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 963,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 963,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 963,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 963,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 963,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 966,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 966,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 966,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 966,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 966,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 966,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 967,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 967,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 967,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 967,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 967,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 967,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 968,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 968,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 968,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 968,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 968,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 968,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 969,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 969,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 969,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 969,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 969,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 969,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 972,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 972,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 972,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 972,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 973,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 973,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 973,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 973,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 974,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 974,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 974,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 974,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 975,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 975,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 975,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 975,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 978,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 978,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 979,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 979,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 980,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 980,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 981,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 981,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 984,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 984,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 985,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 985,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 986,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 986,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 987,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 987,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 990,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 990,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 991,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 991,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 992,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 992,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 993,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 993,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 996,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 996,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 997,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 997,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 998,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 998,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 999,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 999,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1002,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1002,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1003,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1003,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1004,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1004,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1005,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1005,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1008,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1008,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1009,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1009,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1010,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1010,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1011,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1011,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1014,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1014,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1015,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1015,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1016,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1016,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1017,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1017,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1020,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1020,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1021,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1021,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1022,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1022,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1023,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1023,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1026,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1026,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1026,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1026,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1027,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1027,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1027,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1027,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1028,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1028,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1028,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1028,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1029,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1029,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1029,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1029,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1032,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1032,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1032,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1032,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1033,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1033,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1033,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1033,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1034,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1034,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1034,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1034,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1035,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1035,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1035,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1035,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1038,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1038,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1039,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1039,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1040,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1040,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1041,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1041,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1044,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1044,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1045,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1045,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1046,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1046,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1047,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1047,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1050,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1050,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1051,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1051,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 1052,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1052,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 1053,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1053,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1056,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1056,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 1057,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1057,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1058,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1058,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 1059,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 1059,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 1,
+    "s": 1059,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1059,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 1062,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1062,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1062,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1062,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 1063,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1063,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1063,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1063,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1064,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1064,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1064,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1064,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1065,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1065,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1065,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1065,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1068,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1068,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1068,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1068,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1069,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1069,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1069,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1069,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1070,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1070,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1070,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1070,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1071,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1071,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1071,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1071,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1074,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1074,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1074,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1074,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1075,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1075,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1075,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1075,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1076,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1076,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1076,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1076,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1077,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1077,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1077,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1077,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1080,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1080,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1080,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1080,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1081,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1081,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1081,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1081,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1082,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1082,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1082,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1082,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1083,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1083,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1083,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1083,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1086,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1086,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1086,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1086,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1086,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1086,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1087,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1087,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1087,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1087,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1087,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1087,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1088,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1088,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1088,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1088,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1088,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1088,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1089,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1089,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1089,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1089,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1089,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1089,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1092,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1092,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1092,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1092,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1092,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1092,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1093,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1093,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1093,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1093,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1093,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 13,
+    "s": 1093,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1094,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1094,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1094,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1094,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1094,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1094,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1095,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1095,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1095,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1095,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1095,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 12,
+    "s": 1095,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1098,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1098,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1098,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1098,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1099,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1099,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1099,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1099,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1100,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1100,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1100,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1100,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1101,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1101,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1101,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1101,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1104,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1104,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1104,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1104,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1105,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1105,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1105,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1105,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -14,
+    "s": 1106,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1106,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1106,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1106,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1107,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1107,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1107,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1107,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1110,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1110,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1110,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1110,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1111,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1111,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1111,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1111,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -13,
+    "s": 1112,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1112,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1112,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1112,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1113,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1113,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1113,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1113,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1116,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1116,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1116,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1116,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1117,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1117,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1117,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1117,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -12,
+    "s": 1118,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1118,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1118,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1118,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1119,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1119,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1119,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1119,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1122,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1122,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1122,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1122,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1123,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1123,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1123,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1123,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1124,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1124,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1124,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1124,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1125,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1125,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1125,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1125,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1128,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1128,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1128,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1128,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -11,
+    "s": 1129,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -3,
+    "s": 1129,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1129,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1129,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 1130,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1130,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1130,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1130,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -10,
+    "s": 1131,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1131,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1131,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 11,
+    "s": 1131,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 1134,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 1134,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1134,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1134,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -9,
+    "s": 1135,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -1,
+    "s": 1135,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1135,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1135,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1136,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 1136,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1136,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 10,
+    "s": 1136,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -8,
+    "s": 1137,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": 1137,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 3,
+    "s": 1137,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1137,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 1140,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 9,
+    "s": 1140,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 1141,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 8,
+    "s": 1141,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -7,
+    "s": 1142,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1142,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1143,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 7,
+    "s": 1143,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1146,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1146,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1147,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1147,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1148,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1148,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1149,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1149,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1152,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1152,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1153,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1153,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1154,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1154,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1155,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1155,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1158,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1158,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1159,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1159,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1160,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1160,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1161,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1161,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1164,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1164,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1165,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1165,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1166,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1166,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1167,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1167,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1170,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1170,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1170,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1170,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1171,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1171,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1171,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1171,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1172,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1172,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1172,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1172,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1173,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1173,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1173,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1173,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1176,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1176,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1176,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1176,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1177,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1177,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1177,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1177,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1178,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -2,
+    "s": 1178,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 2,
+    "s": 1178,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1178,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1179,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1179,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1182,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1182,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1183,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1183,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1184,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1184,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1185,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1185,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1188,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1188,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1189,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1189,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1190,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1190,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1191,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1191,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1194,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1194,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1195,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1195,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1196,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 4,
+    "s": 1196,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -4,
+    "s": 1197,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1197,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1200,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1200,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1201,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1201,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1202,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1202,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -4,
+    "s": 1203,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 4,
+    "s": 1203,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1206,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1206,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1207,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1207,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1208,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1208,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -5,
+    "s": 1209,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 5,
+    "s": 1209,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1212,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1212,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1213,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1213,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": -6,
+    "s": 1214,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 6,
+    "s": 1214,
+    "motif": "Broken edge lights"
+  },
+  {
+    "x": 0,
+    "s": -30,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": -1,
+    "s": -29,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": 1,
+    "s": -29,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": -2,
+    "s": -28,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": 2,
+    "s": -28,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": -3,
+    "s": -27,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": 3,
+    "s": -27,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": -2,
+    "s": -26,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": 2,
+    "s": -26,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": -1,
+    "s": -25,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": 1,
+    "s": -25,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": 0,
+    "s": -24,
+    "motif": "Lobby diamond"
+  },
+  {
+    "x": -3,
+    "s": -14,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -14,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -3,
+    "s": -13,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -13,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -3,
+    "s": -11,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -11,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -3,
+    "s": -10,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -10,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -3,
+    "s": -8,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -8,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -3,
+    "s": -7,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -7,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -3,
+    "s": -5,
+    "motif": "Grid approach"
+  },
+  {
+    "x": 3,
+    "s": -5,
+    "motif": "Grid approach"
+  },
+  {
+    "x": -2,
+    "s": 26,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 23,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 27,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 24,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 28,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 25,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 27,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 24,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 26,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 23,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 50,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 47,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 51,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 48,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 52,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 49,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 51,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 48,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 50,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 47,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -4,
+    "s": 76,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -4,
+    "s": 73,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -3,
+    "s": 77,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -3,
+    "s": 74,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 78,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 75,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 77,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 74,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 76,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 73,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 118,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 115,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 119,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 116,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 120,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 117,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 119,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 116,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 118,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 115,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 162,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 159,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 163,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 160,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 164,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 161,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 163,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 160,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 162,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 159,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 216,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 213,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 217,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 214,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 5,
+    "s": 218,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 6,
+    "s": 217,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 6,
+    "s": 214,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 7,
+    "s": 216,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 7,
+    "s": 213,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 238,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 235,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 239,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 236,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 237,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 239,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 236,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 238,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 235,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 398,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 395,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 399,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 396,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 400,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 397,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 399,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 396,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 398,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 395,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 602,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 599,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 603,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 600,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 604,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 601,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 603,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 600,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 602,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 599,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 650,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 647,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 651,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 648,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 652,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 649,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 651,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 648,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 650,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 647,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 698,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 695,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 699,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 696,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 700,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 3,
+    "s": 697,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 699,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 4,
+    "s": 696,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 5,
+    "s": 698,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 5,
+    "s": 695,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 746,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 743,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 747,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 744,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 748,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 745,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 747,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 744,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 746,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 743,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 784,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 781,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 785,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 782,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 786,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 783,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 785,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 782,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 784,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 781,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 1010,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 1007,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 1011,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 1008,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 1012,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 1009,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 1011,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 1008,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 1010,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 1007,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 1186,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -2,
+    "s": 1183,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 1187,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -1,
+    "s": 1184,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 1188,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 0,
+    "s": 1185,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 1187,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 1,
+    "s": 1184,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 1186,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": 2,
+    "s": 1183,
+    "motif": "Forward chevron"
+  },
+  {
+    "x": -8,
+    "s": 269,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -7,
+    "s": 270,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -6,
+    "s": 269,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 7,
+    "s": 269,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 8,
+    "s": 270,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 9,
+    "s": 269,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -9,
+    "s": 434,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -8,
+    "s": 435,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -7,
+    "s": 434,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 7,
+    "s": 434,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 8,
+    "s": 435,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 9,
+    "s": 434,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -11,
+    "s": 829,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -10,
+    "s": 830,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -9,
+    "s": 829,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -1,
+    "s": 824,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 0,
+    "s": 825,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 1,
+    "s": 824,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 9,
+    "s": 829,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 10,
+    "s": 830,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 11,
+    "s": 829,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -9,
+    "s": 1069,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -8,
+    "s": 1070,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -7,
+    "s": 1069,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 7,
+    "s": 1069,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 8,
+    "s": 1070,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": 9,
+    "s": 1069,
+    "motif": "Branch arrowhead"
+  },
+  {
+    "x": -3,
+    "s": 621,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 620,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 621,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 619,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -1,
+    "s": 621,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 621,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 620,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 621,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 619,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 621,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 633,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 634,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 633,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 635,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -1,
+    "s": 633,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 633,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 634,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 633,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 635,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 633,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 612,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 3,
+    "s": 612,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -3,
+    "s": 615,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 3,
+    "s": 615,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 667,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 666,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 667,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 665,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 4,
+    "s": 667,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 7,
+    "s": 667,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 7,
+    "s": 666,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 6,
+    "s": 667,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 7,
+    "s": 665,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 5,
+    "s": 667,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 680,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 681,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 3,
+    "s": 680,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 682,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 4,
+    "s": 680,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 7,
+    "s": 680,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 7,
+    "s": 681,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 6,
+    "s": 680,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 7,
+    "s": 682,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 5,
+    "s": 680,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 658,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 7,
+    "s": 658,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 661,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 7,
+    "s": 661,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -4,
+    "s": 719,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -4,
+    "s": 718,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 719,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -4,
+    "s": 717,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 719,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 719,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 718,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 719,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 717,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 0,
+    "s": 719,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -4,
+    "s": 732,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -4,
+    "s": 733,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -3,
+    "s": 732,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -4,
+    "s": 734,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 732,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 732,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 733,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 732,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 734,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 0,
+    "s": 732,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -4,
+    "s": 710,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 710,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -4,
+    "s": 713,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 713,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -2,
+    "s": 1025,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1024,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -1,
+    "s": 1025,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1023,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 0,
+    "s": 1025,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1025,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1024,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 1025,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1023,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1037,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1038,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -1,
+    "s": 1037,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1039,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 0,
+    "s": 1037,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1037,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1038,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 1037,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1039,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1016,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 1016,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -2,
+    "s": 1019,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 1019,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -11,
+    "s": 1085,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -11,
+    "s": 1084,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -10,
+    "s": 1085,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -11,
+    "s": 1083,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -9,
+    "s": 1085,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -8,
+    "s": 1085,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -8,
+    "s": 1084,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -8,
+    "s": 1083,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -11,
+    "s": 1097,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -11,
+    "s": 1098,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -10,
+    "s": 1097,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -11,
+    "s": 1099,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -9,
+    "s": 1097,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -8,
+    "s": 1097,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -8,
+    "s": 1098,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -8,
+    "s": 1099,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -11,
+    "s": 1076,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -8,
+    "s": 1076,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -11,
+    "s": 1079,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -8,
+    "s": 1079,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -2,
+    "s": 1167,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1166,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -1,
+    "s": 1167,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1165,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 0,
+    "s": 1167,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1167,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1166,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 1167,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1165,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1179,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1180,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -1,
+    "s": 1179,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1181,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 0,
+    "s": 1179,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1179,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1180,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 1,
+    "s": 1179,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": 2,
+    "s": 1181,
+    "motif": "Hole corner bracket"
+  },
+  {
+    "x": -2,
+    "s": 1158,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 1158,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -2,
+    "s": 1161,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": 2,
+    "s": 1161,
+    "motif": "Hazard approach ticks"
+  },
+  {
+    "x": -4,
+    "s": -4,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -2,
+    "s": -4,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 0,
+    "s": -4,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 2,
+    "s": -4,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 4,
+    "s": -4,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -3,
+    "s": -3,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -1,
+    "s": -3,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 1,
+    "s": -3,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 3,
+    "s": -3,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -4,
+    "s": -2,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -2,
+    "s": -2,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 0,
+    "s": -2,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 2,
+    "s": -2,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 4,
+    "s": -2,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -3,
+    "s": 1195,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -1,
+    "s": 1195,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 1,
+    "s": 1195,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 3,
+    "s": 1195,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -2,
+    "s": 1196,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 0,
+    "s": 1196,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 2,
+    "s": 1196,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -3,
+    "s": 1197,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -1,
+    "s": 1197,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 1,
+    "s": 1197,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 3,
+    "s": 1197,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -4,
+    "s": 1198,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -2,
+    "s": 1198,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 0,
+    "s": 1198,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 2,
+    "s": 1198,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 4,
+    "s": 1198,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -4,
+    "s": 1204,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -2,
+    "s": 1204,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 0,
+    "s": 1204,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 2,
+    "s": 1204,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 4,
+    "s": 1204,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -3,
+    "s": 1205,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -1,
+    "s": 1205,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 1,
+    "s": 1205,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 3,
+    "s": 1205,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -4,
+    "s": 1206,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -2,
+    "s": 1206,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 0,
+    "s": 1206,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 2,
+    "s": 1206,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 4,
+    "s": 1206,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -3,
+    "s": 1207,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": -1,
+    "s": 1207,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 1,
+    "s": 1207,
+    "motif": "Start / finish checker"
+  },
+  {
+    "x": 3,
+    "s": 1207,
+    "motif": "Start / finish checker"
+  }
+]
