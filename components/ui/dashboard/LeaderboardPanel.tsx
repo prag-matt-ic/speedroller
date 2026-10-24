@@ -16,11 +16,8 @@ type Props = {
 // For use in the Dashboard only..
 
 export const DashboardLeaderboardPanel: FC<Props> = ({ className }) => {
-  const inputType = useGameStore((s) => s.inputType)
   const leaderboardFilter = useGameStore((s) => s.leaderboardFilter)
   const setLeaderboardFilter = useGameStore((s) => s.setLeaderboardFilter)
-
-  const showCTA = inputType === leaderboardFilter
 
   return (
     <Panel strength={2} className={className} attractorClassName="bg-emerald-400/15">
@@ -44,7 +41,7 @@ export const DashboardLeaderboardPanel: FC<Props> = ({ className }) => {
           ]}
         />
       </PanelHeader>
-      <LeaderboardTable count={10} fetchLatestRun={false} showCTA={showCTA} />
+      <LeaderboardTable count={10} fetchLatestRun={false} />
     </Panel>
   )
 }

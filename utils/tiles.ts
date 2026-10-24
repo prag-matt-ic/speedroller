@@ -85,7 +85,9 @@ export type RowData = {
   infoZonePlacements?: IndexedPlacement[] // Info zones rendered on the platform
   collectiblePlacements?: IndexedPlacement[] // Collectibles rendered on the platform
   floatingHeadingPlacements?: IndexedPlacement[] // Floating heading above the platform but still aligned to the row
+  startLinePosition?: [number, number, number] // Start grid and sensor centre
   finishLinePosition?: [number, number, number] // Finish line position
   confettiPlacements?: ConfettiPlacement[] // Confetti platforms rendered on the platform
   colourPickerPlacement?: IndexedPlacement // Colour picker placement (single instance)
+  decorationColumns?: number[] // Detached, non-collidable scenery cells in this row
 }

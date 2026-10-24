@@ -1,6 +1,6 @@
 'use client'
 
-import { type FC, useRef } from 'react'
+import { type FC, useEffect, useRef } from 'react'
 
 import { useGameStore } from '@/components/GameProvider'
 import { useGameFrame } from '@/hooks/useGameFrame'
@@ -37,6 +37,7 @@ const InputSmoother: FC = () => {
   const { inputIntent } = usePlayerInputIntent()
   const { input } = usePlayerInput()
   const smoothedInput = useRef<PlayerInput>({ up: 0, down: 0, left: 0, right: 0 })
+  const attemptId = useGameStore((s) => s.attemptId)
   const setPlayerInput = useGameStore((s) => s.setPlayerInput)
 
   const buffers = useRef<[PlayerInput, PlayerInput]>([
@@ -44,6 +45,16 @@ const InputSmoother: FC = () => {
     { up: 0, down: 0, left: 0, right: 0 },
   ])
   const activeBufferIndex = useRef(0)
+
+  // Attempt resets clear the slice but not this component's buffered ramp. Discard it so a retry
+  // cannot inherit residual movement from the previous run.
+  useEffect(() => {
+    zeroInput(smoothedInput.current)
+    zeroInput(buffers.current[0])
+    zeroInput(buffers.current[1])
+    activeBufferIndex.current = 0
+    setPlayerInput(buffers.current[0])
+  }, [attemptId, setPlayerInput])
 
   useGameFrame((_, delta) => {
     const intent = inputIntent.current

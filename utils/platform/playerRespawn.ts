@@ -5,6 +5,11 @@ import { COLUMNS, type RowData, colToX, rowToWorldZ, worldZToRowIndex } from '@/
 const CENTER_COL_INDEX = Math.floor(COLUMNS / 2)
 const MIN_RESPAWN_ROW = 1
 
+export type RespawnRowRange = {
+  startRow: number
+  endRow: number
+}
+
 type SafeRowSelection = {
   rowIndex: number
   safeX: number
@@ -41,19 +46,30 @@ export function findSafeRespawnPosition(
   playerX: number,
   playerZ: number,
   spawnHeight: number,
+  rowRange?: RespawnRowRange,
 ): Vector3Tuple | null {
   if (rows.length === 0) return null
-  const firstSafeRowIndex = Math.min(MIN_RESPAWN_ROW, rows.length - 1)
-  const currentRowIndex = Math.max(firstSafeRowIndex, worldZToRowIndex(playerZ, rows.length))
+  const lastRowIndex = rows.length - 1
+  const firstSafeRowIndex = rowRange
+    ? Math.max(0, rowRange.startRow)
+    : Math.min(MIN_RESPAWN_ROW, lastRowIndex)
+  const lastSafeRowIndex = rowRange ? Math.min(lastRowIndex, rowRange.endRow) : lastRowIndex
 
-  // Keep the current row when possible, then try the next row before a course-wide search.
+  if (firstSafeRowIndex > lastSafeRowIndex) return null
+
+  const currentRowIndex = Math.min(
+    lastSafeRowIndex,
+    Math.max(firstSafeRowIndex, worldZToRowIndex(playerZ, rows.length)),
+  )
+
+  // Keep the current row when possible, then try the next row before a bounded search.
   let selection =
     selectSafeRow(rows, currentRowIndex, playerX) ??
-    selectSafeRow(rows, currentRowIndex + 1, playerX)
+    selectSafeRow(rows, Math.min(currentRowIndex + 1, lastSafeRowIndex), playerX)
 
   if (!selection) {
     let closestDistance = Infinity
-    for (let rowIndex = firstSafeRowIndex; rowIndex < rows.length; rowIndex++) {
+    for (let rowIndex = firstSafeRowIndex; rowIndex <= lastSafeRowIndex; rowIndex++) {
       const candidate = selectSafeRow(rows, rowIndex, playerX)
       if (!candidate) continue
       const distance = Math.abs(rowToWorldZ(rowIndex) - playerZ)

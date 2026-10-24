@@ -10,8 +10,6 @@ import {
 import { type StoreApi, createStore, useStore } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { GameMode } from '@/stores/types'
-
 export enum SoundFX {
   COUNTDOWN = 'COUNTDOWN',
   BACKGROUND = 'BACKGROUND',
@@ -35,13 +33,19 @@ const SOUND_FILES: Record<SoundFX, string> = {
   [SoundFX.CONFETTI_BURST]: '/audio/confetti.aac',
 }
 
-const GAME_MODE_BACKGROUND_TRACKS: Record<
-  GameMode,
+export type BackgroundTrackPhase = 'lobby' | 'race'
+
+const BACKGROUND_TRACKS: Record<
+  BackgroundTrackPhase,
   SoundFX.BACKGROUND | SoundFX.BACKGROUND_SPEEDRUN
 > = {
-  [GameMode.LEARN]: SoundFX.BACKGROUND,
-  [GameMode.SPEEDRUN]: SoundFX.BACKGROUND_SPEEDRUN,
-  [GameMode.DEV]: SoundFX.BACKGROUND,
+  lobby: SoundFX.BACKGROUND,
+  race: SoundFX.BACKGROUND_SPEEDRUN,
+}
+
+const BACKGROUND_TRACK_VOLUMES: Record<BackgroundTrackPhase, number> = {
+  lobby: 0.35,
+  race: 0.6,
 }
 
 type Buffers = Partial<Record<SoundFX, AudioBuffer>>
@@ -51,12 +55,13 @@ export type SoundState = {
   isLoading: boolean
   isMuted: boolean
   backgroundTrack: SoundFX | null
-  setIsMuted: (isMuted: boolean, mode?: GameMode) => void
+  backgroundTrackPhase: BackgroundTrackPhase
+  setIsMuted: (isMuted: boolean) => void
   initialise: () => Promise<void>
   playSoundFX: PlaySoundFX
   stopSoundFX: (fx: SoundFX) => void
   stopAllSounds: () => void
-  switchBackgroundTrack: (mode: GameMode) => void
+  switchBackgroundTrack: (phase: BackgroundTrackPhase) => void
 }
 
 type PersistedSoundState = Pick<SoundState, 'isMuted'>
@@ -172,6 +177,7 @@ const createSoundStore = () => {
         isLoading: true,
         isMuted: true,
         backgroundTrack: null,
+        backgroundTrackPhase: 'lobby',
 
         initialise: async () => {
           if (!initialisationPromise) {
@@ -180,12 +186,12 @@ const createSoundStore = () => {
           await initialisationPromise
         },
 
-        setIsMuted: (isMuted: boolean, mode?: GameMode) => {
-          const { playSoundFX, stopAllSounds } = get()
+        setIsMuted: (isMuted: boolean) => {
+          const { backgroundTrackPhase, playSoundFX, stopAllSounds } = get()
 
           if (!isMuted) {
-            const backgroundTrack = GAME_MODE_BACKGROUND_TRACKS[mode ?? GameMode.LEARN]
-            const volume = mode === GameMode.SPEEDRUN ? 0.6 : 0.35
+            const backgroundTrack = BACKGROUND_TRACKS[backgroundTrackPhase]
+            const volume = BACKGROUND_TRACK_VOLUMES[backgroundTrackPhase]
             set({ backgroundTrack, isMuted: false })
             playSoundFX(backgroundTrack, true, volume)
             return
@@ -208,12 +214,13 @@ const createSoundStore = () => {
           activeSources.clear()
         },
 
-        switchBackgroundTrack: (mode: GameMode) => {
-          const { backgroundTrack, isMuted, stopSoundFX, playSoundFX } = get()
+        switchBackgroundTrack: (phase: BackgroundTrackPhase) => {
+          set({ backgroundTrackPhase: phase })
 
+          const { backgroundTrack, isMuted, stopSoundFX, playSoundFX } = get()
           if (isMuted) return
 
-          const newBackgroundTrack = GAME_MODE_BACKGROUND_TRACKS[mode]
+          const newBackgroundTrack = BACKGROUND_TRACKS[phase]
           if (backgroundTrack === newBackgroundTrack) return
 
           if (backgroundTrack === SoundFX.BACKGROUND) {
@@ -225,7 +232,7 @@ const createSoundStore = () => {
           // small buffer to ensure clean transition
           setTimeout(() => {
             if (get().isMuted) return // Don't play if muted during the delay
-            playSoundFX(newBackgroundTrack, true, 0.5)
+            playSoundFX(newBackgroundTrack, true, BACKGROUND_TRACK_VOLUMES[phase])
           }, STOP_FX_FADE_SECONDS * 1000)
 
           set({ backgroundTrack: newBackgroundTrack })

@@ -49,6 +49,12 @@ const { PLATFORM_DATA } = loadTypeScript('resources/rowsData.ts')
 const { findSafeRespawnPosition } = loadTypeScript('utils/platform/playerRespawn.ts')
 const { createTileBatches } = loadTypeScript('utils/platform/terrainBatches.ts')
 const { COLLISION_GROUPS } = loadTypeScript('utils/collisionGroups.ts')
+const { findRaceMarkers, getLobbyRowRange, getStartGridPosition } = loadTypeScript(
+  'utils/platform/raceMarkers.ts',
+)
+const approvedLayout = JSON.parse(
+  readFileSync(path.join(projectRoot, 'docs/race-course/approved-layout.json'), 'utf8'),
+)
 
 const SPAWN_HEIGHT = 4
 const PLAYER_RADIUS = 0.45
@@ -68,7 +74,7 @@ function almostEqual(actual, expected, tolerance = 0.001) {
 
 test('row coordinates round-trip the whole course, clamp its ends, and cross boundaries both ways', () => {
   assert.equal(rowToWorldZ(0), 3.5 * TILE_SIZE)
-  const rowCount = PLATFORM_DATA.modes.learn.rows.length
+  const rowCount = PLATFORM_DATA.modes.speedrun.rows.length
   for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
     const z = rowToWorldZ(rowIndex)
     assert.equal(worldZToRowIndex(z, rowCount), rowIndex)
@@ -257,4 +263,192 @@ test('native fixed sensors report player intersections only with KINEMATIC_FIXED
     world.step()
     assert.equal(world.intersectionPair(player.collider, sensor), true)
   } finally { world.free() }
+})
+
+// --- Approved Course draft C integration -------------------------------------------------------
+
+const raceRows = PLATFORM_DATA.modes.speedrun.rows
+const raceCounts = PLATFORM_DATA.modes.speedrun.totalCounts
+const RACE_NAMES = ['lobby', 'launch', 'sweeps', 'slalom', 'recovery', 'finale', 'sprint']
+
+test('race course: approved counts, section stages and physical markers are generated', () => {
+  assert.equal(PLATFORM_DATA.version, '1.2.0')
+  assert.equal(raceRows.length, 1247)
+  assert.equal(raceCounts.rows, 1247)
+  assert.equal(raceCounts.rings, 60)
+  assert.equal(raceCounts.startLines, 1)
+  assert.equal(raceCounts.finishLines, 1)
+  assert.equal(raceCounts.colourPickers, 1)
+  assert.equal(raceCounts.decorations, 682)
+  assert.equal(raceCounts.headings, 0)
+  assert.equal(raceCounts.infoZones, 0)
+  assert.equal(raceCounts.collectibles, 0)
+  assert.equal(raceCounts.confetti, 0)
+
+  const markers = findRaceMarkers(raceRows)
+  assert.ok(markers)
+  assert.equal(markers.start.rowIndex, 32)
+  assert.equal(markers.finish.rowIndex, 1232)
+  assert.equal(markers.start.position[0], 0)
+  assert.equal(markers.start.position[2], rowToWorldZ(32))
+  assert.equal(markers.finish.position[0], 0)
+  assert.equal(markers.finish.position[2], rowToWorldZ(1232))
+  assert.deepEqual(getStartGridPosition(raceRows, SPAWN_HEIGHT), [0, SPAWN_HEIGHT, rowToWorldZ(32)])
+  assert.deepEqual(getLobbyRowRange(raceRows), { startRow: 0, endRow: 29 })
+  assert.equal(findRaceMarkers(PLATFORM_DATA.modes.dev.rows), null)
+  assert.equal(getStartGridPosition(PLATFORM_DATA.modes.dev.rows, SPAWN_HEIGHT), null)
+
+  assert.equal(raceRows[0].stage, 1) // Stage.HOME
+  assert.equal(raceRows[32].stage, 3) // Stage.OBSTACLES
+  assert.equal(raceRows[1232].stage, 5) // Stage.SPEED_RUN_FINISH
+
+  const colourPickerRows = raceRows.filter((row) => row.colourPickerPlacement)
+  assert.equal(colourPickerRows.length, 1)
+  assert.equal(raceRows.indexOf(colourPickerRows[0]), 12)
+
+  const floorCount = raceRows.reduce(
+    (count, row) => count + row.isRaised.filter(Boolean).length,
+    0,
+  )
+  const highlightCount = raceRows.reduce(
+    (count, row) => count + (row.isHighlighted?.filter(Boolean).length ?? 0),
+    0,
+  )
+  assert.equal(floorCount, 17683)
+  assert.equal(highlightCount, 2581)
+})
+
+test('race course: rings, holes and scenery respect the playable floor', () => {
+  let ringCount = 0
+  for (const row of raceRows) {
+    row.rings?.forEach((hasRing, columnIndex) => {
+      if (!hasRing) return
+      ringCount += 1
+      assert.equal(row.isRaised[columnIndex], 1, `ring at ${row.rowIndex}:${columnIndex}`)
+    })
+  }
+  assert.equal(ringCount, 60)
+
+  for (const hole of approvedLayout.holes) {
+    for (let s = hole.start; s <= hole.end; s++) {
+      const row = raceRows[s + 32]
+      for (let x = hole.left; x <= hole.right; x++) {
+        assert.equal(row.isRaised[x + 16], 0, `${hole.id} is not void at ${s},${x}`)
+      }
+    }
+  }
+
+  let decorationCount = 0
+  for (const row of raceRows) {
+    for (const columnIndex of row.decorationColumns ?? []) {
+      decorationCount += 1
+      assert.equal(row.isRaised[columnIndex], 0)
+      assert.notEqual(row.rings?.[columnIndex], 1)
+      for (const direction of [-1, 1]) {
+        for (const offset of [1, 2]) {
+          const nearby = columnIndex + direction * offset
+          if (nearby < 0 || nearby >= COLUMNS) continue
+          assert.equal(
+            row.isRaised[nearby],
+            0,
+            `decoration ${row.rowIndex}:${columnIndex} lacks two empty columns`,
+          )
+        }
+      }
+    }
+  }
+  assert.equal(decorationCount, 682)
+  assert.equal(raceCounts.decorations, decorationCount)
+})
+
+test('race course: start and finish lines have full 9x5 floor support', () => {
+  for (const [rowIndex, label] of [
+    [32, 'START'],
+    [1232, 'FINISH'],
+  ]) {
+    for (let rowOffset = -2; rowOffset <= 2; rowOffset++) {
+      const row = raceRows[rowIndex + rowOffset]
+      assert.ok(row, `${label} row ${rowIndex + rowOffset} exists`)
+      for (let columnOffset = -4; columnOffset <= 4; columnOffset++) {
+        assert.equal(
+          row.isRaised[16 + columnOffset],
+          1,
+          `${label} lacks support at ${rowIndex + rowOffset}:${16 + columnOffset}`,
+        )
+      }
+    }
+  }
+})
+
+test('race course: every generated floor cell is connected and at most three paths coexist', () => {
+  const floorCells = new Set()
+  raceRows.forEach((row, rowIndex) => {
+    let intervals = 0
+    let wasRaised = false
+    row.isRaised.forEach((cell, columnIndex) => {
+      if (cell === 1) {
+        floorCells.add(rowIndex * COLUMNS + columnIndex)
+        if (!wasRaised) intervals += 1
+      }
+      wasRaised = cell === 1
+    })
+    assert.ok(intervals >= 1 && intervals <= 3, `row ${rowIndex} has ${intervals} paths`)
+  })
+
+  const startCell = 0 * COLUMNS + 16
+  const visited = new Set([startCell])
+  const queue = [startCell]
+  for (let index = 0; index < queue.length; index++) {
+    const cell = queue[index]
+    const rowIndex = Math.floor(cell / COLUMNS)
+    const columnIndex = cell % COLUMNS
+    for (const [dy, dx] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nextRow = rowIndex + dy
+      const nextColumn = columnIndex + dx
+      if (nextRow < 0 || nextRow >= raceRows.length) continue
+      if (nextColumn < 0 || nextColumn >= COLUMNS) continue
+      const nextCell = nextRow * COLUMNS + nextColumn
+      if (!floorCells.has(nextCell) || visited.has(nextCell)) continue
+      visited.add(nextCell)
+      queue.push(nextCell)
+    }
+  }
+  assert.equal(visited.size, floorCells.size)
+  assert.equal(floorCells.size, 17683)
+})
+
+test('race course: lobby falls are bounded to lobby rows and never reach the course', () => {
+  const lobbyRange = getLobbyRowRange(raceRows)
+  for (const playerZ of [rowToWorldZ(8), rowToWorldZ(29), rowToWorldZ(40)]) {
+    const position = findSafeRespawnPosition(raceRows, 0, playerZ, SPAWN_HEIGHT, lobbyRange)
+    assert.ok(position)
+    const rowIndex = worldZToRowIndex(position[2], raceRows.length)
+    assert.ok(rowIndex >= 0 && rowIndex <= 31, `respawn landed at row ${rowIndex}`)
+  }
+})
+
+test('race course: approved source files and masks are copied byte-for-byte', () => {
+  for (const name of RACE_NAMES) {
+    const file = `race-${name}.png`
+    assert.deepEqual(
+      readFileSync(path.join(projectRoot, 'assets/platform/1.2.0', file)),
+      readFileSync(path.join(projectRoot, 'docs/race-course/bitmaps/1.2.0', file)),
+      `${file} changed during integration`,
+    )
+    assert.deepEqual(
+      readFileSync(path.join(projectRoot, 'assets/platform/1.2.0/decoration', file)),
+      readFileSync(path.join(projectRoot, 'docs/race-course/bitmaps/decoration', file)),
+      `${file} scenery mask changed during integration`,
+    )
+  }
+})
+
+test('race course: minimap shows both line markers', () => {
+  const svg = readFileSync(
+    path.join(projectRoot, 'public/maps/1.2.0/speedrun.svg'),
+    'utf8',
+  )
+  assert.match(svg, /#5CE1E6/)
+  assert.match(svg, /#FFDD3F/)
+  assert.match(svg, /viewBox="0 0 132 4988"/)
 })

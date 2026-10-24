@@ -1,17 +1,17 @@
 import { useMediaQuery } from '@mantine/hooks'
 import Image from 'next/image'
-import { type FC, forwardRef, useEffect, useRef, useState } from 'react'
+import { type FC, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import { PLATFORM_VERSION } from '@/resources/rowsData'
-import { GameMode, InputType } from '@/stores/types'
+import { GameMode, InputType, SpeedRunStage } from '@/stores/types'
+import { getFinishRowIndex, getStartRowIndex } from '@/utils/platform/raceMarkers'
 import { COLUMNS, TILE_SIZE } from '@/utils/tiles'
 
 const MINI_MAP_ASSET_BASE = `/maps/${PLATFORM_VERSION}`
 const MINI_MAP_ASSET_PATHS: Record<GameMode, string> = {
-  [GameMode.LEARN]: `${MINI_MAP_ASSET_BASE}/learn.svg`,
   [GameMode.SPEEDRUN]: `${MINI_MAP_ASSET_BASE}/speedrun.svg`,
   [GameMode.DEV]: `${MINI_MAP_ASSET_BASE}/dev.svg`,
 }
@@ -42,6 +42,7 @@ const getProgressWindow = (totalRows: number): ProgressWindow => {
 const MiniMap: FC = () => {
   const gameStoreAPI = useGameStoreAPI()
   const mode = useGameStore((s) => s.mode)
+  const rowsData = useGameStore((s) => s.rowsData)
   const totalRows = useGameStore((s) => s.totalCounts.rows)
   const isUsingJoystick = useGameStore((s) => s.inputType === InputType.JOYSTICK)
   const joystickIsOnLeft = useGameStore((s) => s.joystickPosition === 'left')
@@ -55,19 +56,28 @@ const MiniMap: FC = () => {
 
   const {
     maxRowIndex: initialMaxRowIndex,
-    progressStartRow,
-    progressRange,
+    progressStartRow: fallbackProgressStartRow,
+    progressRange: fallbackProgressRange,
   } = getProgressWindow(totalRows)
+
+  const raceProgressWindow = useMemo(() => {
+    const finishRowIndex = getFinishRowIndex(rowsData)
+    const startRow = getStartRowIndex(rowsData)
+    if (finishRowIndex === null || startRow === null) {
+      return { startRow: fallbackProgressStartRow, range: fallbackProgressRange }
+    }
+    return { startRow, range: Math.max(1, finishRowIndex - startRow) }
+  }, [fallbackProgressRange, fallbackProgressStartRow, rowsData])
 
   // const totalRowsRef = useRef(totalRows)
   const rowsToPixelsRef = useRef(
     totalRows === 0 ? 0 : (mapTileSizePx * totalRows) / Math.max(1, initialMaxRowIndex),
   )
   const maxRowIndexRef = useRef(initialMaxRowIndex)
-  const progressStartRowRef = useRef(progressStartRow)
-  const progressRangeRef = useRef(progressRange)
+  const progressStartRowRef = useRef(raceProgressWindow.startRow)
+  const progressRangeRef = useRef(raceProgressWindow.range)
 
-  const miniMapAsset = MINI_MAP_ASSET_PATHS[mode] ?? MINI_MAP_ASSET_PATHS[GameMode.LEARN]
+  const miniMapAsset = MINI_MAP_ASSET_PATHS[mode] ?? MINI_MAP_ASSET_PATHS[GameMode.SPEEDRUN]
 
   const progressRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<HTMLImageElement | null>(null)
@@ -76,17 +86,13 @@ const MiniMap: FC = () => {
   const { playerPosition } = usePlayerPosition()
 
   useEffect(() => {
-    const {
-      maxRowIndex,
-      progressRange: newProgressRange,
-      progressStartRow: newProgressStartRow,
-    } = getProgressWindow(totalRows)
+    const { maxRowIndex } = getProgressWindow(totalRows)
     const denominator = Math.max(1, maxRowIndex)
     rowsToPixelsRef.current = totalRows === 0 ? 0 : (mapTileSizePx * totalRows) / denominator
     maxRowIndexRef.current = maxRowIndex
-    progressStartRowRef.current = newProgressStartRow
-    progressRangeRef.current = newProgressRange
-  }, [mapTileSizePx, totalRows])
+    progressStartRowRef.current = raceProgressWindow.startRow
+    progressRangeRef.current = raceProgressWindow.range
+  }, [mapTileSizePx, raceProgressWindow, totalRows])
 
   useEffect(() => {
     let currentRow = gameStoreAPI.getState().currentRow
@@ -96,13 +102,18 @@ const MiniMap: FC = () => {
 
     const updateProgress = (row: number) => {
       if (!progressRef.current) return
-      const rowsProgress = Math.min(
-        1,
-        Math.max(
-          0,
-          (row - progressStartRowRef.current) / Math.max(1, progressRangeRef.current),
-        ),
-      )
+      const { speedRunStage } = gameStoreAPI.getState()
+      const isFinished =
+        speedRunStage === SpeedRunStage.SUBMITTING || speedRunStage === SpeedRunStage.END
+      const rowsProgress = isFinished
+        ? 1
+        : Math.min(
+            1,
+            Math.max(
+              0,
+              (row - progressStartRowRef.current) / Math.max(1, progressRangeRef.current),
+            ),
+          )
       if (rowsProgress === lastProgressRef) return
       lastProgressRef = rowsProgress
       const translatePercent = (rowsProgress - 1) * 100
@@ -134,7 +145,7 @@ const MiniMap: FC = () => {
     updateProgress(currentRow)
     loop()
 
-    const unsubscribe = gameStoreAPI.subscribe(
+    const unsubscribeCurrentRow = gameStoreAPI.subscribe(
       (s) => s.currentRow,
       (newCurrentRow) => {
         currentRow = newCurrentRow
@@ -142,8 +153,16 @@ const MiniMap: FC = () => {
       },
     )
 
+    // Finishing can happen before the ball reaches the marker centre, so force a full bar when
+    // the result phase starts.
+    const unsubscribeStage = gameStoreAPI.subscribe(
+      (s) => s.speedRunStage,
+      () => updateProgress(currentRow),
+    )
+
     return () => {
-      unsubscribe()
+      unsubscribeCurrentRow()
+      unsubscribeStage()
       cancelAnimationFrame(animationFrameId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

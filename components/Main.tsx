@@ -3,6 +3,7 @@ import { type FC } from 'react'
 
 import Game from '@/components/Game'
 import { PerformanceProvider } from '@/components/PerformanceProvider'
+import RaceAudio from '@/components/RaceAudio'
 import Timer from '@/components/Timer'
 import DebugControls from '@/components/debug/DebugControls'
 import HtmlPortal from '@/components/ui/HtmlPortal'
@@ -20,6 +21,7 @@ const Main: FC<Props> = ({ isMobile, isDebug }) => {
       <UI isMobile={isMobile} />
       <HtmlPortal />
       <Timer />
+      <RaceAudio />
       {isDebug && <DebugControls />}
     </PerformanceProvider>
   )

@@ -1,6 +1,5 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
-import { PlayIcon } from 'lucide-react'
 import { type FC, type ReactNode, useEffect, useMemo } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
 
@@ -8,7 +7,6 @@ import { getSpeedrunData, getSpeedrunPosition } from '@/app/actions'
 import { useGameStore } from '@/components/GameProvider'
 import type { SpeedRunDatabase } from '@/model/schema'
 import { PLATFORM_VERSION } from '@/resources/rowsData'
-import { Overlay } from '@/stores/types'
 
 import type { PerformanceSummary } from './speedrunPerformanceSummary'
 import { getSpeedrunPerformanceSummary } from './speedrunPerformanceSummary'
@@ -19,19 +17,15 @@ type Props = {
   count: number
   className?: string
   fetchLatestRun: boolean
-  showCTA?: boolean
   onPerformanceSummary?: (summary: PerformanceSummary | null) => void
 }
 
 export const LeaderboardTable: FC<Props> = ({
   count,
   className,
-  showCTA = true,
   fetchLatestRun,
   onPerformanceSummary,
 }) => {
-  const setOverlay = useGameStore((s) => s.setOverlay)
-
   const completedSpeedRuns = useGameStore(
     (s) => s.completedSpeedRuns[PLATFORM_VERSION] ?? EMPTY_RUNS,
   )
@@ -150,31 +144,10 @@ export const LeaderboardTable: FC<Props> = ({
         />
       )}
 
-      {showCTA && (
-        <LeaderboardRow
-          key="cta-row"
-          className="pointer-events-auto z-100 my-3 h-12 rounded-full bg-emerald-400/20 py-0 font-semibold text-white uppercase ring ring-emerald-400/30 ring-inset"
-          username="Start speed run"
-          time={0}
-          position={CTA_POSITION}
-          isCurrentUser={false}
-          isLatestRun={false}
-          flag={
-            <button
-              type="button"
-              onClick={() => setOverlay(Overlay.SPEEDRUN_START)}
-              className="absolute right-px flex aspect-square size-12 items-center justify-center rounded-full bg-emerald-600 text-white ring ring-emerald-400 transition-all duration-200 hover:bg-emerald-500 hover:ring-emerald-200"
-              aria-label="Start speed run">
-              <PlayIcon className="ml-0.5 size-5" strokeWidth={2.5} />
-            </button>
-          }
-        />
-      )}
     </section>
   )
 }
 
-const CTA_POSITION = -1
 const ROW_CONTAINER_CLASSES = 'relative col-span-full grid grid-cols-subgrid items-center px-2'
 const TOP_3_CONTAINER_CLASSES = 'h-12 xl:h-14 text-white'
 const NOT_TOP_3_CONTAINER_CLASSES = 'h-9 xl:h-11 text-white/90'
@@ -198,8 +171,7 @@ const LeaderboardRow: FC<RowProps> = ({
   isLatestRun = false,
   className,
 }) => {
-  const isCTAPosition = position === CTA_POSITION
-  const isTopThree = !isCTAPosition && position < 4
+  const isTopThree = position < 4
 
   return (
     <div
@@ -215,7 +187,7 @@ const LeaderboardRow: FC<RowProps> = ({
         <Medal position={position} />
       ) : (
         <div className="flex w-full items-center justify-center pl-1 text-center font-semibold">
-          {isCTAPosition ? '??' : `${position}.`}
+          {position}.
         </div>
       )}
       <h4
@@ -226,7 +198,7 @@ const LeaderboardRow: FC<RowProps> = ({
         {username}
       </h4>
       <div className="flex items-center justify-center text-center font-mono text-base tabular-nums">
-        {isCTAPosition ? '00:00s' : `${time.toFixed(2)}s`}
+        {time.toFixed(2)}s
       </div>
       <div className="flex items-center justify-center text-center text-xl font-bold">
         {flag ?? '?'}

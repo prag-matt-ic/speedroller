@@ -30,7 +30,6 @@ const DPR_OPTIONS: Option<number | undefined>[] = [
 ] as const
 
 const GAME_MODE_OPTIONS: Option<GameMode>[] = [
-  { label: 'Learn', value: GameMode.LEARN },
   { label: 'Speedrun', value: GameMode.SPEEDRUN },
   { label: 'Dev', value: GameMode.DEV },
 ]

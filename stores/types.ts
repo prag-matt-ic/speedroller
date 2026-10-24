@@ -41,6 +41,7 @@ export type RingIndex = [row: number, column: number]
 export type RingCollection = Record<string, true>
 
 export enum SpeedRunStage {
+  LOBBY = 'lobby',
   START = 'start',
   COUNTDOWN = 'countdown',
   RUNNING = 'running',
@@ -49,9 +50,22 @@ export enum SpeedRunStage {
 }
 
 export enum GameMode {
-  LEARN = 'learn',
   SPEEDRUN = 'speedrun',
   DEV = 'dev',
+}
+
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed'
+
+/** Immutable snapshot of the finished attempt, independent of saved history. */
+export type RaceResult = {
+  attemptId: number
+  username: string
+  date: string
+  timeSeconds: number
+  inputType: InputType
+  platformVersion: string
+  raceFalls: number
+  rings: number
 }
 
 export type TimeSlice = {
@@ -60,9 +74,20 @@ export type TimeSlice = {
 
   speedRunStage: SpeedRunStage
 
-  startCountdown: () => void // Sets mode to SPEEDRUN, sets speed run stage to countdown
-  onCountdownComplete: () => void // sets speedRunStage to running
-  finishSpeedRun: () => void // sets speedRunStage to submitting, submits speedrun and then speedRunStage to end
+  /** Ephemeral identity that invalidates delayed countdown/collection/submission callbacks. */
+  attemptId: number
+  attemptStartedAtMs: number | null
+  attemptInputType: InputType | null
+  attemptResult: RaceResult | null
+  saveStatus: SaveStatus
+
+  enterStartLine: () => void
+  startCountdown: () => void
+  cancelStartLine: () => void
+  onCountdownComplete: (attemptId: number) => void
+  finishSpeedRun: (attemptId?: number) => void
+  retryRace: () => void
+  returnToLobby: () => void
 
   speedRunTimeCS: number // current speed run duration in 10 milliseconds (centi-seconds)
   setSpeedRunTimeCS: (centiSeconds: number) => void
@@ -104,6 +129,8 @@ export enum Overlay {
 
 export const getOverlayForSpeedRunStage = (speedRunStage: SpeedRunStage): Overlay => {
   switch (speedRunStage) {
+    case SpeedRunStage.LOBBY:
+      return Overlay.NONE
     case SpeedRunStage.START:
       return Overlay.SPEEDRUN_START
     case SpeedRunStage.COUNTDOWN:
@@ -167,6 +194,7 @@ export type PlayerSlice = {
 
   markCollectibleSeen: (collectibleType: CollectibleID) => void
   stopConfirmation: () => void
+  resetPlayerSpeedState: () => void
   onOutOfBounds: () => void
 }
 
@@ -185,7 +213,8 @@ export type GameSlice = {
   setCurrentRow: (row: number) => void
 
   mode: GameMode
-  resetGame: (params: { mode: GameMode; speedRunStage?: SpeedRunStage }) => void
+  /** Developer layout reset only; attempt retries must not replace terrain. */
+  resetGame: (params: { mode: GameMode }) => void
 
   cameraLookAtPosition: Vector3Tuple | null
   setCameraLookAtPosition: (pos: Vector3Tuple | null) => void
@@ -202,7 +231,7 @@ export type GameSlice = {
   setHtmlPortal: (ref: undefined | React.RefObject<HTMLDivElement>) => void
 
   _isHydrated: boolean
-  setHydrated: (mode: GameMode) => void
+  setHydrated: () => void
 }
 
 export type GameStore = TimeSlice & PlayerSlice & GameSlice & InputSlice & OverlaysSlice
@@ -210,6 +239,14 @@ export type GameStore = TimeSlice & PlayerSlice & GameSlice & InputSlice & Overl
 export type CreateGameStoreParams = {
   isMobile: boolean
   insertSpeedRun: (data: ServerSpeedRunSubmission) => InsertSpeedRunResponse
-} & Pick<SoundState, 'playSoundFX' | 'stopSoundFX' | 'switchBackgroundTrack'>
+} & Pick<SoundState, 'playSoundFX' | 'stopSoundFX'>
 
 export type GameSliceCreator<T> = StateCreator<GameStore, [['zustand/persist', unknown]], [], T>
+
+export const isAttemptLocked = (speedRunStage: SpeedRunStage): boolean =>
+  speedRunStage === SpeedRunStage.COUNTDOWN ||
+  speedRunStage === SpeedRunStage.RUNNING ||
+  speedRunStage === SpeedRunStage.SUBMITTING
+
+export const isManualMovementStage = (speedRunStage: SpeedRunStage): boolean =>
+  speedRunStage === SpeedRunStage.LOBBY || speedRunStage === SpeedRunStage.RUNNING

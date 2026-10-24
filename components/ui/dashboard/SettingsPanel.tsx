@@ -17,14 +17,14 @@ import { useSoundStore } from '@/components/SoundProvider'
 import { ButtonGroup } from '@/components/ui/ButtonGroup'
 import Panel from '@/components/ui/panel/Panel'
 import { PanelHeader } from '@/components/ui/panel/PanelHeader'
-import { InputType } from '@/stores/types'
+import { InputType, isAttemptLocked } from '@/stores/types'
 
 type Props = {
   className?: string
 }
 
 export const SettingsPanel: FC<Props> = ({ className }) => {
-  const mode = useGameStore((s) => s.mode)
+  const speedRunStage = useGameStore((s) => s.speedRunStage)
   const inputType = useGameStore((s) => s.inputType)
   const setInputType = useGameStore((s) => s.setInputType)
   const joystickPosition = useGameStore((s) => s.joystickPosition)
@@ -35,6 +35,7 @@ export const SettingsPanel: FC<Props> = ({ className }) => {
 
   const isMuted = useSoundStore((s) => s.isMuted)
   const setIsMuted = useSoundStore((s) => s.setIsMuted)
+  const isInputLocked = isAttemptLocked(speedRunStage)
 
   return (
     <Panel className={className} strength={1}>
@@ -46,7 +47,7 @@ export const SettingsPanel: FC<Props> = ({ className }) => {
           <span className="text-sm font-medium text-white/70">Audio</span>
           <ButtonGroup
             value={isMuted ? 'off' : 'on'}
-            onChange={(val) => setIsMuted(val === 'off', mode)}
+            onChange={(val) => setIsMuted(val === 'off')}
             items={[
               { label: 'On', value: 'on', Icon: Volume2 },
               { label: 'Off', value: 'off', Icon: VolumeX },
@@ -63,6 +64,7 @@ export const SettingsPanel: FC<Props> = ({ className }) => {
               <ButtonGroup
                 value={inputType}
                 onChange={setInputType}
+                disabled={isInputLocked}
                 items={[
                   { label: 'Keyboard', value: InputType.KEYS, Icon: Keyboard },
                   { label: 'Joystick', value: InputType.JOYSTICK, Icon: Joystick },

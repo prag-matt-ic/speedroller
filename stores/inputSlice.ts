@@ -4,6 +4,7 @@ import {
   type InputSlice,
   InputType,
   type PlayerInput,
+  isAttemptLocked,
 } from './types'
 
 const zeroInput = (): PlayerInput => ({
@@ -23,7 +24,7 @@ export const getResetInputState = (): Pick<
 
 export const createInputSlice =
   (isMobile: CreateGameStoreParams['isMobile']): GameSliceCreator<InputSlice> =>
-  (set) => {
+  (set, get) => {
     const initialInputType: InputType = isMobile ? InputType.JOYSTICK : InputType.KEYS
     return {
       ...getResetInputState(),
@@ -32,6 +33,7 @@ export const createInputSlice =
       joystickPosition: 'right',
       leaderboardFilter: initialInputType,
       setInputType: (type: InputType) => {
+        if (isAttemptLocked(get().speedRunStage)) return
         set({ inputType: type })
       },
       setJoystickPosition: (position) => {

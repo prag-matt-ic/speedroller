@@ -3,16 +3,16 @@ import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { LayoutDashboardIcon, XIcon } from 'lucide-react'
 import { type FC, useRef } from 'react'
-import { SwitchTransition, Transition, type TransitionStatus } from 'react-transition-group'
+import { Transition } from 'react-transition-group'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore } from '@/components/GameProvider'
-import CollectiblesUI from '@/components/ui/CollectiblesUI'
+import LobbyGuidance from '@/components/ui/LobbyGuidance'
 import SpeedUI from '@/components/ui/SpeedUI'
 import MovementControls from '@/components/ui/controls/Controls'
 import { Dashboard } from '@/components/ui/dashboard/Dashboard'
 import MiniMap from '@/components/ui/miniMap/MiniMap'
-import { GameMode, Overlay } from '@/stores/types'
+import { Overlay, SpeedRunStage } from '@/stores/types'
 
 import { SubscribeOverlay } from './SubscribeOverlay'
 import { SpeedRunCountdownOverlay } from './speedRun/SpeedRunCountdownOverlay'
@@ -25,10 +25,14 @@ gsap.registerPlugin(useGSAP)
 type Props = { isMobile: boolean }
 
 const UI: FC<Props> = ({ isMobile }) => {
-  const mode = useGameStore((s) => s.mode)
+  const speedRunStage = useGameStore((s) => s.speedRunStage)
   const overlay = useGameStore((s) => s.overlay)
   const setOverlay = useGameStore((s) => s.setOverlay)
-  const isSpeedRunMode = mode === GameMode.SPEEDRUN
+  const isLobby = speedRunStage === SpeedRunStage.LOBBY
+  const isRunning = speedRunStage === SpeedRunStage.RUNNING
+  const isDashboardAvailable = isLobby || isRunning
+  const isCountdown = overlay === Overlay.SPEEDRUN_COUNTDOWN
+  const showOverlayBackdrop = overlay !== Overlay.NONE && !isCountdown
 
   const infoContainer = useRef<HTMLDivElement>(null)
   const overlayBackdropRef = useRef<HTMLDivElement>(null)
@@ -45,32 +49,20 @@ const UI: FC<Props> = ({ isMobile }) => {
           'pointer-events-none fixed inset-x-0 top-0 z-100 grid w-full grid-cols-3 grid-rows-1 items-center gap-x-2 pt-2 transition-opacity duration-300 select-none xl:pt-3',
           overlay === Overlay.LANDING ? 'opacity-0' : 'opacity-100',
         )}>
-        {/* Collectibles/Timer */}
-        <SwitchTransition>
-          <Transition
-            key={isSpeedRunMode ? 'speed-run' : 'collectibles'}
-            timeout={{ enter: 0, exit: 240 }}
-            appear={true}
-            nodeRef={infoContainer}>
-            {(status: TransitionStatus) => {
-              return (
-                <section
-                  ref={infoContainer}
-                  className={twJoin(
-                    'flex h-fit items-center gap-2.5 pl-4 opacity-0 transition-opacity duration-200 xl:gap-3 xl:pl-5',
-                    status === 'exiting' && 'opacity-0',
-                    status === 'entering' && 'opacity-100',
-                    status === 'entered' && 'opacity-100',
-                  )}>
-                  {isSpeedRunMode ? <SpeedRunControls /> : <CollectiblesUI />}
-                </section>
-              )
-            }}
-          </Transition>
-        </SwitchTransition>
+        {/* Lobby guidance, then race controls only while a run is live. */}
+        <section
+          ref={infoContainer}
+          className={twJoin(
+            'flex h-fit items-center gap-2.5 pl-4 transition-opacity duration-200 xl:gap-3 xl:pl-5',
+            !isRunning && 'col-span-2',
+            overlay === Overlay.LANDING ? 'opacity-0' : 'opacity-100',
+          )}>
+          {isLobby && <LobbyGuidance />}
+          {isRunning && <SpeedRunControls />}
+        </section>
 
-        {/* Speed/Rings */}
-        <SpeedUI />
+        {/* Ring counter and boost dial belong to the live race HUD. */}
+        {isRunning && <SpeedUI />}
       </div>
 
       {/* Top Right Dashboard toggle */}
@@ -84,9 +76,13 @@ const UI: FC<Props> = ({ isMobile }) => {
           }
         }}
         aria-label={overlay === Overlay.DASHBOARD ? 'Close dashboard' : 'Open dashboard'}
+        aria-disabled={!isDashboardAvailable}
+        disabled={!isDashboardAvailable}
         className={twJoin(
           'group pointer-events-auto fixed top-2 right-2 z-300 flex items-center rounded-lg p-3 text-xs uppercase transition-all duration-300 outline-none hover:bg-black/30 xl:top-3 xl:right-3',
-          overlay === Overlay.LANDING ? 'opacity-0' : 'opacity-100',
+          overlay === Overlay.LANDING || !isDashboardAvailable
+            ? 'pointer-events-none opacity-0'
+            : 'opacity-100',
         )}>
         {overlay === Overlay.DASHBOARD ? (
           <XIcon className="size-6 xl:size-8" strokeWidth={1} />
@@ -102,9 +98,9 @@ const UI: FC<Props> = ({ isMobile }) => {
 
       <MovementControls />
 
-      {/* Fullscreen overlays */}
+      {/* Fullscreen overlays: the countdown deliberately keeps the live track unobscured. */}
       <Transition
-        in={overlay !== Overlay.NONE}
+        in={showOverlayBackdrop}
         timeout={{ enter: 0, exit: 300 }}
         mountOnEnter={true}
         unmountOnExit={true}

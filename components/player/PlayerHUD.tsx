@@ -20,7 +20,6 @@ import { useConfirmationProgress } from '@/hooks/useConfirmationProgress'
 import { CollectibleID } from '@/model/schema'
 import { GEMS_COLOURS_BY_ID } from '@/resources/colours'
 
-export const PLAYER_RADIUS = 0.45
 
 const defaultGemColour = GEMS_COLOURS_BY_ID[CollectibleID.DesignTools].colour
 

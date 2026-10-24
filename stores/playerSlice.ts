@@ -9,12 +9,13 @@ import { ringIndexToKey } from '@/utils/rings'
 
 import {
   type CreateGameStoreParams,
-  GameMode,
   type GameSliceCreator,
   type PlayerSlice,
   type PlayerStatus,
   RingCollection,
   type RingIndex,
+  SpeedRunStage,
+  isAttemptLocked,
 } from './types'
 
 export const PLAYER_INITIAL_POSITION: Vector3Tuple = [0, 4, 0]
@@ -32,7 +33,6 @@ export const RESET_PLAYER_STATE: Pick<
   | 'confirmationProgress'
   | 'hasCollectedAllRings'
   | 'playerSpeedUnits'
-  | 'paletteIndex'
 > = {
   confirmingCollectible: null,
   confirmingPaletteIndex: null,
@@ -40,7 +40,6 @@ export const RESET_PLAYER_STATE: Pick<
   confirmationProgress: 0,
   hasCollectedAllRings: false,
   playerSpeedUnits: PLAYER_SPEED_BASE,
-  paletteIndex: 0,
 }
 
 export const createPlayerSlice =
@@ -141,9 +140,10 @@ export const createPlayerSlice =
       outOfBoundsEvents: [],
       username: null,
       isSubscribed: false,
-      paletteIndex: RESET_PLAYER_STATE.paletteIndex,
+      paletteIndex: 0,
       confirmingPaletteIndex: RESET_PLAYER_STATE.confirmingPaletteIndex,
       setUsername: (username: string) => {
+        if (isAttemptLocked(get().speedRunStage)) return
         set({ username })
       },
       setIsSubscribed: (isSubscribed) => {
@@ -216,6 +216,7 @@ export const createPlayerSlice =
         startConfirmation(onConfirmed, COLLECTIBLE_DURATION_S)
       },
       setConfirmingPaletteIndex: (paletteIndex: number | null) => {
+        if (paletteIndex !== null && get().speedRunStage !== SpeedRunStage.LOBBY) return
         confirmationTween?.kill()
 
         if (paletteIndex === null) {
@@ -265,6 +266,12 @@ export const createPlayerSlice =
           confirmationProgress: 0,
         })
       },
+      resetPlayerSpeedState: () => {
+        speedDecayTween?.kill()
+        speedTween?.kill()
+        speedTweenTarget.value = PLAYER_SPEED_BASE
+        set({ playerSpeedUnits: PLAYER_SPEED_BASE })
+      },
       respawnPlayer: (position, hud) => {
         get().stopConfirmation()
         set((s) => ({
@@ -281,14 +288,22 @@ export const createPlayerSlice =
         })
       },
       onOutOfBounds: () => {
-        const status = get().playerStatus
+        const state = get()
+        const status = state.playerStatus
         if (status === 'out-of-bounds' || status === 'idle') return
+        if (
+          state.speedRunStage === SpeedRunStage.SUBMITTING ||
+          state.speedRunStage === SpeedRunStage.END
+        ) {
+          return
+        }
         get().stopConfirmation()
         playSoundFX(SoundFX.OUT_OF_BOUNDS)
         resetSpeed()
-        const mode = get().mode
         const outOfBoundsMessage =
-          mode === GameMode.SPEEDRUN ? null : getOutOfBoundsMessage(get().outOfBoundsEvents)
+          state.speedRunStage === SpeedRunStage.LOBBY
+            ? getOutOfBoundsMessage(state.outOfBoundsEvents)
+            : null
 
         set((s) => ({
           playerStatus: 'out-of-bounds',

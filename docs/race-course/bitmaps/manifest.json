@@ -1,5 +1,5 @@
 {
-  "status": "Artwork approved 2026-10-24; not integrated",
+  "status": "Artwork approved 2026-10-24; integrated into assets/platform/1.2.0 on 2026-10-24",
   "copiedFrom": "assets/platform/1.1.1",
   "width": 33,
   "startGlobalRow": 32,
@@ -67,5 +67,6 @@
     "rings": 60,
     "highlights": 2581,
     "decorations": 682
-  }
+  },
+  "integratedTo": "assets/platform/1.2.0"
 }

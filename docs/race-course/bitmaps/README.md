@@ -2,7 +2,9 @@
 
 Generated 24 October 2026 from the approved Course draft C. Geometry, holes and all 60
 ring coordinates are unchanged. **Bitmap artwork approved by the user on 24 October 2026.**
-Runtime integration and in-game acceptance remain pending.
+The seven terrain chunks and seven scenery masks are integrated into
+`assets/platform/1.2.0/` and generated into the public `1.2.0` course. In-game contrast and
+device acceptance remain pending.
 
 ## Files and editing
 
@@ -33,7 +35,7 @@ copy or preserve manual edits before running it again. It does not write runtime
 | `#00FFFF` | Brighter playable tile, existing HIGHLIGHT convention |
 | `#FF0000` | Ring on playable floor |
 | `#FF8000` | Paint Shop at global row 12 |
-| `#8000FF` | Planned START marker at global row 32; parser support still required |
+| `#8000FF` | START marker at global row 32; parsed into `startLinePosition` |
 | `#FFFF00` | FINISH at global row 1232 |
 
 Palette colours encode meaning, not displayed tile colour. Arbitrary lighter greys do not
@@ -56,8 +58,8 @@ Detached checker grids and forward-facing chevrons preserve all 682 approved sce
 - [x] Add 2,581 bright floor tiles with semantic marker precedence.
 - [x] Decode generated PNGs and verify pixel values, dimensions and floor support.
 - [x] Review the artwork preview with the user and approve it (24 October 2026).
-- [ ] Copy the approved files into the chosen release version and update the source list.
-- [ ] Add start-marker handling and separate non-collidable scenery ingestion.
+- [x] Copy the approved files into the chosen release version and update the source list.
+- [x] Add start-marker handling and separate non-collidable scenery ingestion.
 - [ ] Run the course and race-flow implementation checklists before public release.
 - [ ] Check highlight contrast, ring readability and hazard visibility in-game at speed.
 
@@ -88,12 +90,13 @@ Use the existing PNGs below, in this exact order. Paths are relative to this dir
 | 7 | `1.2.0/race-sprint.png` | `decoration/race-sprint.png` | 195 |
 
 Keep copied legacy PNGs out of the new public course source list; retain `test.png` for
-development. Extend `scripts/buildPlatformRows.ts` for the purple START marker and a
-separate scenery input before activating the new version. Preserve cyan HIGHLIGHT parsing.
+development. `scripts/buildPlatformRows.ts` now parses the purple START marker, resolves
+start/finish markers and prints a typed line role, and ingests the scenery masks separately.
+Cyan HIGHLIGHT parsing is unchanged.
 Render scenery without collision or respawn participation. Generate `resources/rowsData.ts`
 and minimaps with `npm run build-platform`; do not edit generated rows by hand.
-Implement lobby, colour selection, start/countdown, lifecycle, results and persistence from
-the race-flow plan alongside this stage. Keep terrain flat.
+The lobby, colour selection, start/countdown, lifecycle, results and persistence from the
+race-flow plan are implemented alongside this stage. Terrain remains flat.
 
 The approved art reference is `artwork-preview.html`, with bright-cell motifs in
 `artwork.json`. The older `../course-paths-and-rings.html` shows geometry and ring routes
@@ -114,8 +117,10 @@ handling for 45–60-second clean runs. Record any necessary placement changes a
 results. Release only after both plans' acceptance checks pass, under a fresh leaderboard
 identity if public times already exist for different geometry or movement rules.
 
-### Stage 3 Optional downhill experiment
+### Stage 3 The Fold visual update
 
-Keep the approved bitmap footprint. Prototype consistent elevation transforms and downhill
-movement separately after the flat race feels good. Controller choice and final slope are
-still deferred; artwork approval does not approve a physics rewrite.
+Preserve the approved bitmap footprint and every bright-tile pattern. Follow Stage 3 in
+[the course plan](../../race-course-and-speed-design.md): stylised stone materials, modular
+architecture with the main gateway on the recovery straight, WebGPU TSL height fog, and
+distant assembly/seam effects. Keep the course flat and protect the Stage 2 decision-preview
+area from fog and moving geometry. This stage changes presentation, not physics or layout.

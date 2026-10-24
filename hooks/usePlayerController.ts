@@ -4,7 +4,7 @@ import { KinematicCharacterController } from '@dimforge/rapier3d-compat'
 import { useRapier } from '@react-three/rapier'
 import { useLayoutEffect, useRef } from 'react'
 
-import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
+import { PLAYER_RADIUS } from '@/utils/player'
 
 function usePlayerController() {
   const { world } = useRapier()

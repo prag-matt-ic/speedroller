@@ -79,7 +79,9 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
   const { setLookAt, setZoom } = useCameraControls()
   const { playerPosition } = usePlayerPosition()
   const cameraLookAtPosition = useGameStore((s) => s.cameraLookAtPosition)
-  const isOverlayOpen = useGameStore((s) => s.overlay !== Overlay.NONE)
+  const overlay = useGameStore((s) => s.overlay)
+  // The countdown is drawn over the live track at the normal gameplay camera.
+  const isRaisedOverlay = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN
 
   const { input } = usePlayerInput()
 
@@ -100,11 +102,11 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
     // Ease toward the moving goal rather than snapping the camera onto it each frame
     setLookAt(
       playerPosition.current[0],
-      position.y + (isOverlayOpen ? OVERLAY_Y_OFFSET : 0),
+      position.y + (isRaisedOverlay ? OVERLAY_Y_OFFSET : 0),
       playerPosition.current[2] +
         position.z +
         inputZOffset +
-        (isOverlayOpen ? OVERLAY_Z_OFFSET : 0),
+        (isRaisedOverlay ? OVERLAY_Z_OFFSET : 0),
       lookAtX,
       LOOK_AT_HEIGHT,
       lookAt[2] + backwardLookAtOffset,

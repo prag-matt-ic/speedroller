@@ -10,7 +10,6 @@ import { PointerProvider } from '@/components/ui/PointerProvider'
 import SpeedPanel from '@/components/ui/dashboard/SpeedPanel'
 import { Input } from '@/components/ui/input/Input'
 import { useUsernameInput } from '@/components/ui/input/useUsernameInput'
-import { Overlay } from '@/stores/types'
 
 type Props = {
   ref: Ref<HTMLDivElement>
@@ -22,7 +21,7 @@ export const SpeedRunStartOverlay: FC<Props> = ({ ref, transitionStatus }) => {
   const isMobile = useGameStore((s) => s.isMobile)
   const username = useGameStore((s) => s.username)
   const startCountdown = useGameStore((s) => s.startCountdown)
-  const setOverlay = useGameStore((s) => s.setOverlay)
+  const cancelStartLine = useGameStore((s) => s.cancelStartLine)
   const usernameInput = useRef<HTMLInputElement>(null)
   const inputProps = useUsernameInput()
 
@@ -54,8 +53,12 @@ export const SpeedRunStartOverlay: FC<Props> = ({ ref, transitionStatus }) => {
         )}>
         <section className="flex max-h-full max-w-xl flex-col gap-4 overflow-y-auto px-2 py-4 xl:gap-6">
           <h2 className="font-unbounded text-center text-2xl font-semibold lg:text-3xl">
-            Race to the finish line
+            Enter a username to race
           </h2>
+          <p className="mx-auto max-w-md text-center text-sm text-white/70 xl:text-base">
+            You are on the starting grid. A valid name is saved with your time and shown on the
+            leaderboard.
+          </p>
 
           <Input
             ref={usernameInput}
@@ -93,12 +96,12 @@ export const SpeedRunStartOverlay: FC<Props> = ({ ref, transitionStatus }) => {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => setOverlay(Overlay.NONE)}
+            onClick={cancelStartLine}
             className=""
             size="sm"
-            aria-label="Cancel"
+            aria-label="Back to lobby"
             endIcon={X}>
-            Cancel
+            Back to lobby
           </Button>
         </section>
       </div>

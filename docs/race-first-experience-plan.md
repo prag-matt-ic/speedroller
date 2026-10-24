@@ -1,6 +1,6 @@
 # Race First Experience Implementation Plan
 
-Status: **Race flow, Course draft C layout and bitmap artwork approved; runtime integration not started.**
+Status: **Race flow, Course draft C layout and bitmap artwork integrated; automated checks pass and a headless desktop smoke test reached the live race; Stage 2 handling and full browser/device acceptance pending.**
 
 Decision date: **24 October 2026**
 
@@ -13,7 +13,7 @@ This is the race-flow implementation handoff for a new agent. Read
 `docs/race-course-and-speed-design.md` alongside it: that design supersedes the original
 preserved-course layout and introduces a longer branching course, 45–60-second runs,
 automatic forward movement, and braking to a complete stop with no reverse. Terrain
-remains flat for the course and speed stages; downhill work is deferred.
+remains flat throughout; Stage 3 adds The Fold architecture, materials and TSL height fog.
 
 The approved layout, exact ring/hole/decorative placements, coordinate mapping, and staged
 acceptance are in [the course design](race-course-and-speed-design.md). Its checked-in
@@ -70,12 +70,12 @@ Landing screen
        -> Back to lobby: entrance and free movement
 ```
 
-- [ ] A fresh visit enters the lobby after the existing landing screen.
-- [ ] A returning visit also enters the lobby, regardless of a previously saved game mode.
-- [ ] Players can reach the start without choosing a colour or completing tutorial steps.
-- [ ] Name setup occurs only when the saved username fails the existing validation rule.
-- [ ] Retry and Restart bypass the lobby walk; no other public UI bypasses the physical line.
-- [ ] Every exit from an attempt has an explicit destination and leaves no active countdown.
+- [x] A fresh visit enters the lobby after the existing landing screen.
+- [x] A returning visit also enters the lobby, regardless of a previously saved game mode.
+- [x] Players can reach the start without choosing a colour or completing tutorial steps.
+- [x] Name setup occurs only when the saved username fails the existing validation rule.
+- [x] Retry and Restart bypass the lobby walk; no other public UI bypasses the physical line.
+- [x] Every exit from an attempt has an explicit destination and leaves no active countdown.
 
 ## Terrain assets and generated data
 
@@ -96,11 +96,11 @@ markers are absent; the only colour picker is in the lobby. The old course's geo
 ring locations no longer constrain the new design.
 
 - [x] Prepare and approve a source copy without modifying historical assets.
-- [ ] Integrate that approved copy when the generator and marker support are ready.
-- [ ] Add the new lobby before the redesigned course in the generator's source list.
+- [x] Integrate that approved copy when the generator and marker support are ready.
+- [x] Add the new lobby before the redesigned course in the generator's source list.
 - [x] Author and approve the longer branching course, ring placements and bright-tile details.
-- [ ] Remove obsolete public interaction markers from the new playable layout.
-- [ ] Keep the development map available through developer controls.
+- [x] Remove obsolete public interaction markers from the new playable layout.
+- [x] Keep the development map available through developer controls.
 
 ### Lobby pixel layout
 
@@ -126,10 +126,10 @@ section boundary so the complete nine-by-five line footprint has floor support.
 The start marker is at world X = 0 and Z = `rowToWorldZ(32)`, currently -28.5. Derive this
 from generated data at runtime rather than duplicating the coordinate in race logic.
 
-- [ ] Author the lobby floor, corridor, colour marker, highlights, and start marker.
-- [ ] Verify the spawn, each colour tile, and the entire starting grid have supporting floor.
-- [ ] Verify a connected walkable route from spawn through the exit into the launch section.
-- [ ] Verify no floor route bypasses the start sensor in the exit corridor.
+- [x] Author the lobby floor, corridor, colour marker, highlights, and start marker.
+- [x] Verify the spawn, each colour tile, and the entire starting grid have supporting floor.
+- [x] Verify a connected walkable route from spawn through the exit into the launch section.
+- [x] Verify no floor route bypasses the start sensor in the exit corridor.
 
 ### Generator and marker interfaces
 
@@ -148,13 +148,13 @@ Derive the grid and finish positions once from generated row data. Missing or du
 markers must fail generation/validation with a useful error rather than create a playable
 public map with ambiguous race boundaries.
 
-- [ ] Add start-marker parsing and the new row field.
-- [ ] Render exactly one explicitly typed start and finish line in the public course.
-- [ ] Validate start-before-finish ordering and marker counts for the public map only.
-- [ ] Generate the redesigned course with one start, one finish, one colour picker, and counts matching its final bitmap layout.
-- [ ] Confirm public information, collectible, and promotional-heading placement counts are zero.
-- [ ] Generate `resources/rowsData.ts` and the new minimap assets with `npm run build-platform`.
-- [ ] Run generation twice and confirm that the second run produces identical output.
+- [x] Add start-marker parsing and the new row field.
+- [x] Render exactly one explicitly typed start and finish line in the public course.
+- [x] Validate start-before-finish ordering and marker counts for the public map only.
+- [x] Generate the redesigned course with one start, one finish, one colour picker, and counts matching its final bitmap layout.
+- [x] Confirm public information, collectible, and promotional-heading placement counts are zero.
+- [x] Generate `resources/rowsData.ts` and the new minimap assets with `npm run build-platform`.
+- [x] Run generation twice and confirm that the second run produces identical output.
 
 Do not hand-edit generated rows or replace the build-time PNG parser with runtime parsing.
 
@@ -187,11 +187,11 @@ not persisted. Increment/invalidate the attempt identifier when beginning anothe
 or abandoning one, so countdown, collection, and submission callbacks can be rejected
 when stale.
 
-- [ ] Add `LOBBY` and implement the transition table.
-- [ ] Make initial public state and default public row data use the continuous race map.
-- [ ] Remove the overlay setter's implicit mutation of `speedRunStage`.
-- [ ] Add phase guards for start, GO, finish, retry, cancellation, and lobby return.
-- [ ] Keep developer layout resets separate from public race transitions.
+- [x] Add `LOBBY` and implement the transition table.
+- [x] Make initial public state and default public row data use the continuous race map.
+- [x] Remove the overlay setter's implicit mutation of `speedRunStage`.
+- [x] Add phase guards for start, GO, finish, retry, cancellation, and lobby return.
+- [x] Keep developer layout resets separate from public race transitions.
 
 ### Start line and username setup
 
@@ -208,12 +208,12 @@ A valid saved name starts the countdown immediately. A missing/invalid name open
 confirming a valid name starts the countdown. Cancelling returns the player to lobby
 column 16, row 22, outside the start sensor, with free movement and the timer reset.
 
-- [ ] Trigger on initial contact without the current 500 ms delay.
-- [ ] Centre the player, clear attempt state, and hold it before displaying setup/countdown.
-- [ ] Validate the current form value and saved name consistently.
-- [ ] Confirm keyboard typing cannot move the ball behind the name form.
-- [ ] Cancel setup to row 22 without immediately reopening the form or countdown.
-- [ ] Ignore repeated contacts and later race crossings of the start line.
+- [x] Trigger on initial contact without the current 500 ms delay.
+- [x] Centre the player, clear attempt state, and hold it before displaying setup/countdown.
+- [x] Validate the current form value and saved name consistently.
+- [x] Confirm keyboard typing cannot move the ball behind the name form.
+- [x] Cancel setup to row 22 without immediately reopening the form or countdown.
+- [x] Ignore repeated contacts and later race crossings of the start line.
 
 ### Countdown and input
 
@@ -227,11 +227,11 @@ from three when visible. Do not start a run unattended. At GO, release movement 
 the timing origin together. Controls held during countdown may take effect at GO, but no
 raw or smoothed input may displace the ball before then.
 
-- [ ] Implement readiness-gated countdown and guarded completion.
-- [ ] Exclude countdown from menu backdrop and raised-camera styling.
-- [ ] Make countdown cancellation stop its animation, sound, and completion callback.
-- [ ] Restart an interrupted countdown from three after visibility returns.
-- [ ] Verify held keyboard and joystick input takes effect only at GO.
+- [x] Implement readiness-gated countdown and guarded completion.
+- [x] Exclude countdown from menu backdrop and raised-camera styling.
+- [x] Make countdown cancellation stop its animation, sound, and completion callback.
+- [x] Restart an interrupted countdown from three after visibility returns.
+- [x] Verify held keyboard and joystick input takes effect only at GO.
 
 ## Resetting attempts without replacing terrain
 
@@ -254,12 +254,12 @@ All three retain username, chosen colour, input preferences, audio settings, sub
 state, total experience time, and saved history. A race reset must no longer assign the
 default palette over the user's selection.
 
-- [ ] Separate the current `resetPlatformTick`/course remount path from attempt resets.
-- [ ] Reset ring state and animation refs without rebuilding static terrain.
-- [ ] Cancel/reset all boost tween state to the existing base speed.
-- [ ] Clear transient movement and confirmation state on every reset path.
-- [ ] Preserve preferences and saved data across all reset destinations.
-- [ ] Verify several consecutive retries restore every ring and give identical starting conditions.
+- [x] Separate the current `resetPlatformTick`/course remount path from attempt resets.
+- [x] Reset ring state and animation refs without rebuilding static terrain.
+- [x] Cancel/reset all boost tween state to the existing base speed.
+- [x] Clear transient movement and confirmation state on every reset path.
+- [x] Preserve preferences and saved data across all reset destinations.
+- [ ] Verify several consecutive retries restore every ring and give identical starting conditions in-browser.
 
 ## Falls and interruptions
 
@@ -278,12 +278,12 @@ time continues. On return, do not integrate the whole hidden duration into one m
 frame. Lock username and input-method changes from countdown through the live attempt;
 audio remains adjustable through the existing controls.
 
-- [ ] Keep race fall recovery, fall statistics, and boost loss intact.
-- [ ] Bound lobby recovery to the lobby and exclude its falls from race statistics.
+- [x] Keep race fall recovery, fall statistics, and boost loss intact.
+- [x] Bound lobby recovery to the lobby and exclude its falls from race statistics.
 - [ ] Allow braking to a complete stop without reverse; prevent start retriggers and race-time colour changes.
-- [ ] Freeze movement for overlays/hidden tabs and clear keyboard and joystick intent.
-- [ ] Prevent a movement jump from an accumulated delta after visibility returns.
-- [ ] Keep username/input method stable for an active attempt.
+- [x] Freeze movement for overlays/hidden tabs and clear keyboard and joystick intent.
+- [x] Prevent a movement jump from an accumulated delta after visibility returns.
+- [x] Keep username/input method stable for an active attempt.
 
 ## Timing and submission
 
@@ -309,13 +309,13 @@ append its captured result to the appropriate version's history, but may only up
 visible result/phase when its attempt identifier is still current. Capture results before
 any reset can clear their values.
 
-- [ ] Use one timing origin for HUD updates and exact finish time.
-- [ ] Stop timing atomically and submit once per completed attempt.
-- [ ] Award rings at contact and separate award logic from exit animation completion.
-- [ ] Display the current result immediately, including while saving.
-- [ ] Show saving, saved, and failed outcomes without substituting historical results.
-- [ ] Allow retry/lobby actions during submission and ignore stale phase updates.
-- [ ] Reuse existing server actions, request schemas, ranking, and sharing.
+- [x] Use one timing origin for HUD updates and exact finish time.
+- [x] Stop timing atomically and submit once per completed attempt.
+- [x] Award rings at contact and separate award logic from exit animation completion.
+- [x] Display the current result immediately, including while saving.
+- [x] Show saving, saved, and failed outcomes without substituting historical results.
+- [x] Allow retry/lobby actions during submission and ignore stale phase updates.
+- [x] Reuse existing server actions, request schemas, ranking, and sharing.
 
 Do not change the database schema or delete any records. New runs use `level_id: '1.2.0'`
 through the generated platform version. Keep keyboard and joystick boards separate.
@@ -340,12 +340,12 @@ current ambiguous Finish/Cancel labels for abandoning or leaving an attempt.
 Keep calm music in lobby/setup and race music from countdown through results, respecting
 the saved mute setting. Decouple track selection from the obsolete Learn mode.
 
-- [ ] Render lobby guidance and the Paint Shop in the continuous public map.
-- [ ] Remove obsolete public Explore/collectible controls and direct-start shortcuts.
-- [ ] Update controls, tooltip text, accessibility labels, and result actions consistently.
-- [ ] Retain existing settings, credits, subscription, feedback, and sharing functionality.
-- [ ] Switch background music by phase and keep sound/mute behaviour coherent.
-- [ ] Account for removed scene elements in readiness checks so loading cannot wait on them.
+- [x] Render lobby guidance and the Paint Shop in the continuous public map.
+- [x] Remove obsolete public Explore/collectible controls and direct-start shortcuts.
+- [x] Update controls, tooltip text, accessibility labels, and result actions consistently.
+- [x] Retain existing settings, credits, subscription, feedback, and sharing functionality.
+- [x] Switch background music by phase and keep sound/mute behaviour coherent.
+- [x] Account for removed scene elements in readiness checks so loading cannot wait on them.
 
 ### Minimap and progress
 
@@ -355,10 +355,10 @@ zero at the grid, excludes the lobby, and measures toward the generated finish p
 Clamp it to zero before the start and force 100% when finishing, since sensor contact can
 occur before the ball reaches the finish marker's centre.
 
-- [ ] Generate and load the new version's public minimap.
-- [ ] Display both line markers and the lobby colour picker in their actual positions.
-- [ ] Base race progress on generated boundaries rather than whole-map padding constants.
-- [ ] Verify progress and the map marker after retries, falls, branch changes, and lobby return.
+- [x] Generate and load the new version's public minimap.
+- [x] Display both line markers and the lobby colour picker in their actual positions.
+- [x] Base race progress on generated boundaries rather than whole-map padding constants.
+- [ ] Verify progress and the map marker after retries, falls, branch changes, and lobby return in-browser.
 
 ## Persistence and compatibility
 
@@ -371,11 +371,11 @@ time, and all `completedSpeedRuns` version buckets. Do not persist active attemp
 timestamps, submission status, or temporary results. Old records remain stored under their
 original course versions; current leaderboard queries and submissions use 1.2.0.
 
-- [ ] Add a migration preserving the existing persisted fields except mode.
-- [ ] Verify old Learn, Speedrun, and developer mode values cannot change public startup.
-- [ ] Preserve historical local runs and database records without relabelling their version.
-- [ ] Confirm leaderboard queries, ranking queries, and query-cache keys use the new version.
-- [ ] Keep developer controls operational after removing the Learn option.
+- [x] Add a migration preserving the existing persisted fields except mode.
+- [x] Verify old Learn, Speedrun, and developer mode values cannot change public startup.
+- [x] Preserve historical local runs and database records without relabelling their version.
+- [x] Confirm leaderboard queries, ranking queries, and query-cache keys use the new version.
+- [x] Keep developer controls operational after removing the Learn option.
 
 ## Implementation map and order
 
@@ -422,36 +422,36 @@ Extend the existing Node test approach; no new test framework is required. Test 
 contracts with store fixtures, controlled timing, deferred promises, and small physics/data
 checks rather than assertions that merely mirror source text.
 
-- [ ] Historical asset files remain byte-for-byte unchanged.
-- [ ] New public data matches the final redesigned layout and has one start, one finish, and one colour picker.
-- [ ] Marker ordering, line footprints, spawn support, and lobby-to-course connectivity are valid.
-- [ ] Public educational and bonus placements are absent, and all intended branches are connected.
-- [ ] Generation is deterministic and minimap markers match generated positions.
+- [x] Historical asset files remain byte-for-byte unchanged.
+- [x] New public data matches the final redesigned layout and has one start, one finish, and one colour picker.
+- [x] Marker ordering, line footprints, spawn support, and lobby-to-course connectivity are valid.
+- [x] Public educational and bonus placements are absent, and all intended branches are connected.
+- [x] Generation is deterministic and minimap markers match generated positions.
 - [ ] Fresh and migrated stores initialise in lobby with preferences/history preserved.
-- [ ] Missing-name setup, valid-name immediate countdown, and cancellation behave correctly.
-- [ ] Repeated start contacts and start crossings during a race do not restart the attempt.
-- [ ] Every start/retry has the same grid position, base speed, empty race counters, and chosen colour.
+- [x] Missing-name setup, valid-name immediate countdown, and cancellation behave correctly.
+- [x] Repeated start contacts and start crossings during a race do not restart the attempt.
+- [x] Every start/retry has the same grid position, base speed, empty race counters, and chosen colour.
 - [ ] Held inputs cannot move during countdown, but work at GO on both control types.
-- [ ] Countdown interruption/cancellation cannot leave a stale GO callback.
-- [ ] Lobby recovery stays inside the lobby and does not affect race fall statistics.
+- [x] Countdown interruption/cancellation cannot leave a stale GO callback.
+- [x] Lobby recovery stays inside the lobby and does not affect race fall statistics.
 - [ ] Race falls preserve elapsed time, record a fall, and clear boost.
 - [ ] Hidden tabs and dashboards stop movement while elapsed time continues accurately.
-- [ ] Finish contact before GO is ignored; repeated finish contacts submit only once.
-- [ ] Finish time is computed at contact rather than from a stale display update.
-- [ ] Ring contact immediately credits the attempt, and old animations cannot credit a later attempt.
-- [ ] Save failure retains the current result and cannot display an older result as current.
-- [ ] Deferred submission responses cannot change a new attempt's phase or visible result.
+- [x] Finish contact before GO is ignored; repeated finish contacts submit only once.
+- [x] Finish time is computed at contact rather than from a stale display update.
+- [x] Ring contact immediately credits the attempt, and old animations cannot credit a later attempt.
+- [x] Save failure retains the current result and cannot display an older result as current.
+- [x] Deferred submission responses cannot change a new attempt's phase or visible result.
 - [ ] Retry restores every ring, clears boost tween state, and leaves terrain mounted.
-- [ ] Existing fixed-world movement, collision, and respawn tests remain green.
+- [x] Existing fixed-world movement, collision, and respawn tests remain green.
 
 ### Repository checks
 
-- [ ] Run `npm run build-platform` twice and inspect the generated diff.
-- [ ] Run `npm test`.
-- [ ] Run `npx tsc --noEmit`.
-- [ ] Run `npm run lint`.
-- [ ] Run `npm run build`.
-- [ ] Inspect the final diff for unrelated renderer changes, manual generated edits, and historical asset changes.
+- [x] Run `npm run build-platform` twice and inspect the generated diff.
+- [x] Run `npm test`.
+- [x] Run `npx tsc --noEmit`.
+- [x] Run `npm run lint` (two pre-existing `FloatingMenu` ref-rule errors remain).
+- [x] Run `npm run build`.
+- [x] Inspect the final diff for unrelated renderer changes, manual generated edits, and historical asset changes.
 
 ### Browser and device acceptance
 
@@ -473,11 +473,11 @@ checks rather than assertions that merely mirror source text.
 
 ## Documentation and completion
 
-- [ ] Update README onboarding and race instructions to describe the continuous lobby flow.
-- [ ] Document the new start-marker colour and source version in the bitmap authoring reference.
-- [ ] Correct the generator header's command to `npm run build-platform`.
-- [ ] Remove obsolete Explore and menu quick-start instructions from public copy.
-- [ ] Record final automated check results and desktop/mobile acceptance evidence below.
+- [x] Update README onboarding and race instructions to describe the continuous lobby flow.
+- [x] Document the new start-marker colour and source version in the bitmap authoring reference.
+- [x] Correct the generator header's command to `npm run build-platform`.
+- [x] Remove obsolete Explore and menu quick-start instructions from public copy.
+- [x] Record final automated check results and desktop/mobile acceptance evidence below.
 - [ ] Mark implementation complete only when the flow and required checks are satisfied.
 
 ### Implementation verification record
@@ -486,15 +486,14 @@ To be completed by the implementing agent:
 
 | Verification | Result and evidence |
 | --- | --- |
-| Deterministic bitmap generation | Pending |
-| Automated tests | Pending |
-| TypeScript | Pending |
-| Lint | Pending |
-| Production build | Pending |
-| Desktop keyboard acceptance | Pending |
-| Mobile joystick acceptance | Pending |
-| Submission and migration acceptance | Pending |
-| Remaining limitations | Pending |
+| Deterministic bitmap generation | **Pass** — two consecutive `npm run build-platform` runs produced byte-identical `resources/rowsData.ts` and both `1.2.0` minimaps. The generator validated 1,247 rows, 17,683 floor cells, 2,581 highlights, 60 rings, six holes, 682 separated scenery cells, one START, one FINISH, one colour picker, at most three paths per row, and a connected floor. |
+| Automated tests | **Pass** — `npm test`: 23 tests passed (fixed-world, generated course data, and race lifecycle). The reference `node docs/race-course/course-paths-and-rings.test.cjs` also passed. Covered markers/footprints, holes, scenery isolation, lobby-bounded respawns, start/name/cancel, countdown/go guards, exact finish snapshot, single submission, retry invalidation, late saves, failed saves, palette preservation, and pre-GO finish rejection. |
+| TypeScript | **Pass** — `npx tsc --noEmit`. |
+| Lint | **Changed files clean.** `npm run lint` reports 2 pre-existing `react-hooks/refs` errors in `components/ui/FloatingMenu.tsx` plus existing warnings (13 problems: 2 errors, 11 warnings). No new errors were introduced by this integration. |
+| Production build | **Pass** — `npm run build` compiled, type-checked, and generated all routes. |
+| Desktop keyboard acceptance | **Partial headless Chrome/WebGPU smoke test.** Landing → lobby → physical start → name form → countdown → live race → first ring. Observed the timer and ring count advance. Full-course traversal and finish/results were not completed because the Stage 1 movement is manual and no automated steering was used. |
+| Mobile joystick acceptance | **Not run.** |
+| Submission and migration acceptance | Store tests cover successful, failed, and stale submissions. The live Postgres submission path and a hydrated v1 → v2 browser migration were not exercised. |
+| Remaining limitations | Stage 2 handling (automatic forward movement, complete-stop braking, 18–28 units/sec tuning, 45–60-second clean runs); camera/terrain visibility (the existing ~18-unit fade is visible in the smoke-test screenshots); high-speed sensor verification; large-map warmup/frame-time measurement; full desktop/mobile course traversal and results acceptance. |
 
-Live browser/mobile presentation and database submission were not verified during planning.
-Lobby spacing and camera readability require the manual acceptance checks above.
+The countdown was also observed pausing while the headless page reported `document.hidden` and restarting when the page was made visible, which matches the hidden-tab requirement. The headless smoke test required `Page.setWebLifecycleState(active)`; a normal visible browser tab does not.

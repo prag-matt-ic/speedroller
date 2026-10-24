@@ -24,7 +24,7 @@ import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
-import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
+import { PLAYER_RADIUS } from '@/utils/player'
 import { useConfirmationProgress } from '@/hooks/useConfirmationProgress'
 import useGameFrame from '@/hooks/useGameFrame'
 import { usePlayerInput } from '@/hooks/usePlayerInput'

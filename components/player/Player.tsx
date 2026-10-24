@@ -13,14 +13,16 @@ import { type FC, useEffect, useRef } from 'react'
 import { Mesh, type Object3D, Vector3 } from 'three'
 
 import { PLAYER_INITIAL_POSITION, useGameStore } from '@/components/GameProvider'
-import PlayerHUD, { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
+import PlayerHUD from '@/components/player/PlayerHUD'
 import { Marble } from '@/components/player/marble/Marble'
 import { useGameFrame } from '@/hooks/useGameFrame'
 import usePlayerController from '@/hooks/usePlayerController'
 import { usePlayerInput } from '@/hooks/usePlayerInput'
 import usePlayerSpeed from '@/hooks/usePlayerSpeed'
 import type { PlayerUserData, RigidBodyUserData } from '@/model/schema'
+import { isManualMovementStage } from '@/stores/types'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
+import { PLAYER_RADIUS } from '@/utils/player'
 import { EPSILON } from '@/utils/tiles'
 
 // https://rapier.rs/docs/user_guides/javascript/rigid_bodies
@@ -31,6 +33,8 @@ import { EPSILON } from '@/utils/tiles'
 const GRAVITY_ACCELERATION = -9.81 // m/s²
 const UP_DIRECTION = new Vector3(0, 1, 0)
 const PLAYER_USER_DATA: PlayerUserData = { type: 'player' }
+// A hidden tab or stalled frame must never integrate its whole gap into one movement step.
+const MAX_MOVEMENT_DELTA_S = 1 / 15
 
 const Player: FC = () => {
   const onOutOfBounds = useGameStore((s) => s.onOutOfBounds)
@@ -38,6 +42,7 @@ const Player: FC = () => {
   const setConfirmingCollectible = useGameStore((s) => s.setConfirmingCollectible)
   const setConfirmingPaletteIndex = useGameStore((s) => s.setConfirmingPaletteIndex)
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
+  const speedRunStage = useGameStore((s) => s.speedRunStage)
   const playerStatus = useGameStore((s) => s.playerStatus)
   const playerRespawnTick = useGameStore((s) => s.playerRespawnTick)
   const spawnPosition = useGameStore((s) => s.spawnPosition)
@@ -62,7 +67,7 @@ const Player: FC = () => {
   const nextPosition = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 })
   const desiredMovement = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 })
 
-  useGameFrame((_, deltaTime) => {
+  useGameFrame((_, rawDeltaTime) => {
     if (
       !bodyRef.current ||
       !controllerRef.current ||
@@ -72,7 +77,10 @@ const Player: FC = () => {
       return
 
     if (!isPlatformReady || playerStatus === 'idle' || playerStatus === 'out-of-bounds') return
+    if (!isManualMovementStage(speedRunStage)) return
+    if (document.hidden) return
 
+    const deltaTime = Math.min(rawDeltaTime, MAX_MOVEMENT_DELTA_S)
     const speedUnits = playerSpeedUnits.current
     const currentPosition = bodyRef.current.translation()
 

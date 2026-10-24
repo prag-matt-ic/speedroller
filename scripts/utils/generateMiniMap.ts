@@ -7,11 +7,13 @@ const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 const MINI_MAP_TILE_SIZE_PX = 4
 const POINT_OF_INTEREST_COLOUR = '#37D6C7'
 const INFO_COLLECTIBLE_AREA_SIZE = { width: 5, height: 5 }
+const START_LINE_AREA_SIZE = { width: 9, height: 5 }
 const FINISH_LINE_AREA_SIZE = { width: 9, height: 5 }
 const COLOUR_PICKER_AREA_SIZE = { width: 11, height: 2 }
 
 type MiniMapPalette = {
   raised: string
+  startLine: string
   finishLine: string
   pointOfInterest: string
   background?: string
@@ -38,6 +40,7 @@ type WriteMiniMapParams = GenerateMiniMapParams & {
 
 const DEFAULT_PALETTE: MiniMapPalette = {
   raised: '#53938C',
+  startLine: '#5CE1E6',
   finishLine: '#FFDD3F',
   pointOfInterest: POINT_OF_INTEREST_COLOUR,
 }
@@ -63,10 +66,14 @@ export const buildMiniMapSVG = ({
     return { svg: '', width: 0, height: 0 }
   }
 
-  const { background, raised, finishLine, pointOfInterest } = { ...DEFAULT_PALETTE, ...palette }
+  const { background, raised, startLine, finishLine, pointOfInterest } = {
+    ...DEFAULT_PALETTE,
+    ...palette,
+  }
   const width = columnCount * tileSize
   const height = rowCount * tileSize
   const tiles: string[] = []
+  const startLineTiles: string[] = []
   const finishLineTiles: string[] = []
   const infoZoneTiles: string[] = []
   const collectibleTiles: string[] = []
@@ -84,6 +91,7 @@ export const buildMiniMapSVG = ({
     (row) => row.collectiblePlacements,
     INFO_COLLECTIBLE_AREA_SIZE,
   )
+  const startLineCells = collectStartLineCells(rows, columnCount)
   const finishLineCells = collectFinishLineCells(rows, columnCount)
   const colourPickerCells = collectColourPickerCells(rows, columnCount)
 
@@ -97,6 +105,14 @@ export const buildMiniMapSVG = ({
         `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${raised}" />`,
       )
     }
+  })
+
+  startLineCells.forEach(({ rowIndex, columnIndex }) => {
+    const y = (rowCount - 1 - rowIndex) * tileSize
+    const x = columnIndex * tileSize
+    startLineTiles.push(
+      `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${startLine}" />`,
+    )
   })
 
   finishLineCells.forEach(({ rowIndex, columnIndex }) => {
@@ -141,6 +157,7 @@ export const buildMiniMapSVG = ({
 
   svgParts.push(
     ...tiles,
+    ...startLineTiles,
     ...finishLineTiles,
     ...infoZoneTiles,
     ...collectibleTiles,
@@ -225,6 +242,33 @@ const collectIndicatorCells = (
         seen,
         cells,
       })
+    })
+  })
+
+  return cells
+}
+
+const collectStartLineCells = (rows: RowData[], columnCount: number): IndicatorCell[] => {
+  const rowCount = rows.length
+  const seen = new Set<string>()
+  const cells: IndicatorCell[] = []
+
+  rows.forEach((row, rowIndex) => {
+    const position = row.startLinePosition
+    if (!position) return
+    const [x, , relativeZ] = position
+    const targetRow = getRowIndexFromRelativeZ(rowIndex, relativeZ, rowCount)
+    const columnIndex = getColumnIndexFromX(x, columnCount)
+    if (targetRow == null || columnIndex == null) return
+
+    pushIndicatorAreaCells({
+      centerRow: targetRow,
+      centerColumn: columnIndex,
+      columnCount,
+      rowCount,
+      areaSize: START_LINE_AREA_SIZE,
+      seen,
+      cells,
     })
   })
 

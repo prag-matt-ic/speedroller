@@ -5,7 +5,10 @@ export type TotalCounts = {
   infoZones: number
   collectibles: number
   confetti: number
-  colourPickers?: number
+  colourPickers: number
+  startLines: number
+  finishLines: number
+  decorations: number
 }
 
 export const createTotalCounts = (): TotalCounts => ({
@@ -16,4 +19,7 @@ export const createTotalCounts = (): TotalCounts => ({
   collectibles: 0,
   confetti: 0,
   colourPickers: 0,
+  startLines: 0,
+  finishLines: 0,
+  decorations: 0,
 })

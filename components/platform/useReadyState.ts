@@ -10,6 +10,7 @@ export type ReadyState = {
   speedRun: boolean
   floatingTiles: boolean
   colourPicker: boolean
+  decorations: boolean
 }
 export type ReadyStateKey = keyof ReadyState
 
@@ -25,6 +26,7 @@ const INITIAL_READY_STATE: ReadyState = {
   speedRun: false,
   floatingTiles: false,
   colourPicker: false,
+  decorations: false,
 }
 
 const READY_STATE_KEYS = Object.keys(INITIAL_READY_STATE) as ReadyStateKey[]

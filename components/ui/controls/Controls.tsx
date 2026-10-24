@@ -6,27 +6,46 @@ import { twJoin } from 'tailwind-merge'
 
 import { type PlayerInput, useGameStore } from '@/components/GameProvider'
 import Joystick, { type OnJoystickMove } from '@/components/ui/controls/Joystick'
-import { GameMode, InputType, Overlay, SpeedRunStage } from '@/stores/types'
+import { usePageHidden } from '@/hooks/usePageVisibility'
+import { InputType, Overlay, isManualMovementStage } from '@/stores/types'
+
+const JOYSTICK_LEVELS = 10
+
+const createZeroInput = (): PlayerInput => ({
+  up: 0,
+  down: 0,
+  left: 0,
+  right: 0,
+})
+
+const KEY_TO_INPUT: Record<string, keyof PlayerInput> = {
+  ArrowUp: 'up',
+  KeyW: 'up',
+  ArrowDown: 'down',
+  KeyS: 'down',
+  ArrowLeft: 'left',
+  KeyA: 'left',
+  ArrowRight: 'right',
+  KeyD: 'right',
+}
 
 function useControls() {
-  const mode = useGameStore((s) => s.mode)
-  const isSpeedRunMode = mode === GameMode.SPEEDRUN
   const speedRunStage = useGameStore((s) => s.speedRunStage)
-  const DISABLED_STAGES: SpeedRunStage[] = [
-    SpeedRunStage.START,
-    SpeedRunStage.COUNTDOWN,
-    SpeedRunStage.END,
-  ]
-  const isDisabledStage = DISABLED_STAGES.includes(speedRunStage || '')
+  const overlay = useGameStore((s) => s.overlay)
+  const isPageHidden = usePageHidden()
   const isPlayerLocked = useGameStore((s) => s.playerStatus !== 'safe')
-
-  const disableInput = isPlayerLocked || (isSpeedRunMode && isDisabledStage)
+  const disableInput =
+    isPageHidden ||
+    isPlayerLocked ||
+    overlay !== Overlay.NONE ||
+    !isManualMovementStage(speedRunStage)
 
   const setPlayerInput = useGameStore((s) => s.setPlayerInput)
   const setPlayerInputIntent = useGameStore((s) => s.setPlayerInputIntent)
 
   return {
     disableInput,
+    isPageHidden,
     setPlayerInput,
     setPlayerInputIntent,
   }
@@ -50,76 +69,44 @@ const Key: FC<KeyProps> = ({ Icon, isActive }) => {
 }
 
 const Keys: FC = () => {
-  const { disableInput, setPlayerInput, setPlayerInputIntent } = useControls()
+  const { disableInput, isPageHidden, setPlayerInput, setPlayerInputIntent } = useControls()
   const playerInputIntent = useGameStore((s) => s.playerInputIntent)
-  const input = useRef<PlayerInput>(playerInputIntent)
+  const pressedKeys = useRef<PlayerInput>(createZeroInput())
 
+  const publishPressedKeys = useCallback(() => {
+    setPlayerInputIntent({ ...pressedKeys.current })
+  }, [setPlayerInputIntent])
+
+  // Keep window listeners mounted while input is locked so a key held through the countdown
+  // becomes active on GO instead of being lost with the control overlay.
   useEffect(() => {
     if (disableInput) {
-      const zeroInput = { up: 0, down: 0, left: 0, right: 0 }
-      setPlayerInputIntent(zeroInput)
-      setPlayerInput(zeroInput)
-      input.current = zeroInput
+      setPlayerInputIntent(createZeroInput())
+      setPlayerInput(createZeroInput())
       return
     }
+    publishPressedKeys()
+  }, [disableInput, publishPressedKeys, setPlayerInput, setPlayerInputIntent])
 
-    const updateInput = (key: keyof PlayerInput, value: number) => {
-      if (input.current[key] === value) return
-      const nextInput = { ...input.current, [key]: value }
-      input.current = nextInput
-      setPlayerInputIntent(nextInput)
+  useEffect(() => {
+    if (isPageHidden) pressedKeys.current = createZeroInput()
+  }, [isPageHidden])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const inputKey = KEY_TO_INPUT[event.code]
+      if (!inputKey) return
+      if (pressedKeys.current[inputKey] === 1) return
+      pressedKeys.current[inputKey] = 1
+      if (!disableInput) publishPressedKeys()
     }
 
-    const handleKeyDown = (key: keyof PlayerInput) => {
-      if (input.current[key] === 1) return
-      updateInput(key, 1)
-    }
-
-    const handleKeyUp = (key: keyof PlayerInput) => {
-      if (input.current[key] === 0) return
-      updateInput(key, 0)
-    }
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      switch (e.code) {
-        case 'ArrowUp':
-        case 'KeyW':
-          handleKeyDown('up')
-          break
-        case 'ArrowDown':
-        case 'KeyS':
-          handleKeyDown('down')
-          break
-        case 'ArrowLeft':
-        case 'KeyA':
-          handleKeyDown('left')
-          break
-        case 'ArrowRight':
-        case 'KeyD':
-          handleKeyDown('right')
-          break
-      }
-    }
-
-    const onKeyUp = (e: KeyboardEvent) => {
-      switch (e.code) {
-        case 'ArrowUp':
-        case 'KeyW':
-          handleKeyUp('up')
-          break
-        case 'ArrowDown':
-        case 'KeyS':
-          handleKeyUp('down')
-          break
-        case 'ArrowLeft':
-        case 'KeyA':
-          handleKeyUp('left')
-          break
-        case 'ArrowRight':
-        case 'KeyD':
-          handleKeyUp('right')
-          break
-      }
+    const onKeyUp = (event: KeyboardEvent) => {
+      const inputKey = KEY_TO_INPUT[event.code]
+      if (!inputKey) return
+      if (pressedKeys.current[inputKey] === 0) return
+      pressedKeys.current[inputKey] = 0
+      if (!disableInput) publishPressedKeys()
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -128,7 +115,7 @@ const Keys: FC = () => {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
     }
-  }, [disableInput, setPlayerInput, setPlayerInputIntent])
+  }, [disableInput, publishPressedKeys])
 
   return (
     <aside className="pointer-events-none fixed right-4 bottom-4 z-150 grid h-fit w-fit grid-cols-3 gap-1 place-self-end">
@@ -144,29 +131,48 @@ const Keys: FC = () => {
 
 const MovementControls: FC = () => {
   const inputType = useGameStore((s) => s.inputType)
-  const isShowingLandingOverlay = useGameStore((s) => s.overlay === Overlay.LANDING)
-  if (isShowingLandingOverlay) return null
+  const overlay = useGameStore((s) => s.overlay)
+  if (overlay === Overlay.LANDING) return null
 
   if (inputType === InputType.JOYSTICK) return <Stick />
   return <Keys />
 }
 
 const Stick: FC = () => {
-  const { disableInput, setPlayerInputIntent } = useControls()
-  const JOYSTICK_LEVELS = 10
+  const { disableInput, isPageHidden, setPlayerInput, setPlayerInputIntent } = useControls()
   const joystickPosition = useGameStore((s) => s.joystickPosition)
   const [hasMoved, setHasMoved] = useState(false)
+  const lastIntent = useRef<PlayerInput>(createZeroInput())
+
+  const publishLastIntent = useCallback(() => {
+    setPlayerInputIntent({ ...lastIntent.current })
+  }, [setPlayerInputIntent])
+
+  useEffect(() => {
+    if (disableInput) {
+      setPlayerInputIntent(createZeroInput())
+      setPlayerInput(createZeroInput())
+      return
+    }
+    publishLastIntent()
+  }, [disableInput, publishLastIntent, setPlayerInput, setPlayerInputIntent])
+
+  useEffect(() => {
+    if (isPageHidden) lastIntent.current = createZeroInput()
+  }, [isPageHidden])
 
   const onJoystickMove = useCallback(
-    (e: OnJoystickMove) => {
-      if (disableInput) return
+    (event: OnJoystickMove) => {
       setHasMoved(true)
-      setPlayerInputIntent({
-        up: e.leveledY > 0 ? Math.min(e.leveledY / JOYSTICK_LEVELS, 1) : 0,
-        down: e.leveledY < 0 ? Math.min(-e.leveledY / JOYSTICK_LEVELS, 1) : 0,
-        left: e.leveledX < 0 ? Math.min(-e.leveledX / JOYSTICK_LEVELS, 1) : 0,
-        right: e.leveledX > 0 ? Math.min(e.leveledX / JOYSTICK_LEVELS, 1) : 0,
-      })
+      const intent: PlayerInput = {
+        up: event.leveledY > 0 ? Math.min(event.leveledY / JOYSTICK_LEVELS, 1) : 0,
+        down: event.leveledY < 0 ? Math.min(-event.leveledY / JOYSTICK_LEVELS, 1) : 0,
+        left: event.leveledX < 0 ? Math.min(-event.leveledX / JOYSTICK_LEVELS, 1) : 0,
+        right: event.leveledX > 0 ? Math.min(event.leveledX / JOYSTICK_LEVELS, 1) : 0,
+      }
+      lastIntent.current = intent
+      if (disableInput) return
+      setPlayerInputIntent(intent)
     },
     [disableInput, setPlayerInputIntent],
   )
@@ -189,4 +195,5 @@ const Stick: FC = () => {
     </Joystick>
   )
 }
+
 export default MovementControls

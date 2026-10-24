@@ -14,7 +14,7 @@ import {
   default as ConfettiParticleEmitter,
   ConfettiParticleEmitterHandle,
 } from '@/components/platform/confetti/ConfettiParticleEmitter'
-import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
+import { PLAYER_RADIUS } from '@/utils/player'
 import { ConfettiUserData, type RigidBodyUserData } from '@/model/schema'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { TILE_SIZE } from '@/utils/tiles'

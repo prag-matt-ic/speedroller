@@ -1,6 +1,6 @@
 # Race Course and Speed Design
 
-Status: **Course layout and bitmap artwork approved on 24 October 2026; integration pending; handling requires playtesting.**
+Status: **Course layout, bitmap artwork and race-flow foundation integrated on 24 October 2026; a headless desktop smoke test reached the live race; Stage 2 handling, full traversal and device acceptance pending.**
 
 Updated: **24 October 2026**
 
@@ -26,7 +26,7 @@ in `docs/race-first-experience-plan.md` still apply.
 | Forward movement | Automatic during the race, even while terrain is flat |
 | Braking | Can stop completely; cannot reverse |
 | Terrain | Flat for the course and speed stages |
-| Future direction | Explore a gentle downhill course and free rolling as a later stage |
+| Future direction | The Fold: stylised stone architecture, assembly effects and TSL height fog on flat terrain |
 | Delivery order | Course, then speed/handling, then larger 3D changes |
 | Authoring | Continue using copied, versioned PNG terrain and the existing generator |
 
@@ -194,9 +194,9 @@ do not accidentally classify decorative marker colours as raised playable tiles.
 
 - [x] Approve all six hole positions and the ring-guided avoidance lines in the visual layout.
 - [ ] Validate hole passages at target speed with keyboard and joystick controls.
-- [ ] Keep the final clear run-in and the three-path maximum after adding holes.
-- [ ] Preserve visible separation between decorative tiles and playable floor.
-- [ ] Exclude decorative tiles from collisions, ring placement, and safe-respawn searches.
+- [x] Keep the final clear run-in and the three-path maximum after adding holes.
+- [x] Preserve visible separation between decorative tiles and playable floor.
+- [x] Exclude decorative tiles from collisions, ring placement, and safe-respawn searches.
 
 ### Branching rules
 
@@ -280,14 +280,14 @@ semantics, and exclude decoration from collisions and safe-respawn searches.
 ### Stage 1 checklist
 
 - [x] Create the copied bitmap version, lobby and six course sections with approved artwork.
-- [ ] Integrate the approved PNGs in manifest order and ingest scenery separately.
-- [ ] Keep the lobby, colour picker, separate start, and common finish from the race-flow plan.
-- [ ] Validate all intended routes are continuous and connect from start to finish.
-- [ ] Confirm there are never more than three simultaneous paths or unexplained dead ends.
+- [x] Integrate the approved PNGs in manifest order and ingest scenery separately.
+- [x] Keep the lobby, colour picker, separate start, and common finish from the race-flow plan.
+- [x] Validate all intended routes are continuous and connect from start to finish.
+- [x] Confirm there are never more than three simultaneous paths or unexplained dead ends.
 - [ ] Make the later course materially more demanding than the opening.
 - [ ] Document each branch's ring sequence and intended risk/reward.
-- [ ] Validate source colours, floor support, branch widths, ring support, and generated counts.
-- [ ] Regenerate rows and minimap; verify deterministic output and untouched historical assets.
+- [x] Validate source colours, floor support, branch widths, ring support, and generated counts.
+- [x] Regenerate rows and minimap; verify deterministic output and untouched historical assets.
 - [ ] Traverse every branch at current movement speed to inspect geometry.
 - [ ] Review the layout using projected faster-speed approach distances before calling it ready.
 
@@ -370,39 +370,96 @@ object reuse unless measurement shows they are insufficient.
 - [ ] Check frame time, collision workload, and startup/warmup on desktop and mobile.
 - [ ] Record chosen tuning values and acceptance results before releasing the course.
 
-## Stage 3 Downhill and larger 3D changes
+## Stage 3 The Fold visual world
 
-Defer this stage until the flat course and automatic movement feel good. The current ball
-is kinematic: its controller computes explicit movement and applies it with
-`setNextKinematicTranslation`. Rotating floor meshes alone does not provide natural
-gravity-driven rolling, and rotating only visuals would separate them from collision data.
+Replace the previous downhill experiment with a visual/background/material update on flat
+terrain. Keep course geometry, bitmap artwork, ring positions, collision surfaces, handling,
+timing and selectable ball colours unchanged. No downhill or physics-controller rewrite is
+part of this stage. Implement after the flat race and Stage 2 handling are accepted.
 
-The first experiment should be a short downhill section outside the released course.
-Trial a gentle 2–4 degree slope as a starting range. Keep the lobby level and use a smooth
-transition into the descent. Over 1,200 units even a 3-degree slope drops roughly 63 units,
-so a fixed horizontal out-of-bounds plane cannot be retained unchanged.
+Confirmed direction: **stylised stone**, warm ivory tops, graphite undersides, dusty-blue
+atmosphere and restrained copper seams. Preserve every approved bright-tile pattern as
+lighter stone with restrained glow. Reduce incidental material variation on ordinary tiles,
+not the authored markings. The main assembling gateway is on the **recovery straight**,
+framing the approach to the technical finale.
 
-Start by testing controlled downhill acceleration with the existing kinematic ball, keeping
-steering and braking predictable. Treat that as arcade downhill movement, not physical
-free rolling. Only compare a dynamic rigid-body prototype if genuine gravity, momentum,
-and rolling contact are still needed after the controlled version is judged.
+### 3A Track and sphere finish
 
-Keep the bitmap as the course-local footprint. Any elevation/rotation layer must apply the
-same transform to floor meshes, colliders, rings, markers, respawns, and other placements.
-Course progress and minimap coordinates must be derived in course-local space. The camera,
-out-of-bounds detection, player rolling axis, and height-dependent shader effects also need
-review. Do not rotate the whole existing scene as an isolated visual tweak.
+- [ ] Add small tile bevels, shaded undersides and subtle stone texture/roughness variation.
+- [ ] Preserve approved cyan-highlight locations and keep rings/hazards visually distinct.
+- [ ] Refine the existing contact shadow and short trail; add a restrained sphere-coloured
+  light pool on actual tile surfaces, respecting holes and the selected ball palette.
+- [ ] Review one recovery-straight scene before extending the style across the whole course.
 
-- [ ] Prototype a short slope and level-to-slope transition without changing the released course.
-- [ ] Compare controlled downhill motion against the flat automatic race for steering/braking feel.
-- [ ] Decide whether dynamic physical rolling adds enough value to justify a controller change.
-- [ ] Apply consistent course transforms to graphics, physics, sensors, and respawn positions.
-- [ ] Adapt camera framing, course progress, minimap mapping, fall detection, and shader height assumptions.
-- [ ] Validate every branch, transition, complete stop, fall, and retry on sloped terrain.
-- [ ] Give any released physics/elevation change a new leaderboard identity.
+### 3B Architecture and WebGPU TSL atmosphere
 
-Stage 3 is a research milestone, not an approved wholesale physics rewrite. A final slope,
-controller model, and elevation format should follow the prototype results.
+Start with five reusable procedural modules: bevelled slab, tapered pillar, long beam,
+thick plate with offset pivot, and stepped block. Use sparse nearby geometry for parallax,
+larger middle-distance assemblies for scale, and simplified distant silhouettes. Keep
+scenery non-collidable and outside driving, camera and hazard sightlines. Compose an open
+launch, sweeping towers, tighter slalom framing, the recovery gateway, a framed finale and
+an open finish. Bespoke modelling is deferred unless the modular silhouette proves inadequate.
+
+Use the official [Three.js height-fog example](https://threejs.org/examples/webgpu_fog_height.html)
+and [source](https://github.com/mrdoob/three.js/blob/master/examples/webgpu_fog_height.html)
+as the implementation reference. It assigns `fog(colour, exponentialHeightFogFactor(density,
+height))` to `scene.fogNode`. The project's installed Three.js and type declarations already
+export this helper from `three/tsl`; no dependency upgrade is required for it.
+
+The installed helper uses fragment world Y and view depth: fragments at or above the height
+threshold receive no height fog, while lower, more distant surfaces receive more. It is
+analytic surface fog, not volumetric cloud geometry or light scattering. Do not promise the
+reference image's cloud banks from this effect alone.
+
+Use a single scene-owned fog graph with stable uniforms for colour, density, height and
+far-distance haze. Set height initially to the playable top-surface Y, so low pillars and
+undersides sink into dusty-blue haze while the racing surface stays clear. Begin density
+at 0.01 as a tuning seed, not an accepted final value; do not copy the example's scene-scale
+values blindly. Add a gentle distance term for above-track architecture, combined as
+`1 - (1 - heightFactor) * (1 - distanceFactor)`, clamped to 0…1.
+
+Protect the full decision area: start distance haze beyond the camera-to-player distance
+plus two seconds at the Stage 2 maximum speed, with an additional ten-unit margin. Use
+that same maximum-speed-based rule across quality levels rather than varying visibility
+with momentary speed. Begin the distance ramp over a further 100 units, capped at 0.35;
+tune only after checking branches, holes, rings and the landmark in the actual camera.
+Keep the near track, bright markings, sphere contact and ring silhouettes readable.
+
+Match the sky's horizon colour to the fog colour and blend towards a restrained blue sky
+above it. Surface fog cannot itself fill empty background pixels. Keep background and fog
+under one atmosphere owner, restore previous scene nodes on teardown, and rebuild their
+TSL graphs through the existing renderer-generation lifecycle. Reuse shared uniforms;
+create no per-frame nodes or temporary math objects. Check fog participation in existing
+custom node materials instead of assuming every shader inherits it correctly.
+
+- [ ] Build and compose the five-module kit, with the recovery gateway as the main landmark.
+- [ ] Add scene-level TSL height fog and the protected far-distance haze ramp.
+- [ ] Coordinate background/horizon colour with fog, retaining visible negative space at holes.
+- [ ] Check terrain, ring, sphere, scenery and emissive-seam materials under fog and bloom.
+- [ ] Validate atmosphere during lobby play, countdown, racing, falls, respawns and retries.
+
+### 3C Assembly, lighting and performance
+
+Drive assembly from course progress and per-instance timing, without physical block
+simulation. Finish track animation before it enters the two-second decision-preview area;
+visible surfaces and colliders must agree there. Align gateway plates well ahead of the
+player. Trigger restrained seam pulses at existing section boundaries, not new gameplay
+checkpoints. Use environment illumination, one directional key, and the existing local
+contact-shadow approach; emissive seams do not each need a light.
+
+Instance scenery in spatial chunks with bounds covering animated movement. Preserve
+existing terrain batching and add chunk recycling only if profiling shows a need. Lower
+quality may reduce scenery density, atmosphere embellishments, shadow detail and render
+resolution; it must retain identical fog parameters, track visibility and reveal timing.
+
+- [ ] Add distant assembly and seam pulses; reset their progress correctly on retry/respawn.
+- [ ] Verify no architecture or fog hides upcoming branches or holes at maximum speed.
+- [ ] Test keyboard and landscape-mobile framing across supported quality settings.
+- [ ] Check straight and downward camera views, low geometry, horizon continuity and fog-free
+  surfaces above the height threshold; confirm the distance term behaves independently.
+- [ ] Measure frame time and GPU cost before/after atmosphere and scenery on desktop/mobile.
+- [ ] Check scene remount and renderer recreation for stale fog nodes or uniform references.
+- [ ] Record accepted material, fog and reveal settings plus device evidence before release.
 
 ## Release and handoff
 
@@ -424,7 +481,7 @@ Never merge flat/manual, flat/automatic, and downhill results into the same boar
 ## Approval and verification record
 
 - [x] Agree on race-first lobby, colour selection, physical start, and countdown flow.
-- [x] Agree on staged delivery: course, speed on flat terrain, then optional downhill research.
+- [x] Agree on staged delivery: course, speed on flat terrain, then The Fold visual update.
 - [x] Agree on automatic forward racing, complete-stop braking, and no reverse.
 - [x] Agree on a 45–60-second clean-run target, increasing challenge, and up to three paths.
 - [x] Approve Course draft C paths and ring placements, recovery/sprint holes, and side decoration.
@@ -438,7 +495,31 @@ Never merge flat/manual, flat/automatic, and downhill results into the same boar
 - [ ] Record measured values and release the combined course/speed version.
 - [ ] Evaluate Stage 3 separately after the flat race is accepted.
 
+### Stage 1 integration record (24 October 2026)
+
+The approved seven-chunk course and scenery copy is integrated from
+`docs/race-course/bitmaps/1.2.0/` into `assets/platform/1.2.0/`. The public source list is the
+seven `race-*.png` chunks in manifest order, each with its aligned decoration mask. The
+generator now emits explicit START and FINISH markers, scenery columns, and both minimaps.
+
+`npm run build-platform` validates, then writes 1,247 rows, 17,683 floor cells, 2,581
+highlighted cells, 60 rings, six holes, 682 separated decoration cells, one START, one FINISH,
+and one colour picker. Two consecutive runs produced byte-identical `resources/rowsData.ts`
+and minimap SVGs. The generated-data test also checks full floor connectivity, at most three
+paths per row, marker ordering, line-footprint support, ring support, hole voiding, lobby
+respawn bounds, decoration isolation, byte-for-byte source copies, and both minimap markers.
+
+The race-flow foundation (continuous lobby, physical lines, grid hold, readiness-gated
+countdown with hidden-tab restart, exact finish snapshot, single submission, retry, lobby
+return, attempt resets, persistence migration, HUD/copy/audio/minimap updates) is implemented.
+Automated store tests cover the main transitions and stale callbacks. A headless
+Chrome/WebGPU smoke test reached the lobby, physical start, name setup, countdown, live race,
+and first ring, and observed the hidden-tab countdown pause/restart. Full-course traversal,
+results, mobile acceptance, Stage 2 handling, and high-speed sensor/camera checks remain
+pending. The existing ~18-unit terrain fade is visible in the smoke-test screenshots and is
+part of the Stage 2 visibility work.
+
 The design checks validate the reference geometry, not generated PNGs, collider clearances,
-sensor reliability, or playable speed. Re-run equivalent checks against generated data.
-No gameplay was implemented during planning. Speed/acceleration/braking values and camera
-framing require measurement; the downhill controller decision remains deferred to Stage 3.
+sensor reliability, or playable speed. The generated counts and connectivity above were
+re-checked after integration. Speed/acceleration/braking values and camera framing still
+require measurement; Stage 3 changes presentation while keeping the course flat.

@@ -1,24 +1,21 @@
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
-import {
-  CuboidCollider,
-  type IntersectionEnterHandler,
-  type IntersectionExitHandler,
-  RigidBody,
-} from '@react-three/rapier'
-import { type FC, useCallback, useEffect, useId, useMemo, useRef } from 'react'
+import { CuboidCollider, type IntersectionEnterHandler, RigidBody } from '@react-three/rapier'
+import { type FC, useCallback, useId, useMemo } from 'react'
 import { float, floor, fract, mix, step, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import type { Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
-import { useGameStore } from '@/components/GameProvider'
+import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
-import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
+import { Text } from '@/components/platform/Text'
+import { UNBOUNDED_FONT_FAMILY } from '@/components/platform/fonts'
 import type { RigidBodyUserData, SpeedRunLineUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
-import { GameMode, Overlay, SpeedRunStage } from '@/stores/types'
+import { SpeedRunStage } from '@/stores/types'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
+import { PLAYER_RADIUS } from '@/utils/player'
 import { TILE_SIZE } from '@/utils/tiles'
 
 // Tuning constants carried over from finishLine.vert, finishLine.frag and startLine.frag.
@@ -136,17 +133,23 @@ const StartLineMaterial: FC<LineNodes> = ({ colorNode, opacityNode }) => (
 )
 
 type Props = {
+  kind: 'start' | 'finish'
   position: Vector3Tuple
   width: number
   height: number
 }
 
-const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
-  const mode = useGameStore((s) => s.mode)
-  const speedRunStage = useGameStore((s) => s.speedRunStage)
+const LINE_LABEL_Z_OFFSET = 4
+const LINE_LABEL_WIDTH = 6
+const LINE_LABEL_HEIGHT = 1.6
+const LINE_LABEL_COLOR = '#eafffb'
+
+const SpeedRunLine: FC<Props> = ({ kind, position, width, height }) => {
+  const enterStartLine = useGameStore((s) => s.enterStartLine)
   const finishSpeedRun = useGameStore((s) => s.finishSpeedRun)
-  const setOverlay = useGameStore((s) => s.setOverlay)
+  const gameStoreAPI = useGameStoreAPI()
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
+  const isStartLine = kind === 'start'
 
   const userData: SpeedRunLineUserData = useMemo(
     () => ({
@@ -161,8 +164,6 @@ const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
     uniformScope,
   )
 
-  // Port of finishLine.vert + finishLine.frag + startLine.frag. The two fragment variants are built
-  // together off the one shared vertex stage, and the material picks the pair it needs.
   const createNodes = useCallback(
     ({ uniforms }: CreatorState) => {
       const { uPlayerWorldPos } = uniforms.scope(CORE_UNIFORM_SCOPE)
@@ -183,44 +184,19 @@ const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
 
   const { finishLineNodes, startLineNodes } = useLocalNodes(createNodes, [createNodes])
 
-  const hasTriggeredStart = useRef(false)
-  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => () => {
-    if (timeout.current) clearTimeout(timeout.current)
-  }, [])
-  const isSpeedRunMode = mode === GameMode.SPEEDRUN
-  const isStartLine = !isSpeedRunMode
-
   const onIntersectionEnter: IntersectionEnterHandler = (event) => {
-    const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
-    if (!otherUserData || otherUserData.type !== 'player') return
+    const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData | undefined
+    if (otherUserData?.type !== 'player') return
 
-    if (isSpeedRunMode) {
-      if (speedRunStage !== SpeedRunStage.RUNNING) return
-      finishSpeedRun()
-    } else {
-      if (timeout.current) clearTimeout(timeout.current)
-      timeout.current = null
-      if (hasTriggeredStart.current) return
-      timeout.current = setTimeout(() => {
-        timeout.current = null
-        hasTriggeredStart.current = true
-        setOverlay(Overlay.SPEEDRUN_START)
-      }, 500)
+    const state = gameStoreAPI.getState()
+    if (isStartLine) {
+      if (state.speedRunStage !== SpeedRunStage.LOBBY) return
+      enterStartLine()
+      return
     }
-  }
 
-  const onIntersectionExit: IntersectionExitHandler = (event) => {
-    if (!isStartLine) return
-    const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
-    if (!otherUserData || otherUserData.type !== 'player') return
-
-    if (!!timeout.current) clearTimeout(timeout.current)
-
-    timeout.current = setTimeout(() => {
-      hasTriggeredStart.current = false
-      timeout.current = null
-    }, 1000)
+    if (state.speedRunStage !== SpeedRunStage.RUNNING) return
+    finishSpeedRun(state.attemptId)
   }
 
   const LineMaterial = useMemo(
@@ -230,27 +206,37 @@ const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
   const lineNodes = isStartLine ? startLineNodes : finishLineNodes
 
   return (
-    <RigidBody
-      type="fixed"
-      position={position}
-      rotation={[-Math.PI / 2, 0, 0]}
-      colliders={false}
-      userData={userData}>
-      <CuboidCollider
-        args={[width / 2, height / 2, PLAYER_RADIUS * 2]}
-        sensor={true}
-        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
-        mass={0}
-        friction={0}
-        onIntersectionEnter={onIntersectionEnter}
-        onIntersectionExit={onIntersectionExit}
-        collisionGroups={COLLISION_GROUPS.finishLineSensor}
+    <group position={position}>
+      <RigidBody
+        type="fixed"
+        rotation={[-Math.PI / 2, 0, 0]}
+        colliders={false}
+        userData={userData}>
+        <CuboidCollider
+          args={[width / 2, height / 2, PLAYER_RADIUS * 2]}
+          sensor={true}
+          activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
+          mass={0}
+          friction={0}
+          onIntersectionEnter={onIntersectionEnter}
+          collisionGroups={COLLISION_GROUPS.finishLineSensor}
+        />
+        <mesh position={[0, 0, 0.01]} renderOrder={2}>
+          <planeGeometry args={[width, height]} />
+          <LineMaterial colorNode={lineNodes.colorNode} opacityNode={lineNodes.opacityNode} />
+        </mesh>
+      </RigidBody>
+      <Text
+        text={isStartLine ? 'START' : 'FINISH'}
+        position={[0, 0.02, LINE_LABEL_Z_OFFSET]}
+        width={LINE_LABEL_WIDTH}
+        height={LINE_LABEL_HEIGHT}
+        textCanvasOptions={{
+          color: LINE_LABEL_COLOR,
+          fontFamily: UNBOUNDED_FONT_FAMILY,
+        }}
       />
-      <mesh position={[0, 0, 0.01]} renderOrder={2}>
-        <planeGeometry args={[width, height]} />
-        <LineMaterial colorNode={lineNodes.colorNode} opacityNode={lineNodes.opacityNode} />
-      </mesh>
-    </RigidBody>
+    </group>
   )
 }
 

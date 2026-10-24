@@ -6,19 +6,22 @@ import { createInputSlice } from './inputSlice'
 import { createOverlaysSlice } from './overlaysSlice'
 import { createPlayerSlice } from './playerSlice'
 import { createTimeSlice } from './timeSlice'
-import { type CreateGameStoreParams, GameMode, type GameStore } from './types'
+import { type CreateGameStoreParams, type GameStore } from './types'
 
 type PersistedStore = Pick<
   GameStore,
   | 'username'
   | 'totalTimeS'
   | 'completedSpeedRuns'
-  | 'mode'
   | 'inputType'
   | 'joystickPosition'
   | 'paletteIndex'
   | 'isSubscribed'
 >
+
+type LegacyPersistedStore = PersistedStore & { mode?: unknown }
+
+const STORE_VERSION = 2
 
 export const createGameStore = (params: CreateGameStoreParams) => {
   return createStore<GameStore>()(
@@ -29,7 +32,7 @@ export const createGameStore = (params: CreateGameStoreParams) => {
           ...createInputSlice(params.isMobile)(...a),
           ...createPlayerSlice(params)(...a),
           ...createOverlaysSlice(...a),
-          ...createGameSlice(params.switchBackgroundTrack)(...a),
+          ...createGameSlice()(...a),
         }),
         {
           name: 'speedroller-game',
@@ -39,18 +42,28 @@ export const createGameStore = (params: CreateGameStoreParams) => {
               isSubscribed: s.isSubscribed,
               totalTimeS: s.totalTimeS,
               completedSpeedRuns: s.completedSpeedRuns,
-              mode: s.mode,
               inputType: s.inputType,
               joystickPosition: s.joystickPosition,
               paletteIndex: s.paletteIndex,
             }) as PersistedStore,
-          version: 1,
+          version: STORE_VERSION,
+          // Version 1 persisted the removed Learn/Explore mode. Drop it so public startup always
+          // begins in the continuous lobby, while every other preference and run bucket survives.
+          migrate: (persistedState, version) => {
+            if (version >= STORE_VERSION) return persistedState as PersistedStore
+            if (!persistedState || typeof persistedState !== 'object') {
+              return persistedState as PersistedStore
+            }
+            const migratedState = { ...(persistedState as LegacyPersistedStore) }
+            delete migratedState.mode
+            return migratedState
+          },
           onRehydrateStorage: () => {
             return (state, error) => {
               if (!!error) {
                 console.error('Error during game store hydration:', error)
               } else {
-                state?.setHydrated(state?.mode ?? GameMode.LEARN)
+                state?.setHydrated()
               }
             }
           },

@@ -2,12 +2,13 @@
 
 Speedroller is a proof of concept game built to showcase the potential of 3D web for educational experiences.
 
-You play as a marble rolling across a long, wrapping platform. The experience has two halves:
+You play as a marble in one continuous, bitmap-generated world: a small entrance lobby, a physical start line, and a longer branching race course. There is no public Explore mode any more.
 
-1. **Explore** at your own pace — learn the course, read the info zones, unlock the bonus collectibles and choose a colour for your marble.
-2. **Race the clock** — roll onto the start line to begin a timed run, then chain rings to hold your speed all the way to the finish.
+1. **Lobby** — practise movement, choose a marble colour, then roll onto the start line.
+2. **Race** — a 3–2–1–GO countdown starts a timed run. Chain rings for speed, survive the later technical branches, and cross the finish line.
+3. **Results** — retry straight from the grid or return to the lobby. Every saved run goes to the **global leaderboard**, with keyboard and joystick runs ranked separately.
 
-Every completed run is submitted to a **global leaderboard**, where keyboard and joystick runs are ranked on separate boards.
+The public course is version **1.2.0**: 1,247 generated rows, 60 placed rings, six holes, six course sections, and detached non-driveable scenery.
 
 **[👉 How far can you roll? 👈](https://speedroller.vercel.app)**
 
@@ -15,21 +16,19 @@ Every completed run is submitted to a **global leaderboard**, where keyboard and
 
 ## How it plays
 
-### Explore 🌍
+### The lobby 🏁
 
-The map opens in **learn** mode. Nothing is timed, you can wander, and the course introduces itself as you go:
+The game opens on a 33-column entrance lobby after the landing screen. A 17-tile-wide practice floor gives you room to try the controls, and a nine-tile corridor leads to the start line.
 
-- **Info zones** turn the camera towards a panel and explain what you are looking at as you roll through.
-- **Bonus collectibles** sit off the main line. Rolling onto one and holding your ground for 1.5 seconds unlocks it, and a gem lights up in the HUD.
-- **Colour tiles** let you repaint the entire scene (see [Palette Switching](#palette-switching)).
+- **Colour tiles** sit on the practice floor. Hold on one to repaint the marble and the whole scene (see [Palette Switching](#palette-switching)).
+- **Movement is manual.** Desktop uses WASD or the arrow keys; mobile uses the virtual joystick. There are no required tutorial steps.
+- **The start line is physical.** Roll into it at the end of the corridor to begin setup. If no valid username is saved, a name form opens; otherwise the countdown starts immediately. Cancelling returns you to the lobby at row 22, clear of the line.
 
-<!-- TODO: screenshot — exploring the map, ideally with the minimap and an info zone open (suggested: public/screenshots/explore.webp) -->
-
-A **minimap** gives you the shape of the course. It is a pre-rendered SVG of the whole map — raised tiles, every point of interest and the finish line — with a live marker for your position and a progress bar, so exploring has a sense of direction rather than being a wander.
+The lobby uses the calm background track and disables race-only actions. A fall in the lobby respawns you inside the lobby only, so it cannot place you beyond the start line by accident.
 
 ### Rings and speed ⚡
 
-Rings are the whole skill of the game. Each one you roll through gives you a **+0.5 units/second** speed bump, ramped in over 0.25s:
+Rings are the skill of the game. Each one you roll through gives you a **+0.5 units/second** speed bump, ramped in over 0.25s:
 
 | | |
 | --- | --- |
@@ -38,51 +37,35 @@ Rings are the whole skill of the game. Each one you roll through gives you a **+
 | Gain per ring | `+0.5` units/second |
 | Decay back to base | `6.0` seconds |
 
-Speed is a multiplier, not an autopilot — you hold forward to roll, and your speed decides how fast the course comes at you. At base you are covering 8 tiles a second; at the cap, 11.
+The current handling is the **Stage 1 manual model**: you hold forward to roll and steer with the same input. Automatic forward racing, complete-stop braking with no reverse, and the 45–60-second speed/handling tuning are the next stage (see the course design document). The course is already built at that longer scale.
 
-The catch is the decay. Once a ring's boost has ramped in, your speed bleeds linearly back to the base value over six seconds — and because the decay always runs to `8.0`, the faster you are going, the faster you lose it. At the `11.0` cap you are shedding `0.5` units/second, which is exactly one ring's worth per second.
+The 60 rings are distributed across shared and alternative branches. A complete run does not require collecting all of them; rings announce route choices and reward the technical line. Branch choices with the same forward rows have the same forward distance — their times differ through steering, braking, and boosts.
 
-So the cap is not the goal; **sustaining** it is. The boost is capped at `11.0`, which is only six rings above base, so a big stack is worth no more than a fresh one. What matters is the rhythm: keep finding the next ring before the last one drains away.
-
-<!-- TODO: screenshot — marble mid-ring with the boost dial climbing (suggested: public/screenshots/rings.webp) -->
-
-The HUD carries a **boost dial** and your collected ring count, and it grows larger in speedrun mode. There are **59 rings** on the course.
+The HUD carries a **ring count** and a **boost dial** during a live race.
 
 ### Falling off 🕳️
 
-Roll off the platform and you are put straight back on it — no lives, no game over, no countdown. The respawn finds the **nearest safe tile to where you fell**, both along the course and across it, then scrolls the platform to line up behind you so the recovery is seamless.
+Roll off the platform and you are put straight back on it — no lives, no game over. The respawn finds the **nearest safe tile to where you fell** and keeps the course in place.
 
-What it costs you is speed. Falling **resets your boost to base** — the entire chain you had built is wiped out. The rings you have already collected are kept, because they are a record of the run rather than fuel, but the speed they bought you is gone. On a course where a good line keeps you at `11.0` and a fall drops you to `8.0`, that is a long climb back, and it is where runs are won and lost.
+What it costs you is speed. Falling **resets your boost to base** — the chain you had built is wiped out. Ring contact is credited to the attempt immediately, so a fall does not take rings back. During a race the clock keeps running, and each fall is recorded in the result's accident count.
 
-The clock does not pause for any of it. The speedrun timer runs on wall-clock time and keeps counting straight through the fall and the respawn.
+A lobby fall is recovered inside the lobby rows and is cleared from race statistics when the next attempt begins.
 
-The respawn is near-instant, so the real damage is not the seconds spent falling — it is the seconds spent slow afterwards, rebuilding a chain that took the whole course to assemble.
+### The race ⏱️
 
-<!-- TODO: screenshot — the moment of a respawn, marble reappearing on a safe tile (suggested: public/screenshots/respawn.webp) -->
+Rolling onto the start line in the lobby leaves the lobby phase immediately. The marble is centred on the grid and held there. If a username is missing or invalid (6–12 characters), the setup form opens; confirming starts the countdown. A valid saved username skips the form.
 
-In explore mode a fall also earns you a wry message from a pool of seven. In speedrun mode those are suppressed — you have a clock to worry about.
+Then it is a **3–2–1–GO** countdown over the visible track, at the normal gameplay camera. There is no blurred menu backdrop and the countdown cannot start an unattended run: if the tab is hidden, the sequence stops and restarts from three when the tab is visible again. Input held through the countdown takes effect only at GO, together with the timing origin.
 
-### The speedrun ⏱️
-
-Rolling onto the start line in explore mode opens the race panel. You need a **username (6–12 characters)** before you can go, and you choose keyboard or joystick so your run is filed against the right board.
-
-Then it is a **3–2–1–GO** countdown and you are off. The timer runs in centiseconds and displays to two decimal places.
-
-The same line does double duty: in explore mode it is the start, in speedrun mode it is the **finish**. Crossing it while a run is live submits your time, and the end screen tells you where you landed — world record, podium, top ten, or how many seconds you need to shave.
-
-<!-- TODO: screenshot — finish line crossing or the end screen with the performance summary (suggested: public/screenshots/finish.webp) -->
+Crossing the **finish line** freezes the exact time, snapshots the attempt, and shows the results screen immediately. Submission happens once; Retry and Back to lobby remain usable while it is saving. A failed save still shows the current time with **Time not saved** and never substitutes an older run.
 
 ### The leaderboard 🏆
 
-Runs are stored in Postgres and ranked by **fastest time**, scoped to the current map version so a course change starts a clean board.
+Runs are stored in Postgres and ranked by **fastest time**, scoped to the current map version (**1.2.0**) so a course change starts a clean board. Historical `1.x` results remain stored under their original version.
 
-The board is **filtered by input type**. Keyboard and joystick runs are ranked as two separate tables, because a virtual thumbstick is a different instrument from a keyboard and a single mixed table would not say much about either.
+The board is **filtered by input type**. Keyboard and joystick runs are ranked as two separate tables.
 
-Each entry records the time, the player, plus the **accident count** and **rings collected** for that run — so a fast time with a clean sheet is on the record as such.
-
-**Top ten is a real target.** The board is sorted on time alone, and the podium is marked with medals. Every accident costs you your speed chain, so the runs at the top are the ones with no falls and an unbroken ring line. It will take a flawless run to get there.
-
-<!-- TODO: screenshot — the global leaderboard with medals and flags (suggested: public/screenshots/leaderboard.webp) -->
+Each entry records the time, the player, the **accident count**, and **rings collected** for that run. The results screen includes the current leaderboard, feedback, and sharing actions.
 
 ## Tech Stack 💻
 
@@ -119,7 +102,7 @@ Baking it offline keeps fractal noise out of the runtime entirely — the textur
 
 Most of the game logic is encapsulated within the [`GameProvider`](https://github.com/prag-matt-ic/speedroller/blob/main/components/GameProvider.tsx) which is a Zustand store initialised into React Context.
 
-The Game Store handles the current stage, platform speed, ring and collectible state, player positioning, timing and collision/intersection events.
+The Game Store handles the current stage, race lifecycle (lobby, setup, countdown, running, submitting, results), platform speed, ring state, player positioning, the exact timing origin, and collision/intersection events. Attempt-scoped state is ephemeral: it is never persisted, and an incrementing attempt id rejects late countdown or submission callbacks from a previous run.
 
 ### Fast Value Subscriptions 💨
 
@@ -185,11 +168,13 @@ The rotation animation is derived from the player velocity and helps the movemen
 
 ### Collisions and Confirmations ⏳
 
-Rapier sensors mark every interactive surface: info zones, rings, collectibles, colour tiles, the start/finish line and out-of-bounds.
+Rapier sensors mark every interactive surface on the public course: the physical start and finish lines, rings, the lobby colour tiles, and out-of-bounds. The developer map still contains info zones and collectibles, which use the same sensor and confirmation patterns.
 
-Collectibles and colour tiles use a GSAP-driven hold timer. Stay on the tile for 1.5 seconds and it confirms; roll off early and the progress bar unwinds and cancels.
+Collectibles and colour tiles use a GSAP-driven hold timer. Stay on the tile for 1.5 seconds and it confirms; roll off early and the progress bar unwinds and cancels. Colour confirmation is accepted only in the lobby phase, and attempt resets cancel the timer and its sound.
 
-When the player enters an info zone, HTML content is animated in using React Transition Group + GSAP.
+When the player enters an info zone on the developer map, HTML content is animated in using React Transition Group + GSAP.
+
+The start and finish lines share one component but dispatch from an explicit `kind` role rather than the current game mode. Both are nine tiles wide by five tiles deep and are derived from the generated marker rows.
 
 If the player falls off the platform, they intersect with out-of-bounds and are respawned onto the nearest safe tile (see [Falling off](#falling-off)).
 
@@ -197,9 +182,9 @@ If the player falls off the platform, they intersect with out-of-bounds and are 
 
 ![Player colour selection](https://github.com/prag-matt-ic/speedroller/blob/main/public/screenshots/player-colour.webp?raw=true)
 
-The user can change the theme by rolling over one of the four colour picker tiles, with their selection persisted in the game store.
+The user can change the theme by rolling over one of the four colour picker tiles in the lobby, with their selection persisted in the game store. The tiles keep their dwell-to-confirm behaviour.
 
-Because the palette drives the marble, the tiles, the rings and the backdrop at once, picking a colour is really picking a look for the whole scene.
+Because the palette drives the marble, the tiles, the rings and the backdrop at once, picking a colour is really picking a look for the whole scene. Starting, retrying, and returning to the lobby all preserve the chosen colour.
 
 ### Marble Shading 🔮
 
@@ -207,33 +192,49 @@ The marble uses a custom TSL material that samples the palette using the chosen 
 
 It supports textured and flat modes depending on the quality mode.
 
-## Infinite Platform 🏃
+## Platform 🏃
 
 ![Platform](https://github.com/prag-matt-ic/speedroller/blob/main/public/screenshots/platform.webp?raw=true)
 
-The main `Platform` is a grid of instanced rigid bodies that endlessly wrap forward and backwards. The course is 33 tiles wide and 249 rows long, with 40 rows rendered at a time.
+The main `Platform` is a fixed world generated from the approved bitmaps. The public course is 33 tiles wide and 1,247 rows long, including the 32-row lobby. Terrain is drawn in instanced batches of 16 rows, with one static collider per raised tile.
 
-### Row Recycling ♻️
+### Fixed world
 
-When a row passes behind the camera, it wraps to the back and is assigned new row data. This approach means the camera can stay fixed looking at the player, with the floor moving like a conveyor beneath it.
+Row coordinates are permanent: forward travel decreases world Z. The store wraps no rows and moves no terrain at runtime; the camera follows the marble through the fixed course. Attempt resets (start, retry, lobby return) keep the terrain and its compiled materials mounted.
 
-Optimal performance is achieved by limiting the number of rendered rows, and using instanced meshes for the repeated tiles.
+The longer map means more terrain instances and colliders than the previous 249-row course. Instancing and collider batching are unchanged; the measured costs and any streaming decision belong to the speed/performance stage.
 
-### Obstacle Course ⚠️
+### Course sections ⚠️
 
-The course alternates obstacle runs with info sections. Each obstacle section is a drawn pathway of safe tiles — gaps to thread, and lines that reward committing early rather than hesitating. The layout comes straight from the section bitmap, so it is authored rather than generated (see [Authoring the Course](#authoring-the-course)).
+The approved Course draft C is authored as seven PNG chunks, in manifest order:
+
+| Chunk | Rows | Role |
+| --- | ---: | --- |
+| Lobby | 32 | Entrance floor, colour picker, corridor to START |
+| Launch | 180 | Straight opening and first gentle bend |
+| Broad sweeps | 200 | Turns and the first two-way split |
+| Branching slalom | 220 | Wider flowing line versus narrower technical line |
+| Recovery | 160 | Merge, three avoidable holes, right–left–right line |
+| Technical finale | 260 | Up to three routes with the tightest choices |
+| Finish sprint | 195 | Final split, three holes, shared finish approach and run-out |
+
+There are never more than three simultaneous floor passages. The recovery and sprint holes are part of the floor mask, so collisions and safe-respawn searches naturally treat them as void.
 
 ### Surface Elements 🏠
 
-Each stage has its own set of elements which are positioned atop the tiles. These elements include the rings, info zones, collectibles, floating headings and the player colour picker.
+Each generated row owns its surface placements. The public course contains:
 
-Their positioning is defined within the row data. When their corresponding row is raised, the element is positioned.
+- one physical START marker at global row 32,
+- one physical FINISH marker at global row 1232,
+- one colour picker in the lobby at row 12,
+- 60 ring markers, and
+- 682 detached decoration cells rendered from separate scenery masks.
 
-The translation (Z movement) of surface elements is synced with the movement of the underlying tiles so they appear fixed to the tiles.
+Info zones, collectibles, floating promotional headings, and confetti remain supported for the developer map, but are absent from the public course. Start and finish lines are always rendered from explicit start/finish marker data, never inferred from the current mode.
 
 ### Tile Shader 🧊
 
-The platform tiles use a custom TSL node material to colour the tiles, fade in/out and highlight those near the player.
+The platform tiles use a custom TSL node material to colour the tiles, fade in/out and highlight those near the player. The 2,581 bright authored floor cells are parsed through the existing highlight channel, not through the decoration masks.
 
 ## Authoring the Course 📐
 
@@ -243,22 +244,25 @@ The course is drawn, not scripted. Each section is a PNG bitmap where one pixel 
 | --- | --- |
 | `#000000` | void — the tile is lowered, leaving a gap |
 | `#ff0000` | ring |
-| `#00ff00` | info zone |
-| `#0000ff` | bonus collectible |
+| `#00ff00` | info zone (developer map only) |
+| `#0000ff` | bonus collectible (developer map only) |
 | `#ff8000` | colour picker |
-| `#ffff00` | finish line |
-| `#808080` | floating heading |
+| `#8000ff` | physical START marker |
+| `#ffff00` | physical FINISH marker |
+| `#808080` | floating heading (developer map only) |
 | `#00ffff` | highlighted tile |
-| `#ff0080` | confetti |
+| `#ff0080` | confetti (developer map only) |
 
-`npm run build-platform` finds the highest version folder in `assets/platform/`, reads its bitmaps in order, and writes two things:
+The approved `1.2.0` sources are copied into `assets/platform/1.2.0/` from `docs/race-course/bitmaps/1.2.0/`, with aligned black/white scenery masks in `assets/platform/1.2.0/decoration/`. Legacy PNGs stay in the copy for reference but are not part of the public source list; `test.png` remains available for the developer map.
 
-- `resources/rowsData.ts` — the pre-computed row data and per-mode totals, so the client never parses a bitmap at runtime.
-- `public/maps/<version>/<mode>.svg` — the minimap, generated from the same rows.
+`npm run build-platform` finds the highest version folder in `assets/platform/`, reads the seven race chunks in manifest order, and writes:
 
-Both LEARN and SPEEDRUN are built from the same eight section bitmaps. Only the final section differs, mapping to `Stage.CTA` in learn mode and `Stage.SPEED_RUN_FINISH` in speedrun mode — which is why the two maps have identical ring counts.
+- `resources/rowsData.ts` — the pre-computed row data, marker positions, scenery columns, and totals, so the client never parses a bitmap at runtime.
+- `public/maps/<version>/speedrun.svg` and `dev.svg` — the minimap, generated from the same rows, including distinct start and finish markers.
 
-So laying out a level is done in any pixel editor, and the collision layout, the element placements and the minimap all fall out of that one source. Bumping the version folder is also what starts a fresh leaderboard.
+The generator validates the public course against the approved counts before writing: 1,247 rows, 17,683 floor cells, 2,581 highlighted tiles, 60 supported rings, six holes, 682 separated decoration cells, one START, one FINISH, one colour picker, no more than three floor passages per row, and a fully connected floor. It also verifies that the complete nine-by-five start and finish footprints have floor support.
+
+The generator reads rows from a JSON payload rather than inlining a 1,200-row object literal: TypeScript otherwise builds an unrepresentable union over the row literals. Laying out a course is still done in a pixel editor; bumping the version folder starts a fresh leaderboard.
 
 ## Confetti ✨
 
@@ -276,14 +280,16 @@ Decorative floating tiles add depth and motion around the course. They are rende
 
 ## Performance: Adaptive Quality 🏎️
 
-The site achieves great performance even on mobile.
+The earlier 249-row course held good frame rates on desktop and mobile.
 
 ![Stats fps display](https://github.com/prag-matt-ic/speedroller/blob/main/public/screenshots/stats.webp?raw=true)
 
-- My Macbook Pro M4 gets a consistent 120fps on high quality mode.
-- My iPhone 15 Pro gets a steady 60fps also on high quality mode.
+- The earlier course held a consistent 120fps on a Macbook Pro M4 at high quality.
+- It held a steady 60fps on an iPhone 15 Pro at high quality.
 
-_(I appreciate these are top-of-the-range devices, but lower powered machines can also hit >30fps.)_
+_(Those are top-of-the-range devices; lower-powered machines also held >30fps on that course.)_
+
+Course version **1.2.0** is roughly five times longer, with more terrain colliders, scenery instances and floating-tile batches. The measurements above are historical and have not yet been re-run against the new map. The speed/performance stage includes profiling warmup, frame time, collision workload, and mobile performance on the actual generated course before public release.
 
 Visual quality is managed by a small Zustand store `PerformanceProvider`. It exposes a `sceneQuality` mode (Ultra/High/Medium/Low) and a derived `sceneConfig` which is used across components to scale the detail and reduce GPU work.
 
@@ -342,9 +348,11 @@ export type RowData = {
   infoZonePlacements?: IndexedPlacement[]
   collectiblePlacements?: IndexedPlacement[]
   floatingHeadingPlacements?: IndexedPlacement[]
+  startLinePosition?: [number, number, number]
   finishLinePosition?: [number, number, number]
   confettiPlacements?: ConfettiPlacement[]
   colourPickerPlacement?: IndexedPlacement
+  decorationColumns?: number[] // detached, non-collidable scenery
 }
 ```
 
@@ -353,8 +361,8 @@ Take a look at the [`Platform` Component](https://github.com/prag-matt-ic/speedr
 ## Limitations / Wishlist 👀
 
 - **Times are client-reported.** The board is only as honest as the client. There is no server-side timing, no plausibility check on a submitted time, and nothing verifying which input type was actually used — a run is trusted as sent. Accounts, or a server-issued run token, would be the fix.
-- **The course is a single line.** Learn and speedrun are built from the same eight sections, so the speedrun is the exploration map run fast rather than a purpose-built course.
-- **The terrain/obstacles stage is basic.** I'd love to introduce new challenges such as jumps, wall runs and moving hazards.
+- **Handling is still the Stage 1 model.** The new 1,200-unit course is integrated with the old 8–11 units/sec manual movement. Automatic forward racing, complete-stop braking with no reverse, 18–28 units/sec tuning, and 45–60-second clean runs are the next stage. Nothing in the race flow depends on manual movement; the speed slice can change independently.
+- **The new course has not had full device acceptance.** The generated data is validated, but desktop/mobile traversal, high-speed sensor reliability, camera preview distance, and large-map warmup/frame time still need the Stage 2 acceptance passes.
 - **Respawns are forgiving.** The nearest-safe-tile recovery keeps runs flowing, but a stricter checkpoint system could make accidents a more interesting risk.
 - **Two components are still on the legacy GLSL path.** The gem particles and the post-processing pass have not been ported to TSL yet.
 

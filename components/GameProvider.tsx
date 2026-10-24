@@ -26,7 +26,6 @@ type Props = PropsWithChildren<{
 export const GameProvider: FC<Props> = ({ children, isMobile, insertSpeedRun }) => {
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
   const stopSoundFX = useSoundStore((s) => s.stopSoundFX)
-  const switchBackgroundTrack = useSoundStore((s) => s.switchBackgroundTrack)
 
   const [store] = useState(() =>
     createGameStore({
@@ -34,7 +33,6 @@ export const GameProvider: FC<Props> = ({ children, isMobile, insertSpeedRun }) 
       insertSpeedRun,
       playSoundFX,
       stopSoundFX,
-      switchBackgroundTrack,
     }),
   )
   

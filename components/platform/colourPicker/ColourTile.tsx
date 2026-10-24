@@ -22,7 +22,7 @@ import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
-import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
+import { PLAYER_RADIUS } from '@/utils/player'
 import { type ColourTileUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { getColourFromPalette } from '@/resources/tsl/playerPalette'

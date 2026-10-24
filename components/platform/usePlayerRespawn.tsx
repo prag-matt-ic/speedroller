@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { PLAYER_INITIAL_POSITION, useGameStore } from '@/components/GameProvider'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
-import { findSafeRespawnPosition } from '@/utils/platform/playerRespawn'
+import { SpeedRunStage } from '@/stores/types'
+import { type RespawnRowRange, findSafeRespawnPosition } from '@/utils/platform/playerRespawn'
+import { getLobbyRowRange } from '@/utils/platform/raceMarkers'
 import type { RowData } from '@/utils/tiles'
 
 export function usePlayerRespawn({
@@ -13,8 +15,16 @@ export function usePlayerRespawn({
   isPlatformReady: boolean
 }) {
   const respawnPlayer = useGameStore((s) => s.respawnPlayer)
+  const speedRunStage = useGameStore((s) => s.speedRunStage)
   const playerStatus = useGameStore((s) => s.playerStatus)
   const { playerPosition } = usePlayerPosition()
+
+  // A lobby fall must stay inside the lobby, so falling near the exit cannot drop the player
+  // beyond the start line without an attempt.
+  const rowRange = useMemo<RespawnRowRange | undefined>(
+    () => (speedRunStage === SpeedRunStage.LOBBY ? (getLobbyRowRange(rows) ?? undefined) : undefined),
+    [rows, speedRunStage],
+  )
 
   useEffect(() => {
     if (!isPlatformReady || playerStatus !== 'out-of-bounds') return
@@ -23,7 +33,8 @@ export function usePlayerRespawn({
       playerPosition.current[0],
       playerPosition.current[2],
       PLAYER_INITIAL_POSITION[1],
+      rowRange,
     )
     if (position) respawnPlayer(position)
-  }, [isPlatformReady, playerPosition, playerStatus, respawnPlayer, rows])
+  }, [isPlatformReady, playerPosition, playerStatus, respawnPlayer, rows, rowRange])
 }

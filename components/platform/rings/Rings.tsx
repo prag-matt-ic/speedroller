@@ -1,7 +1,7 @@
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { BallCollider, type IntersectionEnterHandler, RigidBody } from '@react-three/rapier'
 import gsap from 'gsap'
-import { type FC, useEffect, useRef } from 'react'
+import { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Vector3Tuple } from 'three'
 
 import { type RingIndex, useGameStore } from '@/components/GameProvider'
@@ -56,17 +56,30 @@ type PlacedRingProps = {
 const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
   const ringKey = getRingKey(indexes[0], indexes[1])
   const isCollected = useGameStore((s) => Boolean(s.collectedRings[ringKey]))
+  const attemptId = useGameStore((s) => s.attemptId)
   const onRingCollected = useGameStore((s) => s.onRingCollected)
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
   const shaderRef = useRef<RingMaterial>(null)
   const exitTween = useRef<gsap.core.Tween | null>(null)
   const collecting = useRef(false)
+  const [exitAttemptId, setExitAttemptId] = useState<number | null>(null)
+  // Derived rather than reset in an effect: a new attempt automatically ends the old exit state.
+  const isExiting = exitAttemptId === attemptId
   const seed = hashRingIndex(indexes[0] * COLUMNS + indexes[1])
   const userData: RingUserData = { type: 'ring', rowIndex: indexes[0], columnIndex: indexes[1] }
 
   useEffect(() => () => {
     exitTween.current?.kill()
   }, [])
+
+  // A retry keeps the terrain and ring meshes mounted. Reset their local animation state so every
+  // ring is visible and collectable again, and stale exit callbacks cannot credit another attempt.
+  useLayoutEffect(() => {
+    exitTween.current?.kill()
+    exitTween.current = null
+    collecting.current = false
+    if (shaderRef.current) shaderRef.current.uExitProgress.value = 0
+  }, [attemptId])
 
   const onIntersectionEnter: IntersectionEnterHandler = (event) => {
     const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData | undefined
@@ -75,11 +88,15 @@ const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
     if (!material) return
     collecting.current = true
     playSoundFX(SoundFX.RING_COLLECTED)
+    // Credit the attempt at contact. The exit animation is purely cosmetic and must not be able
+    // to race with a finish or reset before the ring is counted.
+    onRingCollected(indexes)
+    setExitAttemptId(attemptId)
     exitTween.current = gsap.to(material.uExitProgress, {
       value: 1,
       duration: 0.4,
       ease: 'power1.out',
-      onComplete: () => onRingCollected(indexes),
+      onComplete: () => setExitAttemptId(null),
     })
   }
 
@@ -97,7 +114,7 @@ const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
         collisionGroups={COLLISION_GROUPS.ringSensor}
       />}
       <Ring
-        isVisible={!isCollected}
+        isVisible={!isCollected || isExiting}
         shaderRef={shaderRef}
         uniformScope={`ring${indexes[0]}_${indexes[1]}`}
         rotationSpeed={0.6 + seed * 0.7}
