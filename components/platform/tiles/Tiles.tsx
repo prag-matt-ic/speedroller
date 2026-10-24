@@ -36,7 +36,7 @@ import {
   vec3,
   vertexStage,
 } from 'three/tsl'
-import { InstancedMesh, Matrix4, Sphere, Texture } from 'three'
+import { type InstancedBufferAttribute, InstancedMesh, Matrix4, Sphere, Texture } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
 
 import tileDetailNoise2 from '@/assets/textures/platform/tile-noise-2.webp'
@@ -44,7 +44,9 @@ import tileDetailNoise3 from '@/assets/textures/platform/tile-noise-3.webp'
 import tileDetailNoise1 from '@/assets/textures/platform/tile-noise.webp'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
+import { createTileTrail, useTileTrail } from '@/components/platform/tiles/useTileTrail'
 import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
+import { samplePlayerPalette } from '@/resources/tsl/playerPalette'
 import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import {
   type RowData,
@@ -55,6 +57,7 @@ import {
   TILE_PLAYER_HIGHLIGHT_RADIUS,
   TILE_SIZE,
   TILE_THICKNESS,
+  TRAIL_FADE_SECONDS,
 } from '@/utils/tiles'
 
 const TILE_UNIFORM_SCOPE = 'platformTiles'
@@ -78,6 +81,11 @@ const SHADOW_FADE_RANGE_INV = 1.0 / (SHADOW_FADE_START_Y - SHADOW_FADE_END_Y)
 const SHADOW_MIN_PLAYER_Y = -0.5
 
 const DETAIL_NOISE_STRENGTH = 0.12
+
+// Trail tint: the marble palette lightened toward white so it matches the tiles' lightness.
+const TRAIL_PALETTE_T = 0.5
+const TRAIL_WHITEN = 0.55
+const TRAIL_STRENGTH = 0.85
 
 // tile.frag's early `if (vAlpha <= 0.001) discard;`. A discard needs a statement stack, which a
 // material graph built at React render time does not have, so the material's own alpha test does it.
@@ -120,7 +128,13 @@ type PlatformTilesProps = {
   onReadyChange: (isReady: boolean) => void
 }
 
-const TerrainBatch: FC<{ batch: TileBatch; nodes: TileNodes }> = ({ batch, nodes }) => {
+type TerrainBatchProps = {
+  batch: TileBatch
+  trailAttribute: InstancedBufferAttribute
+  nodes: TileNodes
+}
+
+const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) => {
   const meshRef = useRef<InstancedMesh>(null)
 
   useLayoutEffect(() => {
@@ -163,6 +177,7 @@ const TerrainBatch: FC<{ batch: TileBatch; nodes: TileNodes }> = ({ batch, nodes
         <boxGeometry args={[TILE_SIZE, TILE_THICKNESS, TILE_SIZE]}>
           <instancedBufferAttribute attach="attributes-seed" args={[batch.seeds, 1]} />
           <instancedBufferAttribute attach="attributes-isHighlighted" args={[batch.highlights, 1]} />
+          <primitive object={trailAttribute} attach="attributes-trailTouchedAt" />
         </boxGeometry>
         <Suspense fallback={null}>
           <meshBasicNodeMaterial
@@ -187,6 +202,9 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
     tileDetailNoise3.src,
   ]) as [Texture, Texture, Texture]
   const batches = useMemo(() => createTileBatches(rows), [rows])
+  const trail = useMemo(() => createTileTrail(batches), [batches])
+
+  useTileTrail(trail, rows.length)
 
   useUniforms(
     createTileUniforms({
@@ -204,10 +222,12 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
   const { colorNode, opacityNode, positionNode } = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
-      const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos, uTime, uPlayerPaletteIndex } =
+        scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
       const tileSeed = attribute<'float'>('seed')
       const tileIsHighlighted = attribute<'float'>('isHighlighted')
+      const trailTouchedAt = attribute<'float'>('trailTouchedAt')
 
       const hashFloat = (n: Node<'float'>) => fract(sin(n).mul(43758.5453))
 
@@ -318,6 +338,24 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         playerHighlight,
       )
 
+      // Trail: tiles the ball has just crossed keep a light player-colour tint. The tint and its
+      // fade are constant across a tile's fragments, so both are hoisted to the vertex stage like
+      // the mixes above and the fragment stage pays for a single mix.
+      const trailAge = uTime.sub(trailTouchedAt)
+      const trailAmount = vertexStage(
+        float(1)
+          .sub(smoothstep(float(0), float(TRAIL_FADE_SECONDS), trailAge))
+          .mul(TRAIL_STRENGTH),
+      )
+      const trailColour = vertexStage(
+        mix(
+          samplePlayerPalette(float(TRAIL_PALETTE_T), uPlayerPaletteIndex.toInt()),
+          vec3(1),
+          float(TRAIL_WHITEN),
+        ),
+      )
+      const backgroundWithTrail = mix(background, trailColour, trailAmount)
+
       // Player contact shadow. `distanceSquared` is already derived above, so reuse it instead of
       // recomputing the same sub + dot.
       const playerDistance = distanceSquared.sqrt()
@@ -343,7 +381,9 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         .mul(shadowHeightFade)
         .mul(scoped.uShadowEnabled)
 
-      const shadowed = background.mul(float(1).sub(shadow.mul(SHADOW_STRENGTH))).mul(shade)
+      const shadowed = backgroundWithTrail
+        .mul(float(1).sub(shadow.mul(SHADOW_STRENGTH)))
+        .mul(shade)
 
       return {
         positionNode: tiltedGeometry,
@@ -363,10 +403,11 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
   return (
     <group>
-      {batches.map((batch) => (
+      {trail.entries.map(({ batch, attribute }) => (
         <TerrainBatch
           key={batch.startRow}
           batch={batch}
+          trailAttribute={attribute}
           nodes={{ colorNode, opacityNode, positionNode }}
         />
       ))}

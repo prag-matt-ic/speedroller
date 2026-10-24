@@ -23,6 +23,11 @@ export const TILE_PLAYER_HIGHLIGHT_RADIUS = TILE_PLAYER_HIGHLIGHT_ROW_COUNT * TI
 export const TILE_PLAYER_FADE_FULL_RADIUS = TILE_PLAYER_FADE_FULL_ROWS * TILE_SIZE
 export const TILE_PLAYER_FADE_MIN_RADIUS = TILE_PLAYER_FADE_MIN_ROWS * TILE_SIZE
 
+// Tile trail: how long a touched tile stays tinted, and the radius of tiles the ball stamps.
+export const TRAIL_FADE_SECONDS = 0.4
+export const TRAIL_BRUSH_RADIUS = TILE_SIZE * 0.75
+export const TRAIL_MAX_PLAYER_HEIGHT = 1.2
+
 export const ELEMENT_FADE_DISTANCE = 23 * TILE_SIZE
 
 export const EPSILON = {
@@ -38,11 +43,18 @@ export const RAISED_Y = -TILE_SIZE / 2
 
 export const CONFETTI_ROW_DEPTH = TILE_SIZE
 
+// Y value of the tile's top surface
+export const TILE_SURFACE_Y = RAISED_Y + TILE_THICKNESS * 0.5
+
 // Y value for elements placed directly on top of tiles
-export const ON_TILE_Y = RAISED_Y + TILE_THICKNESS * 0.5 + 0.005
+export const ON_TILE_Y = TILE_SURFACE_Y + 0.005
 
 // Convert a grid column index (can be fractional for centers) to world X.
 export const colToX = (col: number): number => (col - COLUMNS / 2 + 0.5) * TILE_SIZE
+
+/** Nearest grid column for a world X, the inverse of `colToX`. */
+export const worldXToColumn = (worldX: number): number =>
+  Math.round(worldX / TILE_SIZE + COLUMNS / 2 - 0.5)
 
 export function clamp(x: number, a: number, b: number): number {
   return Math.max(a, Math.min(b, x))

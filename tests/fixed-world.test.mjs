@@ -115,10 +115,12 @@ for (const [mode, { rows, totalCounts }] of Object.entries(PLATFORM_DATA.modes))
       assert.equal(batch.startRow % PLATFORM_BATCH_ROWS, 0)
       assert.equal(batch.positions.length, batch.seeds.length)
       assert.equal(batch.positions.length, batch.highlights.length)
+      assert.equal(batch.cellToInstance.length, PLATFORM_BATCH_ROWS * COLUMNS)
       batch.positions.forEach(([x, y, localZ], index) => {
         const worldZ = rowToWorldZ(batch.startRow) + localZ
         const rowIndex = worldZToRowIndex(worldZ, rows.length)
         const column = Math.round(x / TILE_SIZE + (COLUMNS - 1) / 2)
+        assert.equal(batch.cellToInstance[(rowIndex - batch.startRow) * COLUMNS + column], index)
         const key = `${rowIndex}:${column}`
         assert.ok(!visited.has(key), `duplicate tile ${key}`)
         visited.add(key)

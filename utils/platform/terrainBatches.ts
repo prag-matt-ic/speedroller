@@ -7,6 +7,8 @@ export type TileBatch = {
   positions: Vector3Tuple[]
   seeds: Float32Array
   highlights: Float32Array
+  /** Instance index for each cell in the batch's row band, or -1 when the cell has no tile. */
+  cellToInstance: Int32Array
 }
 
 // Stable per-cell seeds keep the same tile's appearance after reset and quality changes.
@@ -21,12 +23,14 @@ export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
     const positions: Vector3Tuple[] = []
     const seeds: number[] = []
     const highlights: number[] = []
+    const cellToInstance = new Int32Array(PLATFORM_BATCH_ROWS * COLUMNS).fill(-1)
     const endRow = Math.min(startRow + PLATFORM_BATCH_ROWS, rows.length)
 
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       const row = rows[rowIndex]
       for (let column = 0; column < COLUMNS; column++) {
         if (row.isRaised[column] !== 1) continue
+        cellToInstance[(rowIndex - startRow) * COLUMNS + column] = positions.length
         positions.push([colToX(column), RAISED_Y, -(rowIndex - startRow) * TILE_SIZE])
         seeds.push(tileSeed(rowIndex, column))
         highlights.push(row.isHighlighted?.[column] ?? 0)
@@ -39,6 +43,7 @@ export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
         positions,
         seeds: new Float32Array(seeds),
         highlights: new Float32Array(highlights),
+        cellToInstance,
       })
     }
   }

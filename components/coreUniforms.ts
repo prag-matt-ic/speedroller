@@ -13,6 +13,10 @@ export const CORE_UNIFORM_SCOPE = 'core'
 export const createCoreUniforms = () => ({
   /** Player world position, written once by GameUniforms for every material. */
   uPlayerWorldPos: new Vector3(),
+  /** Game time in seconds, advanced once per game frame. */
+  uTime: 0,
+  /** Palette index shown on the marble, for effects tinted with the player's colour. */
+  uPlayerPaletteIndex: 0,
 })
 
 // Type-only registration: `uniforms.scope(CORE_UNIFORM_SCOPE)` is typed for every reader without a
