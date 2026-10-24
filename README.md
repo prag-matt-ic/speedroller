@@ -295,13 +295,15 @@ Visual quality is managed by a small Zustand store `PerformanceProvider`. It exp
 
 The main scene is wrapped in Drei's `PerformanceMonitor`. It monitors FPS and calls `onIncline`/`onDecline`, which in turn invokes `onPerformanceChange` from the provider to step the quality up or down.
 
+The canvas renders at a maximum device pixel ratio of 1.5× by default, with a hard ceiling of 2×. That value is a cap rather than a fixed ratio, so a 1× display still renders at 1×. When frames drop, the monitor spends resolution before detail: at medium quality it lowers the cap by 0.5× (to a floor of 1×) before stepping down to the low tier.
+
 Physics can also run on a fixed timestep via `useGameFrame`, which accumulates real frame time and steps the simulation at a target rate, capped at 5 substeps to avoid a spiral of death on slow frames. Frame updates pause entirely while an overlay is open.
 
 ### Debug Mode 🐞
 
-Adding `?debug=true` to the URL inserts the Drei `Stats` component for displaying FPS, and exposes manual quality and DPR controls.
+Adding `?debug=true` to the URL inserts the Drei `Stats` component for displaying FPS, and exposes manual quality and DPR controls. The DPR selector offers 0.5×–2×, with 1.5× as the default.
 
-If you manually change quality in debug tools, auto‑adjustments are paused.
+If you manually change quality or DPR in debug tools, auto‑adjustments are paused.
 
 ## Audio 🎧
 

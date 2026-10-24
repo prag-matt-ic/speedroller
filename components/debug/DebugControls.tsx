@@ -7,6 +7,7 @@ import { twJoin } from 'tailwind-merge'
 import { useGameStore } from '@/components/GameProvider'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
 import { GameMode, Overlay } from '@/stores/types'
+import { DEFAULT_MAX_DPR, MAX_DPR } from '@/utils/dpr'
 
 type Option<T> = {
   label: string
@@ -20,14 +21,13 @@ type Option<T> = {
 //   { label: '120 fps', value: 120 },
 // ]
 
-const DPR_OPTIONS: Option<number | undefined>[] = [
-  { label: 'Native', value: undefined },
+const DPR_OPTIONS: Option<number>[] = [
   { label: '0.5', value: 0.5 },
   { label: '0.75', value: 0.75 },
   { label: '1.0', value: 1 },
-  { label: '1.5', value: 1.5 },
-  { label: '2.0', value: 2 },
-] as const
+  { label: '1.5 (default)', value: DEFAULT_MAX_DPR },
+  { label: '2.0 (max)', value: MAX_DPR },
+]
 
 const GAME_MODE_OPTIONS: Option<GameMode>[] = [
   { label: 'Speedrun', value: GameMode.SPEEDRUN },
@@ -62,8 +62,7 @@ const DebugControls: FC = () => {
 
   const handleDprChange = (event: ChangeEvent<HTMLSelectElement>) => {
     event.target.blur()
-    const next = event.target.value === 'native' ? undefined : Number(event.target.value)
-    setMaxDpr(next)
+    setMaxDpr(Number(event.target.value))
   }
 
   const handleModeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -99,12 +98,10 @@ const DebugControls: FC = () => {
           <SelectRow
             id="performance-debug-dpr"
             label="DPR"
-            value={maxDpr === undefined ? 'native' : maxDpr.toString()}
+            value={maxDpr.toString()}
             onChange={handleDprChange}>
             {DPR_OPTIONS.map((option) => (
-              <option
-                key={option.label}
-                value={option.value === undefined ? 'native' : option.value.toString()}>
+              <option key={option.label} value={option.value.toString()}>
                 {option.label}
               </option>
             ))}

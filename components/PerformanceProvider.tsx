@@ -1,6 +1,8 @@
 import { type FC, type PropsWithChildren, createContext, useContext, useState } from 'react'
 import { type StoreApi, createStore, useStore } from 'zustand'
 
+import { DEFAULT_MAX_DPR, MIN_AUTO_DPR, stepMaxDprDown } from '@/utils/dpr'
+
 export type RapierSimFPS = 0 | 30 | 60 | 120 // 0 = 'vary'
 
 export enum SceneQuality {
@@ -120,15 +122,16 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
 
 type PerformanceState = {
   isMobile: boolean
-  maxDPR: number | undefined
+  maxDPR: number
   simFps: RapierSimFPS
   sceneQuality: SceneQuality
   sceneConfig: SceneConfig
-  onPerformanceChange: (up: boolean) => void
+  onPerformanceChange: (up: boolean, currentDpr: number) => void
   setSimFps: (fps: RapierSimFPS) => void
   setSceneQuality: (quality: SceneQuality) => void
-  setMaxDpr: (value: number | undefined) => void
+  setMaxDpr: (value: number) => void
   hasBeenManuallySet: boolean
+  hasUsedMediumDprBuffer: boolean
   isPhysicsDebug: boolean
   setIsPhysicsDebug: (value: boolean) => void
   isNeutralToneMapping: boolean
@@ -146,11 +149,12 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
 
   return createStore<PerformanceState>((set, get) => ({
     isMobile: initialState.isMobile,
-    maxDPR: undefined,
+    maxDPR: DEFAULT_MAX_DPR,
     simFps: 0,
     sceneQuality: initialQualityMode,
     sceneConfig: SCENE_CONFIGS[initialQualityMode],
     hasBeenManuallySet: false,
+    hasUsedMediumDprBuffer: false,
     isPhysicsDebug: false,
     isNeutralToneMapping: true,
     setIsNeutralToneMapping: (value) => set(() => ({ isNeutralToneMapping: value })),
@@ -165,11 +169,13 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
         hasBeenManuallySet: true,
       })
     },
-    setMaxDpr: (value: number | undefined) => {
+    setMaxDpr: (value: number) => {
       const previous = get().maxDPR
+      if (previous === value) return
       logPerformanceDebug('maxDPR override updated', { previous, next: value })
       set({
         maxDPR: value,
+        hasBeenManuallySet: true,
       })
     },
     setIsPhysicsDebug: (value: boolean) => {
@@ -178,9 +184,25 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
       logPerformanceDebug('isPhysicsDebug updated', { previous, next: value })
       set({ isPhysicsDebug: value })
     },
-    onPerformanceChange: (up: boolean) => {
-      const { sceneQuality, hasBeenManuallySet, maxDPR } = get()
+    onPerformanceChange: (up: boolean, currentDpr: number) => {
+      const { sceneQuality, hasBeenManuallySet, hasUsedMediumDprBuffer } = get()
       if (hasBeenManuallySet) return
+
+      // Spend resolution at medium before dropping to low, so the effects survive the decline.
+      const shouldDropMediumDpr =
+        !up &&
+        sceneQuality === SceneQuality.MEDIUM &&
+        !hasUsedMediumDprBuffer &&
+        currentDpr > MIN_AUTO_DPR
+
+      if (shouldDropMediumDpr) {
+        logPerformanceDebug('maxDPR reduced at medium quality')
+        set({
+          hasUsedMediumDprBuffer: true,
+          maxDPR: stepMaxDprDown(currentDpr),
+        })
+        return
+      }
 
       const order = Object.values(SceneQuality).reverse() // [Low, Medium, High]
       const currentIndex = order.indexOf(sceneQuality)
@@ -188,13 +210,10 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
       const nextMode = order[nextIndex]
 
       if (nextMode === sceneQuality) {
-        const shouldDropDPR =
-          !up && sceneQuality === SceneQuality.LOW && (maxDPR === undefined || maxDPR > 1)
-        if (!shouldDropDPR) return
-        logPerformanceDebug('maxDPR reduced')
-        set((prev) => ({
-          maxDPR: prev.maxDPR === undefined ? 1.5 : 1,
-        }))
+        const shouldDropDpr = !up && sceneQuality === SceneQuality.LOW && currentDpr > MIN_AUTO_DPR
+        if (!shouldDropDpr) return
+        logPerformanceDebug('maxDPR reduced at low quality')
+        set({ maxDPR: stepMaxDprDown(currentDpr) })
         return
       }
 
@@ -207,6 +226,7 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
       set({
         sceneQuality: nextMode,
         sceneConfig: SCENE_CONFIGS[nextMode],
+        hasUsedMediumDprBuffer: false,
       })
     },
   }))

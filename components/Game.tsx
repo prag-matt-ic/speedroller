@@ -20,6 +20,7 @@ import OutOfBounds from '@/components/platform/OutOfBounds'
 import Platform from '@/components/platform/Platform'
 import Player from '@/components/player/Player'
 import PostProcessing from '@/components/postProcessing/Effects'
+import { resolveCanvasDpr } from '@/utils/dpr'
 
 gsap.registerPlugin(useGSAP)
 
@@ -50,11 +51,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
     [isMobile],
   )
 
-  const dpr = useMemo<number>(() => {
-    if (typeof window === 'undefined') return 1
-    if (!!maxDPR) return Math.min(window.devicePixelRatio ?? 1, maxDPR)
-    return window.devicePixelRatio ?? 1
-  }, [maxDPR])
+  const dpr = useMemo(() => resolveCanvasDpr(maxDPR), [maxDPR])
 
   return (
     <WebGPUCanvas
@@ -70,8 +67,8 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
         // Create an upper/lower FPS band relative to device refresh rate
         // If avg fps > upper => incline (step quality up); if < lower => decline (step down)
         bounds={(refreshrate) => (refreshrate > 90 ? [50, 80] : [50, 60])}
-        onIncline={() => onPerformanceChange(true)}
-        onDecline={() => onPerformanceChange(false)}
+        onIncline={() => onPerformanceChange(true, dpr)}
+        onDecline={() => onPerformanceChange(false, dpr)}
         flipflops={2}>
         {/* <ambientLight intensity={1.0} /> */}
 
