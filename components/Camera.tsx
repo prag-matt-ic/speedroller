@@ -1,22 +1,30 @@
 'use client'
 
-import { useFrame } from '@react-three/fiber'
-import { type FC, useCallback, useEffect, useRef } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
+import { type FC, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import type { PerspectiveCamera } from 'three'
 
 import { Stage, useGameStore } from '@/components/GameProvider'
 import useCameraControls from '@/hooks/cameraControls/useCameraControls'
 import { usePlayerInput } from '@/hooks/usePlayerInput'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import useStage from '@/hooks/useStage'
-import { Overlay } from '@/stores/types'
+import { Overlay, SpeedRunStage } from '@/stores/types'
 
 type StageCameraPosition = {
   y: number
   z: number
 }
 
-export const CAMERA_POSITION_DESKTOP: StageCameraPosition = { y: 4.5, z: 8 }
-export const CAMERA_POSITION_MOBILE: StageCameraPosition = { y: 5.5, z: 10 }
+// Racing framing. The camera sits closer and a little higher than the original manual-movement
+// framing, so more of the road ahead fills the frame at speed; both values are playtest targets.
+export const CAMERA_POSITION_DESKTOP: StageCameraPosition = { y: 5, z: 7 }
+export const CAMERA_POSITION_MOBILE: StageCameraPosition = { y: 6, z: 9 }
+
+// Far plane: the terrain dissolve ends 84 units ahead of the player, plus the camera's own
+// trailing distance and the course's diagonal spread. A larger far plane than the old 50 keeps
+// the road from being clipped before its fade completes.
+export const CAMERA_FAR = 110
 
 export const CAMERA_ZOOM_FOR_STAGE_DESKTOP: Record<Stage, number> = {
   [Stage.HOME]: 1.2,
@@ -75,13 +83,31 @@ type Props = {
   position: StageCameraPosition
 }
 
+/**
+ * The running camera keeps whatever far plane it was created with, so a session that started
+ * before the preview change would clip the road mid-dissolve. The write lives outside the
+ * component body so the camera mutation stays in one place.
+ */
+const applyFarPlane = (camera: PerspectiveCamera): void => {
+  if (camera.far === CAMERA_FAR) return
+  camera.far = CAMERA_FAR
+  camera.updateProjectionMatrix()
+}
+
 const Camera: FC<Props> = ({ isMobile, position }) => {
   const { setLookAt, setZoom } = useCameraControls()
+  const camera = useThree((s) => s.camera)
   const { playerPosition } = usePlayerPosition()
   const cameraLookAtPosition = useGameStore((s) => s.cameraLookAtPosition)
   const overlay = useGameStore((s) => s.overlay)
+  const speedRunStage = useGameStore((s) => s.speedRunStage)
   // The countdown is drawn over the live track at the normal gameplay camera.
   const isRaisedOverlay = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN
+
+  // The level design changed the far plane; keep the live camera in step with it.
+  useLayoutEffect(() => {
+    applyFarPlane(camera as PerspectiveCamera)
+  }, [camera])
 
   const { input } = usePlayerInput()
 
@@ -89,8 +115,11 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
 
   useFrame(() => {
     const lookAt = cameraLookAtPosition ?? playerPosition.current
-    const backwardInput = Math.max(input.current.down - input.current.up, 0)
-    const forwardInput = Math.max(input.current.up - input.current.down, 0)
+    // The race accelerates and brakes by itself, so racing input must not dolly the camera. The z
+    // offsets stay for manual lobby travel, where up/down is real movement.
+    const isRacing = speedRunStage === SpeedRunStage.RUNNING
+    const backwardInput = isRacing ? 0 : Math.max(input.current.down - input.current.up, 0)
+    const forwardInput = isRacing ? 0 : Math.max(input.current.up - input.current.down, 0)
     // Offset the camera along z from player input
     const inputZOffset =
       backwardInput * INPUT_DOWN_Z_OFFSET + forwardInput * INPUT_UP_Z_OFFSET

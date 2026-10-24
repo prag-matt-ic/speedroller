@@ -47,6 +47,8 @@ const DebugControls: FC = () => {
   const mode = useGameStore((s) => s.mode)
   const isPhysicsDebug = usePerformanceStore((s) => s.isPhysicsDebug)
   const setIsPhysicsDebug = usePerformanceStore((s) => s.setIsPhysicsDebug)
+  const isNeutralToneMapping = usePerformanceStore((s) => s.isNeutralToneMapping)
+  const setIsNeutralToneMapping = usePerformanceStore((s) => s.setIsNeutralToneMapping)
   const resetGame = useGameStore((s) => s.resetGame)
   const overlay = useGameStore((s) => s.overlay)
   const setOverlay = useGameStore((s) => s.setOverlay)
@@ -114,6 +116,17 @@ const DebugControls: FC = () => {
             onChange={handlePhysicsDebugChange}>
             <option value="false">Off</option>
             <option value="true">On</option>
+          </SelectRow>
+          <SelectRow
+            id="performance-debug-tone-mapping"
+            label="Tone Mapping"
+            value={isNeutralToneMapping ? 'neutral' : 'none'}
+            onChange={(event) => {
+              event.target.blur()
+              setIsNeutralToneMapping(event.target.value === 'neutral')
+            }}>
+            <option value="none">NoToneMapping</option>
+            <option value="neutral">NeutralToneMapping</option>
           </SelectRow>
           <SelectRow
             id="performance-debug-overlays"

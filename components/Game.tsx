@@ -6,7 +6,11 @@ import { Physics } from '@react-three/rapier'
 import gsap from 'gsap'
 import { type FC, Suspense, useMemo } from 'react'
 
-import Camera, { CAMERA_POSITION_DESKTOP, CAMERA_POSITION_MOBILE } from '@/components/Camera'
+import Camera, {
+  CAMERA_FAR,
+  CAMERA_POSITION_DESKTOP,
+  CAMERA_POSITION_MOBILE,
+} from '@/components/Camera'
 import GameUniforms from '@/components/GameUniforms'
 import InputSmoother from '@/components/InputSmoother'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -59,7 +63,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
       rendererProps={rendererProps}
       camera={{
         position: [0, cameraPosition.y, cameraPosition.z],
-        far: 50,
+        far: CAMERA_FAR,
         fov: 65,
       }}>
       <PerformanceMonitor

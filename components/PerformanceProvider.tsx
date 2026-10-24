@@ -58,13 +58,14 @@ const logPerformanceDebug = (...payload: unknown[]) => {
   console.warn('[PerformanceProvider]', ...payload)
 }
 
+// Floating scenery is temporarily disabled while the floor material is being refined.
 const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
   [SceneQuality.ULTRA]: {
     isDistanceFadeEnabled: true,
     marble: { segments: 80, isFlat: false, enableVeins: true },
     ring: { radialSegments: 24, tubularSegments: 48 },
     gem: { particleCount: 180 },
-    floatingTiles: { instanceCount: Math.pow(13, 2) },
+    floatingTiles: { instanceCount: 0 },
     platformTiles: { addDetailNoise: true },
     colourTile: { useNoise: true },
     floatingHeading: { shouldRotate: true, useNoiseFade: true },
@@ -78,7 +79,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     marble: { segments: 64, isFlat: false, enableVeins: true },
     ring: { radialSegments: 16, tubularSegments: 32 },
     gem: { particleCount: 160 },
-    floatingTiles: { instanceCount: Math.pow(13, 2) },
+    floatingTiles: { instanceCount: 0 },
     platformTiles: { addDetailNoise: true },
     colourTile: { useNoise: true },
     floatingHeading: { shouldRotate: true, useNoiseFade: true },
@@ -92,7 +93,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     marble: { segments: 40, isFlat: false, enableVeins: false },
     ring: { radialSegments: 8, tubularSegments: 16 },
     gem: { particleCount: 80 },
-    floatingTiles: { instanceCount: Math.pow(8, 2) },
+    floatingTiles: { instanceCount: 0 },
     platformTiles: { addDetailNoise: false },
     colourTile: { useNoise: true },
     floatingHeading: { shouldRotate: false, useNoiseFade: true },
@@ -130,6 +131,8 @@ type PerformanceState = {
   hasBeenManuallySet: boolean
   isPhysicsDebug: boolean
   setIsPhysicsDebug: (value: boolean) => void
+  isNeutralToneMapping: boolean
+  setIsNeutralToneMapping: (value: boolean) => void
 }
 
 type PerformanceStore = StoreApi<PerformanceState>
@@ -149,6 +152,8 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
     sceneConfig: SCENE_CONFIGS[initialQualityMode],
     hasBeenManuallySet: false,
     isPhysicsDebug: false,
+    isNeutralToneMapping: true,
+    setIsNeutralToneMapping: (value) => set(() => ({ isNeutralToneMapping: value })),
     setSimFps: (fps: RapierSimFPS) => {
       set({ simFps: fps })
     },

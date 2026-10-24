@@ -1,20 +1,19 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
-import { useFrame, useTexture } from '@react-three/fiber'
+import { useFrame, useTexture, useThree } from '@react-three/fiber'
 import { useRenderPipeline, useUniforms } from '@react-three/tsl'
-import { type RefObject, useEffect, useMemo, useRef, useState } from 'react'
+import { type RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import BloomNode, { bloom } from 'three/addons/tsl/display/BloomNode.js'
 import { emissive, mrt, output, uniformTexture, vec4 } from 'three/tsl'
-import type { PassNode } from 'three/webgpu'
+import { NeutralToneMapping, NoToneMapping, type PassNode } from 'three/webgpu'
 
 import noiseTexture from '@/assets/textures/postprocessing/noise.webp'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import SceneWarmup from '@/components/SceneWarmup'
 import { speedEffectsNode } from '@/components/postProcessing/speedEffectsPost'
-import { usePlayerInput } from '@/hooks/usePlayerInput'
 import usePlayerSpeed from '@/hooks/usePlayerSpeed'
-import { PLAYER_SPEED_MAX } from '@/stores/playerSlice'
+import { RACE_MAX_SPEED } from '@/utils/platform/raceSpeed'
 import { SPEED_SMOOTH_HALF_LIFE, stepSmoothedSpeed } from '@/utils/smoothedSpeed'
 
 const EFFECTS_UNIFORM_SCOPE = 'postProcessing'
@@ -39,11 +38,17 @@ const createEffectsUniforms = () => ({
  * phase, so this deliberately registers no `useFrame` render job.
  */
 const PostProcessing = () => {
+  const renderer = useThree((state) => state.renderer)
+  const isNeutralToneMapping = usePerformanceStore((s) => s.isNeutralToneMapping)
+  useLayoutEffect(() => {
+    // RenderPipeline detects this change and updates its final output transform automatically.
+    renderer.toneMapping = isNeutralToneMapping ? NeutralToneMapping : NoToneMapping
+  }, [renderer, isNeutralToneMapping])
+
   const noiseMap = useTexture(noiseTexture.src)
   // The effect nodes take texture nodes; the loaded Texture is stable for this component's life.
   const noiseNode = useMemo(() => uniformTexture(noiseMap), [noiseMap])
   const blurSamples = usePerformanceStore((s) => s.sceneConfig.postProcessing.blurSamples)
-  const { input } = usePlayerInput()
   const { speedUnits } = usePlayerSpeed()
   const smoothedSpeed = useRef(0)
 
@@ -70,7 +75,7 @@ const PostProcessing = () => {
   const { renderPipeline, rebuild } = useRenderPipeline(
     ({ renderPipeline: pipeline, passes }) => {
       setScenePassRef({ current: passes.scenePass })
-      pipeline.outputColorTransform = false
+      pipeline.outputColorTransform = true
 
       bloomNodeRef.current?.dispose()
       const bloomNode = bloom(
@@ -116,11 +121,9 @@ const PostProcessing = () => {
   }, [renderPipeline])
 
   useFrame((_, delta) => {
-    const inputZ = input.current.up - input.current.down
-    const targetSpeed = Math.max(
-      -1,
-      Math.min(1, (inputZ * speedUnits.current) / PLAYER_SPEED_MAX),
-    )
+    // The player publishes forward speed: signed while the lobby is played manually, positive
+    // during the automatic race. Normalising by the race cap keeps both on one curve.
+    const targetSpeed = Math.max(-1, Math.min(1, speedUnits.current / RACE_MAX_SPEED))
     stepSmoothedSpeed(smoothedSpeed, targetSpeed, delta, SPEED_SMOOTH_HALF_LIFE)
     uSpeed.value = smoothedSpeed.current
   })

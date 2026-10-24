@@ -1,6 +1,6 @@
 # Race Course and Speed Design
 
-Status: **Course layout, bitmap artwork and race-flow foundation integrated on 24 October 2026; a headless desktop smoke test reached the live race; Stage 2 handling, full traversal and device acceptance pending.**
+Status: **Course layout, bitmap artwork, race-flow foundation and Stage 2A automatic race speed integrated on 24 October 2026, followed by a first camera and forward-preview pass; full traversal, device acceptance, 30 fps sensor sampling and route balancing remain pending.**
 
 Updated: **24 October 2026**
 
@@ -333,6 +333,176 @@ After a fall, retain normal safe respawn and lost boost. Automatic movement resu
 after placement and the existing respawn lock complete, then accelerates from rest. Keep
 the race clock running. On Retry, reset velocity, boost, raw intent, and smoothed input.
 
+### Stage 2A implementation plan: automatic race speed and braking
+
+**Scope.** This slice makes the live race move and stop correctly: automatic forward
+propulsion, separate sideways steering, complete-stop braking, ring boost and decay, and the
+reset paths, plus the telemetry and unit tests needed to tune them. Camera framing, terrain
+and ring visibility, sensor sampling, route balance, and full acceptance stay in later
+slices and keep their checklist items open. 2A is complete when handling is correct and
+measurable at 60 fps on desktop, not when the course passes acceptance.
+
+#### What the code does today
+
+- `components/player/Player.tsx` moves only in `LOBBY` and `RUNNING`, from four-axis smoothed
+  input and one shared scalar. It resolves a direction, multiplies by `playerSpeedUnits`, and
+  applies the result through `computeColliderMovement` and `setNextKinematicTranslation`.
+  Frame deltas are clamped to 1/15 s; `useGameFrame` already suppresses updates for hidden
+  tabs and open overlays.
+- `stores/playerSlice.ts` owns that scalar through GSAP: +0.5 units/s per ring, capped at 11,
+  then a six-second decay back to a base of 8 (`PLAYER_SPEED_BASE`, `PLAYER_SPEED_MAX`,
+  `RING_SPEED_INCREMENT`, `SPEED_COOLDOWN_S`). Movement speed and boost are therefore the same
+  number, which cannot express cruise, boost, and braking separately.
+- `components/InputSmoother.tsx` ramps raw intent (`playerInputIntent`) into `playerInput`
+  over 0.24 s pressing and 0.12 s releasing.
+- `components/postProcessing/Effects.tsx` and `components/player/marble/Marble.tsx` derive
+  speed feedback from `inputZ * playerSpeedUnits`, so they read neutral during automatic
+  travel.
+- `components/Camera.tsx` pulls back up to seven units on `down` input
+  (`INPUT_DOWN_Z_OFFSET`), which was tuned for manual reverse.
+
+#### Trial values
+
+These start inside the targets above and are expected to move during playtesting. Record the
+values that survive; change cruise within 18–20 first, then boost decay, then acceleration.
+
+| Constant | Trial value | Purpose |
+| --- | --- | --- |
+| `RACE_CRUISE_SPEED` | 19 units/s | automatic speed with no boost |
+| `RACE_MAX_SPEED` | 28 units/s | hard cap, reached only with ring boost |
+| `RACE_STEER_SPEED` | 8 units/s | sideways travel, unchanged from the lobby feel |
+| `RACE_FORWARD_ACCELERATION` | 14 units/s² | 0→cruise in about 1.4 s, also the brake-release ramp |
+| `RACE_BRAKE_DECELERATION` | 22 units/s² | cruise→0 in about 0.9 s and 8 units of travel |
+| `RING_BOOST_SPEED` | 2 units/s | added per collected ring |
+| `RING_BOOST_MAX` | 9 units/s | `RACE_MAX_SPEED − RACE_CRUISE_SPEED`, so boost alone reaches the cap |
+| `RING_BOOST_DECAY` | 1.5 units/s² | a full boost lasts six seconds and one ring about 1.3 s, matching the existing decay concept |
+| `LOBBY_SPEED` | 8 units/s | unchanged manual lobby movement |
+| `BRAKE_DEADZONE` | 0.15 | ignores joystick noise below this downward displacement |
+
+#### Speed model
+
+Add a dependency-free pure module, `utils/platform/raceSpeed.ts`, next to the other race
+helpers so the model can be unit-tested without Three.js or React:
+
+```ts
+type RaceSpeedState = { forwardSpeed: number; boostUnits: number }
+
+createRaceSpeedState(): RaceSpeedState
+getRaceTargetSpeed(boostUnits): number   // min(RACE_MAX_SPEED, RACE_CRUISE_SPEED + boostUnits)
+addRingBoost(state, count): void         // clamps at RING_BOOST_MAX
+stepRaceSpeed(state, brakeHeld, delta): void
+resetRaceSpeed(state): void
+```
+
+`stepRaceSpeed` owns every rule in the contract above:
+
+1. Decay `boostUnits` toward 0 by `RING_BOOST_DECAY × delta` on every racing step, braking
+   included, so boost is always a six-second allowance from the last ring.
+2. While braking, reduce `forwardSpeed` by `RACE_BRAKE_DECELERATION × delta` and floor it at
+   exactly 0. Braking ignores the target speed, so a fresh ring cannot push through a stop.
+3. Otherwise move `forwardSpeed` toward `getRaceTargetSpeed(boostUnits)` at
+   `RACE_FORWARD_ACCELERATION × delta`, in both directions, so a decayed boost is shed
+   smoothly instead of snapping.
+4. Never return a negative forward speed, and clamp at `RACE_MAX_SPEED`.
+
+The state lives in a ref owned by the player and is mutated in place once per frame. This is
+the hot path: no per-frame allocation, in line with the project performance rules.
+
+#### Player loop
+
+`components/player/Player.tsx` gains two explicit movement models instead of one:
+
+- `LOBBY`: today's manual four-axis movement at `LOBBY_SPEED`, including its diagonal
+  normalisation. Unchanged.
+- `RUNNING`: `x = steerX × RACE_STEER_SPEED × delta`, `z = −forwardSpeed × delta`,
+  `y = gravity × delta`, where `steerX` is the smoothed left/right axis and forward is
+  negative world Z, matching `rowToWorldZ`. No input is required for forward travel.
+- Every other phase stays frozen, as now.
+
+The race branch does not normalise the two axes together: sideways and forward travel are
+independent, so steering can never steal forward speed. Automatic propulsion sits inside the
+same `useGameFrame` callback as movement, so the existing hidden-tab, overlay, and delta-clamp
+guards suppress it exactly as they suppress input.
+
+Steering and braking use different sources on purpose: steering keeps the smoothed
+`playerInput` axis for the existing feel, while braking reads `playerInputIntent.down`
+directly (above `BRAKE_DEADZONE`) so it responds without the release ramp. `up` is ignored
+while `RUNNING`, so W/↑ adds no acceleration advantage. Horizontal joystick displacement and
+downward displacement remain independent, so steer-and-brake gestures compose.
+
+Reset the loop state whenever `playerRespawnTick` changes. That tick already fires for grid
+placement, retry, lobby return, and every fall respawn, which gives "accelerates from rest
+after placement" and "a fall loses boost" without another reset path that can be forgotten.
+
+#### Boost delivery and store
+
+- Remove the GSAP `speedTween`/`speedDecayTween` machinery, `increaseSpeed`, `resetSpeed`,
+  and the old speed constants from `stores/playerSlice.ts`.
+- `playerSpeedUnits` becomes a published mirror of the current forward speed for HUD and
+  effects (`setPlayerSpeedUnits`), refreshed by the loop only when it changes by more than a
+  thousandth, the same guard `setPlayerPosition` uses. The loop publishes racing speed while
+  `RUNNING` and manual forward speed while in the lobby, so feedback keeps working in both.
+- Add `ringBoostTick`, incremented by `onRingCollected` only while `RUNNING`. The player
+  subscribes to it as a ref, like `usePlayerSpeed`, and calls `addRingBoost` when it changes.
+  A tick keeps the hot loop out of the store and cannot replay a stale boost after a retry.
+- Add `isAutomaticMovementStage(stage)` beside `isManualMovementStage`; the lobby guard is
+  unchanged, and `Controls.tsx` keeps accepting input during `RUNNING`.
+- `RESET_PLAYER_STATE.playerSpeedUnits` becomes 0, and `resetPlayerSpeedState` also clears
+  `ringBoostTick`. Username, colour, input preference, audio, history, and the total
+  experience time remain untouched.
+
+#### Presentation and copy
+
+- Feed `Effects.tsx` and `Marble.tsx` the published forward speed instead of
+  `inputZ × speedUnits`, normalised by `RACE_MAX_SPEED`. The lobby now reads lower on the same
+  curve; adjust the normaliser so its feel stays close. This is cosmetic only.
+- Reduce or remove the camera's seven-unit brake pull-back so frequent braking does not lurch
+  the view. Full framing is still the visibility slice.
+- Explain the race controls at the starting grid: A/D or ←/→ steer, S or ↓ brake, automatic
+  acceleration to cruise, rings raise the ceiling. The lobby keeps its movement hint, and the
+  keyboard overlay's inert ↑ should not imply thrust.
+- Add a developer speed readout (speed, target, boost, and the current per-frame movement
+  distance) behind the existing `isDebug` flag, so tuning does not need the console.
+
+#### Tests
+
+New `tests/race-speed.test.mjs`, using the in-memory TypeScript loader the race-lifecycle
+test already uses:
+
+- 0→cruise and brake-release acceleration reach the target in the expected time.
+- Braking reaches exactly 0, never goes negative, and overrides a fresh maximum boost.
+- One ring, several rings, and more rings than the cap produce the expected target speed.
+- Boost decays to 0 after six seconds and speed follows down without exceeding the ramp.
+- One 33 ms step and two 16.5 ms steps agree within tolerance (frame-rate independence).
+- Steering leaves forward speed unchanged except through the brake rule.
+- Reset returns to 0 and clears boost.
+- Keep `tests/race-lifecycle.test.mjs` green. It stubs the reset action, so the new model must
+  add no GSAP or timing dependency to `timeSlice`.
+- Re-verify the existing timing contract: the clock stays monotonic through braking, falls, and
+  menus, and the finish time still comes from the attempt origin rather than the display tick.
+
+#### Acceptance for 2A
+
+- GO accelerates from the grid to cruise; S/↓ reaches a complete stop and release re-accelerates
+  without reverse or a jump.
+- Ring boost raises speed toward 28, decays, and cannot defeat a held brake.
+- Fall, retry, and lobby return all restart from rest with no boost; lobby movement is still
+  8 units/s manual.
+- No per-frame allocations in the loop; the only store writes remain the position and speed
+  mirrors.
+- A 60 fps desktop run of the full course is drivable end to end, with the timing, finish, and
+  retry behaviour already covered by the race-flow foundation.
+
+#### Gap handed to the next slice
+
+Ring pickups are sampled once per movement update, and the movement clamp allows 1/15 s per
+sample. At 28 units/s the ball travels 0.47 units per 60 fps update, 0.93 per 30 fps update,
+and up to 1.87 in a clamped slow frame, against a ring-plus-ball overlap radius of about 0.8
+units. Start and finish lines survive this because their colliders are five units deep in Z;
+rings do not. Until swept pickup or bounded substeps land, 2A results are accepted at 60 fps+
+desktop only, and 30 fps plus variable-timestep pickups are explicitly unverified. That is the
+first item of the sensor slice, not a tuning note.
+
 ### Visibility and high-speed correctness
 
 The current terrain fade reaches zero at an 18-unit radial distance, and element fading
@@ -343,6 +513,21 @@ Tune forward camera framing, terrain visibility, ring visibility, and camera cli
 together to provide at least two seconds of useful forward preview at maximum speed.
 Test landscape mobile framing separately. Keep the countdown at the normal gameplay
 camera and avoid using visual effects that hide route boundaries.
+
+**First-pass implementation (24 October 2026).** The terrain dissolve now runs from 56 to 84
+units ahead of the player instead of 8 to 18, and every ring, line and sign shares that same
+near/far pair instead of fading between 8 and 23. At the 28-unit/sec maximum that is two seconds
+of fully solid road plus a further second of readable fade before the course vanishes. The
+camera far plane rises from 50 to 110 so the dissolve finishes before the clip, and the follow
+easing cap rises from 4.8 to 12 units/sec: an eased follow trails roughly `speed / cap`, which
+was nearly six units at race speed and is now about two and a half. Desktop framing tightens from
+y 4.5/z 8 to y 5/z 7 and mobile from 5.5/10 to 6/9, and the manual brake/accelerate camera dolly
+no longer runs during the race. The far plane is also applied to the live camera on mount, because
+R3F only reads the canvas camera prop when it creates the camera and a hot-reloaded session would
+otherwise keep the old 50 and clip the road mid-dissolve. These are playtest values; ring
+legibility at distance, landscape-mobile framing, and the real frame cost of the deeper view still
+need measurement, and the two-second rule must be confirmed in motion rather than from these
+numbers alone.
 
 High speed also changes sensor reliability. Verify ring/start/finish intersections at the
 lowest supported simulation FPS. Use swept contact detection or bounded movement substeps
@@ -355,8 +540,11 @@ object reuse unless measurement shows they are insufficient.
 
 ### Stage 2 checklist
 
-- [ ] Add automatic propulsion only for the live race; retain manual lobby movement.
-- [ ] Add steering and complete-stop braking with no reverse.
+The plan above covers the first five items and the joystick verification below as Stage 2A.
+The remaining items stay open until visibility, sensor sampling, and route measurement land.
+
+- [x] Add automatic propulsion only for the live race; retain manual lobby movement.
+- [x] Add steering and complete-stop braking with no reverse.
 - [ ] Preserve accurate elapsed timing through braking, falls, menus, and hidden tabs.
 - [ ] Reset all velocity and boost state on restart, retry, and lobby return.
 - [ ] Ensure menu/hidden-tab freezes suppress automatic propulsion as well as input.
@@ -369,6 +557,27 @@ object reuse unless measurement shows they are insufficient.
 - [ ] Check that no branch is both easier and consistently faster than the others.
 - [ ] Check frame time, collision workload, and startup/warmup on desktop and mobile.
 - [ ] Record chosen tuning values and acceptance results before releasing the course.
+
+### Stage 2A implementation record (24 October 2026)
+
+The live race now drives itself from the grid, steers on the horizontal axis, brakes to a
+complete stop, and converts rings into a decaying speed allowance. The rules live in
+`utils/platform/raceSpeed.ts` — cruise 19, maximum 28, steering 8, acceleration 14, braking 22,
+ring boost +2 capped at 9, decay 1.5, lobby 8 units/sec. They are stepped once per frame from the
+existing `useGameFrame` callback, so hidden tabs, open overlays and the 1/15-second delta clamp
+suppress propulsion exactly as they suppress input. The GSAP speed tweens are gone;
+`playerSpeedUnits` and `playerBoostUnits` are published mirrors for post-processing, the marble
+shader and the boost dial, and `ringBoostTick` credits each collected ring once. Falls, retries,
+lobby returns and the initial grid placement all reset through `playerRespawnTick`.
+
+The speed model has 13 unit tests and the boost-tick contract has 5 more; the full suite (45
+tests), type checking, lint (apart from two pre-existing `FloatingMenu` ref errors) and the
+production build pass. A headless Chrome load renders the app and the developer speed probe with
+no console errors, but the scene warmup does not settle under the software adapter, so the race
+itself could not be driven there. The first playtest accepted the speed feel and asked for a
+tighter high-speed camera with more preview; the first-pass framing recorded under visibility
+above addresses that. Still open: joystick brake gestures, hidden-tab and retry re-checks in a
+device browser, full-course traversal and route timing, and the 30 fps ring-sampling gap.
 
 ## Stage 3 The Fold visual world
 

@@ -2,7 +2,7 @@
 
 import { Canvas, type CanvasProps, type WebGPURootState } from '@react-three/fiber'
 import { type FC, type PropsWithChildren, Suspense, useCallback } from 'react'
-import { NoToneMapping } from 'three'
+import { NeutralToneMapping } from 'three'
 import type { WebGPURendererParameters } from 'three/src/renderers/webgpu/WebGPURenderer.Nodes.js'
 
 export type WebGPUCanvasProps = PropsWithChildren<
@@ -25,12 +25,11 @@ const WebGPUCanvas: FC<WebGPUCanvasProps> = ({
   onCreated,
   ...canvasProps
 }) => {
-  // R3F's WebGPU canvas defaults the renderer to ACES filmic tone mapping. The scene pass owns the
-  // final image — Effects.tsx turns the pipeline's colour transform off — so the canvas must pass
-  // the rendered colour through untouched.
+  // Match Threenix landing: Neutral tone mapping before the pipeline's sRGB output conversion.
   const handleCreated = useCallback(
     (state: WebGPURootState) => {
-      state.renderer.toneMapping = NoToneMapping
+      state.renderer.toneMapping = NeutralToneMapping
+      state.renderer.toneMappingExposure = 1
       onCreated?.(state)
     },
     [onCreated],

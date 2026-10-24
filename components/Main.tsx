@@ -6,6 +6,7 @@ import { PerformanceProvider } from '@/components/PerformanceProvider'
 import RaceAudio from '@/components/RaceAudio'
 import Timer from '@/components/Timer'
 import DebugControls from '@/components/debug/DebugControls'
+import SpeedProbe from '@/components/debug/SpeedProbe'
 import HtmlPortal from '@/components/ui/HtmlPortal'
 import UI from '@/components/ui/UI'
 
@@ -23,6 +24,7 @@ const Main: FC<Props> = ({ isMobile, isDebug }) => {
       <Timer />
       <RaceAudio />
       {isDebug && <DebugControls />}
+      {isDebug && <SpeedProbe />}
     </PerformanceProvider>
   )
 }

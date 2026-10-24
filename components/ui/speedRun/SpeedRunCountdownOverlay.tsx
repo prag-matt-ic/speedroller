@@ -9,7 +9,7 @@ import { useGameStore } from '@/components/GameProvider'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
 import Button from '@/components/ui/Button'
 import { usePageHidden } from '@/hooks/usePageVisibility'
-import { SpeedRunStage } from '@/stores/types'
+import { InputType, SpeedRunStage } from '@/stores/types'
 
 type Props = {
   ref: Ref<HTMLDivElement>
@@ -29,11 +29,17 @@ export const SpeedRunCountdownOverlay: FC<Props> = ({ ref, transitionStatus }) =
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
   const isWarmupComplete = useGameStore((s) => s.isWarmupComplete)
   const playerStatus = useGameStore((s) => s.playerStatus)
+  const inputType = useGameStore((s) => s.inputType)
   const onCountdownComplete = useGameStore((s) => s.onCountdownComplete)
   const returnToLobby = useGameStore((s) => s.returnToLobby)
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
   const stopSoundFX = useSoundStore((s) => s.stopSoundFX)
   const isPageHidden = usePageHidden()
+
+  const controlsHint =
+    inputType === InputType.JOYSTICK
+      ? 'Stick left and right to steer · pull down to brake · the ball accelerates automatically'
+      : 'A/D or ←/→ to steer · S or ↓ to brake · the ball accelerates automatically'
 
   const isPlacedOnGrid = playerStatus === 'safe'
   const canStart =
@@ -91,6 +97,10 @@ export const SpeedRunCountdownOverlay: FC<Props> = ({ ref, transitionStatus }) =
         <CountdownNumber id="countdown-1" label="1" />
         <CountdownNumber id="countdown-go" label="GO" />
       </div>
+
+      <p className="max-w-[min(90vw,32rem)] rounded-full bg-black/50 px-4 py-2 text-center text-sm text-white/80 xl:text-base">
+        {controlsHint}
+      </p>
 
       <div className="pointer-events-auto absolute inset-x-0 bottom-6 flex justify-center">
         <Button

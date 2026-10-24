@@ -165,8 +165,14 @@ export type PlayerSlice = {
   playerPosition: Vector3Tuple
   setPlayerPosition: (pos: { x: number; y: number; z: number }) => void
 
-  playerSpeedUnits: number // units per second
-  // setPlayerSpeedUnits: (speed: number) => void
+  /** Current forward speed in units per second, published for effects and HUD. */
+  playerSpeedUnits: number
+  setPlayerSpeedUnits: (speedUnits: number) => void
+  /** Ring-boost allowance above cruise in units per second, published for effects and HUD. */
+  playerBoostUnits: number
+  setPlayerBoostUnits: (boostUnits: number) => void
+  /** Monotonic count of rings that granted race boost. The player applies the deltas. */
+  ringBoostTick: number
 
   spawnPosition: Vector3Tuple | null
   playerRespawnTick: number
@@ -248,5 +254,10 @@ export const isAttemptLocked = (speedRunStage: SpeedRunStage): boolean =>
   speedRunStage === SpeedRunStage.RUNNING ||
   speedRunStage === SpeedRunStage.SUBMITTING
 
-export const isManualMovementStage = (speedRunStage: SpeedRunStage): boolean =>
+/** Stages that accept steer/brake input, whether the movement itself is manual or automatic. */
+export const isMovementInputStage = (speedRunStage: SpeedRunStage): boolean =>
   speedRunStage === SpeedRunStage.LOBBY || speedRunStage === SpeedRunStage.RUNNING
+
+/** The live race is the only stage with automatic forward propulsion. */
+export const isAutomaticMovementStage = (speedRunStage: SpeedRunStage): boolean =>
+  speedRunStage === SpeedRunStage.RUNNING

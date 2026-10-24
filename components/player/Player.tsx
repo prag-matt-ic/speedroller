@@ -12,16 +12,29 @@ import {
 import { type FC, useEffect, useRef } from 'react'
 import { Mesh, type Object3D, Vector3 } from 'three'
 
-import { PLAYER_INITIAL_POSITION, useGameStore } from '@/components/GameProvider'
+import { PLAYER_INITIAL_POSITION, useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import PlayerHUD from '@/components/player/PlayerHUD'
 import { Marble } from '@/components/player/marble/Marble'
 import { useGameFrame } from '@/hooks/useGameFrame'
 import usePlayerController from '@/hooks/usePlayerController'
-import { usePlayerInput } from '@/hooks/usePlayerInput'
-import usePlayerSpeed from '@/hooks/usePlayerSpeed'
+import { usePlayerInput, usePlayerInputIntent } from '@/hooks/usePlayerInput'
 import type { PlayerUserData, RigidBodyUserData } from '@/model/schema'
-import { isManualMovementStage } from '@/stores/types'
+import {
+  type PlayerInput,
+  isAutomaticMovementStage,
+  isMovementInputStage,
+} from '@/stores/types'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
+import {
+  BRAKE_DEADZONE,
+  LOBBY_SPEED,
+  RACE_STEER_SPEED,
+  type RaceSpeedState,
+  addRingBoost,
+  createRaceSpeedState,
+  resetRaceSpeed,
+  stepRaceSpeed,
+} from '@/utils/platform/raceSpeed'
 import { PLAYER_RADIUS } from '@/utils/player'
 import { EPSILON } from '@/utils/tiles'
 
@@ -35,10 +48,33 @@ const UP_DIRECTION = new Vector3(0, 1, 0)
 const PLAYER_USER_DATA: PlayerUserData = { type: 'player' }
 // A hidden tab or stalled frame must never integrate its whole gap into one movement step.
 const MAX_MOVEMENT_DELTA_S = 1 / 15
+// The speed mirror only needs republishing when the readout would visibly change.
+const PUBLISHED_SPEED_EPSILON = 0.001
+
+type Movement = { x: number; y: number; z: number }
+
+/** Manual lobby travel: four axes, with diagonals normalised so they are not faster. */
+function writeLobbyMovement(movement: Movement, input: PlayerInput, deltaTime: number): void {
+  const directionX = input.right - input.left
+  const directionZ = input.down - input.up
+  const inputMagnitude = Math.hypot(directionX, directionZ)
+  const movementScale = (LOBBY_SPEED * deltaTime) / Math.max(1, inputMagnitude)
+
+  movement.x = directionX * movementScale
+  movement.z = directionZ * movementScale
+}
+
+/** Signed forward speed for effects and HUD while the lobby is played manually. */
+function getLobbyForwardSpeed(input: PlayerInput): number {
+  return (input.up - input.down) * LOBBY_SPEED
+}
 
 const Player: FC = () => {
+  const gameStoreAPI = useGameStoreAPI()
   const onOutOfBounds = useGameStore((s) => s.onOutOfBounds)
   const setPlayerPosition = useGameStore((s) => s.setPlayerPosition)
+  const setPlayerSpeedUnits = useGameStore((s) => s.setPlayerSpeedUnits)
+  const setPlayerBoostUnits = useGameStore((s) => s.setPlayerBoostUnits)
   const setConfirmingCollectible = useGameStore((s) => s.setConfirmingCollectible)
   const setConfirmingPaletteIndex = useGameStore((s) => s.setConfirmingPaletteIndex)
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
@@ -49,13 +85,19 @@ const Player: FC = () => {
   const onRespawnComplete = useGameStore((s) => s.onRespawnComplete)
 
   const { input } = usePlayerInput()
+  const { inputIntent } = usePlayerInputIntent()
   const { controllerRef } = usePlayerController()
-  const { speedUnits: playerSpeedUnits } = usePlayerSpeed()
 
   // Refs for physics bodies and meshes
   const bodyRef = useRef<RapierRigidBody>(null)
   const ballColliderRef = useRef<RapierCollider | null>(null)
   const sphereMeshRef = useRef<Mesh>(null)
+
+  // Race speed state: mutated in place once per frame, so the loop allocates nothing.
+  const raceSpeed = useRef<RaceSpeedState>(createRaceSpeedState())
+  const lastRingBoostTick = useRef(0)
+  const lastPublishedSpeed = useRef(0)
+  const lastPublishedBoost = useRef(0)
 
   // Preallocated vectors for physics calculations (performance optimization)
   const frameDisplacement = useRef(new Vector3())
@@ -65,7 +107,58 @@ const Player: FC = () => {
 
   // Reusable position objects (avoid per-frame allocations)
   const nextPosition = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 })
-  const desiredMovement = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 })
+  const desiredMovement = useRef<Movement>({ x: 0, y: 0, z: 0 })
+
+  const isRacing = isAutomaticMovementStage(speedRunStage)
+
+  /** Credits each ring collected since the previous frame; the store only reports a tick. */
+  function creditCollectedRings(): void {
+    const { ringBoostTick } = gameStoreAPI.getState()
+    if (ringBoostTick === lastRingBoostTick.current) return
+
+    const collectedRingCount = Math.max(0, ringBoostTick - lastRingBoostTick.current)
+    lastRingBoostTick.current = ringBoostTick
+    addRingBoost(raceSpeed.current, collectedRingCount)
+  }
+
+  /** Publishes the speed and boost readouts the effects and HUD subscribe to. */
+  function publishSpeedMirror(isHeld: boolean): void {
+    const speedUnits = isHeld
+      ? 0
+      : isRacing
+        ? raceSpeed.current.forwardSpeed
+        : getLobbyForwardSpeed(input.current)
+
+    if (Math.abs(speedUnits - lastPublishedSpeed.current) > PUBLISHED_SPEED_EPSILON) {
+      lastPublishedSpeed.current = speedUnits
+      setPlayerSpeedUnits(speedUnits)
+    }
+
+    const boostUnits = isRacing && !isHeld ? raceSpeed.current.boostUnits : 0
+    if (Math.abs(boostUnits - lastPublishedBoost.current) > PUBLISHED_SPEED_EPSILON) {
+      lastPublishedBoost.current = boostUnits
+      setPlayerBoostUnits(boostUnits)
+    }
+  }
+
+  // Every placement, fall respawn, retry, and lobby return increments this tick. Clearing here
+  // makes all of them start from rest with no boost, and rebases the boost cursor so a ring from
+  // the previous run cannot be credited again.
+  useEffect(() => {
+    resetRaceSpeed(raceSpeed.current)
+    lastRingBoostTick.current = gameStoreAPI.getState().ringBoostTick
+    lastPublishedSpeed.current = 0
+    lastPublishedBoost.current = 0
+  }, [playerRespawnTick, gameStoreAPI])
+
+  // Outside a movement stage there is no loop to publish through, so stop the speed feedback here
+  // rather than leaving the results screen frozen at race speed.
+  useEffect(() => {
+    if (isMovementInputStage(speedRunStage)) return
+    resetRaceSpeed(raceSpeed.current)
+    setPlayerSpeedUnits(0)
+    setPlayerBoostUnits(0)
+  }, [speedRunStage, setPlayerSpeedUnits, setPlayerBoostUnits])
 
   useGameFrame((_, rawDeltaTime) => {
     if (
@@ -77,24 +170,33 @@ const Player: FC = () => {
       return
 
     if (!isPlatformReady || playerStatus === 'idle' || playerStatus === 'out-of-bounds') return
-    if (!isManualMovementStage(speedRunStage)) return
+    if (!isMovementInputStage(speedRunStage)) return
     if (document.hidden) return
 
     const deltaTime = Math.min(rawDeltaTime, MAX_MOVEMENT_DELTA_S)
-    const speedUnits = playerSpeedUnits.current
-    const currentPosition = bodyRef.current.translation()
-
-    // Resolve player input into a clamped direction vector
-    const inputDirectionX = input.current.right - input.current.left
-    const inputDirectionZ = input.current.down - input.current.up
     const canMove = playerStatus === 'safe'
-    const inputMagnitude = Math.hypot(inputDirectionX, inputDirectionZ)
-    const movementScale = canMove ? (speedUnits * deltaTime) / Math.max(1, inputMagnitude) : 0
 
-    // Calculate desired movement including gravity
-    desiredMovement.current.x = inputDirectionX * movementScale
+    creditCollectedRings()
+
+    if (isRacing && canMove) {
+      const isBraking = inputIntent.current.down > BRAKE_DEADZONE
+      stepRaceSpeed(raceSpeed.current, isBraking, deltaTime)
+    }
+
+    if (!canMove) {
+      // Held on the grid or mid-respawn: gravity only, no horizontal travel.
+      desiredMovement.current.x = 0
+      desiredMovement.current.z = 0
+    } else if (isRacing) {
+      const steerX = input.current.right - input.current.left
+      desiredMovement.current.x = steerX * RACE_STEER_SPEED * deltaTime
+      desiredMovement.current.z = -raceSpeed.current.forwardSpeed * deltaTime
+    } else {
+      writeLobbyMovement(desiredMovement.current, input.current, deltaTime)
+    }
     desiredMovement.current.y = GRAVITY_ACCELERATION * deltaTime
-    desiredMovement.current.z = inputDirectionZ * movementScale
+
+    const currentPosition = bodyRef.current.translation()
 
     // Use character controller to compute collision-aware movement
     controllerRef.current.computeColliderMovement(
@@ -113,11 +215,7 @@ const Player: FC = () => {
     bodyRef.current.setNextKinematicTranslation(nextPosition.current)
 
     // Calculate physics for rolling animation
-    frameDisplacement.current.set(
-      correctedMovement.x,
-      0,
-      correctedMovement.z,
-    )
+    frameDisplacement.current.set(correctedMovement.x, 0, correctedMovement.z)
 
     calculatePlayerVelocity(frameDisplacement.current, deltaTime, playerVelocity.current)
 
@@ -130,8 +228,9 @@ const Player: FC = () => {
       rollAxis.current,
     )
 
-    // Update global player position in store (immutable update)
+    // Update the store mirrors used by effects and HUD (immutable updates, change-guarded).
     setPlayerPosition(nextPosition.current)
+    publishSpeedMirror(!canMove)
   })
 
   const onIntersectionEnter: IntersectionEnterHandler = (event) => {
@@ -243,7 +342,7 @@ function applyRollingPhysics(
   // Axis given by right-hand rule (surface normal × velocity)
   rollAxis.copy(UP_DIRECTION).cross(velocity).normalize()
 
-  // Calculate rotation angle: θ = |v| * Δt / R
+  // Calculate rotation angle: θ = |v| Δt / R
   const rotationAngle = (speed * deltaTime) / effectiveRadius
   sphereMesh.rotateOnWorldAxis(rollAxis, rotationAngle)
   sphereMesh.quaternion.normalize()

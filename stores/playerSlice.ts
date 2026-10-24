@@ -19,10 +19,6 @@ import {
 } from './types'
 
 export const PLAYER_INITIAL_POSITION: Vector3Tuple = [0, 4, 0]
-export const PLAYER_SPEED_BASE = 8.0 // units per second
-export const PLAYER_SPEED_MAX = 11.0
-const RING_SPEED_INCREMENT = 0.5
-const SPEED_COOLDOWN_S = 6.0
 const COLLECTIBLE_DURATION_S = 1.5
 
 export const RESET_PLAYER_STATE: Pick<
@@ -32,6 +28,7 @@ export const RESET_PLAYER_STATE: Pick<
   | 'collectedRings'
   | 'confirmationProgress'
   | 'hasCollectedAllRings'
+  | 'playerBoostUnits'
   | 'playerSpeedUnits'
 > = {
   confirmingCollectible: null,
@@ -39,7 +36,8 @@ export const RESET_PLAYER_STATE: Pick<
   collectedRings: {},
   confirmationProgress: 0,
   hasCollectedAllRings: false,
-  playerSpeedUnits: PLAYER_SPEED_BASE,
+  playerBoostUnits: 0,
+  playerSpeedUnits: 0,
 }
 
 export const createPlayerSlice =
@@ -89,52 +87,12 @@ export const createPlayerSlice =
       })
     }
 
-    let speedTween: GSAPTween | null = null
-    let speedDecayTween: GSAPTween | null = null
-    const speedTweenTarget = { value: PLAYER_SPEED_BASE }
-
-    function increaseSpeed(increment: number) {
-      speedDecayTween?.kill()
-      speedTween?.kill()
-      const targetValue = Math.min(PLAYER_SPEED_MAX, speedTweenTarget.value + increment)
-      speedTween = gsap.to(speedTweenTarget, {
-        duration: 0.25,
-        ease: 'none',
-        value: targetValue,
-        onUpdate: () => {
-          set({ playerSpeedUnits: speedTweenTarget.value })
-        },
-        onComplete: () => {
-          speedDecayTween = gsap.to(speedTweenTarget, {
-            duration: SPEED_COOLDOWN_S,
-            ease: 'none',
-            value: PLAYER_SPEED_BASE,
-            onUpdate: () => {
-              set({ playerSpeedUnits: speedTweenTarget.value })
-            },
-          })
-        },
-      })
-    }
-
-    function resetSpeed() {
-      speedDecayTween?.kill()
-      speedTween?.kill()
-      speedTween = gsap.to(speedTweenTarget, {
-        duration: 0.25,
-        ease: 'none',
-        value: PLAYER_SPEED_BASE,
-        onUpdate: () => {
-          set({ playerSpeedUnits: speedTweenTarget.value })
-        },
-      })
-    }
-
     return {
       ...RESET_PLAYER_STATE,
       collectedCollectibles: [],
       seenCollectibles: {},
       playerRespawnTick: 0,
+      ringBoostTick: 0,
       spawnPosition: null,
       playerStatus: 'idle' as PlayerStatus,
       outOfBoundsEvents: [],
@@ -157,6 +115,16 @@ export const createPlayerSlice =
           return { playerPosition: [position.x, position.y, position.z] }
         })
       },
+      setPlayerSpeedUnits: (speedUnits) => {
+        set((state) =>
+          state.playerSpeedUnits === speedUnits ? state : { playerSpeedUnits: speedUnits },
+        )
+      },
+      setPlayerBoostUnits: (boostUnits) => {
+        set((state) =>
+          state.playerBoostUnits === boostUnits ? state : { playerBoostUnits: boostUnits },
+        )
+      },
       setPaletteIndex: (paletteIndex: number) => {
         set({ paletteIndex: clampPaletteIndexSafe(paletteIndex) })
       },
@@ -168,18 +136,24 @@ export const createPlayerSlice =
       onRingCollected: (ringIndex: RingIndex) => {
         const ringKey = ringIndexToKey(ringIndex)
         if (get().collectedRings[ringKey]) return
-        const totalRingsCount = get().totalCounts.rings
-        const newCollectedRings: RingCollection = { ...get().collectedRings, [ringKey]: true }
+        const state = get()
+        const newCollectedRings: RingCollection = { ...state.collectedRings, [ringKey]: true }
 
         const playerRingsCount = Object.keys(newCollectedRings).length
-        const hasCollectedAllRings = playerRingsCount >= totalRingsCount
+        const hasCollectedAllRings = playerRingsCount >= state.totalCounts.rings
         if (hasCollectedAllRings) {
           console.warn('All rings collected!')
         }
 
-        increaseSpeed(RING_SPEED_INCREMENT)
+        // The player owns the race speed model; this tick only reports how many rings to credit.
+        // A ring picked up outside the live race still counts towards the attempt, but no boost.
+        const isRaceRing = state.speedRunStage === SpeedRunStage.RUNNING
 
-        set({ collectedRings: newCollectedRings, hasCollectedAllRings })
+        set((previous) => ({
+          collectedRings: newCollectedRings,
+          hasCollectedAllRings,
+          ringBoostTick: isRaceRing ? previous.ringBoostTick + 1 : previous.ringBoostTick,
+        }))
       },
       setConfirmingCollectible: (collectibleType: CollectibleID | null) => {
         confirmationTween?.kill()
@@ -267,10 +241,7 @@ export const createPlayerSlice =
         })
       },
       resetPlayerSpeedState: () => {
-        speedDecayTween?.kill()
-        speedTween?.kill()
-        speedTweenTarget.value = PLAYER_SPEED_BASE
-        set({ playerSpeedUnits: PLAYER_SPEED_BASE })
+        set({ playerBoostUnits: 0, playerSpeedUnits: 0 })
       },
       respawnPlayer: (position, hud) => {
         get().stopConfirmation()
@@ -299,7 +270,8 @@ export const createPlayerSlice =
         }
         get().stopConfirmation()
         playSoundFX(SoundFX.OUT_OF_BOUNDS)
-        resetSpeed()
+        // A fall costs momentum and boost; the player accelerates from rest after respawn.
+        get().resetPlayerSpeedState()
         const outOfBoundsMessage =
           state.speedRunStage === SpeedRunStage.LOBBY
             ? getOutOfBoundsMessage(state.outOfBoundsEvents)

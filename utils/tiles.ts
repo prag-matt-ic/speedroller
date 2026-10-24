@@ -15,8 +15,11 @@ export const worldZToRowIndex = (worldZ: number, rowCount: number): number => {
   if (rowCount === 0) return -1
   return Math.max(0, Math.min(rowCount - 1, Math.round((INITIAL_ROW_START_Z - worldZ) / TILE_SIZE)))
 }
-export const TILE_PLAYER_FADE_FULL_ROWS = 8
-export const TILE_PLAYER_FADE_MIN_ROWS = 18
+// Course preview. At the 28 units/sec race maximum, two seconds of decision preview needs 56
+// units of clear road ahead, so tiles stay fully solid through that radius and dissolve by 84:
+// a further second of read-at-a-glance fade rather than a hard cut at the camera's far plane.
+export const TILE_PLAYER_FADE_FULL_ROWS = 56
+export const TILE_PLAYER_FADE_MIN_ROWS = 84
 export const TILE_PLAYER_FADE_MIN_ALPHA = 0
 export const TILE_PLAYER_FADE_FULL_RADIUS = TILE_PLAYER_FADE_FULL_ROWS * TILE_SIZE
 export const TILE_PLAYER_FADE_MIN_RADIUS = TILE_PLAYER_FADE_MIN_ROWS * TILE_SIZE
@@ -26,7 +29,9 @@ export const TRAIL_FADE_SECONDS = 0.4
 export const TRAIL_BRUSH_RADIUS = TILE_SIZE * 0.75
 export const TRAIL_MAX_PLAYER_HEIGHT = 1.2
 
-export const ELEMENT_FADE_DISTANCE = 23 * TILE_SIZE
+// Rings, lines and signage share the terrain's dissolve so they appear and vanish with the road
+// they sit on.
+export const ELEMENT_FADE_DISTANCE = TILE_PLAYER_FADE_MIN_RADIUS
 
 export const EPSILON = {
   SMALL: 1e-6,

@@ -29,6 +29,7 @@ import {
   positionWorld,
   sin,
   smoothstep,
+  spritesheetUV,
   sqrt,
   step,
   texture,
@@ -37,9 +38,20 @@ import {
   vec3,
   vertexStage,
 } from 'three/tsl'
-import { type InstancedBufferAttribute, InstancedMesh, Matrix4, Sphere, Texture } from 'three'
+import {
+  ClampToEdgeWrapping,
+  type InstancedBufferAttribute,
+  InstancedMesh,
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  Matrix4,
+  Sphere,
+  SRGBColorSpace,
+  Texture,
+} from 'three'
 import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
+import ivoryStoneAtlas from '@/assets/textures/platform/ivory-stone-atlas.webp'
 import tileDetailNoise2 from '@/assets/textures/platform/tile-noise-2.webp'
 import tileDetailNoise3 from '@/assets/textures/platform/tile-noise-3.webp'
 import tileDetailNoise1 from '@/assets/textures/platform/tile-noise.webp'
@@ -48,7 +60,6 @@ import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { createTileTrail, useTileTrail } from '@/components/platform/tiles/useTileTrail'
 import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
 import { samplePlayerPalette } from '@/resources/tsl/playerPalette'
-import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import {
   type RowData,
   rowToWorldZ,
@@ -67,9 +78,9 @@ const TILE_FADE_ROTATE_MAX = 0.3
 const AXIS_EPSILON = 0.001
 const UP_THRESHOLD = 0.5
 const DARKEN_FACTOR = 0.4
-const HIGHLIGHTED_MIX_MIN = 0.16
-const HIGHLIGHTED_MIX_MAX = 0.32
-const REGULAR_MIX = 0.55
+const HIGHLIGHTED_MIX_MIN = 0.04
+const HIGHLIGHTED_MIX_MAX = 0.10
+const REGULAR_MIX = 0.24
 const SHADOW_RADIUS = 0.9
 const SHADOW_RADIUS_MAX_SCALE = 1.5
 const SHADOW_RADIUS_MIN_SCALE = 1.0
@@ -80,6 +91,20 @@ const SHADOW_FADE_RANGE_INV = 1.0 / (SHADOW_FADE_START_Y - SHADOW_FADE_END_Y)
 const SHADOW_MIN_PLAYER_Y = -0.5
 
 const DETAIL_NOISE_STRENGTH = 0.12
+const STONE_ATLAS_GRID = 3
+const STONE_CELL_PIXELS = 512
+const STONE_CELL_PADDING = 16
+const STONE_UV_INSET = (STONE_CELL_PADDING + 0.5) / STONE_CELL_PIXELS
+const STONE_MIN_BRIGHTNESS = 0.65
+
+const configureStoneAtlas = (map: Texture) => {
+  map.colorSpace = SRGBColorSpace
+  map.wrapS = map.wrapT = ClampToEdgeWrapping
+  map.magFilter = LinearFilter
+  map.minFilter = LinearMipmapLinearFilter
+  map.generateMipmaps = true
+  map.needsUpdate = true
+}
 
 // Trail tint: the marble palette darkened toward black so the trail reads as a painted shadow.
 // The emissive glow keeps the undarkened player colour so the bloom still picks the trail up.
@@ -208,6 +233,7 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
 export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) => {
   const addDetailNoise = usePerformanceStore((s) => s.sceneConfig.platformTiles.addDetailNoise)
   const sceneQuality = usePerformanceStore((s) => s.sceneQuality)
+  const stoneAtlasTexture = useTexture(ivoryStoneAtlas.src, configureStoneAtlas)
   const detailNoiseTextures = useTexture([
     tileDetailNoise1.src,
     tileDetailNoise2.src,
@@ -321,18 +347,27 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         return sample
       })()
 
-      // The GLSL gated the subtraction behind its quality flag; the flag is 0 or 1, so multiplying
-      // by it keeps the graph branch-free without changing the result.
-      const backgroundColour = sampleTilesPalette(backgroundNoise).sub(
-        detailNoise.mul(scoped.uAddDetailNoise).mul(DETAIL_NOISE_STRENGTH),
+      // Use a stable cell and padded interior; half-texel inset keeps filtering off cell borders.
+      const stoneFrame = vertexStage(
+        floor(clamp(tileSeed, 0, 0.999999).mul(STONE_ATLAS_GRID * STONE_ATLAS_GRID)),
       )
+      const stoneUv = spritesheetUV(
+        vec2(STONE_ATLAS_GRID),
+        uv().mul(1 - 2 * STONE_UV_INSET).add(STONE_UV_INSET),
+        stoneFrame,
+      )
+      const stoneColour = texture(stoneAtlasTexture, stoneUv).rgb
 
       // Per-instance scalar mix derived only from the seed and highlight flag: hoist it to the
       // vertex stage so the fragment stage reads a varying instead of re-deriving it per pixel.
       const mixAmount = vertexStage(
         mix(REGULAR_MIX, mix(HIGHLIGHTED_MIX_MIN, HIGHLIGHTED_MIX_MAX, tileSeed), isHighlighted),
       )
-      const background = mix(vec3(1), backgroundColour, mixAmount)
+      const darkening = clamp(backgroundNoise, 0, 1)
+        .add(detailNoise.mul(scoped.uAddDetailNoise).mul(DETAIL_NOISE_STRENGTH))
+        .mul(mixAmount)
+      const brightness = clamp(float(1).sub(darkening), STONE_MIN_BRIGHTNESS, 1)
+      const background = stoneColour.mul(brightness)
 
       // Trail: tiles the ball has just crossed keep a darkened player-colour tint. The tint and its
       // fade are constant across a tile's fragments, so both are hoisted to the vertex stage like
@@ -392,7 +427,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         emissiveNode: trailEmissive,
       }
     },
-    [detailNoiseTextures],
+    [detailNoiseTextures, stoneAtlasTexture],
   )
 
   useEffect(() => {

@@ -27,10 +27,9 @@ import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvi
 import { PLAYER_RADIUS } from '@/utils/player'
 import { useConfirmationProgress } from '@/hooks/useConfirmationProgress'
 import useGameFrame from '@/hooks/useGameFrame'
-import { usePlayerInput } from '@/hooks/usePlayerInput'
 import usePlayerSpeed from '@/hooks/usePlayerSpeed'
 import { getColourFromPalette } from '@/resources/tsl/playerPalette'
-import { PLAYER_SPEED_MAX } from '@/stores/playerSlice'
+import { RACE_MAX_SPEED } from '@/utils/platform/raceSpeed'
 import { SPEED_SMOOTH_HALF_LIFE, stepSmoothedSpeed } from '@/utils/smoothedSpeed'
 
 // Carried over from marble.vert / marble.frag.
@@ -94,7 +93,6 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
   const shaderTime = useRef(0)
   const { confirmationProgress } = useConfirmationProgress()
   const smoothedSpeed = useRef(0)
-  const { input } = usePlayerInput()
   const { speedUnits } = usePlayerSpeed()
 
   const uniforms = useUniforms(
@@ -239,11 +237,9 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
     uniforms.uTime.value = shaderTime.current
 
     if (!isLowQuality) {
-      const inputZ = input.current.up - input.current.down
-      const targetSpeed = Math.min(
-        1,
-        Math.abs((inputZ * speedUnits.current) / PLAYER_SPEED_MAX),
-      )
+      // The player publishes forward speed for both phases, so the shader no longer has to infer
+      // it from input — which is neutral during the automatic race.
+      const targetSpeed = Math.min(1, Math.abs(speedUnits.current) / RACE_MAX_SPEED)
       uniforms.uSpeed.value = stepSmoothedSpeed(
         smoothedSpeed,
         targetSpeed,

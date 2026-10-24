@@ -3,8 +3,8 @@
 import { type FC, useCallback, useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import usePlayerSpeed from '@/hooks/usePlayerSpeed'
-import { PLAYER_SPEED_BASE, PLAYER_SPEED_MAX } from '@/stores/playerSlice'
+import usePlayerBoost from '@/hooks/usePlayerBoost'
+import { RING_BOOST_MAX } from '@/utils/platform/raceSpeed'
 
 type SpeedBoostDialProps = {
   progressOverride?: number
@@ -38,18 +38,16 @@ export const SpeedBoostDial: FC<SpeedBoostDialProps> = ({
     pendingFrame.current = requestAnimationFrame(applyDraw)
   }, [applyDraw])
 
-  const onPlayerSpeedChange = useCallback(
-    (speed: number) => {
+  const onPlayerBoostChange = useCallback(
+    (boostUnits: number) => {
       if (hasProgressOverride) return
-      const speedBoost = speed - PLAYER_SPEED_BASE
-      const maxBoost = PLAYER_SPEED_MAX - PLAYER_SPEED_BASE
-      targetProgress.current = clamp01(maxBoost > 0 ? speedBoost / maxBoost : 0)
+      targetProgress.current = clamp01(RING_BOOST_MAX > 0 ? boostUnits / RING_BOOST_MAX : 0)
       scheduleDraw()
     },
     [hasProgressOverride, scheduleDraw],
   )
 
-  usePlayerSpeed(onPlayerSpeedChange)
+  usePlayerBoost(onPlayerBoostChange)
 
   useEffect(() => {
     const path = pathRef.current

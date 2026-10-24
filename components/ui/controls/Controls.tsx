@@ -7,7 +7,7 @@ import { twJoin } from 'tailwind-merge'
 import { type PlayerInput, useGameStore } from '@/components/GameProvider'
 import Joystick, { type OnJoystickMove } from '@/components/ui/controls/Joystick'
 import { usePageHidden } from '@/hooks/usePageVisibility'
-import { InputType, Overlay, isManualMovementStage } from '@/stores/types'
+import { InputType, Overlay, isMovementInputStage } from '@/stores/types'
 
 const JOYSTICK_LEVELS = 10
 
@@ -38,7 +38,7 @@ function useControls() {
     isPageHidden ||
     isPlayerLocked ||
     overlay !== Overlay.NONE ||
-    !isManualMovementStage(speedRunStage)
+    !isMovementInputStage(speedRunStage)
 
   const setPlayerInput = useGameStore((s) => s.setPlayerInput)
   const setPlayerInputIntent = useGameStore((s) => s.setPlayerInputIntent)

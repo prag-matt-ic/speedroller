@@ -23,10 +23,7 @@ const TILE_EPS = 1e-4
 const CHECKER_PHASE_EDGE = 0.25
 const FINISH_RED_LINE_RATIO = 0.05
 const FINISH_RED_LINE_COLOR: [number, number, number] = [0.75, 0.0, 0.0]
-const START_STRIPE_RATIO = 0.08
-const START_CHECKER_DARK_COLOR: [number, number, number] = [0.05, 0.14, 0.18]
-const START_CHECKER_LIGHT_COLOR: [number, number, number] = [0.09, 0.26, 0.32]
-const START_STRIPE_COLOR: [number, number, number] = [0.18, 0.86, 0.62]
+
 
 const SPEED_RUN_LINE_UNIFORM_SCOPE = 'speedRunLine'
 
@@ -100,26 +97,14 @@ const createFinishLineNodes = ({
   }
 }
 
-// Port of startLine.frag.
+// White checks leave the alternate cells open to the underlying stone.
 const createStartLineNodes = ({
-  lineUv,
   checkerPhase,
   distanceFade,
-}: LineSurfaceNodes): LineNodes => {
-  const lightMask: Node<'float'> = step(CHECKER_PHASE_EDGE, checkerPhase)
-  const stripeMask: Node<'float'> = float(1).sub(step(START_STRIPE_RATIO, lineUv.y))
-  const baseColor: Node<'vec3'> = mix(
-    vec3(...START_CHECKER_DARK_COLOR),
-    vec3(...START_CHECKER_LIGHT_COLOR),
-    lightMask,
-  )
-
-  return {
-    colorNode: mix(baseColor, vec3(...START_STRIPE_COLOR), stripeMask),
-    // uOpacity was always 1, so alpha here is the distance fade alone.
-    opacityNode: distanceFade,
-  }
-}
+}: LineSurfaceNodes): LineNodes => ({
+  colorNode: vec3(1),
+  opacityNode: step(CHECKER_PHASE_EDGE, checkerPhase).mul(distanceFade),
+})
 
 // The two GLSL programs shared one vertex shader but differed in the fragment stage, so they stay
 // two materials: the chosen component swaps the material instance, as the two extended shader
@@ -129,7 +114,7 @@ const FinishLineMaterial: FC<LineNodes> = ({ colorNode, opacityNode }) => (
 )
 
 const StartLineMaterial: FC<LineNodes> = ({ colorNode, opacityNode }) => (
-  <meshBasicNodeMaterial colorNode={colorNode} opacityNode={opacityNode} transparent />
+  <meshBasicNodeMaterial colorNode={colorNode} opacityNode={opacityNode} transparent depthWrite={false} />
 )
 
 type Props = {
@@ -232,7 +217,7 @@ const SpeedRunLine: FC<Props> = ({ kind, position, width, height }) => {
         width={LINE_LABEL_WIDTH}
         height={LINE_LABEL_HEIGHT}
         textCanvasOptions={{
-          color: LINE_LABEL_COLOR,
+          color: isStartLine ? '#ffffff' : LINE_LABEL_COLOR,
           fontFamily: UNBOUNDED_FONT_FAMILY,
         }}
       />
