@@ -1,5 +1,5 @@
-import { useTexture } from '@react-three/drei'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { useTexture } from '@react-three/fiber'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import {
   type FC,
@@ -43,7 +43,7 @@ import tileDetailNoise2 from '@/assets/textures/platform/tile-noise-2.webp'
 import tileDetailNoise3 from '@/assets/textures/platform/tile-noise-3.webp'
 import tileDetailNoise1 from '@/assets/textures/platform/tile-noise.webp'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
 import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import {
@@ -204,7 +204,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
   const { colorNode, opacityNode, positionNode } = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
-      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
       const tileSeed = attribute<'float'>('seed')
       const tileIsHighlighted = attribute<'float'>('isHighlighted')
@@ -351,6 +351,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         opacityNode: alpha as Node<'float'>,
       }
     },
+    [detailNoiseTextures],
   )
 
   useEffect(() => {

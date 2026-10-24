@@ -18,6 +18,13 @@ statements, R3F's staged uniform registry and TSL's `positionNode` override work
 fixed and written up in "First run — runtime errors" below. The scene now boots, plays and renders
 with an empty console.
 
+> **Stack update (three 0.186.1 / Fiber alpha.6).** The versions in section 1 are the original
+> migration target and are kept as a historical record. The repo now runs `three@0.186.1`,
+> `@types/three@0.186.0`, `@react-three/fiber@10.0.0-alpha.6`, `@react-three/tsl@10.0.0-alpha.6`
+> and `@react-three/drei@11.0.0-alpha.6`. Fiber's default entry is now WebGPU, `/webgpu` is
+> deprecated, and the TSL resource hooks moved to `@react-three/tsl`. See
+> [r3f-v10-webgpu-hooks.md](r3f-v10-webgpu-hooks.md) for the current conventions.
+
 The list of things only a browser could settle, and where each landed:
 
 - **whether the two compute kernels produce valid WGSL and correct motion** — both compile and run.

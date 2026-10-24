@@ -1,6 +1,6 @@
 'use client'
 
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { type FC, type RefObject, useCallback, useId, useMemo } from 'react'
 import {
   attribute,
@@ -21,7 +21,7 @@ import { Color, Float32BufferAttribute, OctahedronGeometry, type Vector3Tuple } 
 import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { CollectibleID } from '@/model/schema'
 import { GEMS_COLOURS_BY_ID } from '@/resources/colours'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
@@ -140,7 +140,7 @@ const Gem: FC<GemShellProps> = ({
       const scoped = scopedUniforms.scope<GemShellUniforms & GemShellConfigUniforms>(
         gemShellScope,
       )
-      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
       const surfaceColorNode = vec3(surfaceColor.r, surfaceColor.g, surfaceColor.b)
       const lineColorNode = vec3(lineColor.r, lineColor.g, lineColor.b)
@@ -192,7 +192,7 @@ const Gem: FC<GemShellProps> = ({
     [gemShellScope, lineColor, surfaceColor, useDistanceFade],
   )
 
-  const { colorNode, opacityNode } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
 
 
   // Collectible.tsx still writes `gemShaderRef.current.uConfirmingProgress` / `.uTime`, so hang the

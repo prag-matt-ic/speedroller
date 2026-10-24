@@ -1,13 +1,8 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
-import {
-  type CreatorState,
-  useFrame,
-  useLocalNodes,
-  useThree,
-  useUniforms,
-} from '@react-three/fiber/webgpu'
+import { useFrame, useThree } from '@react-three/fiber'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import gsap from 'gsap'
 import { type FC, useCallback, useEffect, useId, useRef } from 'react'
 import { float, shapeCircle, time, vertexStage } from 'three/tsl'
@@ -15,7 +10,7 @@ import { AdditiveBlending, type InstancedMesh, Sphere, Vector3, type Vector3Tupl
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import {
   createGemParticleBuffers,
   createGemParticleRenderNodes,
@@ -88,7 +83,7 @@ const Particles: FC<Props> = ({
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<GemParticleUniforms>(particleScope)
-      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
       const buffers = createGemParticleBuffers({
         count: particleCount,
         gemScale,
@@ -117,7 +112,7 @@ const Particles: FC<Props> = ({
     [gemPosition, gemScale, particleCount, particlePalette, particleScope, tileHeight, tileWidth, useDistanceFade],
   )
 
-  const { simulation, render } = useLocalNodes(createNodes)
+  const { simulation, render } = useLocalNodes(createNodes, [createNodes])
 
   useEffect(() => {
     return () => {

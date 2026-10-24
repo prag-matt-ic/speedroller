@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { type FC, type RefObject, Suspense, useCallback, useRef } from 'react'
 import {
   clamp,
@@ -125,18 +125,22 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
 
       const baseColor = getColourFromPalette(scoped.uPaletteIndex, paletteT)
 
+      // Fn's body runs after the creator returns, so scoped reads inside it are not tracked.
+      // Hoist the two uniforms the reveal reads so a replaced generation rebuilds this graph.
+      const { uConfirmingPaletteIndex, uConfirmingProgress } = scoped
+
       // applyConfirmingReveal: the GLSL early-returns when there is no confirming palette. The
       // confirming lookup is a cosine palette (3 cos + 4 uniform loads) per fragment, so it moves
       // behind a uniform branch: `hasConfirmingPalette` derives from uniforms, so the branch has no
       // per-fragment divergence and skips the whole reveal subtree the rest of the time.
-      const hasConfirmingPalette = scoped.uConfirmingPaletteIndex
+      const hasConfirmingPalette = uConfirmingPaletteIndex
         .greaterThanEqual(0)
-        .and(scoped.uConfirmingProgress.greaterThan(0))
+        .and(uConfirmingProgress.greaterThan(0))
       const baseMarbleColor = Fn(() => {
         const marble = baseColor.toVar()
         If(hasConfirmingPalette, () => {
-          const confirmingColor = getColourFromPalette(scoped.uConfirmingPaletteIndex, paletteT)
-          const clampedProgress = clamp(scoped.uConfirmingProgress, float(0), float(1))
+          const confirmingColor = getColourFromPalette(uConfirmingPaletteIndex, paletteT)
+          const clampedProgress = clamp(uConfirmingProgress, float(0), float(1))
           const height01 = unitLocalPosition.y.mul(0.5).add(0.5)
           const revealSmoothness = REVEAL_SMOOTHNESS * 1.35
           const revealEdgeLow = clamp(height01.sub(revealSmoothness), float(0), float(1))
@@ -211,7 +215,7 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
     [enableVeins, isFlat],
   )
 
-  const { colorNode, opacityNode } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
 
 
   useGameFrame((_, deltaTime) => {

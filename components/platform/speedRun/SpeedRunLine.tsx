@@ -1,5 +1,5 @@
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
@@ -165,7 +165,7 @@ const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
   // together off the one shared vertex stage, and the material picks the pair it needs.
   const createNodes = useCallback(
     ({ uniforms }: CreatorState) => {
-      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = uniforms.scope(CORE_UNIFORM_SCOPE)
       const surfaceNodes = createLineSurfaceNodes({
         uTilesX,
         uTilesY,
@@ -181,7 +181,7 @@ const SpeedRunLine: FC<Props> = ({ position, width, height }) => {
     [uTilesX, uTilesY, uDistanceFadeEnabled],
   )
 
-  const { finishLineNodes, startLineNodes } = useLocalNodes(createNodes)
+  const { finishLineNodes, startLineNodes } = useLocalNodes(createNodes, [createNodes])
 
   const hasTriggeredStart = useRef(false)
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null)

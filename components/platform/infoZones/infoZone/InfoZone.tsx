@@ -5,7 +5,7 @@ import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { useGSAP } from '@gsap/react'
 import { Html } from '@react-three/drei'
 import { type HtmlProps } from '@react-three/drei/webgpu'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import {
   CuboidCollider,
   type IntersectionEnterHandler,
@@ -33,7 +33,7 @@ import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { PointerProvider } from '@/components/ui/PointerProvider'
@@ -130,7 +130,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
   const createNodes = useCallback(
     ({ uniforms }: CreatorState) => {
       const scoped = uniforms.scope<InfoZoneUniforms>(zoneKey)
-      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = uniforms.scope(CORE_UNIFORM_SCOPE)
       // Height-space UV: centred, with the aspect ratio applied to x.
       const centeredUvSource = uv().sub(0.5)
       const centeredUv: Node<'vec2'> = vec2(
@@ -165,7 +165,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
     [useDistanceFade, zoneKey],
   )
 
-  const { colorNode, opacityNode } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
 
   const cameraTarget = useMemo<Vector3Tuple>(() => [
     position[0] - infoPositionOffset[0],

@@ -1,5 +1,5 @@
+import { type RegisteredScopeUniforms } from '@react-three/tsl'
 import { Vector3 } from 'three'
-import { type UniformNode } from 'three/webgpu'
 
 // Uniforms owned by the game loop and read by more than one component's node graph.
 //
@@ -10,11 +10,21 @@ import { type UniformNode } from 'three/webgpu'
 
 export const CORE_UNIFORM_SCOPE = 'core'
 
-export type CoreUniforms = {
-  /** Player world position, written once by GameUniforms for every material. */
-  uPlayerWorldPos: UniformNode<'vec3', Vector3>
-}
-
 export const createCoreUniforms = () => ({
+  /** Player world position, written once by GameUniforms for every material. */
   uPlayerWorldPos: new Vector3(),
 })
+
+// Type-only registration: `uniforms.scope(CORE_UNIFORM_SCOPE)` is typed for every reader without a
+// generic, and a misspelled uniform name within the scope is a compile error. The scope key and its
+// node types derive from the creator, so they cannot drift. No runtime cost.
+declare module '@react-three/tsl' {
+  interface Register {
+    scopes: {
+      [CORE_UNIFORM_SCOPE]: ReturnType<typeof createCoreUniforms>
+    }
+  }
+}
+
+/** Exact node types for the core scope, for helpers that receive them as parameters. */
+export type CoreUniforms = RegisteredScopeUniforms<typeof CORE_UNIFORM_SCOPE>

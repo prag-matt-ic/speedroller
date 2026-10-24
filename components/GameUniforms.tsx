@@ -1,6 +1,6 @@
 'use client'
 
-import { useUniforms } from '@react-three/fiber/webgpu'
+import { useUniforms } from '@react-three/tsl'
 import { type FC, useCallback } from 'react'
 import { type Vector3Tuple } from 'three'
 

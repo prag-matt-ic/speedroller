@@ -1,5 +1,5 @@
 'use client'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { type FC, useCallback, useId } from 'react'
@@ -21,7 +21,7 @@ import { type Vector3Tuple } from 'three'
 import type { UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { type ColourTileUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
@@ -76,7 +76,7 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<ColourTileUniforms>(colourTileUniformScope)
-      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
       const tileUv = uv()
       const centredUv = tileUv.sub(0.5)
@@ -118,7 +118,7 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
     [colourTileUniformScope, useDistanceFade, useNoise],
   )
 
-  const { colorNode, opacityNode } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
 
   return (
     <RigidBody

@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
+import { useThree } from '@react-three/fiber'
 import {
   type CreatorState,
   useLocalNodes,
-  useThree,
   useUniforms,
-} from '@react-three/fiber/webgpu'
+} from '@react-three/tsl'
 import { type FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   clamp as tslClamp,
@@ -33,7 +33,7 @@ import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import {
   createFloatingTilesBuffers,
   createFloatingTilesSimulation,
@@ -121,7 +121,7 @@ const FloatingBatch: FC<{
 
   const createNodes = useCallback(
     ({ uniforms }: CreatorState) => {
-      const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = uniforms.scope(CORE_UNIFORM_SCOPE)
       const buffers = createFloatingTilesBuffers({
         instanceCount: batch.count,
         gridCols: GRID_COLS,
@@ -180,7 +180,9 @@ const FloatingBatch: FC<{
     [batch.count, batch.rows.length, originZ, spawnData, uDeltaTime],
   )
 
-  const { colorNode, opacityNode, positionNode, simulation } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode, positionNode, simulation } = useLocalNodes(createNodes, [
+    createNodes,
+  ])
 
   useLayoutEffect(() => {
     const mesh = meshRef.current
@@ -256,7 +258,7 @@ const FloatingTiles: FC<FloatingTilesProps> = ({ rows, onReadyChange }) => {
 
   useGameFrame((_, delta) => {
     uDeltaTime.value = clamp(delta, 0, MAX_DELTA_TIME)
-  }, -1)
+  }, 1)
 
   // Child bounds and GPU buffers are initialized before this passive effect runs.
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useFrame } from '@react-three/fiber/webgpu'
+import { useFrame } from '@react-three/fiber'
 import { type FC, useCallback, useEffect, useRef } from 'react'
 
 import { Stage, useGameStore } from '@/components/GameProvider'

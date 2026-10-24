@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
-import { useTexture } from '@react-three/drei'
-import { useFrame, useRenderPipeline, useUniforms } from '@react-three/fiber/webgpu'
+import { useFrame, useTexture } from '@react-three/fiber'
+import { useRenderPipeline, useUniforms } from '@react-three/tsl'
 import { type RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { uniformTexture } from 'three/tsl'
 import type { PassNode } from 'three/webgpu'

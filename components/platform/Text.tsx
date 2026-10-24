@@ -1,6 +1,6 @@
 'use client'
 
-import { useThree } from '@react-three/fiber/webgpu'
+import { useThree } from '@react-three/fiber'
 import { type FC, type RefObject, Suspense } from 'react'
 import { Mesh, type Vector3Tuple } from 'three'
 

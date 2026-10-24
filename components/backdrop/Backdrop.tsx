@@ -1,7 +1,7 @@
 'use client'
 
-import { useTexture } from '@react-three/drei'
-import { useLocalNodes } from '@react-three/fiber/webgpu'
+import { useTexture } from '@react-three/fiber'
+import { useLocalNodes } from '@react-three/tsl'
 import { type FC, useCallback, useLayoutEffect, useRef } from 'react'
 import { float, smoothstep, texture, uv, vec2 } from 'three/tsl'
 import { BufferAttribute, type Mesh, type PlaneGeometry, type Vector3Tuple } from 'three'
@@ -49,7 +49,7 @@ const Backdrop: FC = () => {
       vec2(backdropUv.x, backdropUv.x.oneMinus()),
     )
     return { colorNode: sampled.mul(edgeMask.x.mul(edgeMask.y)) }
-  })
+  }, [backdropColour])
 
   useLayoutEffect(() => {
     const geometry = geometryRef.current

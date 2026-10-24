@@ -1,6 +1,6 @@
 'use client'
 
-import { useThree } from '@react-three/fiber/webgpu'
+import { useThree } from '@react-three/fiber'
 import { type RefObject, useEffect, useRef } from 'react'
 import { type Camera, type Object3D, type PassNode, type WebGPURenderer } from 'three/webgpu'
 
@@ -30,7 +30,7 @@ const compileScene = async (
         object.visible = true
         object.frustumCulled = false
       })
-      // In installed Three r185, an initialized renderer collects the entire render list before
+      // In installed Three r186, an initialized renderer collects the entire render list before
       // its first await. Restore flags immediately so R3F's next onFramed pass sees real visibility.
       compilation = renderer.compileAsync(scene, camera)
     } finally {

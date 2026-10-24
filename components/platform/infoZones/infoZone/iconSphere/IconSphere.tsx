@@ -2,8 +2,8 @@
 'use client'
 
 import { useGSAP } from '@gsap/react'
-import { useTexture } from '@react-three/drei'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { useTexture } from '@react-three/fiber'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import gsap from 'gsap'
 import { type FC, Suspense, useCallback, useRef } from 'react'
 import {
@@ -27,7 +27,7 @@ import type { Node, UniformNode } from 'three/webgpu'
 
 import noise from '@/assets/textures/iconSphere/noise.webp'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { INFO_ZONE_SPHERE_COLOUR } from '@/resources/colours'
 import { fadeInOut, objectWorldZ } from '@/resources/tsl/fadeInOut'
 
@@ -99,7 +99,7 @@ const IconSphere: FC<IconSphereProps> = ({ iconSrc, shouldHide, isVisible, zoneK
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
         const scoped = scopedUniforms.scope<IconSphereUniforms>(sphereScope)
-        const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+        const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
         const visibility = float(1).sub(smoothstep(float(0), float(1), scoped.uHiddenProgress))
         const scale = mix(float(0.33), float(1), visibility)
@@ -169,7 +169,7 @@ const IconSphere: FC<IconSphereProps> = ({ iconSrc, shouldHide, isVisible, zoneK
     [enableVeins, isDistanceFadeEnabled, noiseTexture, sphereScope],
   )
 
-  const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes, [createNodes])
 
 
   useGSAP(

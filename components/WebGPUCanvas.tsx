@@ -1,6 +1,6 @@
 'use client'
 
-import { Canvas, type CanvasProps, type RootState } from '@react-three/fiber/webgpu'
+import { Canvas, type CanvasProps, type WebGPURootState } from '@react-three/fiber'
 import { type FC, type PropsWithChildren, Suspense, useCallback } from 'react'
 import { NoToneMapping } from 'three'
 import type { WebGPURendererParameters } from 'three/src/renderers/webgpu/WebGPURenderer.Nodes.js'
@@ -29,7 +29,7 @@ const WebGPUCanvas: FC<WebGPUCanvasProps> = ({
   // final image — Effects.tsx turns the pipeline's colour transform off — so the canvas must pass
   // the rendered colour through untouched.
   const handleCreated = useCallback(
-    (state: RootState) => {
+    (state: WebGPURootState) => {
       state.renderer.toneMapping = NoToneMapping
       onCreated?.(state)
     },

@@ -2,8 +2,8 @@
 'use client'
 
 import { useGSAP } from '@gsap/react'
-import { useTexture } from '@react-three/drei'
-import { type CreatorState, useLocalNodes,useThree } from '@react-three/fiber/webgpu'
+import { useTexture, useThree } from '@react-three/fiber'
+import { type CreatorState, useLocalNodes } from '@react-three/tsl'
 import gsap from 'gsap'
 import { type FC, useCallback, useEffect, useMemo } from 'react'
 import {
@@ -43,7 +43,7 @@ import {
   useTextCanvas,
 } from '@/hooks/useTextCanvas'
 
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { fadeInOut, objectWorldZ } from '@/resources/tsl/fadeInOut'
 import { HEADING_POSITION_OFFSET_Z } from '@/utils/platform/floatingHeading'
 
@@ -102,7 +102,7 @@ export const FloatingHeading: FC<Props> = ({
   // the heading centre the GLSL passed in as uHeadingCenterXZ.
   const createNodes = useCallback(
     ({ uniforms: scopedUniforms }: CreatorState) => {
-      const { uPlayerWorldPos } = scopedUniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+      const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
       const mirroredUv = vec2(uv().x.oneMinus(), uv().y)
       const headingCenter = modelWorldMatrix.mul(vec4(0, 0, 0, 1))
@@ -159,7 +159,7 @@ export const FloatingHeading: FC<Props> = ({
     [useDistanceFade, useNoiseFade, shouldRotate, textTextureNode, dissolveNoiseTexture],
   )
 
-  const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes)
+  const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes, [createNodes])
 
   const textCanvasOptionsWithDefaults = useMemo<TextCanvasOptions>(() => {
     const baseFontSize = textCanvasOptions?.fontSize ?? DEFAULT_FONT_SIZE

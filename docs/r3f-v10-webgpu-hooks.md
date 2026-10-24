@@ -1,10 +1,10 @@
 # React Three Fiber v10 WebGPU Hooks
 
-Purpose: Define Threenix conventions for React Three Fiber v10 WebGPU hooks and prop utilities when building TSL uniforms, material nodes, compute nodes, postprocessing nodes, and mount-only setup.
+Purpose: Define Speedroller conventions for React Three Fiber `10.0.0-alpha.6` and `@react-three/tsl` `10.0.0-alpha.6` when building TSL uniforms, material nodes, compute nodes, postprocessing nodes, and mount-only setup.
 
 Read this before touching:
 
-- WebGPU/R3F components that import from `@react-three/fiber/webgpu`
+- WebGPU/R3F components that import from `@react-three/fiber` or `@react-three/tsl`
 - TSL node materials using `colorNode`, `opacityNode`, `positionNode`, `scaleNode`, `emissiveNode`, or compute nodes
 - `uniform(...)` calls inside React components
 - repeated WebGPU components that need per-instance uniforms
@@ -23,7 +23,11 @@ Keywords: React Three Fiber v10, R3F v10, WebGPU hooks, TSL hooks, useUniform, u
 - Additional exports (`once`, `fromRef`): https://github.com/pmndrs/react-three-fiber/blob/v10/docs/API/additional-exports.mdx
 - Release notes: https://github.com/pmndrs/react-three-fiber/releases
 
-The upstream docs are the conceptual source of truth, but this project may run an alpha package that is behind the docs. Before using a hook not already used in the repo, confirm it exists in `node_modules/@react-three/fiber/dist/webgpu/index.d.ts`, and confirm what it actually does in `dist/webgpu/index.mjs` — the docs describe a ref-counted lifecycle for the registered-resource hooks that the installed alpha does not implement. The installed package (`10.0.0-alpha.5`) exports `CreatorState`, `useUniform`, `useUniforms`, `useNodes`, `useLocalNodes`, `useBuffers`, `useGPUStorage`, `useTextures`, `useTexture`, `useRenderPipeline`, the `rebuildAll*` helpers for each resource kind, and the prop utilities `once`/`isOnce`/`ONCE`/`OnceValue` plus `fromRef`/`isFromRef`. `useThree` and `useFrame` imported from `/webgpu` are typed against `WebGPURootState`, whose `renderer` (and the deprecated `gl` alias) is already `WebGPURenderer`. Both `once` and `fromRef` are also exported from the plain `@react-three/fiber` entry, so either import path typechecks.
+The upstream docs are the conceptual source of truth, but this project runs an alpha package that can be ahead of or behind them. Before using a hook not already in the repo, confirm it exists in `node_modules/@react-three/fiber/dist/index.d.ts` or `node_modules/@react-three/tsl/dist/index.d.ts`, and confirm what it does in the matching `.mjs`.
+
+**Alpha.6 split.** `@react-three/fiber` is the WebGPU entry by default and owns `Canvas`, `useFrame`, `useThree`, `useTexture`, `useTextures`, `once`, `fromRef`, and the frame-timing types. `@react-three/fiber/webgpu` still works but is deprecated and will be removed in the first beta. The TSL resource hooks — `CreatorState`, `useUniform`, `useUniforms`, `useNodes`, `useLocalNodes`, `useBuffers`, `useGPUStorage`, `useRenderPipeline`, and `rebuildAll*` — moved to `@react-three/tsl`. Three classes and types stay in `three`/`three/webgpu`; shader expressions stay in `three/tsl`.
+
+The alpha.5 lifecycle measurements in this document remain useful evidence, but the package layout and `useRenderPipeline` teardown changed in alpha.6. Re-check the installed implementation before relying on an alpha.5-specific conclusion.
 
 ## Hook Choice
 
@@ -50,15 +54,11 @@ Inline objects are fine for simple singleton uniforms. In repeated components, o
 
 When deriving a uniform scope from React `useId()`, strip non-alphanumeric characters instead of replacing them with underscores. React IDs can otherwise produce consecutive underscores in generated WGSL identifiers, which Safari rejects.
 
-Use `useLocalNodes` for component-local TSL node bundles that feed JSX material props or compute passes. Creator callbacks receive a `CreatorState` with scoped `uniforms` and `nodes`, so node graphs can read registered uniforms inside the callback instead of closing over them directly. The upstream `useLocalNodes` docs support returning non-node values, but do not add setter wrappers when the hook-returned uniform can be updated directly. Keep CPU data, Three objects, layout data, and instanced buffers in normal `useMemo` when they are not shader-node composition:
+Use `useLocalNodes` for component-local TSL node bundles that feed JSX material props or compute passes. Creator callbacks receive a `CreatorState` with scoped `uniforms` and `nodes`, so node graphs can read registered uniforms inside the callback instead of closing over them directly. Alpha.6 gives the hook `useMemo` semantics: pass a dependency array, or it rebuilds the graph on every render. Use `[createNodes]` for a `useCallback` creator and the captured structural inputs for an inline creator. Only reads made in the creator body are tracked; a read inside `Fn()` or `If()` runs later, so hoist it into the creator and close over the node. Keep CPU data, Three objects, layout data, and instanced buffers in normal `useMemo` when they are not shader-node composition:
 
 ```tsx
-import {
-  type CreatorState,
-  useFrame,
-  useLocalNodes,
-  useUniforms,
-} from '@react-three/fiber/webgpu'
+import { useFrame } from '@react-three/fiber'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 
 const PARTICLE_UNIFORM_SCOPE = 'flightParticles'
 
@@ -72,7 +72,7 @@ const { opacityNode, positionNode } = useLocalNodes(({ uniforms }: CreatorState)
   const opacityNode = smoothstep(0, 1, uProgress)
 
   return { opacityNode, positionNode }
-})
+}, [particleBuffers])
 
 useFrame(({ elapsed }) => {
   uProgress.value = Math.sin(elapsed) * 0.5 + 0.5
@@ -81,7 +81,7 @@ useFrame(({ elapsed }) => {
 
 Use `useNodes` only when the node is expensive and genuinely shared by multiple components. `useLocalNodes(({ nodes }: CreatorState) => ...)` can then read shared root nodes directly or use `nodes.scope('scopeName')` for scoped shared nodes. Do not promote one-off material expressions into global nodes.
 
-### Buffers, GPU Storage, Textures, and Render Pipelines (alpha.4+)
+### Buffers, GPU Storage, Textures, and Render Pipelines (alpha.6)
 
 `useBuffers` and `useGPUStorage` are the registered-resource equivalents of `useUniforms` for compute buffers and storage textures. They add scoping, atomic rebuild during fast refresh, and `dispose*` utilities on top of the raw Three objects. Prefer them for buffers or storage textures that must be shared across components, survive HMR, or need explicit GPU disposal.
 
@@ -101,9 +101,14 @@ Three measured caveats in the installed alpha decide how the migration has to be
 
 `RingParticles` remains a migration candidate. `InvertedMeteorFalls` uses per-batch scopes. `Fireflies` now uses instance/count-specific scopes, explicitly passes the scope to `disposeBuffers`, and disposes outgoing compute graphs. Its four buffers also feed rendering attributes, so geometry cleanup owns their GPU attributes. Count changes are checked with production compute/readback and render calls. `hooks/pointerTrail/usePointerTrail.ts` is the reference for the manual approach it already uses — it disposes its three compute nodes and both `StorageTexture`s in an effect — so it needs no migration.
 
-`useTextures` exposes the reactive, ref-counted texture registry that `useTexture` already enrolls in; use it when a texture needs to be shared by key without passing refs through the tree. `useRenderPipeline` replaces `usePostProcessing` with a declarative render-pipeline and MRT setup on the WebGPU entry. Adopt it for a new, single pipeline whose node graph is fixed after mount; it is not a drop-in for the flight post pass (see the next subsection).
+`useTextures` exposes the reactive, ref-counted texture registry that `useTexture` already enrolls in; use it when a texture needs to be shared by key without passing refs through the tree. Alpha.6 moved `useTexture` into Fiber, and this repo imports it from `@react-three/fiber` rather than `@react-three/drei`. `useRenderPipeline` replaces `usePostProcessing` with a declarative render-pipeline and MRT setup. Alpha.6 owns and disposes the pipeline and scene pass on unmount; dispose only custom effect nodes yourself. `Effects.tsx` uses it for the speed-driven post pass; it is not a drop-in for a multi-pipeline render-phase owner.
 
-#### Why `Postprocessing.tsx` Stays on Raw `RenderPipeline` (installed alpha.5)
+#### Historical: why Threenix's `Postprocessing.tsx` stays on raw `RenderPipeline` (alpha.5)
+
+> This subsection records a different app's pipeline audit and is kept for context. Speedroller's
+> `Effects.tsx` uses `useRenderPipeline`; alpha.6 owns and disposes that pipeline and its scene pass.
+> The constraints below describe the Threenix flight pass, which still selects between three
+> precompiled pipelines per frame.
 
 The flight post pass was audited against `useRenderPipeline` and rejected. The mismatch is structural, not about dynamic values, and comes from the hook's own contract:
 
@@ -114,7 +119,7 @@ The flight post pass was audited against `useRenderPipeline` and rejected. The m
 
 This is the pattern the shared `@repo/threenix-developers/bloom-post-processing` component follows: one root pipeline, a graph fixed after mount, numeric controls written to the bloom node's own uniforms, `isEnabled` driving `rebuild()`, and no manual render call. Revisit the flight post when the hook gains per-pipeline instances or an explicit unmount cleanup, or when it collapses to a single graph.
 
-Inline `useLocalNodes` creators are valid and match the upstream examples. In the installed alpha, `useLocalNodes` memoizes the returned object with the creator function, uniforms, nodes, and textures as dependencies, so an inline creator can recompute on normal component renders. That is acceptable for simple material composition and keeps the uniform access local and readable. Use `useCallback` only around creator functions that are expensive enough to justify stabilizing their identity.
+Inline `useLocalNodes` creators are valid and match the upstream examples, but alpha.6 rebuilds an inline creator on every render unless it gets a dependency array. Pass the captured structural inputs, or wrap an expensive creator in `useCallback` and pass `[createNodes]`. Do not include values that change every frame; animate uniforms by writing `.value` instead.
 
 `useUniforms` and `useNodes` return `remove*`, `clear*`, and `rebuild*` utilities for explicit lifecycle management. A rebuild invalidates the cache and atomically replaces the resource generation, so long-lived callbacks that captured the previous uniforms or nodes can become stale. Avoid hiding those resources in refs and ensure callbacks are recreated after a rebuild. See the upstream [TSL HMR guide](https://github.com/pmndrs/react-three-fiber/blob/v10/docs/webgpu/hmr.mdx).
 
@@ -123,7 +128,7 @@ Inline `useLocalNodes` creators are valid and match the upstream examples. In th
 `once` marks one prop as a mount-time side effect. The marker is a fresh object on every render, so `once` does not avoid R3F's prop diff; it avoids re-application. The runtime records the prop name in `instance.appliedOnce` on first application and skips the method call on every later `applyProps` pass, which is a single set lookup:
 
 ```tsx
-import { once } from '@react-three/fiber/webgpu'
+import { once } from '@react-three/fiber'
 
 // In-place geometry transform, applied exactly once.
 <planeGeometry args={[10, 10]} translate={once(0, 0, 5)} center={once()} />
@@ -193,7 +198,7 @@ const { colorNode } = useLocalNodes(({ uniforms }: CreatorState) => {
   const colorNode = select(uMode.equal(1), activeColor, inactiveColor)
 
   return { colorNode }
-})
+}, [])
 ```
 
 Bad:
@@ -203,8 +208,20 @@ const { colorNode } = useLocalNodes(({ uniforms }: CreatorState) => {
   const { uMode } = uniforms.scope('exampleMode')
 
   return { colorNode: uMode.value === 1 ? activeColor : inactiveColor }
-})
+}, [])
 ```
+
+### Frame ordering
+
+Alpha.6 runs `useFrame` priorities higher-first, the reverse of v9. A v9 `-1` ran before the
+default-priority jobs; use `{ priority: 1 }` — or `useGameFrame(..., 1)` — to keep that position.
+Do not pass a bare number: alpha.6 warns, and v9's positive priorities also had render-takeover
+semantics. Prefer named `before`/`after` constraints or a named `phase` when the order is not a
+simple before/after the default jobs.
+
+`state.gl` still aliases `state.renderer`, but alpha.6 logs a deprecation warning when it is read.
+Use `state.renderer` from `@react-three/fiber`. Drei's `Html` still reads `gl` internally, so that
+single warning can remain until drei updates; do not add new `state.gl` reads.
 
 ### Vertex-Stage Nodes Must Read `positionGeometry`, Not `positionLocal`
 
@@ -297,7 +314,7 @@ Reader-mode hooks (`useUniforms`, `useNodes`, `useBuffers`, `useGPUStorage`) acc
 const sunUniforms = useUniforms<SunUniforms>(SUN_UNIFORM_SCOPE)
 ```
 
-When an exact Three.js `UniformNode<TNodeType, TValue>` type crosses a project or helper boundary, import the library type and use it as the schema generic at that boundary only. Do not redefine `UniformNode` or create local schema-like aliases when the imported Three type works. `useThree` and `useFrame` from `@react-three/fiber/webgpu` already narrow `renderer` to `WebGPURenderer`, and Three TSL accessors such as `materialEmissive` are typed as `Node<'vec3'>`, so none of those need `as unknown as` casts.
+When an exact Three.js `UniformNode<TNodeType, TValue>` type crosses a project or helper boundary, import the library type and use it as the schema generic at that boundary only. Do not redefine `UniformNode` or create local schema-like aliases when the imported Three type works. `useThree` and `useFrame` from `@react-three/fiber` already narrow `renderer` to `WebGPURenderer`, and Three TSL accessors such as `materialEmissive` are typed as `Node<'vec3'>`, so none of those need `as unknown as` casts.
 
 ## Migration Checklist
 
@@ -307,6 +324,7 @@ When an exact Three.js `UniformNode<TNodeType, TValue>` type crosses a project o
 - Use `once` for geometry transforms and other mount-only method calls on declaratively created objects. Do not treat it as a `useMemo` replacement, do not apply it to geometries built with `new` or shared by reference, and use a concrete geometry element rather than `<bufferGeometry>`.
 - Scope uniforms in repeated components using stable ids to avoid sharing state accidentally.
 - Register compute buffers with `useBuffers` when the component owns GPU storage that must be freed and its churn is reachable. Wrap the creator in `useCallback` so recreation is driven by the data, namespace the scope with every input that shapes the allocation, and dispose the current scope in an unmount effect. Do not register component-local CPU attributes that R3F already owns, and do not add a registration render to a component that keys a material on a node `uuid`.
-- Write simple `useLocalNodes` creators inline. Use `useCallback` only when the creator itself is expensive or render churn proves the identity change is a problem.
+- Write simple `useLocalNodes` creators inline but give every call a dependency array. Use `[createNodes]` for a `useCallback` creator or list the inline creator's captured structural inputs; `[]` keeps the graph until a resource it read is replaced. Animate per-frame values through uniforms, not dependencies.
+- Import `Canvas`, `useFrame`, `useThree`, `useTexture`, and `once`/`fromRef` from `@react-three/fiber`; import TSL resource hooks and `CreatorState` from `@react-three/tsl`. `/webgpu` is deprecated.
 - Do not store `UniformNode` objects in refs or React state. Update hook-returned uniforms directly; add setters only when they provide meaningful encapsulation.
 - Verify with `npx tsc --noEmit --pretty false`, targeted lint, and the smallest visual/runtime check for the affected WebGPU scene.

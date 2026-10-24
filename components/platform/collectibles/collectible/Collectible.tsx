@@ -1,6 +1,6 @@
 'use client'
 
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/fiber/webgpu'
+import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { type FC, useCallback, useId, useMemo, useRef } from 'react'
@@ -11,7 +11,7 @@ import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE, type CoreUniforms } from '@/components/coreUniforms'
+import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import Gem, { type GemShellRef } from '@/components/platform/collectibles/collectible/gem/Gem'
 import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
 import { useConfirmationProgress } from '@/hooks/useConfirmationProgress'
@@ -94,7 +94,7 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
   // fade were varyings in the GLSL; here they are recomputed inside the fragment node graph.
   const { colorNode, opacityNode } = useLocalNodes(({ uniforms }: CreatorState) => {
     const scoped = uniforms.scope<CollectibleTileUniforms>(tileUniformScope)
-    const { uPlayerWorldPos } = uniforms.scope<CoreUniforms>(CORE_UNIFORM_SCOPE)
+    const { uPlayerWorldPos } = uniforms.scope(CORE_UNIFORM_SCOPE)
 
     // vHeightSpacePosition: centred UV with the aspect ratio applied to x.
     const centeredUv = uv().sub(0.5)
@@ -133,7 +133,7 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
       : bracketMask
 
     return { colorNode: vec3(1), opacityNode: mask }
-  })
+  }, [tileUniformScope, useDistanceFade])
 
   useGameFrame((_, delta) => {
     if (!isFramedRef.current) return

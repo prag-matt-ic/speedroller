@@ -1,6 +1,6 @@
 'use client'
 
-import { useFrame, useThree } from '@react-three/fiber/webgpu'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useRef } from 'react'
 import { Vector3 } from 'three/webgpu'
 
@@ -188,7 +188,9 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
     }
 
     applyZoom(camera, cameraState.currentZoom)
-  }, -1)
+    // v10 priority is higher-first. This ran at -1 under v9 (before the default-priority jobs),
+    // so keep it ahead of the game's useFrame jobs.
+  }, { priority: 1 })
 
   return { setLookAt, setZoom, setIsPointerEnabled, getDistanceToTarget, getZoom }
 }
