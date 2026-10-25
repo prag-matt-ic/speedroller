@@ -28,11 +28,12 @@ const UI: FC<Props> = ({ isMobile }) => {
   const speedRunStage = useGameStore((s) => s.speedRunStage)
   const overlay = useGameStore((s) => s.overlay)
   const setOverlay = useGameStore((s) => s.setOverlay)
+  const isSpectating = useGameStore(s => s.isSpectating)
   const isLobby = speedRunStage === SpeedRunStage.LOBBY
   const isRunning = speedRunStage === SpeedRunStage.RUNNING
-  const isDashboardAvailable = (isLobby || isRunning) && overlay !== Overlay.MULTIPLAYER
-  const isCountdown = overlay === Overlay.SPEEDRUN_COUNTDOWN
-  const showOverlayBackdrop = overlay !== Overlay.NONE && !isCountdown
+  const isDashboardAvailable = !isSpectating && (isLobby || isRunning) && overlay !== Overlay.MULTIPLAYER
+  const isCountdown = overlay === Overlay.SPEEDRUN_COUNTDOWN || overlay === Overlay.MULTIPLAYER_COUNTDOWN
+  const showOverlayBackdrop = overlay !== Overlay.NONE && overlay !== Overlay.SPECTATING && !isCountdown
 
   const infoContainer = useRef<HTMLDivElement>(null)
   const overlayBackdropRef = useRef<HTMLDivElement>(null)
@@ -96,7 +97,7 @@ const UI: FC<Props> = ({ isMobile }) => {
 
       <MiniMap />
 
-      <MovementControls />
+      {!isSpectating && <MovementControls />}
 
       {/* Fullscreen overlays: the countdown deliberately keeps the live track unobscured. */}
       <Transition

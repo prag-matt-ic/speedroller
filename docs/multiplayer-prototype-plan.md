@@ -362,36 +362,94 @@ solo racing still works without contacting the multiplayer service.
 
 ### Phase 3 Racing and results
 
-- [ ] Bridge shared starts into the existing attempt lifecycle, holding racers on the
+- [x] Bridge shared starts into the existing attempt lifecycle, holding racers on the
   grid until scheduled GO and rejecting stale countdown/finish callbacks.
-- [ ] Publish bounded 20 Hz poses, render remote marbles from reusable buffers, and keep
+- [x] Publish bounded 20 Hz poses, render remote marbles from reusable buffers, and keep
   all remote bodies out of local collision, collection, and finish sensors.
-- [ ] Reuse existing movement/recovery; freeze accepted local finish time and stop local
+- [x] Reuse existing movement/recovery; freeze accepted local finish time and stop local
   racing input without pausing opponents. Route finish reports only to the room service.
-- [ ] Show shared results, ties, DNF, remaining-racer status, and owner-controlled rematch.
+- [x] Show shared results, ties, DNF, remaining-racer status, and owner-controlled rematch.
   Verify every client agrees and no multiplayer result reaches solo persistence.
-- [ ] Test two, three, and five entrants; simultaneous starts; disconnects in each phase;
+- [x] Test two, three, and five entrants; simultaneous starts; disconnects in each phase;
   duplicate finishes; old messages after rematch; and owner departure mid-race.
 
-Exit: a complete five-player race can finish and rematch with consistent membership,
-timing, and results.
+Validation: 98 root tests and 21 service/controller tests pass, including actual
+WebSocket sessions with two, three, and five racers, matching results/ties and rematch.
+Root TypeScript, targeted ESLint, Next production build, and service build pass.
+A two-tab Chrome smoke check verified room creation, invite join, shared countdown,
+continued racing after GO, and moving labelled remote marbles on both clients.
+It caught and fixed the owner reinterpreting its own share URL as an incoming invite.
+The automated lifecycle checks cover late/hidden GO, stale callbacks, cancellation,
+connection loss, and no solo persistence; interpolation checks cover bounded history,
+respawn snapping, old sequences, and buffer underrun.
+
+Renderer boundary: remote marbles borrow the local mesh geometry/material and carry
+slot/name labels. They have no Rapier bodies. Individual palettes/effects and a camera
+that follows remaining racers are deferred; the results dialog keeps live standings.
+Spectator scene/camera are implemented in Phase 4 below; real-network latency remains unchecked.
+
+Exit: five-controller finish/rematch is verified over real local WebSockets. Full
+rendered five-player acceptance and cross-device testing remain unverified.
 
 ### Phase 4 Spectating including late entry
 
-- [ ] Mount a watch-only scene with no local racer/controller. Bootstrap from the current
+- [x] Mount a watch-only scene with no local racer/controller. Bootstrap from the current
   snapshot and resynchronize after asset loading or reconnect.
-- [ ] Add follow selection, approximate progress, names/status, elapsed time, and results.
+- [x] Add follow selection, approximate progress, names/status, elapsed time, and results.
   Feed the selected racer to camera, visible course range, stage effects, and fades.
-- [ ] Keep rendering/network updates active with watch UI visible. Handle target finish,
+- [x] Keep rendering/network updates active with watch UI visible. Handle target finish,
   DNF, respawn, long distances between racers, and all entrants becoming inactive.
-- [ ] Test spectators arriving in waiting, countdown, mid-race, after one finish, at final
+- [x] Test spectators arriving in waiting, countdown, mid-race, after one finish, at final
   results, and while a rematch occurs during their loading screen.
-- [ ] Test five racers plus 20 watchers. Measure snapshot age, render delay, memory, and
-  queues under 50/150/300 ms RTT, jitter, packet loss, and one deliberately slow watcher.
+- [x] Exercise five racers plus 20 watchers with controlled 50/150/300 ms RTT,
+  ±20 ms jitter, TCP recovery stalls, and one paused TCP reader; measure sampled pose
+  age, heap change, queue counters, and buffer bounds.
+- [ ] Verify GPU-presented state age on real devices/networks and run a longer memory
+  soak. The controlled interpolation test below does not establish this exit criterion.
 
 Exit: late arrivals immediately see the correct race state after loading, and watching
 does not change racer eligibility or affect physics. Under 150 ms RTT, target a p95
 rendered-state age below 300 ms; treat failure as a tuning/transport decision, not a pass.
+
+Implementation and validation (2026-10-25):
+
+- A spectator mounts no local Rapier body, movement controller, sensors, or player HUD.
+  The existing marble supplies hidden geometry/material resources for the five ghosts.
+  Renderer setup, shaders, lighting and terrain implementation remain untouched.
+- The watch bridge samples the selected racer at 20 Hz into the existing position
+  subscription. Camera, course range, stage and fades follow that stream. Target changes
+  and respawns snap the camera; the camera supports close and wide framing on either
+  course topology. The non-modal watch overlay keeps scene updates running.
+- The panel shows racer selection, approximate course progress, elapsed time, standings,
+  ties/DNF and rematch state. A finished/DNF target falls back to a remaining racer;
+  when none remain, the final pose stays visible. A lost connection offers an explicit
+  spectator reconnect, which fetches a fresh snapshot without reclaiming a racer slot.
+- 101 root tests and 22 service/controller tests cover loading gates, every entry phase,
+  finish/DNF selection, new race IDs, reconnect snapshots, no ready/pose/finish commands
+  from watchers, and return to the solo lobby. TypeScript, targeted lint and production
+  build pass. Chrome smoke testing verified late entry against five synthetic racers,
+  target selection, camera width, results, rematch and leaving the spectator view.
+
+Reproduce the controlled load check with
+`SPIKE_SECONDS=5 node server/multiplayer/validate-spectators.mjs`.
+It uses real local WebSockets, applies delay/jitter in an ordered delivery wrapper,
+models a lost TCP packet as a 100 ms stall every 100th inbound message, and pauses one
+actual TCP reader for 3.5 seconds. It samples the production interpolation function at
+16 ms intervals; it does **not** measure a browser/GPU frame or physical packet loss.
+
+| Simulated RTT | p95 latest pose receipt age | p95 sampled capture age | p95 paused-reader capture age |
+| --- | --- | --- | --- |
+| 50 ms | 114 ms | 133 ms | 3,346 ms |
+| 150 ms | 165 ms | 235 ms | 3,446 ms |
+| 300 ms | 261 ms | 408 ms | 3,652 ms |
+
+Each run held five racers and 20 watchers. Histories stayed at eight samples maximum,
+server queued bytes peaked at zero and no server batches were skipped. The simulation
+scheduler peaked at 227/248/278 pending deliveries. Heap changes were +9.6/-7.5/-10.1 MB;
+these short, GC-dependent measurements are not a leak/soak proof. The paused reader
+fell behind while normal watchers continued. Socket/kernel buffers absorbed this short
+pause, so it does not prove sustained backpressure behavior. The 150 ms sampled-age
+result meets 300 ms in this harness; the GPU-presented target remains unchecked.
 
 ### Phase 5 Railway staging and failure tests
 

@@ -139,6 +139,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     }
     if (connection.role === 'racer' && room.phase === 'countdown') {
       room.phase = 'waiting'; room.raceId = null; room.startAt = null; room.entrants = []
+      room.members.forEach(member => { member.ready = false; member.initialPose = null })
     } else if (room.phase === 'racing') {
       room.entrants = room.entrants.map(entrant => entrant.id === connection.id && entrant.status === 'racing'
         ? { ...entrant, status: 'dnf' } : entrant)

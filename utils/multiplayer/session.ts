@@ -1,3 +1,5 @@
+import { followTarget } from './spectating'
+import { appendPose, type PoseSample } from './interpolation'
 import { createStore } from 'zustand/vanilla'
 import { estimateClockOffset, type ClockSample } from '../../shared/multiplayer/clock.mts'
 import { PROTOCOL_VERSION, serverMessageSchema, type ClientMessage, type Course, type Pose, type Profile, type RoomInfo, type Snapshot } from '../../shared/multiplayer/protocol.mts'
@@ -10,9 +12,11 @@ export type SessionState = {
   info: RoomInfo | null
   error: string | null
   clockOffset: number | null
+  followId: string | null
+  wideCamera: boolean
   pendingStart: boolean
 }
-const initialState: SessionState = { status: 'idle', snapshot: null, info: null, error: null, clockOffset: null, pendingStart: false }
+const initialState: SessionState = { status: 'idle', snapshot: null, info: null, error: null, clockOffset: null, pendingStart: false, followId: null, wideCamera: false }
 const messages: Record<string, string> = {
   'room-missing': 'This room has closed or expired.',
   'course-mismatch': 'This room uses a different course or game version. Open the same game version to join.',
@@ -42,6 +46,11 @@ export function createRoomSession(options: {
   const now = options.now ?? (() => performance.now())
   let socket: WebSocket | null = null
   let generation = 0
+  const poseBuffers = new Map<string, PoseSample[]>()
+  const rotation: Pose['rotation'] = [0, 0, 0, 1]
+  let sequence = 0
+  let lastPublishedAt = -Infinity
+  let finishSentFor: string | null = null
   let ready = false
   let readySent = false
   let previewRoom: string | null = null
@@ -57,7 +66,7 @@ export function createRoomSession(options: {
   function disconnect() {
     generation++
     clearInterval(poll); clearInterval(syncTimer); clearTimeout(timeout); clearTimeout(syncTimeout)
-    socket?.close(); socket = null; readySent = false; latestPoses = null
+    socket?.close(); socket = null; readySent = false; latestPoses = null; poseBuffers.clear()
   }
   function fail(error: string) {
     disconnect(); store.setState({ status: 'error', error, pendingStart: false })
@@ -131,8 +140,17 @@ export function createRoomSession(options: {
         const previous = store.getState().snapshot
         if (previous && (previous.roomId !== message.roomId || message.revision < previous.revision)) return
         clearTimeout(timeout); clearInterval(poll)
+        if (previous?.raceId !== message.raceId) {
+          poseBuffers.clear(); sequence = 0; lastPublishedAt = -Infinity; finishSentFor = null
+        }
+        if (previous?.raceId && message.phase === 'waiting' && previous.phase !== 'waiting') ready = false
         if (previous?.raceId !== message.raceId || previous?.phase !== message.phase) { latestPoses = null; readySent = false }
-        store.setState({ status: 'joined', snapshot: message, pendingStart: false })
+        for (const entrant of message.entrants) {
+          let buffer = poseBuffers.get(entrant.id)
+          if (!buffer) { buffer = []; poseBuffers.set(entrant.id, buffer) }
+          appendPose(buffer, entrant)
+        }
+        store.setState({ status: 'joined', snapshot: message, pendingStart: false, followId: followTarget(message, store.getState().followId) })
         if (!previous) { sync(); syncTimer = setInterval(sync, 15000) }
         markReady(); return
       }
@@ -152,12 +170,22 @@ export function createRoomSession(options: {
       }
       if (message.type === 'poses') {
         const snapshot = store.getState().snapshot
-        if (snapshot?.raceId === message.raceId && snapshot.roomId === message.roomId && message.revision >= snapshot.revision) latestPoses = message
+        if (snapshot?.raceId === message.raceId && snapshot.roomId === message.roomId && message.revision >= snapshot.revision) {
+          latestPoses = message
+          for (const entrant of message.entrants) {
+            const buffer = poseBuffers.get(entrant.id)
+            if (buffer) appendPose(buffer, entrant)
+          }
+        }
       }
     }
   }
   return {
     store, connect,
+    follow(id: string) {
+      if (store.getState().snapshot?.entrants.some(entrant => entrant.id === id)) store.setState({ followId: id })
+    },
+    setWideCamera(wideCamera: boolean) { store.setState({ wideCamera }) },
     setReady(value: boolean) { ready = value; markReady() },
     join(role: 'racer' | 'spectator', profile: Profile) {
       if (!previewRoom || store.getState().status !== 'preview') return
@@ -173,6 +201,32 @@ export function createRoomSession(options: {
       send({ type: 'start', revision: snapshot!.revision })
       timeout = setTimeout(() => fail('Start could not be confirmed. Please rejoin to check the race.'), 8000)
     },
+    publishPose(raceId: string, position: Pose['position'], respawn: number) {
+      const { snapshot, status } = store.getState()
+      const self = snapshot?.entrants.find(entrant => entrant.id === snapshot.selfId)
+      if (status !== 'joined' || snapshot?.raceId !== raceId || snapshot.phase !== 'racing' || self?.status !== 'racing' || finishSentFor === raceId) return false
+      if (now() - lastPublishedAt < 50) return false
+      lastPublishedAt = now()
+      return send({ type: 'pose', raceId, pose: { position, rotation, respawn, sequence: ++sequence } })
+    },
+    finish(raceId: string, elapsedMs: number, position: Pose['position'], respawn: number) {
+      const { snapshot, status } = store.getState()
+      if (status !== 'joined' || snapshot?.raceId !== raceId || snapshot.phase !== 'racing' || finishSentFor === raceId) return false
+      if (!snapshot.entrants.some(entrant => entrant.id === snapshot.selfId && entrant.status === 'racing')) return false
+      if (!send({ type: 'finish', raceId, elapsedMs, pose: { position, rotation, respawn, sequence: ++sequence } })) return false
+      finishSentFor = raceId
+      return true
+    },
+    newRace() {
+      const { snapshot, status } = store.getState()
+      if (status !== 'joined' || snapshot?.phase !== 'results' || snapshot.selfId !== snapshot.ownerId || !snapshot.raceId) return
+      store.setState({ error: null })
+      send({ type: 'new-race', raceId: snapshot.raceId })
+    },
+    captureRotation(value: { x: number; y: number; z: number; w: number }) {
+      rotation[0] = value.x; rotation[1] = value.y; rotation[2] = value.z; rotation[3] = value.w
+    },
+    getPoseBuffer: (id: string) => poseBuffers.get(id),
     leave() { disconnect(); previewRoom = null; store.setState(initialState) },
     dispose() { disconnect(); store.setState({ status: 'error', error: 'Room connection closed. Please create or rejoin a room.' }) },
     getLatestPoses: () => latestPoses,

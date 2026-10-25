@@ -386,3 +386,116 @@ test('race lifecycle: multiplayer room freezes the attempt and cannot submit sol
   store.getState().returnToLobby()
   assert.equal(store.getState().overlay, Overlay.NONE)
 })
+
+test('multiplayer GO preserves the shared origin; finishes never enter solo persistence', () => {
+  const { store, Overlay, SpeedRunStage, submissionCalls } = createRaceStore()
+  store.getState().prepareMultiplayer()
+  store.setState({ playerStatus: 'safe' })
+  const start = performance.now() - 1000
+  store.getState().scheduleMultiplayerRace('race-one', start)
+  const attempt = store.getState().attemptId
+  store.getState().onCountdownComplete(attempt)
+  store.getState().startMultiplayerRace('old-race', start + 1)
+  store.getState().startMultiplayerRace('race-one', start - 1)
+  assert.equal(store.getState().overlay, Overlay.MULTIPLAYER_COUNTDOWN)
+  store.getState().startMultiplayerRace('race-one', start + 1000)
+  assert.equal(store.getState().attemptStartedAtMs, start)
+  store.getState().finishSpeedRun(attempt - 1)
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.RUNNING)
+  store.getState().finishSpeedRun(attempt)
+  const result = store.getState().multiplayerFinish
+  assert.ok(result.elapsedMs >= 1000)
+  store.getState().finishSpeedRun(attempt)
+  store.getState().retryRace()
+  assert.equal(store.getState().multiplayerFinish, result)
+  assert.equal(store.getState().overlay, Overlay.MULTIPLAYER)
+  assert.equal(submissionCalls.length, 0)
+  assert.deepEqual(store.getState().completedSpeedRuns, {})
+  store.getState().prepareMultiplayer()
+  assert.equal(store.getState().multiplayerFinish, null)
+  assert.equal(store.getState().multiplayerRaceId, null)
+  store.getState().stopMultiplayerRace('race-one')
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+})
+
+test('multiplayer bridge handles hidden GO, countdown cancellation, rematch and connection loss', () => {
+  const { bindMultiplayerRace } = loadTypeScript('utils/multiplayer/raceBridge.ts')
+  const { store, SpeedRunStage } = createRaceStore()
+  store.getState().prepareMultiplayer()
+  store.setState({ _isHydrated: true, playerStatus: 'safe' })
+  let hidden = true
+  let now = 1100
+  const snapshot = { selfId: 'me', members: [{ id: 'me', role: 'racer' }], raceId: 'first', startAt: 1500, phase: 'countdown', entrants: [{ id: 'me', status: 'racing' }] }
+  const room = createStore(() => ({ status: 'joined', clockOffset: 500, snapshot }))
+  const poses = []; const readiness = []
+  const session = { store: room, setReady: ready => readiness.push(ready), publishPose: (...args) => poses.push(args), finish() {} }
+  const bridge = bindMultiplayerRace(store, session, { now: () => now, hidden: () => hidden, automaticTick: false })
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.COUNTDOWN)
+  hidden = false; bridge.tick()
+  assert.equal(store.getState().attemptStartedAtMs, 1000)
+  assert.equal(poses.length, 1)
+  room.setState({ snapshot: { ...snapshot, phase: 'waiting', raceId: null } })
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+  assert.equal(readiness.at(-1), false, 'rematch must wait for grid placement')
+  store.setState({ playerStatus: 'safe' }); bridge.tick()
+  assert.equal(readiness.at(-1), true)
+  room.setState({ snapshot: { ...snapshot, raceId: 'second' } })
+  assert.equal(store.getState().multiplayerRaceId, 'second')
+  room.setState({ status: 'error' })
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.END)
+  bridge.dispose()
+})
+
+test('spectator bridge bootstraps late poses without racing, follows switches and resets on rematch', () => {
+  const { bindMultiplayerRace } = loadTypeScript('utils/multiplayer/raceBridge.ts')
+  const { store, Overlay, SpeedRunStage, submissionCalls } = createRaceStore()
+  store.setState({ _isHydrated: true, setOverlay: overlay => store.setState({ overlay }) })
+  const snapshot = { selfId: 'watcher', members: [{ id: 'watcher', role: 'spectator' }], raceId: 'late', startAt: 100,
+    phase: 'racing', entrants: [{ id: 'one', status: 'racing' }, { id: 'two', status: 'racing' }] }
+  const room = createStore(() => ({ status: 'joined', clockOffset: 0, followId: 'one', snapshot }))
+  const buffer = [{ time: 900, pose: { sequence: 4, respawn: 0, position: [4, 1, -200], rotation: [0, 0, 0, 1] } }]
+  let published = 0
+  const session = { store: room, getPoseBuffer: () => buffer, setReady: () => { throw Error('spectator must not ready') },
+    publishPose: () => published++, finish: () => published++ }
+  const bridge = bindMultiplayerRace(store, session, { now: () => 1000, automaticTick: false })
+  assert.equal(store.getState().isSpectating, true)
+  assert.equal(store.getState().overlay, Overlay.SPECTATING)
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+  assert.deepEqual(store.getState().playerPosition, [4, 1, -200])
+  const firstTick = store.getState().playerRespawnTick
+  room.setState({ followId: 'two' })
+  assert.equal(store.getState().playerRespawnTick, firstTick + 1)
+  buffer[0] = { ...buffer[0], pose: { ...buffer[0].pose, respawn: 1, position: [5, 2, -1000] } }
+  bridge.tick()
+  assert.equal(store.getState().playerRespawnTick, firstTick + 2)
+  assert.deepEqual(store.getState().playerPosition, [5, 2, -1000])
+  store.getState().finishSpeedRun(); bridge.tick()
+  assert.equal(submissionCalls.length, 0); assert.equal(published, 0)
+  room.setState({ snapshot: { ...snapshot, phase: 'results' } })
+  assert.equal(store.getState().overlay, Overlay.SPECTATING)
+  room.setState({ followId: null, snapshot: { ...snapshot, phase: 'waiting', raceId: null, entrants: [] } })
+  assert.notDeepEqual(store.getState().playerPosition, [5, 2, -1000])
+  assert.equal(store.getState().isSpectating, true)
+  room.setState({ status: 'error' })
+  assert.equal(store.getState().overlay, Overlay.MULTIPLAYER)
+  bridge.dispose()
+  store.getState().returnToLobby()
+  assert.equal(store.getState().isSpectating, false)
+})
+
+test('spectator asset loading uses the newest snapshot, never the race seen before a rematch', () => {
+  const { bindMultiplayerRace } = loadTypeScript('utils/multiplayer/raceBridge.ts')
+  const { store, Overlay } = createRaceStore()
+  store.setState({ _isHydrated: true, isWarmupComplete: false })
+  const snapshot = { selfId: 'watcher', members: [{ id: 'watcher', role: 'spectator' }], raceId: 'old', phase: 'racing' }
+  const room = createStore(() => ({ status: 'joined', clockOffset: 0, followId: 'old-racer', snapshot }))
+  const bridge = bindMultiplayerRace(store, { store: room, getPoseBuffer: () => undefined }, { automaticTick: false })
+  assert.equal(store.getState().isSpectating, false)
+  room.setState({ followId: null, snapshot: { ...snapshot, phase: 'waiting', raceId: null } })
+  store.setState({ isWarmupComplete: true }); bridge.tick()
+  assert.equal(store.getState().isSpectating, true)
+  assert.equal(store.getState().overlay, Overlay.SPECTATING)
+  assert.equal(store.getState().multiplayerRaceId, null)
+  assert.equal(store.getState().attemptStartedAtMs, null)
+  bridge.dispose()
+})

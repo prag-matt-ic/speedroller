@@ -4,6 +4,7 @@ import { type FC } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore } from '@/components/GameProvider'
+import { useOptionalMultiplayer } from '@/components/multiplayer/MultiplayerProvider'
 import Button from '@/components/ui/Button'
 import { SpeedRunTimeDisplay } from '@/components/ui/SpeedRunTimeDisplay'
 import { SpeedRunStage } from '@/stores/types'
@@ -33,6 +34,8 @@ export const SpeedRunTimer: FC = () => {
 }
 
 export const SpeedRunControls: FC = () => {
+  const multiplayer = useOptionalMultiplayer()
+  const isMultiplayer = useGameStore(state => state.multiplayerRaceId !== null)
   const speedRunStatus = useGameStore((s) => s.speedRunStage)
   const retryRace = useGameStore((s) => s.retryRace)
   const returnToLobby = useGameStore((s) => s.returnToLobby)
@@ -48,11 +51,11 @@ export const SpeedRunControls: FC = () => {
         aria-label="Back to lobby"
         disabled={isDisabled}
         className="aspect-square!"
-        onClick={returnToLobby}>
+        onClick={isMultiplayer ? multiplayer?.leave : returnToLobby}>
         <LogOutIcon size={20} strokeWidth={2} />
       </Button>
 
-      <Button
+      {!isMultiplayer && <Button
         variant="secondary"
         size="sm"
         onClick={retryRace}
@@ -61,7 +64,7 @@ export const SpeedRunControls: FC = () => {
         disabled={isDisabled}
         className="aspect-square!">
         <RotateCcwIcon size={20} strokeWidth={2} />
-      </Button>
+      </Button>}
 
       <SpeedRunTimer />
     </div>

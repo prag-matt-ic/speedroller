@@ -84,6 +84,13 @@ export type TimeSlice = {
 
   enterStartLine: () => void
   prepareMultiplayer: () => void
+  isSpectating: boolean
+  multiplayerRaceId: string | null
+  multiplayerStartAtMs: number | null
+  multiplayerFinish: { raceId: string; attemptId: number; elapsedMs: number } | null
+  scheduleMultiplayerRace: (raceId: string, startAtMs: number) => void
+  startMultiplayerRace: (raceId: string, nowMs: number) => void
+  stopMultiplayerRace: (raceId: string) => void
   startCountdown: () => void
   cancelStartLine: () => void
   onCountdownComplete: (attemptId: number) => void
@@ -126,6 +133,8 @@ export enum Overlay {
   SUBSCRIBE = 'subscribe',
   SPEEDRUN_START = 'speedrun-start',
   MULTIPLAYER = 'multiplayer',
+  SPECTATING = 'spectating',
+  MULTIPLAYER_COUNTDOWN = 'multiplayer-countdown',
   SPEEDRUN_COUNTDOWN = 'speedrun-countdown',
   SPEEDRUN_END = 'speedrun-end',
 }

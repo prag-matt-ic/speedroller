@@ -9,12 +9,15 @@ import { Overlay } from '@/stores/types'
 import { getStartGridPosition } from '@/utils/platform/raceMarkers'
 import { PLAYER_RESTING_Y } from '@/utils/player'
 import { createRoomSession, type RoomSession, type SessionState } from '@/utils/multiplayer/session'
+import { bindMultiplayerRace } from '@/utils/multiplayer/raceBridge'
+import { MultiplayerCountdown } from './MultiplayerCountdown'
+import { SpectatorControls } from './SpectatorControls'
 import { MultiplayerOverlay } from './MultiplayerOverlay'
 
-const emptyStore = createStore<SessionState>(() => ({ status: 'idle', snapshot: null, info: null, error: null, clockOffset: null, pendingStart: false }))
+const emptyStore = createStore<SessionState>(() => ({ status: 'idle', snapshot: null, info: null, error: null, clockOffset: null, pendingStart: false, followId: null, wideCamera: false }))
 const Context = createContext<{
   session: RoomSession | null; busy: boolean; problem: string | null; watchLink: boolean
-  create: () => void; join: (role: 'racer' | 'spectator') => void; leave: () => void
+  reconnect: () => void; create: () => void; join: (role: 'racer' | 'spectator') => void; leave: () => void
 } | null>(null)
 const endpoint = process.env.NEXT_PUBLIC_MULTIPLAYER_URL
 
@@ -66,6 +69,7 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
     } finally { if (generation.current === token) setBusy(false) }
   }
   function create() {
+    inspectedInvite.current = true
     cleanUrl(); setWatchLink(false)
     game.getState().prepareMultiplayer()
     void open()
@@ -74,6 +78,12 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
     if (role === 'racer') game.getState().prepareMultiplayer()
     session?.join(role, profile())
   }
+  function reconnect() {
+    const roomId = session?.store.getState().snapshot?.roomId
+    if (!roomId) return
+    setWatchLink(true)
+    void open(roomId)
+  }
   function leave() {
     generation.current++; active.current?.leave(); active.current = null
     setSession(null); setProblem(null); setBusy(false); cleanUrl()
@@ -81,6 +91,11 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
     game.getState().setOverlay(Overlay.NONE)
   }
   useEffect(() => () => { generation.current++; active.current?.dispose() }, [])
+  useEffect(() => {
+    if (!session) return
+    const bridge = bindMultiplayerRace(game, session)
+    return () => bridge.dispose()
+  }, [game, session])
   useEffect(() => {
     session?.setReady(hydrated && platformReady && warmupComplete && playerSafe)
   }, [session, hydrated, platformReady, warmupComplete, playerSafe])
@@ -100,17 +115,20 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overlay, hydrated, platformReady, warmupComplete])
 
-  return <Context value={{ session, busy, problem, watchLink, create, join, leave }}>
+  return <Context value={{ session, busy, problem, watchLink, create, join, leave, reconnect }}>
     {children}
     {overlay === Overlay.MULTIPLAYER && <MultiplayerOverlay />}
+    {overlay === Overlay.SPECTATING && <SpectatorControls />}
+    {overlay === Overlay.MULTIPLAYER_COUNTDOWN && <MultiplayerCountdown />}
   </Context>
 }
+export function useOptionalMultiplayer() { return useContext(Context) }
 export function useMultiplayer() {
   const context = useContext(Context)
   if (!context) throw new Error('Missing multiplayer provider')
   return context
 }
 export function useRoomState<T>(selector: (state: SessionState) => T) {
-  const { session } = useMultiplayer()
-  return useStore(session?.store ?? emptyStore, selector)
+  const context = useOptionalMultiplayer()
+  return useStore(context?.session?.store ?? emptyStore, selector)
 }

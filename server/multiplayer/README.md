@@ -162,5 +162,24 @@ the persistent provider ends its current room connection and requires re-entry.
 The loaded game's layout hash includes rows and surface metadata. Serve both clients
 from the same build; course edits during development can correctly produce a mismatch.
 The UI only sends `ready` after existing loading/warmup/placement gates and clock sync.
-The race remains a room preview after Start in Phase 2, with local solo submission
-blocked. Phase 3 connects the game lifecycle; Phase 4 supplies spectator rendering.
+Phase 3 connects the shared GO time to the local attempt, sends poses at up to 20 Hz,
+and displays interpolated remote marbles without physics bodies. Finishes go only to
+the room service; results include ties/DNF and the owner can reopen the room for a
+rematch. Countdown cancellation and rematch both require fresh grid readiness.
+Spectators now receive a watch-only scene, racer selection, close/wide camera controls,
+live progress/results and an explicit reconnect action. They never mount a local physics
+body or send racer updates. Late arrivals and rematches bootstrap from the newest snapshot. Remote marbles temporarily share the local palette/effects to keep this
+integration separate from renderer work. Results remain client-reported, not anti-cheat.
+
+
+Phase 4 controlled spectator load check:
+
+```sh
+SPIKE_SECONDS=5 node server/multiplayer/validate-spectators.mjs
+```
+
+Runs five racers and 20 watchers at 50/150/300 ms simulated RTT with jitter,
+ordered TCP-recovery stalls and one paused TCP reader. Reports interpolation capture
+age, latest-pose age, heap deltas, scheduler queues and server buffer counters.
+This is not a GPU presentation or real-network benchmark; see the prototype plan
+for measured results and remaining device/soak checks.

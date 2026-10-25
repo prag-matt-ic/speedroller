@@ -84,6 +84,10 @@ test('countdown disconnect cancels race ID; owner departure closes waiting/count
   await waitFor(() => owner.latest.phase === 'waiting')
   assert.equal(owner.latest.raceId, null)
   await owner.error({ type: 'start', revision: 0 }, 'stale-room')
+  await owner.error({ type: 'start' }, 'not-ready')
+  await f.advance(1000)
+  await owner.ready(); await racers[1].ready()
+  await waitFor(() => owner.latest.members.every(member => member.ready))
   await owner.request({ type: 'start' }, m => m.type === 'snapshot' && m.phase === 'countdown')
   assert.notEqual(owner.latest.raceId, raceId)
   const opponent = racers[1]

@@ -31,13 +31,18 @@ const LOBBY_CANCEL_COLUMN = 16
 
 export const RESET_TIME_STATE: Pick<
   TimeSlice,
-  'speedRunTimeCS' | 'speedRunStage' | 'attemptStartedAtMs' | 'attemptResult' | 'saveStatus'
+  'speedRunTimeCS' | 'speedRunStage' | 'attemptStartedAtMs' | 'attemptResult' | 'saveStatus' |
+  'multiplayerRaceId' | 'multiplayerStartAtMs' | 'multiplayerFinish' | 'isSpectating'
 > = {
   speedRunTimeCS: 0,
   speedRunStage: SpeedRunStage.LOBBY,
   attemptStartedAtMs: null,
   attemptResult: null,
   saveStatus: 'idle',
+  isSpectating: false,
+  multiplayerRaceId: null,
+  multiplayerStartAtMs: null,
+  multiplayerFinish: null,
 }
 
 const isValidUsername = (username: string | null): username is string =>
@@ -82,6 +87,10 @@ export const createTimeSlice =
 
       set({
         attemptId,
+        isSpectating: false,
+        multiplayerRaceId: null,
+        multiplayerStartAtMs: null,
+        multiplayerFinish: null,
         attemptStartedAtMs: null,
         attemptInputType: state.inputType,
         attemptResult: null,
@@ -112,6 +121,10 @@ export const createTimeSlice =
       resetAttemptPlayerState()
       set({
         attemptId: state.attemptId + 1,
+        isSpectating: false,
+        multiplayerRaceId: null,
+        multiplayerStartAtMs: null,
+        multiplayerFinish: null,
         attemptStartedAtMs: null,
         attemptInputType: null,
         attemptResult: null,
@@ -158,8 +171,32 @@ export const createTimeSlice =
       },
       prepareMultiplayer: () => {
         const state = get()
-        if (state.speedRunStage !== SpeedRunStage.LOBBY && state.speedRunStage !== SpeedRunStage.START) return
+        if (!state.multiplayerRaceId && state.speedRunStage !== SpeedRunStage.LOBBY && state.speedRunStage !== SpeedRunStage.START) return
         if (beginAttempt(SpeedRunStage.START)) set({ overlay: Overlay.MULTIPLAYER })
+      },
+      scheduleMultiplayerRace: (raceId, startAtMs) => {
+        const state = get()
+        if (state.multiplayerRaceId === raceId || !Number.isFinite(startAtMs)) return
+        if (state.overlay !== Overlay.MULTIPLAYER || state.speedRunStage !== SpeedRunStage.START) return
+        set({ multiplayerRaceId: raceId, multiplayerStartAtMs: startAtMs, multiplayerFinish: null,
+          attemptId: state.attemptId + 1, attemptStartedAtMs: null, attemptInputType: state.inputType,
+          speedRunStage: SpeedRunStage.COUNTDOWN, overlay: Overlay.MULTIPLAYER_COUNTDOWN })
+      },
+      startMultiplayerRace: (raceId, nowMs) => {
+        const state = get()
+        if (state.multiplayerRaceId !== raceId || state.speedRunStage !== SpeedRunStage.COUNTDOWN) return
+        if (state.multiplayerStartAtMs === null || !Number.isFinite(nowMs) || nowMs < state.multiplayerStartAtMs) return
+        if (!state.isPlatformReady || !state.isWarmupComplete || state.playerStatus !== 'safe') return
+        set({ speedRunStage: SpeedRunStage.RUNNING, overlay: Overlay.NONE,
+          attemptStartedAtMs: state.multiplayerStartAtMs,
+          speedRunTimeCS: Math.max(0, Math.floor((nowMs - state.multiplayerStartAtMs) / 10)) })
+      },
+      stopMultiplayerRace: (raceId) => {
+        const state = get()
+        if (state.multiplayerRaceId !== raceId) return
+        if (state.speedRunStage === SpeedRunStage.END && state.overlay === Overlay.MULTIPLAYER) return
+        state.resetPlayerSpeedState()
+        set({ speedRunStage: SpeedRunStage.END, overlay: Overlay.MULTIPLAYER, ...getResetInputState() })
       },
       startCountdown: () => {
         const state = get()
@@ -176,7 +213,7 @@ export const createTimeSlice =
       },
       onCountdownComplete: (attemptId: number) => {
         const state = get()
-        if (state.speedRunStage !== SpeedRunStage.COUNTDOWN) return
+        if (state.multiplayerRaceId || state.speedRunStage !== SpeedRunStage.COUNTDOWN) return
         if (state.attemptId !== attemptId) return
         set({
           speedRunStage: SpeedRunStage.RUNNING,
@@ -192,6 +229,14 @@ export const createTimeSlice =
         if (state.attemptStartedAtMs === null) return
 
         const finishedAt = getMonotonicNow()
+        if (state.multiplayerRaceId) {
+          const elapsedMs = Math.max(0, finishedAt - state.attemptStartedAtMs)
+          state.resetPlayerSpeedState()
+          set({ multiplayerFinish: { raceId: state.multiplayerRaceId, attemptId: state.attemptId, elapsedMs },
+            speedRunTimeCS: Math.round(elapsedMs / 10), speedRunStage: SpeedRunStage.END,
+            overlay: Overlay.MULTIPLAYER, ...getResetInputState() })
+          return
+        }
         const timeSeconds = toCentisecondSeconds(
           (finishedAt - state.attemptStartedAtMs) / 1000,
         )
@@ -267,6 +312,7 @@ export const createTimeSlice =
       },
       retryRace: () => {
         const state = get()
+        if (state.multiplayerRaceId) return
         if (
           state.speedRunStage !== SpeedRunStage.RUNNING &&
           state.speedRunStage !== SpeedRunStage.SUBMITTING &&

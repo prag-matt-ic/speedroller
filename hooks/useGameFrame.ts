@@ -13,13 +13,13 @@ type GameFrameState = WebGPURootState & FrameTimingState
 // - The scheduler owns the throttle: `fps` skips frames until 1/fps has elapsed and hands the
 //   callback the real time since its last run, so callers integrate over wall-clock time instead of
 //   a fixed step — a slow frame runs the callback once with the full delta, never a backlog.
-// - An open overlay disables the job outright, so paused frames cost nothing.
+// - Modal overlays pause jobs; the non-modal spectator controls keep the scene live.
 // - `drop: true` keeps a slow frame from queueing catch-up runs.
 export function useGameFrame(
   callback: (state: GameFrameState, delta: number) => void,
   priority = 0,
 ) {
-  const isOverlayOpen = useGameStore((s) => s.overlay !== Overlay.NONE)
+  const isOverlayOpen = useGameStore((s) => s.overlay !== Overlay.NONE && s.overlay !== Overlay.SPECTATING)
   const simFps = usePerformanceStore((s) => s.simFps)
 
   useFrame(callback, {

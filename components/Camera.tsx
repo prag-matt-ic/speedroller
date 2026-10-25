@@ -1,4 +1,5 @@
 'use client'
+import { useRoomState } from '@/components/multiplayer/MultiplayerProvider'
 
 import { useFrame, useThree } from '@react-three/fiber'
 import { type FC, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
@@ -116,7 +117,7 @@ const FlatCamera: FC<Props> = ({ isMobile, position }) => {
   const overlay = useGameStore((s) => s.overlay)
   const speedRunStage = useGameStore((s) => s.speedRunStage)
   // The countdown is drawn over the live track at the normal gameplay camera.
-  const isRaisedOverlay = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN
+  const isRaisedOverlay = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN && overlay !== Overlay.MULTIPLAYER_COUNTDOWN && overlay !== Overlay.SPECTATING
 
   // The level design changed the far plane; keep the live camera in step with it.
   useLayoutEffect(() => {
@@ -188,7 +189,7 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
     frame.player.fromArray(playerPosition.current)
     worldToCourse(frame.player, surface, frame.course)
     surfaceFrame(frame.course.x, surface, frame.up, frame.right)
-    const raised = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN
+    const raised = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN && overlay !== Overlay.MULTIPLAYER_COUNTDOWN && overlay !== Overlay.SPECTATING
     frame.eye.copy(frame.player).addScaledVector(frame.up, position.y + (raised ? OVERLAY_Y_OFFSET : 0))
     frame.eye.z += position.z + (raised ? OVERLAY_Z_OFFSET : 0)
     if (lookAtOverride) frame.target.fromArray(lookAtOverride)
@@ -212,6 +213,9 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
 
 const Camera: FC<Props> = props => {
   const surface = useCourseSurface()
+  const isSpectating = useGameStore(state => state.isSpectating)
+  const wide = useRoomState(state => state.wideCamera)
+  if (isSpectating) return <CylinderRaceCamera {...props} position={wide ? { y: props.position.y * 1.7, z: props.position.z * 1.7 } : props.position} />
   return surface.topology === 'cylinder' ? <CylinderRaceCamera {...props} /> : <FlatCamera {...props} />
 }
 

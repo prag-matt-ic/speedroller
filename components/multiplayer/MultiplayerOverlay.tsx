@@ -11,7 +11,7 @@ import { canStartRace } from '@/utils/multiplayer/session'
 import { useMultiplayer, useRoomState } from './MultiplayerProvider'
 
 export function MultiplayerOverlay() {
-  const { session, busy, problem, watchLink, create, join, leave } = useMultiplayer()
+  const { session, busy, problem, watchLink, create, join, leave, reconnect } = useMultiplayer()
   const status = useRoomState(state => state.status)
   const snapshot = useRoomState(state => state.snapshot)
   const info = useRoomState(state => state.info)
@@ -53,7 +53,7 @@ export function MultiplayerOverlay() {
     try { await navigator.clipboard.writeText(link); setCopyStatus('Link copied.') }
     catch { setCopyStatus('Could not copy. Select and copy the link below.'); linkInput.current?.focus(); linkInput.current?.select() }
   }
-  const heading = snapshot ? self?.role === 'spectator' ? 'Watching the room' : 'Race room' : 'Join a race'
+  const heading = snapshot?.phase === 'results' ? 'Race results' : snapshot ? self?.role === 'spectator' ? 'Watching the room' : 'Race room' : 'Join a race'
   return <PointerProvider isMobile={isMobile}>
     <dialog ref={dialog} onCancel={event => { event.preventDefault(); leave() }} aria-labelledby="room-heading"
       className="fixed inset-0 m-auto max-h-[90dvh] w-[min(36rem,95vw)] overflow-y-auto rounded-2xl border border-teal-200/20 bg-neutral-950 p-5 text-white shadow-2xl backdrop:bg-black/75 sm:p-8">
@@ -76,12 +76,17 @@ export function MultiplayerOverlay() {
         </>}
         {snapshot && <>
           {snapshot.phase !== 'waiting' && <p className="text-sm text-white/70">{racers.length} racers · {spectators} spectators</p>}
-          <ol aria-label="Racers" className="flex flex-col gap-2">
+          {snapshot.phase === 'waiting' ? <ol aria-label="Racers" className="flex flex-col gap-2">
             {racers.map((member, index) => <li key={member.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 p-3 text-sm">
               <span>{index + 1}. {member.profile.name}{member.id === snapshot.ownerId ? ' · Owner' : ''}{member.id === snapshot.selfId ? ' · You' : ''}</span>
               <span className="text-teal-200">{member.ready ? 'Ready' : 'Loading…'}</span>
             </li>)}
-          </ol>
+          </ol> : <ol aria-label="Race standings" className="flex flex-col gap-2">
+            {[...snapshot.entrants].sort((a, b) => (a.place ?? Infinity) - (b.place ?? Infinity) || a.slot - b.slot).map(entrant => <li key={entrant.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 p-3 text-sm">
+              <span>{entrant.place ? `${entrant.place}. ` : ''}{entrant.profile.name}{entrant.id === snapshot.selfId ? ' · You' : ''}</span>
+              <span className="text-teal-200">{entrant.status === 'finished' ? `${((entrant.elapsedMs ?? 0) / 1000).toFixed(2)} s` : entrant.status === 'dnf' ? 'DNF' : snapshot.phase === 'countdown' ? 'On the grid' : 'Racing…'}</span>
+            </li>)}
+          </ol>}
           <label htmlFor="race-share-url" className="text-sm">Invite racers and spectators</label>
           <input ref={linkInput} id="race-share-url" readOnly value={link} className="min-w-0 w-full rounded-lg border border-white/20 bg-black px-3 py-2 text-sm" onFocus={event => event.target.select()} />
           <div className="flex flex-wrap gap-3">
@@ -90,8 +95,11 @@ export function MultiplayerOverlay() {
           </div>
           <p role="status" className="text-xs text-teal-200">{copyStatus}</p>
           {snapshot.phase === 'waiting' && <p className="text-sm text-white/60">{owner ? racers.length < 2 ? 'Invite at least one other racer to start.' : racers.some(member => !member.ready) ? 'Waiting for racers to load and synchronize.' : 'Everyone is ready. You can start without filling all five places.' : 'The owner starts once at least two racers are ready.'}</p>}
-          {snapshot.phase !== 'waiting' && <p className="text-sm text-white/60">Room preview: race controls are connected. Playable multiplayer and the spectator view are coming next.</p>}
+          {snapshot.phase === 'racing' && <p role="status" className="text-sm text-white/60">{snapshot.entrants.filter(entrant => entrant.status === 'racing').length} racers still racing. Results update as they finish.</p>}
+          {snapshot.phase === 'results' && (owner && snapshot.ownerConnected ? <Button variant="primary" disabled={status !== 'joined'} onClick={() => session?.newRace()}>New race</Button> : <p className="text-sm text-white/60">{snapshot.ownerConnected ? 'Waiting for the owner to open the next race.' : 'The owner left. Create a new room to race again.'}</p>)}
+
         </>}
+        {status === 'error' && self?.role === 'spectator' && <Button variant="primary" onClick={reconnect}>Reconnect to watch</Button>}
         {(problem || status === 'error') && <Button variant="primary" disabled={!input.isValid || busy} onClick={create}>Create new room</Button>}
         <Button variant="secondary" onClick={leave}>{snapshot ? 'Leave room' : 'Back to lobby'}</Button>
       </section>

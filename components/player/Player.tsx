@@ -13,6 +13,9 @@ import { type FC, useEffect, useRef } from 'react'
 import { Mesh, type Object3D, Vector3 } from 'three'
 
 import { PLAYER_INITIAL_POSITION, useGameStore, useGameStoreAPI } from '@/components/GameProvider'
+import { SpectatorScene } from '@/components/multiplayer/SpectatorScene'
+import { RemoteRacers } from '@/components/multiplayer/RemoteRacers'
+import { useOptionalMultiplayer, useRoomState } from '@/components/multiplayer/MultiplayerProvider'
 import PlayerHUD from '@/components/player/PlayerHUD'
 import { Marble } from '@/components/player/marble/Marble'
 import { useGameFrame } from '@/hooks/useGameFrame'
@@ -71,6 +74,13 @@ function getLobbyForwardSpeed(input: PlayerInput): number {
 }
 
 const Player: FC = () => {
+  const spectatorMember = useRoomState(state => state.snapshot?.members.some(member => member.id === state.snapshot?.selfId && member.role === 'spectator') ?? false)
+  const isSpectating = useGameStore(state => state.isSpectating)
+  return spectatorMember || isSpectating ? <SpectatorScene /> : <LocalPlayer />
+}
+
+const LocalPlayer: FC = () => {
+  const multiplayer = useOptionalMultiplayer()
   const surface = useCourseSurface()
   const rowCount = useGameStore(s => s.rowsData.length)
   const gameStoreAPI = useGameStoreAPI()
@@ -247,6 +257,8 @@ const Player: FC = () => {
       surfaceUp.current,
     )
 
+    multiplayer?.session?.captureRotation(sphereMeshRef.current.quaternion)
+
     // Update the store mirrors used by effects and HUD (immutable updates, change-guarded).
     setPlayerPosition(nextPosition.current)
     publishSpeedMirror(!canMove)
@@ -315,22 +327,25 @@ const Player: FC = () => {
   // parked at PLAYER_INITIAL_POSITION, the shader's Y fade keeps it invisible there, and the drop-in
   // is the respawn LandingOverlay triggers once it closes.
   return (
-    <RigidBody
-      ref={bodyRef}
-      type="kinematicPosition"
-      userData={PLAYER_USER_DATA}
-      colliders={false}
-      position={PLAYER_INITIAL_POSITION}
-      onIntersectionEnter={onIntersectionEnter}
-      onIntersectionExit={onIntersectionExit}>
-      <BallCollider
-        args={[PLAYER_RADIUS]}
-        ref={ballColliderRef}
-        collisionGroups={COLLISION_GROUPS.player}
-      />
-      <Marble ref={sphereMeshRef} />
-      <PlayerHUD />
-    </RigidBody>
+    <>
+      <RigidBody
+        ref={bodyRef}
+        type="kinematicPosition"
+        userData={PLAYER_USER_DATA}
+        colliders={false}
+        position={PLAYER_INITIAL_POSITION}
+        onIntersectionEnter={onIntersectionEnter}
+        onIntersectionExit={onIntersectionExit}>
+        <BallCollider
+          args={[PLAYER_RADIUS]}
+          ref={ballColliderRef}
+          collisionGroups={COLLISION_GROUPS.player}
+        />
+        <Marble ref={sphereMeshRef} />
+        <PlayerHUD />
+      </RigidBody>
+      <RemoteRacers localMesh={sphereMeshRef} />
+    </>
   )
 }
 
