@@ -18,6 +18,10 @@ open because a fresh-user manual run could not get past loading on an isolated o
 
 ## Reproducible test and measurements
 
+Historical note: Phase 1 extended the same service and replaced the protocol v0 harness.
+The JSON below records the original Phase 0 run; use repository history to rerun that
+version. The current README and `validate.mjs` exercise protocol v1.
+
 Run commands are in [the spike README](../server/multiplayer/README.md).
 [Raw measurements](multiplayer-phase0-results.json) preserve all values and assertions.
 Environment: Apple M4 Pro, macOS arm64, Node 24.22.1. Each scenario runs a separate relay

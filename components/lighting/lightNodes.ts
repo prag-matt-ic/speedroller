@@ -19,7 +19,7 @@ import { PLATFORM_DATA } from '@/resources/rowsData'
 // The world-fixed directional key was removed: the track wraps around the cylinder, so the key's
 // contribution fell to zero over long stretches of the course. This ambient value is the baseline a
 // course-relative key will be re-balanced against when that work is picked up again.
-const TILE_AMBIENT_INTENSITY = 1.0
+const TILE_AMBIENT_INTENSITY = Math.PI * 0.66
 
 export const TILE_AMBIENT_LIGHT = new AmbientLight('#ffffff', TILE_AMBIENT_INTENSITY)
 

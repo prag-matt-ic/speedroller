@@ -1,7 +1,7 @@
 # Player Versus Player Prototype Plan
 
-Status: **Phase 0 transport validated locally; fresh-user manual baseline still outstanding.
-No multiplayer gameplay integration or deployment.** See the
+Status: **Phase 1 room service implemented and tested locally. Fresh-user manual baseline
+still outstanding; no multiplayer gameplay integration or deployment.** See the
 [Phase 0 report](multiplayer-phase0-validation.md) for measurements and remaining gates.
 
 Updated: **25 October 2026**
@@ -276,16 +276,37 @@ Exit: transport and integration risks have concrete measurements and named call 
 
 ### Phase 1 Room service and protocol
 
-- [ ] Add shared validated message types, isolated server build scripts, one HTTP/WSS
+- [x] Add shared validated message types, isolated server build scripts, one HTTP/WSS
   service, `/health`, and the in-memory room state machine.
-- [ ] Implement server-generated identity, random room links, five racer slots, spectator
+- [x] Implement server-generated identity, random room links, five racer slots, spectator
   membership, readiness, owner-only Start, closed entry, and complete join snapshots.
-- [ ] Implement revision/race IDs, clock sync, three-second scheduled start, result
+- [x] Implement revision/race IDs, clock sync, three-second scheduled start, result
   collection, DNF/deadlines, rematch reopening, and room expiry.
-- [ ] Add role/phase checks, payload/rate/capacity limits, heartbeat, queue bounds, error
+- [x] Add role/phase checks, payload/rate/capacity limits, heartbeat, queue bounds, error
   responses, and shutdown that closes sockets and clears room timers.
-- [ ] Test these behaviours with real WebSocket clients and a controllable clock before
+- [x] Test these behaviours with real WebSocket clients and a controllable clock before
   connecting the 3D scene. Include simultaneous attempts at the fifth racer slot.
+
+Implementation: [service and protocol guide](../server/multiplayer/README.md),
+[shared schemas](../shared/multiplayer/protocol.mts), and
+[clock estimator](../shared/multiplayer/clock.mts). The Phase 0 service was extended in
+place; its old test protocol was replaced. Start now includes the latest room revision
+to reject delayed requests after roster/readiness changes. Room URLs preserve the
+supplied game pathname; actual entry/copy-link UI remains Phase 2.
+
+Verification: **14 service tests and 92 existing game tests passed**; isolated typecheck,
+targeted TypeScript lint, build, and a compiled-service healthcheck/shutdown smoke test
+passed. The [30-second local load run](multiplayer-phase1-results.json) delivered 589
+pose batches to each of 25 clients, accepted 2,945 poses, and used about 0.730 MB/s of
+outbound JSON payload with zero observed outgoing queue bytes or skipped batches.
+This is local transport evidence, not WAN latency or rendered-game acceptance.
+
+The Node process provides HTTP/WebSocket upgrade; public WSS termination belongs to
+Railway staging in Phase 5. IP limits currently use direct socket peers and ignore
+forwarded headers; verify trusted proxy handling before deployment. Course identifiers
+are validated and matched exactly, but the game must supply actual layout/rules versions
+during frontend integration. Real device clock skew, rendered interpolation, and the
+Phase 0 fresh-user loading baseline remain open. No renderer files were changed by this work.
 
 Exit: headless clients can create, fill, start, watch late, finish, and reopen a room;
 unauthorized commands and cross-room messages cannot change it.

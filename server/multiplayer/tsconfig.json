@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": "../..",
+    "outDir": "./dist",
+    "types": ["node"]
+  },
+  "include": ["*.mts", "../../shared/multiplayer/*.mts"]
+}
