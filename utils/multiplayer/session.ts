@@ -1,8 +1,10 @@
 import { followTarget } from './spectating'
-import { appendPose, type PoseSample } from './interpolation'
+import { appendPose, createPlayback, samplePlayback, createPresentationClock, type Playback, type PoseSample } from './interpolation'
 import { createStore } from 'zustand/vanilla'
 import { estimateClockOffset, type ClockSample } from '../../shared/multiplayer/clock.mts'
 import { PROTOCOL_VERSION, serverMessageSchema, type ClientMessage, type Course, type Pose, type Profile, type RoomInfo, type Snapshot } from '../../shared/multiplayer/protocol.mts'
+
+const POSE_INTERVAL_MS = 50
 
 type Command = ClientMessage extends infer Message ? Message extends ClientMessage ? Omit<Message, 'protocolVersion'> : never : never
 type Entry = { type: 'create'; profile: Profile } | { type: 'inspect'; roomId: string }
@@ -47,9 +49,15 @@ export function createRoomSession(options: {
   let socket: WebSocket | null = null
   let generation = 0
   const poseBuffers = new Map<string, PoseSample[]>()
+  const playbacks = new Map<string, Playback>()
+  const presentationClock = createPresentationClock()
+  let presentationTime = 0
+  function updateEntrantPlayback(playback: Playback, id: string) {
+    samplePlayback(poseBuffers.get(id)!, presentationTime, playback)
+  }
   const rotation: Pose['rotation'] = [0, 0, 0, 1]
   let sequence = 0
-  let lastPublishedAt = -Infinity
+  let nextPublishAt = -Infinity
   let finishSentFor: string | null = null
   let ready = false
   let readySent = false
@@ -66,7 +74,7 @@ export function createRoomSession(options: {
   function disconnect() {
     generation++
     clearInterval(poll); clearInterval(syncTimer); clearTimeout(timeout); clearTimeout(syncTimeout)
-    socket?.close(); socket = null; readySent = false; latestPoses = null; poseBuffers.clear()
+    socket?.close(); socket = null; readySent = false; latestPoses = null; poseBuffers.clear(); playbacks.clear(); presentationClock.reset()
   }
   function fail(error: string) {
     disconnect(); store.setState({ status: 'error', error, pendingStart: false })
@@ -141,13 +149,13 @@ export function createRoomSession(options: {
         if (previous && (previous.roomId !== message.roomId || message.revision < previous.revision)) return
         clearTimeout(timeout); clearInterval(poll)
         if (previous?.raceId !== message.raceId) {
-          poseBuffers.clear(); sequence = 0; lastPublishedAt = -Infinity; finishSentFor = null
+          poseBuffers.clear(); playbacks.clear(); presentationClock.reset(); sequence = 0; nextPublishAt = -Infinity; finishSentFor = null
         }
         if (previous?.raceId && message.phase === 'waiting' && previous.phase !== 'waiting') ready = false
         if (previous?.raceId !== message.raceId || previous?.phase !== message.phase) { latestPoses = null; readySent = false }
         for (const entrant of message.entrants) {
           let buffer = poseBuffers.get(entrant.id)
-          if (!buffer) { buffer = []; poseBuffers.set(entrant.id, buffer) }
+          if (!buffer) { buffer = []; poseBuffers.set(entrant.id, buffer); playbacks.set(entrant.id, createPlayback()) }
           appendPose(buffer, entrant)
         }
         store.setState({ status: 'joined', snapshot: message, pendingStart: false, followId: followTarget(message, store.getState().followId) })
@@ -205,8 +213,9 @@ export function createRoomSession(options: {
       const { snapshot, status } = store.getState()
       const self = snapshot?.entrants.find(entrant => entrant.id === snapshot.selfId)
       if (status !== 'joined' || snapshot?.raceId !== raceId || snapshot.phase !== 'racing' || self?.status !== 'racing' || finishSentFor === raceId) return false
-      if (now() - lastPublishedAt < 50) return false
-      lastPublishedAt = now()
+      const time = now()
+      if (time < nextPublishAt) return false
+      nextPublishAt = Number.isFinite(nextPublishAt) ? nextPublishAt + (Math.floor((time - nextPublishAt) / POSE_INTERVAL_MS) + 1) * POSE_INTERVAL_MS : time + POSE_INTERVAL_MS
       return send({ type: 'pose', raceId, pose: { position, rotation, respawn, sequence: ++sequence } })
     },
     finish(raceId: string, elapsedMs: number, position: Pose['position'], respawn: number) {
@@ -226,6 +235,13 @@ export function createRoomSession(options: {
     captureRotation(value: { x: number; y: number; z: number; w: number }) {
       rotation[0] = value.x; rotation[1] = value.y; rotation[2] = value.z; rotation[3] = value.w
     },
+    updatePlayback(localTime = now()) {
+      const { clockOffset, status } = store.getState()
+      if (clockOffset === null || status !== 'joined') return
+      presentationTime = presentationClock.sample(localTime, clockOffset)
+      playbacks.forEach(updateEntrantPlayback)
+    },
+    getRenderedPose: (id: string) => playbacks.get(id),
     getPoseBuffer: (id: string) => poseBuffers.get(id),
     leave() { disconnect(); previewRoom = null; store.setState(initialState) },
     dispose() { disconnect(); store.setState({ status: 'error', error: 'Room connection closed. Please create or rejoin a room.' }) },

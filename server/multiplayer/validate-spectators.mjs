@@ -5,7 +5,6 @@ import WebSocket from 'ws'
 import { fixture, pose, profile, waitFor } from './tests/helpers.mjs'
 import { loadTypeScript } from '../../tests/loadTypeScript.mjs'
 const { createRoomSession } = loadTypeScript('utils/multiplayer/session.ts')
-const { samplePose, INTERPOLATION_DELAY_MS } = loadTypeScript('utils/multiplayer/interpolation.ts')
 const seconds = Number(process.env.SPIKE_SECONDS ?? 5)
 assert(Number.isFinite(seconds) && seconds >= 3 && seconds <= 30)
 const percentile = values => values.sort((a, b) => a - b)[Math.floor(values.length * 0.95)] ?? null
@@ -15,7 +14,9 @@ async function measure(rtt) {
   const f = await fixture({ after: callback => cleanup.push(callback) }, { realTime: true })
   const sessions = [], sockets = [], timers = new Set(), captures = new Map()
   let publisher, sampler, sequence = 0, peakQueued = 0, delivered = 0
-  const age = [], slowAge = [], snapshotAge = [], rendered = { position: [0, 0, 0], rotation: [0, 0, 0, 1] }
+  let frames = 0, underruns = 0, maxPredictionMs = 0, maxCorrectionDistance = 0, updates = 0
+  const lastSequences = new Map()
+  const age = [], slowAge = [], snapshotAge = []
   function later(fn, delay) {
     const timer = setTimeout(() => { timers.delete(timer); fn() }, delay)
     timers.add(timer); peakQueued = Math.max(peakQueued, timers.size)
@@ -69,8 +70,17 @@ async function measure(rtt) {
         if (!buffer?.length) continue
         assert(buffer.length <= 8)
         const serverNow = performance.now() + clockOffset
-        const target = serverNow - INTERPOLATION_DELAY_MS
-        if (!samplePose(buffer, target, rendered)) continue
+        session.updatePlayback()
+        const rendered = session.getRenderedPose(owner.latest.selfId)
+        if (!rendered?.latest) continue
+        frames++
+        if (rendered.predictionMs > 0) underruns++
+        maxPredictionMs = Math.max(maxPredictionMs, rendered.predictionMs)
+        maxCorrectionDistance = Math.max(maxCorrectionDistance, rendered.correctionDistance)
+        if (lastSequences.get(index) !== rendered.latest.pose.sequence) updates++
+        lastSequences.set(index, rendered.latest.pose.sequence)
+        assert(rendered.predictionMs <= 100)
+        assert(rendered.position.every(Number.isFinite))
         // pose(sequence).z = -sequence, so interpolated Z identifies the original capture time.
         const interpolatedSequence = -rendered.position[2]
         const before = Math.floor(interpolatedSequence), after = Math.ceil(interpolatedSequence)
@@ -85,7 +95,8 @@ async function measure(rtt) {
     }, 16)
     await sleep(seconds * 1000)
     const result = { rttMs: rtt, jitterMs: 20, tcpRecoveryStall: '100 ms every 100th inbound message', seconds,
-      racers: 5, watchers: 20, p95PoseReceiptAgeMs: percentile(snapshotAge), p95SampledCaptureAgeMs: percentile(age),
+      racers: 5, watchers: 20, observedUpdatesPerWatcherHz: updates / sessions.length / seconds,
+      sampledFrames: frames, bufferUnderrunFrames: underruns, maxPredictionMs, maxCorrectionDistance, p95PoseReceiptAgeMs: percentile(snapshotAge), p95SampledCaptureAgeMs: percentile(age),
       p95SlowReaderSampledAgeMs: percentile(slowAge), heapGrowthBytes: process.memoryUsage().heapUsed - heapBefore,
       maxSimulatedPendingDeliveries: peakQueued, delivered, maxServerBufferedBytes: f.relay.metrics.maxBufferedBytes,
       skippedServerBatches: f.relay.metrics.skippedBatches, maxPoseSamples: Math.max(...sessions.flatMap(session =>

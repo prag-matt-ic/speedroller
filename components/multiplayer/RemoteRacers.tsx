@@ -5,12 +5,12 @@ import { useRef, type RefObject } from 'react'
 import { Mesh, Sprite, Vector3 } from 'three'
 import { useTextCanvas, TRANSPARENT_TEXTURE } from '@/hooks/useTextCanvas'
 import type { Entrant } from '@/shared/multiplayer/protocol.mts'
-import { INTERPOLATION_DELAY_MS, samplePose, type PoseOutput } from '@/utils/multiplayer/interpolation'
 import type { RoomSession } from '@/utils/multiplayer/session'
 import { useOptionalMultiplayer, useRoomState } from './MultiplayerProvider'
 
 export function RemoteRacers({ localMesh }: { localMesh: RefObject<Mesh | null> }) {
   const multiplayer = useOptionalMultiplayer()
+  useFrame(() => multiplayer?.session?.updatePlayback(), -100)
   const snapshot = useRoomState(state => state.snapshot)
   const followId = useRoomState(state => state.followId)
   const self = snapshot?.members.find(member => member.id === snapshot.selfId)
@@ -23,22 +23,20 @@ function RemoteRacer({ entrant, showName, session, localMesh }: { entrant: Entra
   const labelUp = useRef(new Vector3())
   const mesh = useRef<Mesh>(null)
   const label = useRef<Sprite>(null)
-  const sampled = useRef<PoseOutput>({ position: [0, 0, 0], rotation: [0, 0, 0, 1] })
   const text = useTextCanvas(showName ? `${entrant.slot}. ${entrant.profile.name}${entrant.status === 'dnf' ? ' · DNF' : entrant.status === 'finished' ? ' · Finished' : ''}` : String(entrant.slot), {
     width: 384, height: 64, fontSize: 32, color: '#ffffff', fontWeight: 700,
   })
   useFrame(({ camera }) => {
     if (!mesh.current || !label.current || !localMesh.current) return
-    const buffer = session.getPoseBuffer(entrant.id)
-    const { clockOffset } = session.store.getState()
-    if (!buffer || clockOffset === null || !samplePose(buffer, performance.now() + clockOffset - INTERPOLATION_DELAY_MS, sampled.current)) {
+    const sampled = session.getRenderedPose(entrant.id)
+    if (!sampled?.latest) {
       mesh.current.visible = false; label.current.visible = false; return
     }
     // shortcut: share the local marble palette/effects; add per-racer uniforms after renderer work settles.
     mesh.current.geometry = localMesh.current.geometry
     mesh.current.material = localMesh.current.material
-    mesh.current.position.fromArray(sampled.current.position)
-    mesh.current.quaternion.fromArray(sampled.current.rotation)
+    mesh.current.position.fromArray(sampled.position)
+    mesh.current.quaternion.fromArray(sampled.rotation)
     mesh.current.scale.copy(localMesh.current.scale)
     mesh.current.visible = true; label.current.visible = true
     label.current.position.copy(mesh.current.position)

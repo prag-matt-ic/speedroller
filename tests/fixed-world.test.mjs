@@ -143,6 +143,8 @@ test('Z-only store changes notify player-position consumers without React render
   const { usePlayerPosition } = loadTypeScript('hooks/usePlayerPosition.ts', {
     react: { useRef: (value) => ({ current: value }), useEffect: (effect) => cleanups.push(effect()) },
     '@/components/GameProvider': { useGameStoreAPI: () => store },
+    '@react-three/fiber': { useFrame() {} },
+    '@/components/multiplayer/MultiplayerProvider': { useOptionalMultiplayer: () => null },
   })
   const received = []
   const { playerPosition } = usePlayerPosition((position) => received.push(position))

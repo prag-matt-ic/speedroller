@@ -48,7 +48,10 @@ test('browser session creates, previews without admission, joins, synchronizes a
   const snapshot = late.store.getState().snapshot
   await f.advance(50)
   assert.equal(late.store.getState().snapshot, snapshot, 'pose batches must not update reactive room state')
+  const formerId = owner.store.getState().snapshot.selfId
   owner.leave()
+  owner.updatePlayback()
+  assert.equal(owner.getRenderedPose(formerId), undefined)
   assert.equal(owner.store.getState().status, 'idle')
 })
 
@@ -133,12 +136,18 @@ for (const count of [2, 3, 5]) test(`${count} browser controllers agree on poses
   }
   await waitFor(() => sessions.every(s => s.store.getState().snapshot.phase === 'results'))
   const results = owner.store.getState().snapshot.entrants
+  owner.updatePlayback()
+  const renderedFinish = owner.getRenderedPose(results[0].id)
+  assert.deepEqual(renderedFinish.position, [3, 2, 1])
+  assert.equal(renderedFinish.predictionMs, 0)
+  assert.equal(owner.getRenderedPose(results[0].id), renderedFinish, 'all frame consumers share one pose')
   assert.ok(results.every(e => e.place === 1 && e.elapsedMs === 100))
   for (const session of sessions) assert.deepEqual(session.store.getState().snapshot.entrants, results)
   owner.newRace()
   await waitFor(() => sessions.every(s => s.store.getState().snapshot.phase === 'waiting'))
   for (const session of sessions) {
     assert.equal(session.getPoseBuffer(results[0].id), undefined)
+    assert.equal(session.getRenderedPose(results[0].id), undefined)
     assert.equal(session.publishPose(raceId, [0, 0, 0], 0), false)
     assert.equal(session.finish(raceId, 100, [0, 0, 0], 0), false)
     assert.equal(selfReady(session), false)
@@ -201,4 +210,24 @@ test('spectators bootstrap every phase, follow finish/DNF, reconnect and survive
   // The scene may still be loading; the retained controller must contain the newest room only.
   assert.equal(waiting.store.getState().snapshot.raceId, null)
   assert.equal(waiting.store.getState().snapshot.members.find(m => m.id === waiting.store.getState().snapshot.selfId).role, 'spectator')
+})
+
+test('publisher keeps its 20 Hz schedule through timer jitter without catch-up bursts', () => {
+  let time = 0
+  const commands = []
+  const socket = { readyState: 1, bufferedAmount: 0, close() {}, send: value => commands.push(JSON.parse(value)) }
+  const session = createRoomSession({ endpoint: 'ws://localhost:8080', course, initialPose: pose(), now: () => time, socket: () => socket })
+  try {
+    session.connect({ type: 'create', profile })
+    session.store.setState({ status: 'joined', snapshot: { selfId: 'me', raceId: 'race', phase: 'racing', entrants: [{ id: 'me', status: 'racing' }] } })
+    for (const tick of [0, 51, 100, 151, 200, 251, 300]) {
+      time = tick
+      assert.equal(session.publishPose('race', [0, 0, 0], 0), true)
+      assert.equal(session.publishPose('race', [0, 0, 0], 0), false)
+    }
+    time = 1000
+    assert.equal(session.publishPose('race', [0, 0, 0], 0), true)
+    assert.equal(session.publishPose('race', [0, 0, 0], 0), false)
+    assert.equal(commands.length, 8)
+  } finally { session.dispose() }
 })

@@ -3,7 +3,6 @@ import { Overlay, SpeedRunStage, type GameStore } from '@/stores/types'
 import { getResetInputState } from '@/stores/inputSlice'
 import { getStartGridPosition } from '@/utils/platform/raceMarkers'
 import { PLAYER_RESTING_Y } from '@/utils/player'
-import { samplePose, INTERPOLATION_DELAY_MS, type PoseOutput } from './interpolation'
 import type { RoomSession } from './session'
 
 export function bindMultiplayerRace(game: StoreApi<GameStore>, session: RoomSession, options: {
@@ -16,7 +15,6 @@ export function bindMultiplayerRace(game: StoreApi<GameStore>, session: RoomSess
   let followedId: string | null = null
   let followedRespawn = -1
   let watchedRace: string | null = null
-  const sampled: PoseOutput = { position: [0, 0, 0], rotation: [0, 0, 0, 1] }
 
   function watch() {
     const { snapshot, clockOffset, followId } = session.store.getState()
@@ -31,12 +29,14 @@ export function bindMultiplayerRace(game: StoreApi<GameStore>, session: RoomSess
     }
     if (game.getState().overlay !== Overlay.SPECTATING) game.setState({ overlay: Overlay.SPECTATING })
     const buffer = followId ? session.getPoseBuffer(followId) : undefined
-    if (buffer && samplePose(buffer, now() + clockOffset - INTERPOLATION_DELAY_MS, sampled)) {
-      const respawn = buffer.at(-1)!.pose.respawn
+    // Coarse state drives progress and respawn notifications; frame consumers use session playback.
+    const latestPose = buffer?.at(-1)?.pose
+    if (latestPose) {
+      const respawn = latestPose.respawn
       const changed = followedId !== followId || followedRespawn !== respawn || watchedRace !== snapshot.raceId
       const position = game.getState().playerPosition
-      if (changed || position.some((value, axis) => value !== sampled.position[axis])) {
-        game.setState(current => ({ playerPosition: [...sampled.position],
+      if (changed || position.some((value, axis) => value !== latestPose.position[axis])) {
+        game.setState(current => ({ playerPosition: [...latestPose.position],
           playerRespawnTick: current.playerRespawnTick + (changed ? 1 : 0) }))
       }
       followedId = followId; followedRespawn = respawn; watchedRace = snapshot.raceId
