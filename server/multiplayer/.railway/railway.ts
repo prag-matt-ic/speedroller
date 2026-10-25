@@ -14,7 +14,7 @@ export default defineRailway(() => {
       restartPolicyMaxRetries: 3,
       sleepApplication: null,
     },
-    env: { ALLOWED_ORIGINS: "http://localhost:3000", NODE_ENV: "production", PORT: "8080", TRUST_RAILWAY_PROXY: "true" },
+    env: { ALLOWED_ORIGINS: "http://localhost:3000,https://speedroller.vercel.app", NODE_ENV: "production", PORT: "8080", TRUST_RAILWAY_PROXY: "true" },
   });
 
   return project("speedroller-multiplayer", {

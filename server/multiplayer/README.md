@@ -224,7 +224,7 @@ uploaded. No frontend, renderer, `.env`, assets or Git history are included. Doc
 installs service dependencies at the bundle root so shared Zod imports resolve without
 installing the game; it compiles and copies only runtime output/dependencies.
 
-Staging allows exactly `http://localhost:3000`, per the current testing choice. When
+Staging allows `http://localhost:3000` and `https://speedroller.vercel.app`. When
 starting the frontend yourself, use this command from the repository root:
 
 ```sh
@@ -260,7 +260,7 @@ Research: [Railway IaC](https://docs.railway.com/infrastructure-as-code),
 [public networking headers and WebSocket limits](https://docs.railway.com/networking/public-networking/specs-and-limits),
 [deployment teardown](https://docs.railway.com/guides/deployment-teardown).
 The server pins Zod 4.6.7 following [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5);
-its production dependency audit is clean. The frontend dependency was not changed.
+its production dependency audit is clean. The subsequent Vercel deployment also updates the frontend lockfile to patched dependencies.
 
 Verification on 2026-10-25: deployment `d21c98d6-1ae1-46a7-b0fc-32ef0efad604`
 is healthy. Five-racer WSS lifecycle/late-spectator/failure checks passed on this build.
@@ -322,3 +322,15 @@ Railway sizing promise, WAN benchmark, browser/GPU test or continuous scheduled 
 
 References adapted: Rugbet `packages/worker/logger.ts`, `apps/multiplayer/timings.ts`,
 `apps/multiplayer/ws/socketHub.ts`; [Pino API](https://github.com/pinojs/pino/blob/main/docs/api.md).
+
+## Vercel frontend deployment
+
+Project `pragmattic/quizroller` has a custom `speedroller` environment tracking the
+`speedroller` branch and serving `https://speedroller.vercel.app`. Its scoped
+`NEXT_PUBLIC_MULTIPLAYER_URL` points to the Railway WSS endpoint above. Railway IaC
+allows this exact origin alongside localhost. Existing database/email variables stay
+in Vercel. No wildcard origin or old WebRTC credentials are needed for multiplayer.
+
+The frontend TypeScript configuration excludes `server/`; the standalone service has
+its own build/type checks and dependencies. Production frontend build verification uses
+a temporary checkout so the active renderer dev server and its `.next` cache stay intact.
