@@ -302,8 +302,8 @@ outbound JSON payload with zero observed outgoing queue bytes or skipped batches
 This is local transport evidence, not WAN latency or rendered-game acceptance.
 
 The Node process provides HTTP/WebSocket upgrade; public WSS termination belongs to
-Railway staging in Phase 5. IP limits currently use direct socket peers and ignore
-forwarded headers; verify trusted proxy handling before deployment. Course identifiers
+Railway staging in Phase 5. At this phase, IP limits used direct socket peers and ignored
+forwarded headers; Phase 5 adds validated Railway source-IP handling. Course identifiers
 are validated and matched exactly, but the game must supply actual layout/rules versions
 during frontend integration. Real device clock skew, rendered interpolation, and the
 Phase 0 fresh-user loading baseline remain open. No renderer files were changed by this work.
@@ -453,16 +453,16 @@ result meets 300 ms in this harness; the GPU-presented target remains unchecked.
 
 ### Phase 5 Railway staging and failure tests
 
-- [ ] Deploy the standalone Node service with one replica, an explicit supported Node
+- [x] Deploy the standalone Node service with one replica, an explicit supported Node
   runtime, WSS domain, `/health`, and bounded shutdown. Disable service sleep for staging.
-- [ ] Configure allowed frontend origins and `NEXT_PUBLIC_MULTIPLAYER_URL`; keep server
+- [x] Configure allowed frontend origins and document `NEXT_PUBLIC_MULTIPLAYER_URL` startup; keep server
   settings separate from browser configuration. Include shared protocol sources in the
   server build and document local two-process startup.
-- [ ] Use one region and in-memory rooms. Set deployment overlap to zero and draining to
+- [x] Use one region and in-memory rooms. Set deployment overlap to zero and draining to
   five seconds; close existing sockets on SIGTERM. Test the replacement window explicitly:
   no room continuity is promised across deployments. The UI must show room loss and offer
   a new room, never loop forever or attach to a similarly named room on another instance.
-- [ ] Record connection count, rooms, publish/broadcast rates, queue drops, disconnect
+- [x] Record connection count, rooms, publish/broadcast rates, queue drops, disconnect
   causes, CPU, memory, and outbound bytes without logging complete payloads or invite URLs.
 - [ ] Test real devices on separate networks, WSS from the deployed frontend, background
   mobile tabs, server restart during a race, expired rooms, and protocol/course mismatch.
@@ -470,6 +470,50 @@ result meets 300 ms in this harness; the GPU-presented target remains unchecked.
 Exit: the documented staging URL supports five racers and late spectators across networks;
 failure and restart paths are understandable to users. Continuous uptime monitoring must
 be configured separately from Railway's deployment healthcheck.
+
+Staging implementation (2026-10-25): [service runbook](../server/multiplayer/README.md#railway-staging-phase-5)
+and [TypeScript infrastructure](../server/multiplayer/.railway/railway.ts). Server-only
+upload; branch unchanged. The existing renderer dev process was left running untouched.
+The user chose localhost only: `http://localhost:3000`; no deployed frontend was changed.
+
+- [x] Remote WSS: five racers, late spectator snapshot and live poses, sixth-racer/closed-entry
+  rejection, spectator write rejection, invalid Origin and protocol/course mismatch.
+- [x] Remote WSS: owner disconnect becomes DNF, other racers finish, results remain visible,
+  non-owner rematch rejected, silent client's native heartbeat timeout evicts it.
+- [x] Active-race deployment: shutdown message and socket closure; old room lookup fails;
+  replacement accepts a newly generated room. No reconnect continuity is implied.
+- [x] Local deterministic failure suite: room expiry, race deadline, rate/payload limits,
+  queue congestion, simultaneous admissions, countdown cancellation and stale traffic.
+- [x] Actual process SIGTERM closes even a stalled partial HTTP request within four seconds.
+- [x] Aggregate telemetry observed in Railway logs, without invite IDs or player payloads.
+- [x] Live Railway source-IP probe: 53 further upgrades accepted after seven smoke-test
+  connections, then HTTP 429 despite changing forged X-Real-IP/X-Forwarded-For headers.
+- [x] 105 repository tests, 25 service tests, root/service type checks and service build pass.
+  Targeted lint has no errors (eight intentional stdout/telemetry console warnings).
+  Production server dependency audit reports zero vulnerabilities; IaC plan has zero drift.
+- [ ] Physical devices on separate networks, mobile background/resume and browser WSS
+  presentation remain manual acceptance checks. Synthetic native clients do not prove these.
+- [ ] External continuous uptime monitoring remains to be configured separately.
+
+Pino instrumentation and automated local capacity run (2026-10-25):
+`npm run stress --prefix server/multiplayer` runs one and ten full rooms in separate
+server processes and retains JSONL server traces plus an assertion-based JSON report.
+Rugbet worker logging/timing patterns are adapted in `logging.mts`; per-command and
+full tick histograms, event-loop delay, correlation IDs and lifecycle timings are now
+captured without logging player payloads or invite IDs. Pino is deployed on staging.
+
+| 30-second scenario | Clients | Minimum batches/client | Local ping p99 | Largest server tick p99 | Largest event-loop p99 | Peak server RSS |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 full room | 25 | 594 | 0.52 ms | 1.65 ms | 11.89 ms | 124.4 MB |
+| 10 full rooms | 250 | 594 | 8.50 ms | 8.06 ms | 16.49 ms | 128.7 MB |
+
+Both runs passed with zero dropped batches/congestion disconnects; server cleanup left
+zero rooms/connections. The ten-room run accepted 29,620 poses. These are local,
+synthetic-client measurements on this machine, not Railway capacity or device acceptance.
+The 10 ms event-loop sampling interval contributes to the idle delay floor. Largest
+server p99 values are maxima across one-second windows; CPU/RSS include setup.
+Evidence: `.tmp/multiplayer-stress/phase5-pino/results.json` and accompanying server JSONL.
+26 server tests, type checks and server build pass with the new instrumentation.
 
 ### Phase 6 Acceptance and limited rollout
 

@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { createServer } from 'node:http'
-import { performance } from 'node:perf_hooks'
+import { performance, createHistogram } from 'node:perf_hooks'
+import type { Logger } from 'pino'
 import { WebSocket, WebSocketServer } from 'ws'
+import { clientIp } from './clientIp.mts'
 import { queueAction } from './queue.mts'
 import { clientMessageSchema, LIMITS, PROTOCOL_VERSION, sameCourse } from '../../shared/multiplayer/protocol.mts'
 import type { ClientMessage, Course, Entrant, ErrorCode, Pose, Profile, ServerMessage, Snapshot } from '../../shared/multiplayer/protocol.mts'
@@ -13,19 +15,21 @@ type Connection = {
   lastPing: number; congestedAt: number | null; windowAt: number; poses: number; controls: number;
 }
 type Room = {
-  id: string; ownerId: string; course: Course; phase: Snapshot['phase']; revision: number;
+  id: string; traceId: string; ownerId: string; course: Course; phase: Snapshot['phase']; revision: number;
   members: Set<Connection>; entrants: Entrant[]; raceId: string | null;
   startAt: number | null; activeAt: number;
 }
-type Options = { allowedOrigins: readonly string[]; now?: () => number; automaticTick?: boolean }
+type Options = { allowedOrigins: readonly string[]; now?: () => number; automaticTick?: boolean; trustRailwayProxy?: boolean; logger?: Logger }
 
-export function createRelay({ allowedOrigins, now = () => performance.now(), automaticTick = true }: Options) {
+export function createRelay({ allowedOrigins, now = () => performance.now(), automaticTick = true, trustRailwayProxy = false, logger }: Options) {
+  const commandDuration = createHistogram(), tickDuration = createHistogram()
   const rooms = new Map<string, Room>()
   const connections = new Set<Connection>()
   const sources = new Map<string, { since: number; connections: number; creations: number }>()
   let stopping = false
   let lastBatch = now()
-  const metrics = { acceptedPoses: 0, outboundBytes: 0, skippedBatches: 0, congestedDisconnects: 0, maxBufferedBytes: 0 }
+  const metrics = { acceptedPoses: 0, outboundBytes: 0, skippedBatches: 0, congestedDisconnects: 0, maxBufferedBytes: 0, broadcasts: 0, closedConnections: 0, timedOutConnections: 0,
+    rejections: {} as Partial<Record<ErrorCode, number>>, closedRooms: { shutdown: 0, expired: 0, 'owner-left': 0 } }
   const http = createServer((request, response) => {
     response.writeHead(request.url === '/health' && !stopping ? 200 : 404)
     response.end(request.url === '/health' && !stopping ? 'ok' : 'not found')
@@ -43,9 +47,8 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
   }
 
   http.on('upgrade', (request, socket, head) => {
-    // shortcut: trust only the direct peer IP; verify Railway proxy headers before staging.
-    const ip = request.socket.remoteAddress ?? 'unknown'
-    if (stopping || !request.headers.origin || !allowedOrigins.includes(request.headers.origin)) {
+    const ip = clientIp(request, trustRailwayProxy)
+    if (!ip || stopping || !request.headers.origin || !allowedOrigins.includes(request.headers.origin)) {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return
     }
     if (connections.size >= LIMITS.connections || !allowSource(ip, 'connections', LIMITS.connectionsPerMinute)) {
@@ -57,28 +60,41 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
         joinedAt: now(), lastPong: now(), lastPing: now(), congestedAt: null,
         windowAt: now(), poses: 0, controls: 0 }
       connections.add(connection)
+      logger?.info({ event: 'ws.client.connected', connectionId: connection.id, connections: connections.size })
       webSocket.on('error', () => { webSocket.terminate() })
       webSocket.on('pong', () => { connection.lastPong = now() })
-      webSocket.on('close', () => { advanceRooms(); connections.delete(connection); leave(connection) })
+      webSocket.on('close', closeCode => {
+        logger?.info({ event: 'ws.client.disconnected', connectionId: connection.id, traceId: connection.room?.traceId, closeCode, durationMs: now() - connection.joinedAt })
+        metrics.closedConnections++; advanceRooms(); connections.delete(connection); leave(connection)
+      })
       webSocket.on('message', (raw, binary) => {
         if (stopping || webSocket.readyState !== WebSocket.OPEN) return
-        advanceRooms()
-        if (now() - connection.windowAt >= 1000) {
-          connection.windowAt = now(); connection.poses = 0; connection.controls = 0
+        const startedAt = performance.now()
+        let command = 'invalid'
+        try {
+          advanceRooms()
+          if (now() - connection.windowAt >= 1000) {
+            connection.windowAt = now(); connection.poses = 0; connection.controls = 0
+          }
+          let input: unknown
+          try { input = binary ? null : JSON.parse(raw.toString()) } catch { input = null }
+          const parsed = clientMessageSchema.safeParse(input)
+          if (parsed.success) command = parsed.data.type
+          const isPose = parsed.success && parsed.data.type === 'pose'
+          const count = isPose ? ++connection.poses : ++connection.controls
+          if (count > (isPose ? LIMITS.posesPerSecond : LIMITS.controlsPerSecond)) {
+            reject(connection, 'rate-limit'); webSocket.close(1008, 'rate limit'); leave(connection); return
+          }
+          if (!parsed.success) {
+            const version = input && typeof input === 'object' && 'protocolVersion' in input ? input.protocolVersion : undefined
+            reject(connection, version !== undefined && version !== PROTOCOL_VERSION ? 'protocol-mismatch' : 'invalid-message'); return
+          }
+          handle(connection, parsed.data)
+        } finally {
+          const durationMs = performance.now() - startedAt
+          commandDuration.record(Math.max(1, Math.round(durationMs * 1e6)))
+          if (command !== 'pose' && command !== 'ping') logger?.info({ event: 'ws.command.completed', connectionId: connection.id, traceId: connection.room?.traceId, command, durationMs })
         }
-        let input: unknown
-        try { input = binary ? null : JSON.parse(raw.toString()) } catch { input = null }
-        const parsed = clientMessageSchema.safeParse(input)
-        const isPose = parsed.success && parsed.data.type === 'pose'
-        const count = isPose ? ++connection.poses : ++connection.controls
-        if (count > (isPose ? LIMITS.posesPerSecond : LIMITS.controlsPerSecond)) {
-          reject(connection, 'rate-limit'); webSocket.close(1008, 'rate limit'); leave(connection); return
-        }
-        if (!parsed.success) {
-          const version = input && typeof input === 'object' && 'protocolVersion' in input ? input.protocolVersion : undefined
-          reject(connection, version !== undefined && version !== PROTOCOL_VERSION ? 'protocol-mismatch' : 'invalid-message'); return
-        }
-        handle(connection, parsed.data)
       })
     })
   })
@@ -89,6 +105,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     metrics.maxBufferedBytes = Math.max(metrics.maxBufferedBytes, queued)
     const action = queueAction(queued, connection.congestedAt, now(), replaceable)
     if (action === 'close') {
+      logger?.warn({ event: 'ws.congested', connectionId: connection.id, traceId: connection.room?.traceId, bufferedBytes: queued })
       metrics.congestedDisconnects++; connection.socket.terminate(); return
     }
     if (action === 'skip') {
@@ -99,7 +116,9 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     metrics.outboundBytes += Buffer.byteLength(encoded)
     connection.socket.send(encoded)
   }
-  function reject(connection: Connection, code: ErrorCode) { send(connection, { type: 'error', code }) }
+  function reject(connection: Connection, code: ErrorCode) {
+    logger?.warn({ event: 'ws.command.rejected', connectionId: connection.id, traceId: connection.room?.traceId, code })
+    metrics.rejections[code] = (metrics.rejections[code] ?? 0) + 1; send(connection, { type: 'error', code }) }
   function snapshot(connection: Connection, room: Room): Snapshot {
     return { type: 'snapshot', protocolVersion: PROTOCOL_VERSION, selfId: connection.id,
       roomId: room.id, ownerId: room.ownerId, ownerConnected: [...room.members].some(m => m.id === room.ownerId),
@@ -108,10 +127,13 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
       members: [...room.members].map(m => ({ id: m.id, profile: m.profile!, role: m.role, ready: m.ready })) }
   }
   function publish(room: Room) {
+    logger?.info({ event: 'room.state', traceId: room.traceId, phase: room.phase, revision: room.revision + 1, members: room.members.size })
     room.revision++
     room.members.forEach(member => send(member, snapshot(member, room)))
   }
   function closeRoom(room: Room, reason: 'owner-left' | 'expired' | 'shutdown') {
+    logger?.info({ event: 'room.closed', traceId: room.traceId, reason })
+    metrics.closedRooms[reason]++
     rooms.delete(room.id)
     for (const member of room.members) {
       member.room = null
@@ -122,6 +144,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
   }
   function completeIfFinished(room: Room) {
     if (room.phase !== 'racing' || room.entrants.some(entrant => entrant.status === 'racing')) return
+    logger?.info({ event: 'race.completed', traceId: room.traceId, durationMs: now() - room.startAt! })
     room.phase = 'results'; room.activeAt = now()
     room.entrants = room.entrants.map(entrant => ({ ...entrant, place: entrant.elapsedMs === null ? null :
       1 + room.entrants.filter(other => other.elapsedMs !== null &&
@@ -153,6 +176,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
         closeRoom(room, 'expired'); continue
       }
       if (room.phase === 'countdown' && now() >= room.startAt!) {
+        logger?.info({ event: 'race.started', traceId: room.traceId, startDelayMs: now() - room.startAt! })
         room.phase = 'racing'; publish(room)
       }
       if (room.phase === 'racing' && now() >= room.startAt! + LIMITS.raceMs) {
@@ -197,7 +221,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
       if (message.type === 'create') {
         if (!allowSource(connection.ip, 'creations', LIMITS.creationsPerMinute)) { reject(connection, 'rate-limit'); return }
         if (rooms.size >= LIMITS.rooms) { reject(connection, 'server-full'); return }
-        const room: Room = { id: randomUUID(), ownerId: connection.id, course: message.course, phase: 'waiting',
+        const room: Room = { id: randomUUID(), traceId: randomUUID(), ownerId: connection.id, course: message.course, phase: 'waiting',
           revision: 0, members: new Set(), entrants: [], raceId: null, startAt: null, activeAt: now() }
         rooms.set(room.id, room); join(connection, room, 'racer', message.profile); return
       }
@@ -260,24 +284,29 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     completeIfFinished(room); publish(room)
   }
   function tick() {
-    advanceRooms()
-    for (const connection of connections) {
-      if ((!connection.room && now() - connection.joinedAt >= LIMITS.joinMs) || now() - connection.lastPong >= LIMITS.deadConnectionMs) {
-        leave(connection); connection.socket.terminate(); continue
+    const startedAt = performance.now()
+    try {
+      advanceRooms()
+      for (const connection of connections) {
+        if ((!connection.room && now() - connection.joinedAt >= LIMITS.joinMs) || now() - connection.lastPong >= LIMITS.deadConnectionMs) {
+          logger?.warn({ event: 'ws.timeout', connectionId: connection.id, traceId: connection.room?.traceId })
+          metrics.timedOutConnections++; leave(connection); connection.socket.terminate(); continue
+        }
+        if (now() - connection.lastPing >= LIMITS.heartbeatMs) {
+          connection.lastPing = now(); connection.socket.ping()
+        }
       }
-      if (now() - connection.lastPing >= LIMITS.heartbeatMs) {
-        connection.lastPing = now(); connection.socket.ping()
+      for (const [ip, source] of sources) if (now() - source.since >= 60000) sources.delete(ip)
+      if (now() - lastBatch < 50) return
+      lastBatch += Math.floor((now() - lastBatch) / 50) * 50
+      for (const room of rooms.values()) {
+        if (room.phase !== 'racing') continue
+        metrics.broadcasts++
+        const message: ServerMessage = { type: 'poses', protocolVersion: PROTOCOL_VERSION, roomId: room.id,
+          raceId: room.raceId!, revision: room.revision, serverTime: now(), entrants: room.entrants }
+        room.members.forEach(member => send(member, message, true))
       }
-    }
-    for (const [ip, source] of sources) if (now() - source.since >= 60000) sources.delete(ip)
-    if (now() - lastBatch < 50) return
-    lastBatch += Math.floor((now() - lastBatch) / 50) * 50
-    for (const room of rooms.values()) {
-      if (room.phase !== 'racing') continue
-      const message: ServerMessage = { type: 'poses', protocolVersion: PROTOCOL_VERSION, roomId: room.id,
-        raceId: room.raceId!, revision: room.revision, serverTime: now(), entrants: room.entrants }
-      room.members.forEach(member => send(member, message, true))
-    }
+    } finally { tickDuration.record(Math.max(1, Math.round((performance.now() - startedAt) * 1e6))) }
   }
   const timer = automaticTick ? setInterval(tick, 50) : null
   async function close() {
@@ -286,12 +315,13 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     if (timer) clearInterval(timer)
     for (const room of rooms.values()) closeRoom(room, 'shutdown')
     connections.forEach(connection => connection.socket.close(1001, 'shutdown'))
-    const force = setTimeout(() => sockets.clients.forEach(socket => socket.terminate()), 1000)
+    const force = setTimeout(() => { sockets.clients.forEach(socket => socket.terminate()); http.closeAllConnections() }, 1000)
     await Promise.all([
       new Promise<void>(resolve => sockets.close(() => resolve())),
       new Promise<void>(resolve => http.close(() => resolve())),
     ])
     clearTimeout(force); connections.clear(); sources.clear()
   }
-  return { http, tick, close, metrics }
+  return { http, tick, close, metrics, getMetrics: () => ({ ...metrics, rooms: rooms.size, connections: connections.size }),
+    timings: { commandDuration, tickDuration } }
 }

@@ -1,10 +1,9 @@
 # Multiplayer room service
 
-Room service for Phases 1–2 of the [prototype plan](../../docs/multiplayer-prototype-plan.md). One Node.js
+Room service for Phases 1–5 of the [prototype plan](../../docs/multiplayer-prototype-plan.md). One Node.js
 HTTP/WebSocket service holds private rooms in memory. Each room admits **2–5 racers**
 and **20 external spectators**. The server coordinates membership, timing and results;
-physics remain local and remote racers do not collide. The frontend now connects room
-entry, readiness, and start controls; playable racing and spectator rendering are later phases.
+physics remain local and remote racers do not collide. The frontend connects room entry, racing, results and spectator cameras.
 
 The Phase 0 relay was extended here, not retained as a second server. Its recorded
 [measurements](../../docs/multiplayer-phase0-results.json) are historical evidence;
@@ -29,16 +28,14 @@ npm start --prefix server/multiplayer
 Run dev OR start on the selected port, not both. `dev` runs source with Node's native
 TypeScript stripping; `build` compiles the service and browser-safe shared `.mts` files
 into `dist/`, and `start` runs compiled JavaScript. Nothing imports server modules into
-Next.js. Build from the checkout with shared sources present; deployment packaging is
-Phase 5.
+Next.js. Build from the checkout with shared sources present; the isolated deployment bundle is described below.
 
 | Variable | Default / meaning |
 | --- | --- |
 | `PORT` | `8080`; listen on `0.0.0.0`. `/health` returns 200 while serving. |
 | `ALLOWED_ORIGINS` | `http://localhost:3000`; comma-separated exact HTTP(S) frontend origins, no trailing slash. Missing or mismatched WebSocket Origin gets HTTP 403. |
 
-Locally connect to `ws://localhost:8080`. Railway will terminate TLS for public WSS in
-Phase 5; this process does not provision certificates or a Railway service. SIGTERM
+Locally connect to `ws://localhost:8080`. Railway staging terminates TLS for public WSS. SIGTERM
 and SIGINT notify rooms, close sockets, and force remaining connections shut after one
 second. A restart loses all rooms. There is no database or solo leaderboard access.
 
@@ -123,10 +120,10 @@ visit must bootstrap afresh. Compression is disabled. Typed error codes and room
 reasons are exported in the protocol; clients should show them rather than blindly
 replaying lifecycle commands.
 
-**Proxy limit:** IP limits currently use the actual socket peer and deliberately ignore
-forwarded headers. Behind Railway this may group users under a proxy address. Verify
-Railway's trusted proxy chain and configure validated source-IP handling in Phase 5
-before exposing the service. Origin checks do not authenticate non-browser clients.
+**Proxy trust:** local mode uses the socket peer and ignores forwarded headers. Railway
+uses a validated, single `X-Real-IP` only when `TRUST_RAILWAY_PROXY=true` and the Railway
+runtime environment is present. Keep this service behind Railway HTTP ingress; do not
+expose a raw TCP proxy. `X-Forwarded-For` is ignored. Origin checks do not authenticate native clients.
 
 ## Verification
 
@@ -183,3 +180,145 @@ ordered TCP-recovery stalls and one paused TCP reader. Reports interpolation cap
 age, latest-pose age, heap deltas, scheduler queues and server buffer counters.
 This is not a GPU presentation or real-network benchmark; see the prototype plan
 for measured results and remaining device/soak checks.
+
+## Railway staging (Phase 5)
+
+Project `speedroller-multiplayer`, environment `staging`, service `multiplayer`:
+
+- Project: `ec316859-4afb-4bad-b745-e4a2ff01b3ef`
+- Environment: `0e63a212-0155-4703-b562-1b69faba5577`
+- Service: `627ff59a-3531-4ec9-8df1-d6f4f07c7fbb`
+- WSS: `wss://multiplayer-staging-814d.up.railway.app`
+- Health: <https://multiplayer-staging-814d.up.railway.app/health>
+
+[TypeScript infrastructure](.railway/railway.ts) follows Rugbet's `defineRailway` pattern.
+It manages this one service: one Europe West replica, no sleep, 1 CPU/500 MB limit,
+zero deployment overlap, five-second drain, `/health` deployment gate (60 seconds),
+and up to three restarts on failure. Node 24 runs directly as the container's non-root
+process, so SIGTERM reaches it. Rooms are memory-only and disappear on deployment.
+Generated domain stays managed by Railway. No GitHub auto-deploy source is attached.
+
+The SDK is a service-only dev dependency; root frontend dependencies are untouched.
+From `server/multiplayer`:
+
+```sh
+npm ci
+railway link --project ec316859-4afb-4bad-b745-e4a2ff01b3ef --environment 0e63a212-0155-4703-b562-1b69faba5577 --service 627ff59a-3531-4ec9-8df1-d6f4f07c7fbb
+railway config plan
+railway config apply --yes
+```
+
+Review the target and plan before applying. IaC applies configuration separately from
+source uploads; `railway up` does not apply the TypeScript file. Do not link this config
+to Rugbet or another environment: omitted resources can be removed by an apply.
+
+Upload from the repository root using an allowlisted temporary bundle:
+
+```sh
+staging_bundle=$(node server/multiplayer/package-staging.mjs)
+railway up "$staging_bundle" --path-as-root --project ec316859-4afb-4bad-b745-e4a2ff01b3ef --environment 0e63a212-0155-4703-b562-1b69faba5577 --service 627ff59a-3531-4ec9-8df1-d6f4f07c7fbb --detach
+```
+
+Only service sources, locked dependencies, Dockerfile and shared protocol/clock are
+uploaded. No frontend, renderer, `.env`, assets or Git history are included. Docker
+installs service dependencies at the bundle root so shared Zod imports resolve without
+installing the game; it compiles and copies only runtime output/dependencies.
+
+Staging allows exactly `http://localhost:3000`, per the current testing choice. When
+starting the frontend yourself, use this command from the repository root:
+
+```sh
+NEXT_PUBLIC_MULTIPLAYER_URL=wss://multiplayer-staging-814d.up.railway.app npm run dev
+```
+
+The existing renderer development process was not restarted or reconfigured. For fully
+local two-process development, run `npm run dev --prefix server/multiplayer` in one
+terminal and `npm run dev` in another with no multiplayer URL override. A different
+frontend port or HTTPS origin needs an explicit corresponding allowed origin.
+
+Every 10 seconds the server emits aggregate `multiplayer_metrics`: current rooms and
+connections, accepted poses/broadcasts/outbound bytes and rates, queue skips/congestion,
+timeouts/closures, rejection codes, room closure reasons, CPU and memory. Logs omit
+names, poses, IPs and invite IDs. Counters reset on restart. Railway's `/health` gate is
+only deployment readiness; an external continuous uptime monitor is still outstanding.
+
+Run bounded synthetic failure checks against this staging service:
+
+```sh
+MULTIPLAYER_URL=wss://multiplayer-staging-814d.up.railway.app node server/multiplayer/validate-staging.mjs
+# Start this, wait for READY_FOR_REDEPLOY, then redeploy staging in another terminal:
+WAIT_FOR_RESTART=true MULTIPLAYER_URL=wss://multiplayer-staging-814d.up.railway.app node server/multiplayer/validate-staging.mjs
+# After a restart or a fresh minute-long source-rate window:
+PROXY_CHECK=true MULTIPLAYER_URL=wss://multiplayer-staging-814d.up.railway.app node server/multiplayer/validate-staging.mjs
+```
+
+The restart check requires an explicit deployment; it never initiates one itself.
+The proxy probe sends at most 61 sequential upgrades, then expects HTTP 429 despite
+changing forged IP headers. Wait a minute before running other checks from that IP.
+
+Research: [Railway IaC](https://docs.railway.com/infrastructure-as-code),
+[public networking headers and WebSocket limits](https://docs.railway.com/networking/public-networking/specs-and-limits),
+[deployment teardown](https://docs.railway.com/guides/deployment-teardown).
+The server pins Zod 4.6.7 following [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5);
+its production dependency audit is clean. The frontend dependency was not changed.
+
+Verification on 2026-10-25: deployment `d21c98d6-1ae1-46a7-b0fc-32ef0efad604`
+is healthy. Five-racer WSS lifecycle/late-spectator/failure checks passed on this build.
+An earlier deployment replacement test passed during an active race. The forged-header
+probe hit the 60-upgrade source limit (seven smoke connections + 53 probe connections).
+IaC reports zero drift; 25 service tests and 105 repository tests pass, as do root/service
+type checks and the service build. Targeted lint has zero errors and eight console-output
+warnings for intentional CLI output/telemetry. Real-device/network diversity, browser
+presentation/mobile resume, long soaks and external uptime monitoring remain unverified.
+
+## Pino traces and automated stress test
+
+The server uses Pino 10.3.1, matching Rugbet's worker logger: ISO timestamps, string
+levels, structured events, error serialization and monotonic durations. `LOG_LEVEL`
+defaults to `info`. The service/instance fields distinguish deployments; optional
+`STRESS_RUN_ID` correlates a controlled run. Connection IDs and independent room trace
+IDs link events without exposing room invite UUIDs. These are structured timing traces,
+not OpenTelemetry distributed spans.
+
+- `ws.command.completed`: validated control command name and processing duration (including
+  parsing, validation and handling). `ws.command.rejected` carries only the error code.
+- `room.state`, `race.started`, `race.completed`, `room.closed`: lifecycle, server GO
+  lateness and race duration. Server GO lateness does not measure browser start skew.
+- `ws.client.connected/disconnected`, `ws.timeout`, `ws.congested`: connection lifetime,
+  close codes, timeout and congestion evidence.
+- `multiplayer_metrics`: existing load/queue/CPU/RSS counters plus interval p50/p95/p99/max
+  command and full tick durations, and event-loop p99/max delay. Tick time includes room
+  advancement, housekeeping and broadcast serialization/enqueue, not network delivery.
+
+Every command contributes to a bounded native histogram, including poses, but pose/ping
+packets are not logged individually. Histograms reset each reporting window. Event-loop
+sampling resolution is 10 ms, so that is approximately the idle delay floor. Metrics
+are also emitted at shutdown. Payloads, profiles, IPs and invite URLs are not logged.
+
+```sh
+# From the repository root: automated 1-room then 10-room runs, 30 seconds each.
+npm run stress --prefix server/multiplayer
+# Short harness smoke check, not capacity evidence:
+STRESS_SECONDS=3 npm run stress --prefix server/multiplayer
+```
+
+The harness starts a separate Node server process per scenario, synchronizes five
+racers per room, admits 20 late spectators per room, and publishes at 20 Hz. It saves
+`results.json` and `server-1-rooms.jsonl` / `server-10-rooms.jsonl` in a unique directory
+under the repository's `.tmp/multiplayer-stress/` (or `STRESS_OUTPUT`). It exits nonzero
+on failed assertions, retains evidence, and shuts down all owned sockets/processes.
+
+Checks require every client to receive at least 18 batches/second, no unexpected errors
+or disconnects, no congestion/drop counters, enough accepted poses, local ping p99 and
+server event-loop p99 below 100 ms, captured timing/correlation events, and no rooms or
+connections left after cleanup. Reports show the largest per-window server p99, not a
+single whole-run percentile. CPU/RSS peaks include setup; outbound bytes include setup.
+
+Ten full rooms require 250 sockets. The loopback-only fixture represents ten source IPs
+using the same trusted-proxy path; it does not relax the production 60-upgrade/IP/minute
+limit or expose a test bypass in the deployed main process. Client and server processes
+still share this machine. This is a repeatable local capacity regression check, not a
+Railway sizing promise, WAN benchmark, browser/GPU test or continuous scheduled job.
+
+References adapted: Rugbet `packages/worker/logger.ts`, `apps/multiplayer/timings.ts`,
+`apps/multiplayer/ws/socketHub.ts`; [Pino API](https://github.com/pinojs/pino/blob/main/docs/api.md).

@@ -107,7 +107,10 @@ const PostProcessing = () => {
   )
 
   // A change to the quality tier sizes the blur loop, which is a structural graph change.
+  const previousBlurSamples = useRef(blurSamples)
   useEffect(() => {
+    if (previousBlurSamples.current === blurSamples) return
+    previousBlurSamples.current = blurSamples
     rebuild()
   }, [blurSamples, rebuild])
 

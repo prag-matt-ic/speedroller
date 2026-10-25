@@ -17,11 +17,10 @@ export async function waitFor(predicate, message = 'condition', timeoutMs = 3000
 }
 export async function fixture(t, options = {}) {
   let clock = 1000
-  const relay = createRelay({ allowedOrigins: ['http://localhost:3000'],
+  const relay = options.url ? null : createRelay({ allowedOrigins: ['http://localhost:3000'], logger: options.logger,
     ...(options.realTime ? {} : { now: () => clock, automaticTick: false }) })
-  relay.http.listen(0, '127.0.0.1')
-  await once(relay.http, 'listening')
-  const url = `ws://127.0.0.1:${relay.http.address().port}`
+  if (relay) { relay.http.listen(0, '127.0.0.1'); await once(relay.http, 'listening') }
+  const url = options.url ?? `ws://127.0.0.1:${relay.http.address().port}`
   const clients = []
   async function connect(settings = {}) {
     const socket = new WebSocket(url, { origin: 'http://localhost:3000', ...settings })
@@ -78,7 +77,7 @@ export async function fixture(t, options = {}) {
   }
   t.after(async () => {
     clients.forEach(client => client.socket.terminate())
-    await relay.close()
+    await relay?.close()
     clients.forEach(client => assert.deepEqual(client.invalid, []))
   })
   async function race(count = 2) {

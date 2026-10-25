@@ -16,7 +16,7 @@ import {
   type WebGPURenderer,
 } from 'three/webgpu'
 
-export const ENVIRONMENT_BLUR = { sigma: 2, referenceWidth: 1024 } as const
+export const ENVIRONMENT_BLUR = { sigma: 1.5, referenceWidth: 1024 } as const
 
 /** One source generation, two passes. The caller owns the returned target. */
 export const bakeEnvironmentMap = (renderer: WebGPURenderer, source: Texture) => {

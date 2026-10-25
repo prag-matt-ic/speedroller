@@ -1,5 +1,5 @@
 import { createStore } from 'zustand'
-import { type PersistOptions, persist, subscribeWithSelector } from 'zustand/middleware'
+import { createJSONStorage, type PersistOptions, type StorageValue, persist, subscribeWithSelector } from 'zustand/middleware'
 
 import { createGameSlice } from './gameSlice'
 import { createInputSlice } from './inputSlice'
@@ -24,6 +24,9 @@ type LegacyPersistedStore = PersistedStore & { mode?: unknown }
 const STORE_VERSION = 2
 
 export const createGameStore = (params: CreateGameStoreParams) => {
+  const storage = createJSONStorage<PersistedStore>(() => window.localStorage)
+  let lastSaved: StorageValue<PersistedStore> | undefined
+
   return createStore<GameStore>()(
     subscribeWithSelector(
       persist<GameStore, [], [], PersistedStore>(
@@ -36,6 +39,30 @@ export const createGameStore = (params: CreateGameStoreParams) => {
         }),
         {
           name: 'speedroller-game',
+          storage: storage && {
+            getItem: (name) => {
+              lastSaved = undefined
+              return storage.getItem(name)
+            },
+            setItem: (name, value) => {
+              // Transient frame updates must not serialize saved runs or write localStorage.
+              if (lastSaved && lastSaved.version === value.version &&
+                lastSaved.state.username === value.state.username &&
+                lastSaved.state.isSubscribed === value.state.isSubscribed &&
+                lastSaved.state.totalTimeS === value.state.totalTimeS &&
+                lastSaved.state.completedSpeedRuns === value.state.completedSpeedRuns &&
+                lastSaved.state.inputType === value.state.inputType &&
+                lastSaved.state.joystickPosition === value.state.joystickPosition &&
+                lastSaved.state.paletteIndex === value.state.paletteIndex
+              ) return
+              storage.setItem(name, value)
+              lastSaved = value
+            },
+            removeItem: (name) => {
+              storage.removeItem(name)
+              lastSaved = undefined
+            },
+          },
           partialize: (s) =>
             ({
               username: s.username,

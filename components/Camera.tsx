@@ -54,6 +54,7 @@ const INPUT_DOWN_Z_DAMPING = 8
 const OVERLAY_Y_OFFSET = 5
 const OVERLAY_Z_OFFSET = 5
 const COLLECTIBLE_ZOOM_OFFSET = 0.3
+const ZOOM_SNAP_THRESHOLD = 0.001
 
 type SetZoom = (zoom: number, transition?: boolean) => void
 
@@ -171,6 +172,7 @@ const FlatCamera: FC<Props> = ({ isMobile, position }) => {
 }
 
 const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
+  const camera = useThree((s) => s.camera)
   const surface = useCourseSurface()
   const { playerPosition } = usePlayerPosition()
   const { input } = usePlayerInput()
@@ -183,6 +185,9 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
     zoom: 1.2, lookX: 0, respawnTick: -1,
   })
   const setZoom = useCallback((zoom: number) => { state.current.zoom = zoom }, [])
+  useLayoutEffect(() => {
+    applyFarPlane(camera as PerspectiveCamera)
+  }, [camera])
   useStageZoom(setZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
   useFrame(({ camera }, delta) => {
     const frame = state.current
@@ -203,9 +208,12 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
     const blend = frame.respawnTick !== respawnTick ? 1 : 1 - Math.exp(-8 * Math.min(delta, 1 / 15))
     camera.position.lerp(frame.eye, blend)
     camera.quaternion.slerp(frame.rotation, blend)
-    camera.zoom += (frame.zoom - camera.zoom) * blend
-    camera.far = CAMERA_FAR
-    camera.updateProjectionMatrix()
+    const easedZoom = camera.zoom + (frame.zoom - camera.zoom) * blend
+    const nextZoom = Math.abs(frame.zoom - easedZoom) < ZOOM_SNAP_THRESHOLD ? frame.zoom : easedZoom
+    if (camera.zoom !== nextZoom) {
+      camera.zoom = nextZoom
+      camera.updateProjectionMatrix()
+    }
     frame.respawnTick = respawnTick
   })
   return null
