@@ -1,8 +1,10 @@
 'use client'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { courseToWorld, surfaceRotation } from '@/utils/platform/courseSurface'
 
 import { useLocalNodes } from '@react-three/tsl'
 import { type FC, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { BoxGeometry, InstancedBufferAttribute, InstancedMesh, Matrix4 } from 'three'
+import { Quaternion, Vector3, BoxGeometry, InstancedBufferAttribute, InstancedMesh, Matrix4 } from 'three'
 import { MeshBasicNodeMaterial } from 'three/webgpu'
 import { attribute, clamp, color, dot, normalWorld, vec3 } from 'three/tsl'
 
@@ -19,6 +21,7 @@ type Props = { enabled?: boolean; fadeEnabled?: boolean; onReadyChange?: (ready:
 type BatchProps = { pillars: PillarPlacement[]; geometry: BoxGeometry; material: MeshBasicNodeMaterial }
 
 const PillarBatch: FC<BatchProps> = ({ pillars, geometry, material }) => {
+  const surface = useCourseSurface()
   const meshRef = useRef<InstancedMesh>(null)
   const batchGeometry = useMemo(() => {
     const clone = geometry.clone()
@@ -32,17 +35,22 @@ const PillarBatch: FC<BatchProps> = ({ pillars, geometry, material }) => {
     const mesh = meshRef.current
     if (!mesh) return
     const matrix = new Matrix4()
+    const position = new Vector3()
+    const rotation = new Quaternion()
+    const scale = new Vector3()
     pillars.forEach((pillar, index) => {
       const [x, baseY, z] = pillar.position
       const [width, height, depth] = pillar.dimensions
-      matrix.makeScale(width, height, depth)
-      matrix.setPosition(x, baseY + height / 2, z)
+      courseToWorld(x, baseY + height / 2, z, surface, position)
+      surfaceRotation(x, surface, rotation)
+      scale.set(width, height, depth)
+      matrix.compose(position, rotation, scale)
       mesh.setMatrixAt(index, matrix)
     })
     mesh.instanceMatrix.needsUpdate = true
     mesh.computeBoundingBox()
     mesh.computeBoundingSphere()
-  }, [pillars, batchGeometry, material])
+  }, [pillars, batchGeometry, material, surface])
   return (
     <instancedMesh ref={meshRef} args={[batchGeometry, material, pillars.length]} dispose={null} frustumCulled />
   )

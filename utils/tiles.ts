@@ -40,11 +40,11 @@ export const TILE_SURFACE_Y = RAISED_Y + TILE_THICKNESS * 0.5
 export const ON_TILE_Y = TILE_SURFACE_Y + 0.005
 
 // Convert a grid column index (can be fractional for centers) to world X.
-export const colToX = (col: number): number => (col - COLUMNS / 2 + 0.5) * TILE_SIZE
+export const colToX = (col: number, columns = COLUMNS): number => (col - columns / 2 + 0.5) * TILE_SIZE
 
 /** Nearest grid column for a world X, the inverse of `colToX`. */
-export const worldXToColumn = (worldX: number): number =>
-  Math.round(worldX / TILE_SIZE + COLUMNS / 2 - 0.5)
+export const worldXToColumn = (worldX: number, columns = COLUMNS): number =>
+  Math.round(worldX / TILE_SIZE + columns / 2 - 0.5)
 
 export function clamp(x: number, a: number, b: number): number {
   return Math.max(a, Math.min(b, x))

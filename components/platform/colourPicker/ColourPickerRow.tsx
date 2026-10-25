@@ -1,3 +1,4 @@
+import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { type FC, useEffect } from 'react'
 
 import { useGameStore } from '@/components/GameProvider'
@@ -16,6 +17,7 @@ const COLOUR_PICKER_Z_OFFSET = -TILE_SIZE * 0.5
 const TEXT_HEIGHT = 2
 
 const ColourPickerRow: FC<Props> = ({ rows, onReadyChange }) => {
+  const surface = useCourseSurface()
   const paletteIndex = useGameStore((s) => s.paletteIndex)
   useEffect(() => {
     onReadyChange(true)
@@ -41,6 +43,7 @@ const ColourPickerRow: FC<Props> = ({ rows, onReadyChange }) => {
         ))}
         <Text
           text="Paint Shop"
+          surface={surface}
           position={[x, y + 0.005, worldZ + COLOUR_PICKER_Z_OFFSET + TEXT_HEIGHT]}
           width={5}
           height={TEXT_HEIGHT}

@@ -1,8 +1,11 @@
 'use client'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { createCoursePlaneGeometry } from '@/utils/platform/coursePlaneGeometry'
+import { createSurfaceColliders } from '@/utils/platform/surfaceColliders'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
-import { CuboidCollider, RigidBody } from '@react-three/rapier'
-import { type FC, useCallback, useId } from 'react'
+import { TrimeshCollider, RigidBody } from '@react-three/rapier'
+import { type FC, useCallback, useId, useMemo, useEffect } from 'react'
 import {
   clamp,
   float,
@@ -63,6 +66,16 @@ type ColourTileProps = {
 }
 
 const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
+  const surface = useCourseSurface()
+  const [x, y, z] = option.position
+  const geometry = useMemo(() => createCoursePlaneGeometry(COLOUR_TILE_SIZE, COLOUR_TILE_SIZE, x, y, surface), [x, y, surface])
+  useEffect(() => () => geometry.dispose(), [geometry])
+  const collision = useMemo(() => {
+    const columns = Math.ceil(COLOUR_TILE_SIZE)
+    const width = COLOUR_TILE_SIZE / columns
+    const cells = Array.from({ length: columns }, (_, column): Vector3Tuple => [x + (column + 0.5) * width - COLOUR_TILE_SIZE / 2, y, 0])
+    return createSurfaceColliders(cells, surface, width, PLAYER_RADIUS * 4, COLOUR_TILE_SIZE)
+  }, [x, y, surface])
   const useNoise = usePerformanceStore((s) => s.sceneConfig.colourTile.useNoise)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
 
@@ -123,18 +136,17 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
   return (
     <RigidBody
       type="fixed"
-      position={option.position}
-      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0, z]}
       colliders={false}
       userData={option.userData}>
-      <CuboidCollider
-        args={[COLOUR_TILE_SIZE / 2, COLOUR_TILE_SIZE / 2, PLAYER_RADIUS * 2]}
+      <TrimeshCollider
+        args={[collision.vertices, collision.indices]}
         sensor={true}
         activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
         collisionGroups={COLLISION_GROUPS.colourTileSensor}
       />
       <mesh renderOrder={1}>
-        <planeGeometry args={[COLOUR_TILE_SIZE, COLOUR_TILE_SIZE]} />
+        <primitive object={geometry} attach="geometry" />
         <meshBasicNodeMaterial
           colorNode={colorNode}
           opacityNode={opacityNode}

@@ -1,4 +1,6 @@
 import { createCoursePillars } from './utils/createCoursePillars'
+import { createCylinderPillars } from './utils/createCylinderPillars'
+import { type CourseSurface, FLAT_SURFACE, wrapColumn } from '../utils/platform/courseSurface'
 /**
  * PLATFORM ROW DATA BUILDER
  *
@@ -25,15 +27,14 @@ import { type TotalCounts, createTotalCounts } from '../stores/totalCounts'
 import { GameMode, Stage } from '../stores/types'
 import { HEADING_Y } from '../utils/platform/floatingHeading'
 import {
-  COLUMNS,
   CONFETTI_ROW_DEPTH,
   type ConfettiPlacement,
   type IndexedPlacement,
   ON_TILE_Y,
   type RowData,
   TILE_SIZE,
-  colToX,
-  worldXToColumn,
+  colToX as columnToX,
+  worldXToColumn as xToColumn,
 } from '../utils/tiles'
 import { MINI_MAP_CONSTANTS, writeMiniMapSVG } from './utils/generateMiniMap'
 
@@ -64,6 +65,7 @@ type BitmapRow = {
 }
 
 type ModeRows = {
+  surface: CourseSurface
   rows: RowData[]
   totalCounts: TotalCounts
 }
@@ -231,9 +233,11 @@ function buildOutputFile({
   return `import { GameMode } from '@/stores/types'
 import type { TotalCounts } from '@/stores/totalCounts'
 import type { RowData } from '@/utils/tiles'
+import type { CourseSurface } from '@/utils/platform/courseSurface'
 import { placeRowElementsOnTiles } from '@/utils/platform/placeRowElementsOnTiles'
 
 export type PlatformModeData = {
+  surface: CourseSurface
   rows: RowData[]
   totalCounts: TotalCounts
 }
@@ -251,20 +255,25 @@ const DEV_COUNTS: TotalCounts = ${devCounts}
 export const PLATFORM_DATA: PlatformRowsData = {
   version: '${version}',
   modes: {
-    [GameMode.SPEEDRUN]: { rows: SPEEDRUN_ROWS.map(placeRowElementsOnTiles), totalCounts: SPEEDRUN_COUNTS },
-    [GameMode.DEV]: { rows: DEV_ROWS.map(placeRowElementsOnTiles), totalCounts: DEV_COUNTS },
+    [GameMode.SPEEDRUN]: { surface: ${JSON.stringify(modes[GameMode.SPEEDRUN].surface)}, rows: SPEEDRUN_ROWS.map(placeRowElementsOnTiles), totalCounts: SPEEDRUN_COUNTS },
+    [GameMode.DEV]: { surface: ${JSON.stringify(modes[GameMode.DEV].surface)}, rows: DEV_ROWS.map(placeRowElementsOnTiles), totalCounts: DEV_COUNTS },
   },
 }
 export const PLATFORM_VERSION = PLATFORM_DATA.version
 `
 }
 
+function createBitmapParser(surface: CourseSurface) {
+const COLUMNS = surface.columns
+const colToX = (column: number) => columnToX(column, COLUMNS)
+const worldXToColumn = (x: number) => xToColumn(x, COLUMNS)
+const resolveColumn = (column: number) => surface.topology === 'cylinder' ? wrapColumn(column, COLUMNS) : column
+
 async function parseDecorationMaskFromFile(
   filePath: string,
   expectedHeight: number,
 ): Promise<number[][]> {
   const { data, info } = await sharp(filePath)
-    .resize(COLUMNS, expectedHeight, { fit: 'fill' })
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -310,7 +319,6 @@ async function parseSectionBitmapFromFile(
   }
 
   const { data, info } = await image
-    .resize(COLUMNS, imageHeight, { fit: 'fill' })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -320,7 +328,7 @@ async function parseSectionBitmapFromFile(
   const channels = info.channels
 
   if (width !== COLUMNS) {
-    throw new Error(`Expected resized width of ${COLUMNS}, got ${width} for ${filePath}`)
+    throw new Error(`Expected exact width of ${COLUMNS}, got ${width} for ${filePath}`)
   }
 
   const decorationRows = decorationFilePath
@@ -488,7 +496,7 @@ function assignBitmapPlacements(
         for (const [dRow, dColumn] of NEIGHBOUR_OFFSETS) {
           const nextRow = cell.row + dRow
           if (nextRow < 0 || nextRow >= rowCount) continue
-          const nextColumn = cell.column + dColumn
+          const nextColumn = resolveColumn(cell.column + dColumn)
           if (!columnSets[nextRow].has(nextColumn)) continue
           stack.push({ row: nextRow, column: nextColumn })
         }
@@ -511,7 +519,15 @@ function assignBitmapPlacements(
       }
 
       const centerRow = (minRow + maxRow) * 0.5
-      const centerColumn = Math.round((minColumn + maxColumn) / 2)
+      // Unwrap each connected footprint around its seed before computing its centre.
+      if (surface.topology === 'cylinder') {
+        minColumn = Infinity; maxColumn = -Infinity
+        for (const cell of component) {
+          const lifted = column + wrapColumn(cell.column - column + COLUMNS / 2, COLUMNS) - COLUMNS / 2
+          minColumn = Math.min(minColumn, lifted); maxColumn = Math.max(maxColumn, lifted)
+        }
+      }
+      const centerColumn = resolveColumn(Math.round((minColumn + maxColumn) / 2))
 
       rowsInComponent.forEach((row) => {
         const placements = placementsByRow.get(row) ?? []
@@ -896,7 +912,7 @@ async function buildModeData(
     rows.push(...parsedRows)
   }
 
-  return { rows, totalCounts }
+  return { rows, totalCounts, surface }
 }
 
 function countRaisedIntervals(isRaised: readonly number[]): number {
@@ -907,7 +923,7 @@ function countRaisedIntervals(isRaised: readonly number[]): number {
     if (isRaisedCell && !wasRaised) intervals += 1
     wasRaised = isRaisedCell
   }
-  return intervals
+  return surface.topology === 'cylinder' && isRaised[0] && isRaised.at(-1) && intervals > 1 ? intervals - 1 : intervals
 }
 
 function collectFloorCells(rows: readonly RowData[]): Set<number> {
@@ -942,7 +958,8 @@ function assertConnectedFloor(rows: readonly RowData[]) {
       [rowIndex, columnIndex - 1],
       [rowIndex, columnIndex + 1],
     ]
-    for (const [nextRow, nextColumn] of neighbours) {
+    for (const [nextRow, rawColumn] of neighbours) {
+      const nextColumn = resolveColumn(rawColumn)
       if (nextRow < 0 || nextRow >= rows.length) continue
       if (nextColumn < 0 || nextColumn >= COLUMNS) continue
       const nextCell = nextRow * COLUMNS + nextColumn
@@ -970,7 +987,7 @@ function assertDecorationIsolation(rows: readonly RowData[]) {
       }
       for (const direction of [-1, 1]) {
         for (const offset of [1, 2]) {
-          const nearbyColumn = columnIndex + direction * offset
+          const nearbyColumn = resolveColumn(columnIndex + direction * offset)
           if (nearbyColumn < 0 || nearbyColumn >= COLUMNS) continue
           if (row.isRaised[nearbyColumn] === 1) {
             throw new Error(
@@ -997,7 +1014,7 @@ function assertLineFootprintSupport(
       throw new Error(`${label} line extends past the course at row ${rowIndex + rowOffset}`)
     }
     for (let columnOffset = -4; columnOffset <= 4; columnOffset++) {
-      const footprintColumn = columnIndex + columnOffset
+      const footprintColumn = resolveColumn(columnIndex + columnOffset)
       if (footprintColumn < 0 || footprintColumn >= COLUMNS) {
         throw new Error(`${label} line extends outside the bitmap columns`)
       }
@@ -1016,7 +1033,7 @@ function validateRaceMode({ rows, totalCounts }: ModeRows) {
   for (const [key, value] of Object.entries(expected)) {
     if (key === 'floor' || key === 'highlights') continue
     const actual = totalCounts[key as keyof TotalCounts]
-    if (actual !== value) {
+    if (surface.topology === 'flat' && actual !== value) {
       throw new Error(`Race course expected ${key}=${value}; generated ${actual}`)
     }
   }
@@ -1025,7 +1042,7 @@ function validateRaceMode({ rows, totalCounts }: ModeRows) {
     (count, row) => count + row.isRaised.filter((cell) => cell === 1).length,
     0,
   )
-  if (floorCount !== expected.floor) {
+  if (surface.topology === 'flat' && floorCount !== expected.floor) {
     throw new Error(`Race course expected floor=${expected.floor}; generated ${floorCount}`)
   }
 
@@ -1033,7 +1050,7 @@ function validateRaceMode({ rows, totalCounts }: ModeRows) {
     (count, row) => count + (row.isHighlighted?.filter((cell) => cell === 1).length ?? 0),
     0,
   )
-  if (highlightCount !== expected.highlights) {
+  if (surface.topology === 'flat' && highlightCount !== expected.highlights) {
     throw new Error(
       `Race course expected highlights=${expected.highlights}; generated ${highlightCount}`,
     )
@@ -1041,7 +1058,7 @@ function validateRaceMode({ rows, totalCounts }: ModeRows) {
 
   rows.forEach((row, rowIndex) => {
     const intervals = countRaisedIntervals(row.isRaised)
-    if (intervals > MAX_SIMULTANEOUS_PATHS) {
+    if (surface.topology === 'flat' && intervals > MAX_SIMULTANEOUS_PATHS) {
       throw new Error(`Race course has ${intervals} simultaneous paths at row ${rowIndex}`)
     }
     ;(row.rings ?? []).forEach((hasRing, columnIndex) => {
@@ -1096,6 +1113,9 @@ function validateRaceMode({ rows, totalCounts }: ModeRows) {
   )
 }
 
+return { buildModeData, validateRaceMode }
+}
+
 function writeMiniMapAssets(modes: Record<GameMode, ModeRows>, version: string) {
   const miniMapVersionDir = path.join(MINIMAP_BASE_DIR, version)
   fs.mkdirSync(miniMapVersionDir, { recursive: true })
@@ -1105,7 +1125,7 @@ function writeMiniMapAssets(modes: Record<GameMode, ModeRows>, version: string) 
     const outputPath = path.join(miniMapVersionDir, `${mode}.svg`)
     const { width, height } = writeMiniMapSVG({
       rows: modeRows.rows,
-      columns: COLUMNS,
+      columns: modeRows.surface.columns,
       tileSize: MINI_MAP_CONSTANTS.TILE_SIZE_PX,
       outputPath,
     })
@@ -1118,12 +1138,26 @@ async function main() {
 
   console.log(`🛠️  Generating platform rows for version ${version}`)
 
+  const configPath = path.join(directory, 'course.json')
+  const config = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {}
+  const surfaces = Object.fromEntries(Object.values(GameMode).map(mode => {
+    const surface: CourseSurface = config[mode] ?? FLAT_SURFACE
+    if (!['flat', 'cylinder'].includes(surface.topology) || !Number.isInteger(surface.columns) || surface.columns < 9 || surface.columns > 1024) {
+      throw new Error(`Invalid course surface for ${mode}`)
+    }
+    return [mode, surface]
+  })) as Record<GameMode, CourseSurface>
+  const raceParser = createBitmapParser(surfaces[GameMode.SPEEDRUN])
   const modes: Record<GameMode, ModeRows> = {
-    [GameMode.SPEEDRUN]: await buildModeData(directory, MODE_SOURCES[GameMode.SPEEDRUN]),
-    [GameMode.DEV]: await buildModeData(directory, MODE_SOURCES[GameMode.DEV]),
+    [GameMode.SPEEDRUN]: await raceParser.buildModeData(directory, MODE_SOURCES[GameMode.SPEEDRUN]),
+    [GameMode.DEV]: await createBitmapParser(surfaces[GameMode.DEV]).buildModeData(directory, MODE_SOURCES[GameMode.DEV]),
   }
 
-  validateRaceMode(modes[GameMode.SPEEDRUN])
+  raceParser.validateRaceMode(modes[GameMode.SPEEDRUN])
+  if (surfaces[GameMode.SPEEDRUN].topology === 'cylinder') {
+    const pillars = createCylinderPillars(modes[GameMode.SPEEDRUN].rows, surfaces[GameMode.SPEEDRUN])
+    fs.writeFileSync(path.join(process.cwd(), 'resources/coursePillars.json'), JSON.stringify(pillars, null, 2) + '\n')
+  } else {
   const architecturePath = path.join(directory, 'architecture/recovery.png')
   const architectureImage = await sharp(architecturePath).removeAlpha().raw().toBuffer({ resolveWithObject: true })
   const pillars = parseArchitecture(architectureImage.data, architectureImage.info.width, architectureImage.info.height)
@@ -1136,6 +1170,8 @@ async function main() {
   const coursePillars = createCoursePillars(pillars, modes[GameMode.SPEEDRUN].rows)
   validateArchitectureClearance(coursePillars, modes[GameMode.SPEEDRUN].rows)
   fs.writeFileSync(path.join(process.cwd(), 'resources/coursePillars.json'), JSON.stringify(coursePillars, null, 2) + '\n')
+
+  }
 
   writeMiniMapAssets(modes, version)
 

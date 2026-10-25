@@ -1,5 +1,6 @@
 import { PLATFORM_DATA } from '@/resources/rowsData'
 import type { RowData } from '@/utils/tiles'
+import { type CourseSurface, FLAT_SURFACE } from '@/utils/platform/courseSurface'
 
 import { getResetInputState } from './inputSlice'
 import { PLAYER_INITIAL_POSITION, RESET_PLAYER_STATE } from './playerSlice'
@@ -16,16 +17,18 @@ import {
 
 const getPlatformDataForMode = (
   mode: GameMode,
-): { rowsData: RowData[]; totalCounts: ReturnType<typeof createTotalCounts> } => {
+): { rowsData: RowData[]; totalCounts: ReturnType<typeof createTotalCounts>; courseSurface: CourseSurface } => {
   const modeData = PLATFORM_DATA.modes[mode] ?? PLATFORM_DATA.modes[GameMode.SPEEDRUN]
   if (!modeData) {
     return {
       rowsData: [],
+      courseSurface: FLAT_SURFACE,
       totalCounts: createTotalCounts(),
     }
   }
   return {
     rowsData: modeData.rows,
+    courseSurface: modeData.surface,
     totalCounts: { ...modeData.totalCounts },
   }
 }
@@ -33,6 +36,7 @@ const getPlatformDataForMode = (
 const DEFAULT_PLATFORM_DATA = getPlatformDataForMode(GameMode.SPEEDRUN)
 
 export const RESET_GAME_STATE = {
+  courseSurface: DEFAULT_PLATFORM_DATA.courseSurface,
   totalCounts: DEFAULT_PLATFORM_DATA.totalCounts,
   currentRow: 0,
   cameraLookAtPosition: null,
@@ -106,6 +110,7 @@ export const createGameSlice = (): GameSliceCreator<GameSlice> => (set, get) => 
       ...getResetInputState(),
       mode: targetMode,
       rowsData: nextModeData.rowsData,
+      courseSurface: nextModeData.courseSurface,
       totalCounts: nextModeData.totalCounts,
       overlay: isShowingLandingOverlay ? Overlay.LANDING : Overlay.NONE,
       stage: Stage.HOME,

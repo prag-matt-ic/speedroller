@@ -1,0 +1,10 @@
+{
+  "speedrun": {
+    "topology": "cylinder",
+    "columns": 132
+  },
+  "dev": {
+    "topology": "flat",
+    "columns": 33
+  }
+}

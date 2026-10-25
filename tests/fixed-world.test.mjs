@@ -88,6 +88,7 @@ test('safe respawn searches gaps and the complete course, including falls past e
 })
 
 for (const [mode, { rows, totalCounts }] of Object.entries(PLATFORM_DATA.modes)) {
+  const COLUMNS = rows[0].isRaised.length
   test(`${mode}: complete generated layout has exactly one instance per raised cell in fixed batches`, () => {
     const batches = createTileBatches(rows)
     const expectedTiles = rows.reduce((count, row) => count + row.isRaised.filter(Boolean).length, 0)
@@ -244,10 +245,15 @@ test('native fixed sensors report player intersections only with KINEMATIC_FIXED
 
 const raceRows = PLATFORM_DATA.modes.speedrun.rows
 const raceCounts = PLATFORM_DATA.modes.speedrun.totalCounts
+const RACE_COLUMNS = 132
+const shiftedColumn = (column, row) => {
+  const progress = Math.max(0, Math.min(1, (row - 36) / (1228 - 36)))
+  return (column + 50 + Math.round(132 * progress * progress * (3 - 2 * progress))) % 132
+}
 const RACE_NAMES = ['lobby', 'launch', 'sweeps', 'slalom', 'recovery', 'finale', 'sprint']
 
 test('race course: approved counts, section stages and physical markers are generated', () => {
-  assert.equal(PLATFORM_DATA.version, '1.2.0')
+  assert.equal(PLATFORM_DATA.version, '1.3.0')
   assert.equal(raceRows.length, 1247)
   assert.equal(raceCounts.rows, 1247)
   assert.equal(raceCounts.rings, 60)
@@ -264,11 +270,11 @@ test('race course: approved counts, section stages and physical markers are gene
   assert.ok(markers)
   assert.equal(markers.start.rowIndex, 32)
   assert.equal(markers.finish.rowIndex, 1232)
-  assert.equal(markers.start.position[0], 0)
+  assert.equal(markers.start.position[0], 0.5)
   assert.equal(markers.start.position[2], rowToWorldZ(32))
-  assert.equal(markers.finish.position[0], 0)
+  assert.equal(markers.finish.position[0], 0.5)
   assert.equal(markers.finish.position[2], rowToWorldZ(1232))
-  assert.deepEqual(getStartGridPosition(raceRows, SPAWN_HEIGHT), [0, SPAWN_HEIGHT, rowToWorldZ(32)])
+  assert.deepEqual(getStartGridPosition(raceRows, SPAWN_HEIGHT), [0.5, SPAWN_HEIGHT, rowToWorldZ(32)])
   assert.deepEqual(getLobbyRowRange(raceRows), { startRow: 0, endRow: 29 })
   assert.equal(findRaceMarkers(PLATFORM_DATA.modes.dev.rows), null)
   assert.equal(getStartGridPosition(PLATFORM_DATA.modes.dev.rows, SPAWN_HEIGHT), null)
@@ -308,7 +314,7 @@ test('race course: rings, holes and scenery respect the playable floor', () => {
     for (let s = hole.start; s <= hole.end; s++) {
       const row = raceRows[s + 32]
       for (let x = hole.left; x <= hole.right; x++) {
-        assert.equal(row.isRaised[x + 16], 0, `${hole.id} is not void at ${s},${x}`)
+        assert.equal(row.isRaised[shiftedColumn(x + 16, s + 32)], 0, `${hole.id} is not void at ${s},${x}`)
       }
     }
   }
@@ -321,8 +327,7 @@ test('race course: rings, holes and scenery respect the playable floor', () => {
       assert.notEqual(row.rings?.[columnIndex], 1)
       for (const direction of [-1, 1]) {
         for (const offset of [1, 2]) {
-          const nearby = columnIndex + direction * offset
-          if (nearby < 0 || nearby >= COLUMNS) continue
+          const nearby = (columnIndex + direction * offset + RACE_COLUMNS) % RACE_COLUMNS
           assert.equal(
             row.isRaised[nearby],
             0,
@@ -346,7 +351,7 @@ test('race course: start and finish lines have full 9x5 floor support', () => {
       assert.ok(row, `${label} row ${rowIndex + rowOffset} exists`)
       for (let columnOffset = -4; columnOffset <= 4; columnOffset++) {
         assert.equal(
-          row.isRaised[16 + columnOffset],
+          row.isRaised[shiftedColumn(16 + columnOffset, rowIndex + rowOffset)],
           1,
           `${label} lacks support at ${rowIndex + rowOffset}:${16 + columnOffset}`,
         )
@@ -362,27 +367,28 @@ test('race course: every generated floor cell is connected and at most three pat
     let wasRaised = false
     row.isRaised.forEach((cell, columnIndex) => {
       if (cell === 1) {
-        floorCells.add(rowIndex * COLUMNS + columnIndex)
+        floorCells.add(rowIndex * RACE_COLUMNS + columnIndex)
         if (!wasRaised) intervals += 1
       }
       wasRaised = cell === 1
     })
+    if (row.isRaised[0] && row.isRaised[RACE_COLUMNS - 1] && intervals > 1) intervals -= 1
     assert.ok(intervals >= 1 && intervals <= 3, `row ${rowIndex} has ${intervals} paths`)
   })
 
-  const startCell = 0 * COLUMNS + 16
+  const startCell = shiftedColumn(16, 0)
   const visited = new Set([startCell])
   const queue = [startCell]
   for (let index = 0; index < queue.length; index++) {
     const cell = queue[index]
-    const rowIndex = Math.floor(cell / COLUMNS)
-    const columnIndex = cell % COLUMNS
+    const rowIndex = Math.floor(cell / RACE_COLUMNS)
+    const columnIndex = cell % RACE_COLUMNS
     for (const [dy, dx] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nextRow = rowIndex + dy
-      const nextColumn = columnIndex + dx
+      const nextColumn = (columnIndex + dx + RACE_COLUMNS) % RACE_COLUMNS
       if (nextRow < 0 || nextRow >= raceRows.length) continue
-      if (nextColumn < 0 || nextColumn >= COLUMNS) continue
-      const nextCell = nextRow * COLUMNS + nextColumn
+      if (nextColumn < 0 || nextColumn >= RACE_COLUMNS) continue
+      const nextCell = nextRow * RACE_COLUMNS + nextColumn
       if (!floorCells.has(nextCell) || visited.has(nextCell)) continue
       visited.add(nextCell)
       queue.push(nextCell)

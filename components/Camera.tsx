@@ -2,7 +2,9 @@
 
 import { useFrame, useThree } from '@react-three/fiber'
 import { type FC, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
-import type { PerspectiveCamera } from 'three'
+import { Matrix4, Quaternion, Vector3, type PerspectiveCamera } from 'three'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { surfaceFrame, worldToCourse } from '@/utils/platform/courseSurface'
 
 import { CAMERA_FAR } from '@/utils/sceneDistances'
 
@@ -91,7 +93,7 @@ const applyFarPlane = (camera: PerspectiveCamera): void => {
   camera.updateProjectionMatrix()
 }
 
-const Camera: FC<Props> = ({ isMobile, position }) => {
+const FlatCamera: FC<Props> = ({ isMobile, position }) => {
   const { setLookAt, setZoom } = useCameraControls()
   const camera = useThree((s) => s.camera)
   const { playerPosition } = usePlayerPosition()
@@ -143,6 +145,50 @@ const Camera: FC<Props> = ({ isMobile, position }) => {
   })
 
   return null
+}
+
+const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
+  const surface = useCourseSurface()
+  const { playerPosition } = usePlayerPosition()
+  const { input } = usePlayerInput()
+  const overlay = useGameStore(s => s.overlay)
+  const respawnTick = useGameStore(s => s.playerRespawnTick)
+  const lookAtOverride = useGameStore(s => s.cameraLookAtPosition)
+  const state = useRef({
+    player: new Vector3(), course: new Vector3(), up: new Vector3(), right: new Vector3(),
+    eye: new Vector3(), target: new Vector3(), matrix: new Matrix4(), rotation: new Quaternion(),
+    zoom: 1.2, respawnTick: -1,
+  })
+  const setZoom = useCallback((zoom: number) => { state.current.zoom = zoom }, [])
+  useStageZoom(setZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
+  useFrame(({ camera }, delta) => {
+    const frame = state.current
+    frame.player.fromArray(playerPosition.current)
+    worldToCourse(frame.player, surface, frame.course)
+    surfaceFrame(frame.course.x, surface, frame.up, frame.right)
+    const raised = overlay !== Overlay.NONE && overlay !== Overlay.SPEEDRUN_COUNTDOWN
+    frame.eye.copy(frame.player).addScaledVector(frame.up, position.y + (raised ? OVERLAY_Y_OFFSET : 0))
+    frame.eye.z += position.z + (raised ? OVERLAY_Z_OFFSET : 0)
+    if (lookAtOverride) frame.target.fromArray(lookAtOverride)
+    else frame.target.copy(frame.player)
+    frame.target.addScaledVector(frame.up, LOOK_AT_HEIGHT)
+      .addScaledVector(frame.right, (input.current.right - input.current.left) * LOOK_AT_X_RANGE)
+    frame.matrix.lookAt(frame.eye, frame.target, frame.up)
+    frame.rotation.setFromRotationMatrix(frame.matrix)
+    const blend = frame.respawnTick !== respawnTick ? 1 : 1 - Math.exp(-8 * Math.min(delta, 1 / 15))
+    camera.position.lerp(frame.eye, blend)
+    camera.quaternion.slerp(frame.rotation, blend)
+    camera.zoom += (frame.zoom - camera.zoom) * blend
+    camera.far = CAMERA_FAR
+    camera.updateProjectionMatrix()
+    frame.respawnTick = respawnTick
+  })
+  return null
+}
+
+const Camera: FC<Props> = props => {
+  const surface = useCourseSurface()
+  return surface.topology === 'cylinder' ? <CylinderRaceCamera {...props} /> : <FlatCamera {...props} />
 }
 
 export default Camera

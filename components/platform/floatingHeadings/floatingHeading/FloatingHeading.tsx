@@ -1,6 +1,10 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
+import { useCoursePlacement } from '@/hooks/useCoursePlacement'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { worldCourseNode } from '@/resources/tsl/courseSurface'
+
 import { useGSAP } from '@gsap/react'
 import { useTexture, useThree } from '@react-three/fiber'
 import { type CreatorState, useLocalNodes } from '@react-three/tsl'
@@ -81,6 +85,8 @@ export const FloatingHeading: FC<Props> = ({
   isVisible = true,
   textCanvasOptions = {},
 }) => {
+  const placement = useCoursePlacement(position)
+  const surface = useCourseSurface()
   const { shouldRotate, useNoiseFade } = usePerformanceStore(
     (s) => s.sceneConfig.floatingHeading,
   )
@@ -139,7 +145,10 @@ export const FloatingHeading: FC<Props> = ({
       const alpha = texel.a.mul(dissolve)
 
       // Lane-style lateral tilt about the heading's own centre.
-      const lateralOffset = uPlayerWorldPos.x.sub(headingCenter.x)
+      const courseOffset = worldCourseNode(uPlayerWorldPos, surface).x.sub(worldCourseNode(headingCenter.xyz, surface).x)
+      const lateralOffset = surface.topology === 'cylinder'
+        ? courseOffset.add(surface.columns / 2).mod(surface.columns).sub(surface.columns / 2)
+        : courseOffset
       const tiltT = clamp(lateralOffset.div(HEADING_LATERAL_RANGE), float(-1), float(1))
       const headingRotation = float(HEADING_MAX_ANGLE).mul(tiltT)
       const sine = sin(headingRotation)
@@ -156,7 +165,7 @@ export const FloatingHeading: FC<Props> = ({
         opacityNode: alpha,
       }
     },
-    [useDistanceFade, useNoiseFade, shouldRotate, textTextureNode, dissolveNoiseTexture],
+    [useDistanceFade, useNoiseFade, shouldRotate, textTextureNode, dissolveNoiseTexture, surface],
   )
 
   const { colorNode, opacityNode, positionNode } = useLocalNodes(createNodes, [createNodes])
@@ -201,9 +210,9 @@ export const FloatingHeading: FC<Props> = ({
   }, [height, radius])
 
   return (
+    <group {...placement}>
     <mesh
       visible={isVisible}
-      position={position}
       renderOrder={2}
       rotation={[0, Math.PI / 2, 0]}>
       <cylinderGeometry ref={setAnimationBounds} args={[radius, radius, height, 32, 1, true, thetaStart, thetaLength]} />
@@ -219,5 +228,6 @@ export const FloatingHeading: FC<Props> = ({
         side={BackSide}
       />
     </mesh>
+    </group>
   )
 }

@@ -69,7 +69,7 @@ export const createTimeSlice =
 
     const beginAttempt = (phase: SpeedRunStage): boolean => {
       const state = get()
-      const startGridPosition = getStartGridPosition(state.rowsData, PLAYER_RESTING_Y)
+      const startGridPosition = getStartGridPosition(state.rowsData, PLAYER_RESTING_Y, state.courseSurface)
       if (!startGridPosition) {
         console.error('[race] Cannot begin an attempt without a generated START marker')
         return false

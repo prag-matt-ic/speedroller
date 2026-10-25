@@ -1,6 +1,7 @@
 import type { Vector3Tuple } from 'three'
 
 import { type RowData, rowToWorldZ } from '@/utils/tiles'
+import { type CourseSurface, courseToWorld, FLAT_SURFACE } from './courseSurface'
 
 export type RaceMarkerKind = 'start' | 'finish'
 
@@ -50,10 +51,12 @@ export function findRaceMarkers(rows: readonly RowData[]): RaceMarkers | null {
 export function getStartGridPosition(
   rows: readonly RowData[],
   restingY: number,
+  surface: CourseSurface = FLAT_SURFACE,
 ): Vector3Tuple | null {
   const markers = findRaceMarkers(rows)
   if (!markers) return null
-  return [markers.start.position[0], restingY, markers.start.position[2]]
+  const position = courseToWorld(markers.start.position[0], restingY, markers.start.position[2], surface, { x: 0, y: 0, z: 0 })
+  return [position.x, position.y, position.z]
 }
 
 export function getStartRowIndex(rows: readonly RowData[]): number | null {

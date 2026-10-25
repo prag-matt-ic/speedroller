@@ -1,6 +1,10 @@
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { courseToWorld } from '@/utils/platform/courseSurface'
+import { createSurfaceColliders } from '@/utils/platform/surfaceColliders'
+import { coursePositionNode, courseNormalNode, worldCourseNode } from '@/resources/tsl/courseSurface'
 import { useTexture } from '@react-three/fiber'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
-import { CuboidCollider, RigidBody } from '@react-three/rapier'
+import { CuboidCollider, TrimeshCollider, RigidBody } from '@react-three/rapier'
 import {
   type FC,
   Suspense,
@@ -12,6 +16,8 @@ import {
 } from 'react'
 import {
   attribute,
+  abs,
+  min,
   clamp,
   cross,
   dot,
@@ -53,6 +59,8 @@ import {
   Sphere,
   SRGBColorSpace,
   Texture,
+  Vector3,
+  Box3,
 } from 'three'
 import type { MeshLambertNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
@@ -168,6 +176,8 @@ type TerrainBatchProps = {
 }
 
 const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) => {
+  const surface = useCourseSurface()
+  const collision = useMemo(() => surface.topology === 'cylinder' ? createSurfaceColliders(batch.positions, surface) : null, [batch, surface])
   const meshRef = useRef<InstancedMesh>(null)
 
   // Installed Three types omit emissiveNode; the lighting graph supports it.
@@ -189,12 +199,21 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
     }
     mesh.instanceMatrix.needsUpdate = true
     mesh.computeBoundingBox()
+    if (surface.topology === 'cylinder') {
+      const bounds = new Box3()
+      const center = new Vector3()
+      for (const [x, y, z] of batch.positions) {
+        courseToWorld(x, y, z, surface, center)
+        bounds.expandByPoint(center)
+      }
+      mesh.boundingBox = bounds.expandByScalar(TILE_SLAB_RADIUS)
+    }
     // The GPU tilts each tile around its centre. Expand the CPU bounds by the largest possible
     // vertex displacement so tilted edges cannot disappear at a frustum boundary.
     const tileRadius = TILE_SLAB_RADIUS
     mesh.boundingBox!.expandByScalar(2 * tileRadius * Math.sin(TILE_FADE_ROTATE_MAX / 2))
     mesh.boundingSphere = mesh.boundingBox!.getBoundingSphere(new Sphere())
-  }, [batch])
+  }, [batch, surface])
 
   return (
     <RigidBody
@@ -203,7 +222,7 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
       position={[0, 0, rowToWorldZ(batch.startRow)]}
       userData={{ type: 'tile' }}
       friction={0}>
-      {batch.positions.map((position, index) => (
+      {collision ? <TrimeshCollider args={[collision.vertices, collision.indices]} friction={0} /> : batch.positions.map((position, index) => (
         <CuboidCollider
           key={index}
           position={position}
@@ -239,6 +258,7 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
 }
 
 export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) => {
+  const surface = useCourseSurface()
   const addDetailNoise = usePerformanceStore((s) => s.sceneConfig.platformTiles.addDetailNoise)
   const sceneQuality = usePerformanceStore((s) => s.sceneQuality)
   const stoneAtlasTexture = useTexture(ivoryStoneAtlas.src, configureStoneAtlas)
@@ -281,7 +301,11 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
       const hashFloat = (n: Node<'float'>) => fract(sin(n).mul(43758.5453))
 
-      const playerOffset = positionWorld.xz.sub(uPlayerWorldPos.xz)
+      const playerCourse = worldCourseNode(uPlayerWorldPos, surface)
+      const fragmentCourse = worldCourseNode(positionWorld, surface)
+      const rawOffsetX = abs(fragmentCourse.x.sub(playerCourse.x))
+      const offsetX = surface.topology === 'cylinder' ? min(rawOffsetX, float(surface.columns * TILE_SIZE).sub(rawOffsetX)) : rawOffsetX
+      const playerOffset = vec2(offsetX, fragmentCourse.z.sub(playerCourse.z))
       const distanceSquared = dot(playerOffset, playerOffset)
 
       const fadeAmount = smoothstep(
@@ -363,9 +387,9 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         stoneFrame,
       )
       const stoneColour = texture(stoneAtlasTexture, stoneUv).rgb
-      const surface = attribute<'float'>('slabSurface')
-      const isIvory = step(0.5, surface)
-      const isTop = step(1.5, surface)
+      const slabSurface = attribute<'float'>('slabSurface')
+      const isIvory = step(0.5, slabSurface)
+      const isTop = step(1.5, slabSurface)
       const geometryNormal = attribute<'vec3'>('normal')
       const sampledNormal = sceneQuality === SceneQuality.LOW ? geometryNormal : (() => {
         const tangentNormal = texture(stoneNormalTexture, stoneUv).rgb.mul(2).sub(1)
@@ -373,7 +397,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         return mix(geometryNormal, vec3(tangentNormal.x, tangentNormal.z, tangentNormal.y.negate()), isTop)
       })()
       const tiltedNormal = rotateWithTrig(sampledNormal, tiltAxis, tiltSin, tiltCos)
-      const normalNode = transformNormalToView(tiltedNormal).normalize()
+      const normalNode = transformNormalToView(courseNormalNode(tiltedNormal, positionLocal.x, surface)).normalize()
       const ambient = new AmbientLight('#ffffff', TILE_AMBIENT_INTENSITY)
       const key = new DirectionalLight('#fff2df', TILE_KEY_INTENSITY)
       key.position.set(-3, 6, 4)
@@ -419,12 +443,12 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       const playerDistance = distanceSquared.sqrt()
       const shadowHeightT = clamp(
         float(SHADOW_FADE_START_Y)
-          .sub(uPlayerWorldPos.y)
+          .sub(playerCourse.y)
           .mul(SHADOW_FADE_RANGE_INV),
         float(0),
         float(1),
       )
-      const playerAboveGround = step(float(SHADOW_MIN_PLAYER_Y), uPlayerWorldPos.y)
+      const playerAboveGround = step(float(SHADOW_MIN_PLAYER_Y), playerCourse.y)
       const shadowHeightFade = shadowHeightT
         .mul(shadowHeightT)
         .mul(float(3).sub(shadowHeightT.mul(2)))
@@ -444,7 +468,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
 
       return {
-        positionNode: tiltedGeometry,
+        positionNode: coursePositionNode(tiltedGeometry, surface),
         colorNode: mix(color('#32343a'), shadowed, isIvory),
         normalNode,
         lightsNode,
@@ -452,7 +476,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         emissiveNode: trailEmissive.mul(isTop),
       }
     },
-    [detailNoiseTextures, stoneAtlasTexture, stoneNormalTexture, sceneQuality],
+    [detailNoiseTextures, stoneAtlasTexture, stoneNormalTexture, sceneQuality, surface],
   )
 
   useEffect(() => {

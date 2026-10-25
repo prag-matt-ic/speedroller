@@ -1,5 +1,7 @@
 'use client'
 
+import { useCoursePlacement } from '@/hooks/useCoursePlacement'
+
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import {
   CuboidCollider,
@@ -29,6 +31,7 @@ type Props = {
 const EMITTER_EDGE_PADDING = TILE_SIZE * 0.5
 
 const ConfettiRow: FC<Props> = ({ position, width, depth, index }) => {
+  const placement = useCoursePlacement(position)
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
   const leftEmitterRef = useRef<ConfettiParticleEmitterHandle>(null)
   const rightEmitterRef = useRef<ConfettiParticleEmitterHandle>(null)
@@ -70,7 +73,7 @@ const ConfettiRow: FC<Props> = ({ position, width, depth, index }) => {
   return (
     <RigidBody
       type="fixed"
-      position={position}
+      {...placement}
       colliders={false}
       userData={userData}>
       <CuboidCollider

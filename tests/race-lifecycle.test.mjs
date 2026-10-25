@@ -1,3 +1,4 @@
+import { loadTypeScript } from './loadTypeScript.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import Module, { createRequire } from 'node:module'
@@ -90,6 +91,7 @@ function createRaceStore({ username = 'racer123', insertSpeedRun } = {}) {
     completedSpeedRuns: {},
     platformVersion: PLATFORM_DATA.version,
     rowsData,
+    courseSurface: PLATFORM_DATA.modes.speedrun.surface,
     totalCounts: PLATFORM_DATA.modes.speedrun.totalCounts,
     speedRunStage: SpeedRunStage.LOBBY,
     overlay: Overlay.NONE,
@@ -161,7 +163,7 @@ const createSavedRun = (overrides = {}) => ({
   date: new Date().toISOString(),
   attempt: 1,
   input_type: 'keyboard',
-  level_id: '1.2.0',
+  level_id: '1.3.0',
   accidents: 0,
   rings: 0,
   ip: '127.0.0.1',
@@ -181,11 +183,8 @@ test('race lifecycle: valid name starts countdown, GO sets the timing origin', a
   assert.equal(state.overlay, Overlay.SPEEDRUN_COUNTDOWN)
   assert.equal(state.attemptId, 1)
   assert.equal(state.playerStatus, 'respawning')
-  assert.deepEqual(state.spawnPosition, [
-    markers.start.position[0],
-    PLAYER_RESTING_Y,
-    markers.start.position[2],
-  ])
+  const { getStartGridPosition } = loadTypeScript('utils/platform/raceMarkers.ts')
+  assert.deepEqual(state.spawnPosition, getStartGridPosition(race.rowsData, PLAYER_RESTING_Y, race.PLATFORM_DATA.modes.speedrun.surface))
   assert.equal(state.collectedRings && Object.keys(state.collectedRings).length, 0)
 
   // A stale countdown from another attempt must be ignored.
@@ -220,7 +219,7 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   assert.ok(state.attemptResult.timeSeconds > 0)
   assert.equal(state.attemptResult.username, 'racer123')
   assert.equal(submissionCalls.length, 1)
-  assert.equal(submissionCalls[0].level_id, '1.2.0')
+  assert.equal(submissionCalls[0].level_id, '1.3.0')
 
   // Repeated finish contacts cannot submit twice.
   store.getState().finishSpeedRun(1)
@@ -231,8 +230,8 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   state = store.getState()
   assert.equal(state.speedRunStage, SpeedRunStage.END)
   assert.equal(state.saveStatus, 'saved')
-  assert.equal(state.completedSpeedRuns['1.2.0'].length, 1)
-  assert.equal(state.completedSpeedRuns['1.2.0'][0].id, 77)
+  assert.equal(state.completedSpeedRuns['1.3.0'].length, 1)
+  assert.equal(state.completedSpeedRuns['1.3.0'][0].id, 77)
 })
 
 test('race lifecycle: retry resets the attempt and a late save cannot change it', async () => {
@@ -257,11 +256,8 @@ test('race lifecycle: retry resets the attempt and a late save cannot change it'
   assert.equal(state.speedRunTimeCS, 0)
   assert.equal(state.paletteIndex, 2)
   assert.deepEqual(Object.keys(state.collectedRings), [])
-  assert.deepEqual(state.spawnPosition, [
-    markers.start.position[0],
-    PLAYER_RESTING_Y,
-    markers.start.position[2],
-  ])
+  const { getStartGridPosition } = loadTypeScript('utils/platform/raceMarkers.ts')
+  assert.deepEqual(state.spawnPosition, getStartGridPosition(race.rowsData, PLAYER_RESTING_Y, race.PLATFORM_DATA.modes.speedrun.surface))
 
   submission.resolve(createSavedRun({ id: 88 }))
   await flushAsync()
@@ -270,8 +266,8 @@ test('race lifecycle: retry resets the attempt and a late save cannot change it'
   assert.equal(state.saveStatus, 'idle')
   assert.equal(state.attemptResult, null)
   // A late successful response still appends to history.
-  assert.equal(state.completedSpeedRuns['1.2.0'].length, 1)
-  assert.equal(state.completedSpeedRuns['1.2.0'][0].id, 88)
+  assert.equal(state.completedSpeedRuns['1.3.0'].length, 1)
+  assert.equal(state.completedSpeedRuns['1.3.0'][0].id, 88)
 })
 
 test('race lifecycle: missing name opens setup, cancel returns to lobby row 22', () => {

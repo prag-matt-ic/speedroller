@@ -36,6 +36,8 @@ import {
   stepRaceSpeed,
 } from '@/utils/platform/raceSpeed'
 import { PLAYER_RADIUS } from '@/utils/player'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { surfaceFrame, worldToCourse } from '@/utils/platform/courseSurface'
 import { EPSILON } from '@/utils/tiles'
 
 // https://rapier.rs/docs/user_guides/javascript/rigid_bodies
@@ -44,7 +46,6 @@ import { EPSILON } from '@/utils/tiles'
 
 // Physics constants
 const GRAVITY_ACCELERATION = -9.81 // m/s²
-const UP_DIRECTION = new Vector3(0, 1, 0)
 const PLAYER_USER_DATA: PlayerUserData = { type: 'player' }
 // A hidden tab or stalled frame must never integrate its whole gap into one movement step.
 const MAX_MOVEMENT_DELTA_S = 1 / 15
@@ -70,6 +71,8 @@ function getLobbyForwardSpeed(input: PlayerInput): number {
 }
 
 const Player: FC = () => {
+  const surface = useCourseSurface()
+  const rowCount = useGameStore(s => s.rowsData.length)
   const gameStoreAPI = useGameStoreAPI()
   const onOutOfBounds = useGameStore((s) => s.onOutOfBounds)
   const setPlayerPosition = useGameStore((s) => s.setPlayerPosition)
@@ -100,6 +103,9 @@ const Player: FC = () => {
   const lastPublishedBoost = useRef(0)
 
   // Preallocated vectors for physics calculations (performance optimization)
+  const coursePosition = useRef(new Vector3())
+  const surfaceUp = useRef(new Vector3(0, 1, 0))
+  const surfaceRight = useRef(new Vector3(1, 0, 0))
   const frameDisplacement = useRef(new Vector3())
   const playerVelocity = useRef(new Vector3())
   const rollAxis = useRef(new Vector3())
@@ -197,6 +203,17 @@ const Player: FC = () => {
     desiredMovement.current.y = GRAVITY_ACCELERATION * deltaTime
 
     const currentPosition = bodyRef.current.translation()
+    worldToCourse(currentPosition, surface, coursePosition.current)
+    surfaceFrame(coursePosition.current.x, surface, surfaceUp.current, surfaceRight.current)
+    controllerRef.current.setUp(surfaceUp.current)
+    if (surface.topology === 'cylinder' && (coursePosition.current.y < -4 || currentPosition.z > 14 || currentPosition.z < 3.5 - rowCount - 10)) {
+      onOutOfBounds()
+      return
+    }
+    const sideways = desiredMovement.current.x
+    const gravity = desiredMovement.current.y
+    desiredMovement.current.x = surfaceRight.current.x * sideways + surfaceUp.current.x * gravity
+    desiredMovement.current.y = surfaceRight.current.y * sideways + surfaceUp.current.y * gravity
 
     // Use character controller to compute collision-aware movement
     controllerRef.current.computeColliderMovement(
@@ -215,7 +232,8 @@ const Player: FC = () => {
     bodyRef.current.setNextKinematicTranslation(nextPosition.current)
 
     // Calculate physics for rolling animation
-    frameDisplacement.current.set(correctedMovement.x, 0, correctedMovement.z)
+    frameDisplacement.current.copy(correctedMovement)
+    frameDisplacement.current.addScaledVector(surfaceUp.current, -frameDisplacement.current.dot(surfaceUp.current))
 
     calculatePlayerVelocity(frameDisplacement.current, deltaTime, playerVelocity.current)
 
@@ -226,6 +244,7 @@ const Player: FC = () => {
       deltaTime,
       worldScale.current,
       rollAxis.current,
+      surfaceUp.current,
     )
 
     // Update the store mirrors used by effects and HUD (immutable updates, change-guarded).
@@ -331,6 +350,7 @@ function applyRollingPhysics(
   deltaTime: number,
   worldScale: Vector3,
   rollAxis: Vector3,
+  up: Vector3,
 ): void {
   sphereMesh.getWorldScale(worldScale)
   // Assume uniform scale for a sphere
@@ -340,7 +360,7 @@ function applyRollingPhysics(
   if (speed <= EPSILON.SMALL || effectiveRadius <= EPSILON.SMALL) return
   // Rolling without slipping: ω = (n × v) / R
   // Axis given by right-hand rule (surface normal × velocity)
-  rollAxis.copy(UP_DIRECTION).cross(velocity).normalize()
+  rollAxis.copy(up).cross(velocity).normalize()
 
   // Calculate rotation angle: θ = |v| Δt / R
   const rotationAngle = (speed * deltaTime) / effectiveRadius

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import Module, { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -18,8 +18,12 @@ export function loadTypeScript(relativePath, overrides = {}, cache = new Map()) 
   const nativeRequire = createRequire(filename)
   loaded.require = (specifier) => {
     if (Object.hasOwn(overrides, specifier)) return overrides[specifier]
-    if (specifier.startsWith('@/')) {
-      return loadTypeScript(`${specifier.slice(2)}.ts`, overrides, cache)
+    if (specifier.startsWith('@/') || specifier.startsWith('.')) {
+      const base = specifier.startsWith('@/')
+        ? path.resolve(projectRoot, specifier.slice(2))
+        : path.resolve(path.dirname(filename), specifier)
+      const match = [`${base}.ts`, `${base}.tsx`, path.join(base, 'index.ts')].find(existsSync)
+      if (match) return loadTypeScript(match, overrides, cache)
     }
     return nativeRequire(specifier)
   }

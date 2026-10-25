@@ -1,6 +1,11 @@
 /* eslint-disable react-hooks/refs */
 'use client'
 
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { courseToWorld } from '@/utils/platform/courseSurface'
+import { createLocalCoursePanelGeometry } from '@/utils/platform/coursePlaneGeometry'
+import { useCoursePlacement } from '@/hooks/useCoursePlacement'
+
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { useGSAP } from '@gsap/react'
 import { Html } from '@react-three/drei'
@@ -97,6 +102,11 @@ export const InfoZone: FC<InfoZoneProps> = ({
   infoContentHtmlProps = {},
   iconSrc,
 }) => {
+  const surface = useCourseSurface()
+  const placement = useCoursePlacement(position, -Math.PI / 2)
+  const [courseX, courseY] = position
+  const panelGeometry = useMemo(() => createLocalCoursePanelGeometry(INFO_ZONE_WIDTH, INFO_ZONE_HEIGHT, courseX, courseY, surface), [courseX, courseY, surface])
+  useEffect(() => () => panelGeometry.dispose(), [panelGeometry])
   const gameStore = useGameStoreAPI()
   const isMobile = useGameStore((s) => s.isMobile)
   const htmlPortal = useGameStore((s) => s.htmlPortal)
@@ -167,11 +177,10 @@ export const InfoZone: FC<InfoZoneProps> = ({
 
   const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
 
-  const cameraTarget = useMemo<Vector3Tuple>(() => [
-    position[0] - infoPositionOffset[0],
-    position[1] - infoPositionOffset[1],
-    position[2] - infoPositionOffset[2],
-  ], [position, infoPositionOffset])
+  const cameraTarget = useMemo<Vector3Tuple>(() => {
+    const target = courseToWorld(position[0] - infoPositionOffset[0], position[1] - infoPositionOffset[1], position[2] - infoPositionOffset[2], surface, { x: 0, y: 0, z: 0 })
+    return [target.x, target.y, target.z]
+  }, [position, infoPositionOffset, surface])
 
   const clearCameraTarget = useCallback(() => {
     // A late exit from this zone must not clear a newer zone's target.
@@ -241,8 +250,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
   return (
     <RigidBody
       type="fixed"
-      position={position}
-      rotation={[-Math.PI / 2, 0, 0]}
+      {...placement}
       colliders={false}
       userData={userData}>
       <CuboidCollider
@@ -258,7 +266,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
       <group>
         {/* Floor tile */}
         <mesh position={[0, 0, 0.01]} renderOrder={2} onFramed={onFramed}>
-          <planeGeometry args={[INFO_ZONE_WIDTH, INFO_ZONE_HEIGHT]} />
+          <primitive object={panelGeometry} attach="geometry" />
           <meshBasicNodeMaterial
             colorNode={colorNode}
             opacityNode={opacityNode}

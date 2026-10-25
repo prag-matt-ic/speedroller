@@ -1,9 +1,13 @@
 'use client'
 
+import { createLocalCoursePanelGeometry } from '@/utils/platform/coursePlaneGeometry'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { useCoursePlacement } from '@/hooks/useCoursePlacement'
+
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
-import { type FC, useCallback, useId, useMemo, useRef } from 'react'
+import { type FC, useCallback, useEffect, useId, useMemo, useRef } from 'react'
 import { DataTexture, FloatType, Group, type Mesh, RGBAFormat, Vector3, type Vector3Tuple } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
 import { clamp, float, mix, select, uv, vec2, vec3, vertexStage } from 'three/tsl'
@@ -59,6 +63,11 @@ type Props = {
 }
 
 export const Collectible: FC<Props> = ({ position, width, height, id }) => {
+  const surface = useCourseSurface()
+  const placement = useCoursePlacement(position, -Math.PI / 2)
+  const [courseX, courseY] = position
+  const panelGeometry = useMemo(() => createLocalCoursePanelGeometry(width, height, courseX, courseY, surface), [courseX, courseY, surface, width, height])
+  useEffect(() => () => panelGeometry.dispose(), [panelGeometry])
   const isCollected = useGameStore((s) => s.collectedCollectibles.includes(id))
   const isConfirming = useGameStore((s) => s.confirmingCollectible === id)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
@@ -176,8 +185,7 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
   return (
     <RigidBody
       type="fixed"
-      position={position}
-      rotation={[-Math.PI / 2, 0, 0]}
+      {...placement}
       colliders={false}
       userData={userData}>
       <CuboidCollider
@@ -191,7 +199,7 @@ export const Collectible: FC<Props> = ({ position, width, height, id }) => {
 
       {/* Tile mesh: shader renders corner brackets and confirmation progress bar */}
       <mesh position={[0, 0, 0.01]} renderOrder={2} onFramed={onFramed}>
-        <planeGeometry args={[width, height]} />
+        <primitive object={panelGeometry} attach="geometry" />
         <meshBasicNodeMaterial
           colorNode={colorNode}
           opacityNode={opacityNode}

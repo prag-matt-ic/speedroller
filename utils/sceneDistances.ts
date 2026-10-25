@@ -10,7 +10,7 @@ export const ELEMENT_FADE_DISTANCE = TILE_PLAYER_FADE_MIN_RADIUS
 export const FADE_OUT_START = 8
 export const FADE_OUT_END = 14
 
-// Height fog is clear above this world Y; density controls the transition below it.
+// Height fog is clear above this course height (world Y on flat terrain, radial on a cylinder).
 // Three also multiplies depth below this height by camera-space distance.
 export const HEIGHT_FOG_TOP_Y = -8
 export const HEIGHT_FOG_DENSITY = 0.003

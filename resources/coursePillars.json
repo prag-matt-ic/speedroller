@@ -1,766 +1,6361 @@
 [
   {
-    "id": "course-pillar-16",
+    "id": "cylinder-pillar-48-0",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -65.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
       -44.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 16
   },
   {
-    "id": "course-pillar-40",
+    "id": "cylinder-pillar-48-84",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      18.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-48-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -44.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 16
+  },
+  {
+    "id": "cylinder-pillar-72-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -68.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      4,
+      28,
+      6
     ],
     "distance": 40
   },
   {
-    "id": "course-pillar-64",
+    "id": "cylinder-pillar-72-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
-      -92.5
+      -53.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -68.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
+      28,
+      8
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-72-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 40
+  },
+  {
+    "id": "cylinder-pillar-96-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
     ],
     "distance": 64
   },
   {
-    "id": "course-pillar-88",
+    "id": "cylinder-pillar-96-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-96",
     "module": "pillar",
     "position": [
       30.5,
-      -32,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-96-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -92.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 64
+  },
+  {
+    "id": "cylinder-pillar-120-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -116.5
     ],
     "dimensions": [
-      12,
-      71.56,
-      14
+      2,
+      28,
+      4
     ],
     "distance": 88
   },
   {
-    "id": "course-pillar-112",
+    "id": "cylinder-pillar-120-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-120-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -116.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 88
+  },
+  {
+    "id": "cylinder-pillar-144-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -140.5
     ],
     "dimensions": [
-      8,
-      55.56,
-      10
+      6,
+      28,
+      8
     ],
     "distance": 112
   },
   {
-    "id": "course-pillar-136",
+    "id": "cylinder-pillar-144-12",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -53.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-144-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 112
+  },
+  {
+    "id": "cylinder-pillar-168-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -164.5
     ],
     "dimensions": [
-      10,
-      55.56,
-      12
+      5,
+      28,
+      7
     ],
     "distance": 136
   },
   {
-    "id": "course-pillar-160",
+    "id": "cylinder-pillar-168-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-168-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-168-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-168-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-168-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-168-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-168-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -164.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 136
+  },
+  {
+    "id": "cylinder-pillar-192-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -188.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      4,
+      28,
+      6
     ],
     "distance": 160
   },
   {
-    "id": "course-pillar-184",
+    "id": "cylinder-pillar-192-12",
     "module": "pillar",
     "position": [
-      28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-192-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -188.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 160
+  },
+  {
+    "id": "cylinder-pillar-216-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -212.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      3,
+      28,
+      5
     ],
     "distance": 184
   },
   {
-    "id": "course-pillar-208",
+    "id": "cylinder-pillar-216-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -53.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-216-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 184
+  },
+  {
+    "id": "cylinder-pillar-240-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
       -236.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 208
   },
   {
-    "id": "course-pillar-232",
+    "id": "cylinder-pillar-240-24",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -41.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-240-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -236.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 208
+  },
+  {
+    "id": "cylinder-pillar-264-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -260.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      6,
+      28,
+      8
     ],
     "distance": 232
   },
   {
-    "id": "course-pillar-256",
+    "id": "cylinder-pillar-264-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
-      -284.5
+      -53.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -260.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
+      28,
+      8
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-264-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -260.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 232
+  },
+  {
+    "id": "cylinder-pillar-288-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
     ],
     "distance": 256
   },
   {
-    "id": "course-pillar-280",
+    "id": "cylinder-pillar-288-12",
     "module": "pillar",
     "position": [
-      30.5,
-      -32,
+      -53.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-288-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-288-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-288-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-288-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-288-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-288-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 256
+  },
+  {
+    "id": "cylinder-pillar-312-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -308.5
     ],
     "dimensions": [
-      12,
-      71.56,
-      14
+      4,
+      28,
+      6
     ],
     "distance": 280
   },
   {
-    "id": "course-pillar-304",
+    "id": "cylinder-pillar-312-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-312-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-312-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-312-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-312-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-312-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-312-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -308.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 280
+  },
+  {
+    "id": "cylinder-pillar-336-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -332.5
     ],
     "dimensions": [
-      8,
-      55.56,
-      10
+      3,
+      28,
+      5
     ],
     "distance": 304
   },
   {
-    "id": "course-pillar-328",
+    "id": "cylinder-pillar-336-12",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -53.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-336-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-336-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-336-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-336-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-336-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-336-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -332.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 304
+  },
+  {
+    "id": "cylinder-pillar-360-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -356.5
     ],
     "dimensions": [
-      10,
-      55.56,
-      12
+      2,
+      28,
+      4
     ],
     "distance": 328
   },
   {
-    "id": "course-pillar-352",
+    "id": "cylinder-pillar-360-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-360-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-360-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-360-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-360-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-360-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-360-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 328
+  },
+  {
+    "id": "cylinder-pillar-384-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -380.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      6,
+      28,
+      8
     ],
     "distance": 352
   },
   {
-    "id": "course-pillar-376",
+    "id": "cylinder-pillar-384-12",
     "module": "pillar",
     "position": [
-      28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-384-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -380.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 352
+  },
+  {
+    "id": "cylinder-pillar-408-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -404.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      5,
+      28,
+      7
     ],
     "distance": 376
   },
   {
-    "id": "course-pillar-400",
+    "id": "cylinder-pillar-408-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -53.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-408-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -404.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 376
+  },
+  {
+    "id": "cylinder-pillar-432-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
       -428.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 400
   },
   {
-    "id": "course-pillar-424",
+    "id": "cylinder-pillar-432-48",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -17.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-432-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 400
+  },
+  {
+    "id": "cylinder-pillar-456-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -452.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      3,
+      28,
+      5
     ],
     "distance": 424
   },
   {
-    "id": "course-pillar-448",
+    "id": "cylinder-pillar-456-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
-      -476.5
+      -53.5,
+      -28.44,
+      -452.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-456-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -452.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
+      28,
+      8
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-456-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -452.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-456-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -452.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-456-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -452.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-456-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -452.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-456-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -452.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 424
+  },
+  {
+    "id": "cylinder-pillar-480-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
     ],
     "distance": 448
   },
   {
-    "id": "course-pillar-472",
+    "id": "cylinder-pillar-480-12",
     "module": "pillar",
     "position": [
-      30.5,
-      -32,
+      -53.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-480-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-480-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-480-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-480-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-480-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-480-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -476.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 448
+  },
+  {
+    "id": "cylinder-pillar-504-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -500.5
     ],
     "dimensions": [
-      12,
-      71.56,
-      14
+      6,
+      28,
+      8
     ],
     "distance": 472
   },
   {
-    "id": "course-pillar-496",
+    "id": "cylinder-pillar-504-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-504-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-504-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-504-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-504-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-504-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-504-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 472
+  },
+  {
+    "id": "cylinder-pillar-528-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
       -524.5
     ],
     "dimensions": [
-      8,
-      55.56,
-      10
+      4,
+      28,
+      6
     ],
     "distance": 496
   },
   {
-    "id": "course-pillar-520",
+    "id": "cylinder-pillar-528-24",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -41.5,
+      -28.44,
+      -524.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 496
+  },
+  {
+    "id": "cylinder-pillar-528-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -524.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 496
+  },
+  {
+    "id": "cylinder-pillar-528-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -524.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 496
+  },
+  {
+    "id": "cylinder-pillar-528-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -524.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 496
+  },
+  {
+    "id": "cylinder-pillar-528-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -524.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 496
+  },
+  {
+    "id": "cylinder-pillar-528-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -524.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 496
+  },
+  {
+    "id": "cylinder-pillar-552-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
       -548.5
     ],
     "dimensions": [
-      10,
-      55.56,
-      12
+      3,
+      28,
+      5
     ],
     "distance": 520
   },
   {
-    "id": "course-pillar-544",
+    "id": "cylinder-pillar-552-24",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -41.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-552-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-552-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-552-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-552-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-552-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-552-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -548.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 520
+  },
+  {
+    "id": "cylinder-pillar-576-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
       -572.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      2,
+      28,
+      4
     ],
     "distance": 544
   },
   {
-    "id": "course-pillar-568",
+    "id": "cylinder-pillar-576-24",
     "module": "pillar",
     "position": [
-      28.5,
-      -32,
+      -41.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-576-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-576-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-576-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-576-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-576-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-576-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 544
+  },
+  {
+    "id": "cylinder-pillar-600-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
       -596.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      6,
+      28,
+      8
     ],
     "distance": 568
   },
   {
-    "id": "course-pillar-592",
+    "id": "cylinder-pillar-600-24",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -41.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-600-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -596.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 568
+  },
+  {
+    "id": "cylinder-pillar-624-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-624-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-624-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-624-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
       -620.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 592
   },
   {
-    "id": "recovery-pillar-47-140",
+    "id": "cylinder-pillar-624-72",
     "module": "pillar",
     "position": [
-      -30,
-      -32,
+      6.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-624-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-624-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-624-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -620.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 592
+  },
+  {
+    "id": "cylinder-pillar-648-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 616
+  },
+  {
+    "id": "cylinder-pillar-648-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 616
+  },
+  {
+    "id": "cylinder-pillar-648-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
       -644.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 616
   },
   {
-    "id": "recovery-pillar-123-130",
+    "id": "cylinder-pillar-648-60",
     "module": "pillar",
     "position": [
-      48,
-      -32,
-      -652.5
+      -5.5,
+      -28.44,
+      -644.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      5,
+      28,
+      7
     ],
-    "distance": 624
+    "distance": 616
   },
   {
-    "id": "recovery-pillar-107-105",
+    "id": "cylinder-pillar-648-72",
     "module": "pillar",
     "position": [
-      30,
-      -32,
-      -678.5
+      6.5,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 616
+  },
+  {
+    "id": "cylinder-pillar-648-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 616
+  },
+  {
+    "id": "cylinder-pillar-648-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 616
+  },
+  {
+    "id": "cylinder-pillar-648-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -644.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
-    ],
-    "distance": 650
-  },
-  {
-    "id": "recovery-pillar-20-93",
-    "module": "pillar",
-    "position": [
-      -54,
-      -32,
-      -688.5
-    ],
-    "dimensions": [
-      12,
-      71.56,
-      14
-    ],
-    "distance": 660
-  },
-  {
-    "id": "recovery-pillar-44-65",
-    "module": "pillar",
-    "position": [
-      -32,
-      -32,
-      -718.5
-    ],
-    "dimensions": [
-      8,
-      55.56,
-      10
-    ],
-    "distance": 690
-  },
-  {
-    "id": "recovery-pillar-127-50",
-    "module": "pillar",
-    "position": [
-      52,
-      -32,
-      -732.5
-    ],
-    "dimensions": [
-      10,
-      55.56,
-      12
-    ],
-    "distance": 704
-  },
-  {
-    "id": "recovery-pillar-48-16",
-    "module": "pillar",
-    "position": [
-      -28,
-      -32,
-      -766.5
-    ],
-    "dimensions": [
-      8,
-      71.56,
-      12
-    ],
-    "distance": 738
-  },
-  {
-    "id": "recovery-pillar-104-16",
-    "module": "pillar",
-    "position": [
       28,
-      -32,
-      -766.5
+      8
     ],
-    "dimensions": [
-      8,
-      71.56,
-      12
-    ],
-    "distance": 738
+    "distance": 616
   },
   {
-    "id": "course-pillar-784",
+    "id": "cylinder-pillar-648-120",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      54.5,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 616
+  },
+  {
+    "id": "cylinder-pillar-672-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-672-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -668.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 640
+  },
+  {
+    "id": "cylinder-pillar-696-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-696-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -692.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 664
+  },
+  {
+    "id": "cylinder-pillar-720-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-720-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 688
+  },
+  {
+    "id": "cylinder-pillar-744-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-744-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -740.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 712
+  },
+  {
+    "id": "cylinder-pillar-768-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-768-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -764.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 736
+  },
+  {
+    "id": "cylinder-pillar-792-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-792-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 760
+  },
+  {
+    "id": "cylinder-pillar-816-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -812.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      3,
+      28,
+      5
     ],
     "distance": 784
   },
   {
-    "id": "course-pillar-808",
+    "id": "cylinder-pillar-816-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
-      -836.5
+      -53.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -812.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
+      28,
+      8
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-816-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -812.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 784
+  },
+  {
+    "id": "cylinder-pillar-840-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
     ],
     "distance": 808
   },
   {
-    "id": "course-pillar-832",
+    "id": "cylinder-pillar-840-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-840-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-840-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-840-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-840-96",
     "module": "pillar",
     "position": [
       30.5,
-      -32,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-840-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-840-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -836.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 808
+  },
+  {
+    "id": "cylinder-pillar-864-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -860.5
     ],
     "dimensions": [
-      12,
-      71.56,
-      14
+      6,
+      28,
+      8
     ],
     "distance": 832
   },
   {
-    "id": "course-pillar-856",
+    "id": "cylinder-pillar-864-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-864-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-864-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-864-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-864-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-864-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-864-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 832
+  },
+  {
+    "id": "cylinder-pillar-888-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -884.5
     ],
     "dimensions": [
-      8,
-      55.56,
-      10
+      5,
+      28,
+      7
     ],
     "distance": 856
   },
   {
-    "id": "course-pillar-880",
+    "id": "cylinder-pillar-888-12",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -53.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-888-60",
+    "module": "pillar",
+    "position": [
+      -5.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-888-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-888-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-888-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-888-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-888-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -884.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 856
+  },
+  {
+    "id": "cylinder-pillar-912-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -908.5
     ],
     "dimensions": [
-      10,
-      55.56,
-      12
+      4,
+      28,
+      6
     ],
     "distance": 880
   },
   {
-    "id": "course-pillar-904",
+    "id": "cylinder-pillar-912-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -908.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 880
+  },
+  {
+    "id": "cylinder-pillar-912-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -908.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 880
+  },
+  {
+    "id": "cylinder-pillar-912-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -908.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 880
+  },
+  {
+    "id": "cylinder-pillar-912-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -908.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 880
+  },
+  {
+    "id": "cylinder-pillar-912-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -908.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 880
+  },
+  {
+    "id": "cylinder-pillar-912-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -908.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 880
+  },
+  {
+    "id": "cylinder-pillar-936-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -932.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      3,
+      28,
+      5
     ],
     "distance": 904
   },
   {
-    "id": "course-pillar-928",
+    "id": "cylinder-pillar-936-12",
     "module": "pillar",
     "position": [
-      28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-936-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-936-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-936-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-936-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-936-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-936-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 904
+  },
+  {
+    "id": "cylinder-pillar-960-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -956.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      2,
+      28,
+      4
     ],
     "distance": 928
   },
   {
-    "id": "course-pillar-952",
+    "id": "cylinder-pillar-960-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -53.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-960-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-960-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-960-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-960-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-960-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-960-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -956.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 928
+  },
+  {
+    "id": "cylinder-pillar-984-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -980.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 952
   },
   {
-    "id": "course-pillar-976",
+    "id": "cylinder-pillar-984-12",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -53.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-984-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-984-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-984-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-984-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-984-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-984-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -980.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 952
+  },
+  {
+    "id": "cylinder-pillar-1008-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1004.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      5,
+      28,
+      7
     ],
     "distance": 976
   },
   {
-    "id": "course-pillar-1000",
+    "id": "cylinder-pillar-1008-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
-      -1028.5
+      -53.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1004.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
+      28,
+      8
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1008-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 976
+  },
+  {
+    "id": "cylinder-pillar-1032-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
     ],
     "distance": 1000
   },
   {
-    "id": "course-pillar-1024",
+    "id": "cylinder-pillar-1032-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-96",
     "module": "pillar",
     "position": [
       30.5,
-      -32,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1032-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1028.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "cylinder-pillar-1056-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1052.5
     ],
     "dimensions": [
-      12,
-      71.56,
-      14
+      3,
+      28,
+      5
     ],
     "distance": 1024
   },
   {
-    "id": "course-pillar-1048",
+    "id": "cylinder-pillar-1056-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-72",
+    "module": "pillar",
+    "position": [
+      6.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1056-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1052.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "cylinder-pillar-1080-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1076.5
     ],
     "dimensions": [
-      8,
-      55.56,
-      10
+      2,
+      28,
+      4
     ],
     "distance": 1048
   },
   {
-    "id": "course-pillar-1072",
+    "id": "cylinder-pillar-1080-12",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -53.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1080-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1080-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1080-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1080-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1080-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1080-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "cylinder-pillar-1104-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1100.5
     ],
     "dimensions": [
-      10,
-      55.56,
-      12
+      6,
+      28,
+      8
     ],
     "distance": 1072
   },
   {
-    "id": "course-pillar-1096",
+    "id": "cylinder-pillar-1104-12",
     "module": "pillar",
     "position": [
-      -28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1104-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1104-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1104-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1104-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1104-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1104-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1100.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "cylinder-pillar-1128-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1124.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      5,
+      28,
+      7
     ],
     "distance": 1096
   },
   {
-    "id": "course-pillar-1120",
+    "id": "cylinder-pillar-1128-12",
     "module": "pillar",
     "position": [
-      28.5,
-      -32,
+      -53.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1128-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1128-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1128-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1128-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1128-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1128-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1124.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "cylinder-pillar-1152-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1148.5
     ],
     "dimensions": [
-      8,
-      71.56,
-      12
+      4,
+      28,
+      6
     ],
     "distance": 1120
   },
   {
-    "id": "course-pillar-1144",
+    "id": "cylinder-pillar-1152-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -53.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1152-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1152-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1152-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1152-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1152-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1152-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "cylinder-pillar-1176-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
       -1172.5
     ],
     "dimensions": [
       6,
-      43.56,
+      28,
       8
     ],
     "distance": 1144
   },
   {
-    "id": "course-pillar-1168",
+    "id": "cylinder-pillar-1176-36",
     "module": "pillar",
     "position": [
-      29.5,
-      -32,
+      -29.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1176-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1172.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "cylinder-pillar-1200-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1196.5
     ],
     "dimensions": [
-      10,
-      71.56,
-      12
+      2,
+      28,
+      4
     ],
     "distance": 1168
   },
   {
-    "id": "course-pillar-1192",
+    "id": "cylinder-pillar-1200-12",
     "module": "pillar",
     "position": [
-      -27.5,
-      -32,
+      -53.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1200-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1196.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "cylinder-pillar-1224-0",
+    "module": "pillar",
+    "position": [
+      -65.5,
+      -28.44,
       -1220.5
     ],
     "dimensions": [
       6,
-      55.56,
-      10
+      28,
+      8
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-12",
+    "module": "pillar",
+    "position": [
+      -53.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      5,
+      28,
+      7
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-24",
+    "module": "pillar",
+    "position": [
+      -41.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-36",
+    "module": "pillar",
+    "position": [
+      -29.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-48",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-84",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      4,
+      28,
+      6
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-96",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      3,
+      28,
+      5
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-108",
+    "module": "pillar",
+    "position": [
+      42.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      2,
+      28,
+      4
+    ],
+    "distance": 1192
+  },
+  {
+    "id": "cylinder-pillar-1224-120",
+    "module": "pillar",
+    "position": [
+      54.5,
+      -28.44,
+      -1220.5
+    ],
+    "dimensions": [
+      6,
+      28,
+      8
     ],
     "distance": 1192
   }

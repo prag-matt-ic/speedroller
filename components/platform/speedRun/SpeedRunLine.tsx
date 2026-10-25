@@ -1,7 +1,10 @@
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { createCoursePlaneGeometry } from '@/utils/platform/coursePlaneGeometry'
+import { createSurfaceColliders } from '@/utils/platform/surfaceColliders'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
-import { CuboidCollider, type IntersectionEnterHandler, RigidBody } from '@react-three/rapier'
-import { type FC, useCallback, useId, useMemo } from 'react'
+import { TrimeshCollider, type IntersectionEnterHandler, RigidBody } from '@react-three/rapier'
+import { type FC, useCallback, useEffect, useId, useMemo } from 'react'
 import { float, floor, fract, mix, step, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import type { Vector3Tuple } from 'three'
 import type { Node, UniformNode } from 'three/webgpu'
@@ -130,6 +133,16 @@ const LINE_LABEL_HEIGHT = 1.6
 const LINE_LABEL_COLOR = '#eafffb'
 
 const SpeedRunLine: FC<Props> = ({ kind, position, width, height }) => {
+  const surface = useCourseSurface()
+  const [x, y, z] = position
+  const geometry = useMemo(() => createCoursePlaneGeometry(width, height, x, y + 0.01, surface), [width, height, x, y, surface])
+  useEffect(() => () => geometry.dispose(), [geometry])
+  const collision = useMemo(() => {
+    const columns = Math.ceil(width / TILE_SIZE)
+    const cellWidth = width / columns
+    const cells = Array.from({ length: columns }, (_, column): Vector3Tuple => [x + (column + 0.5) * cellWidth - width / 2, y, 0])
+    return createSurfaceColliders(cells, surface, cellWidth, PLAYER_RADIUS * 4, height)
+  }, [x, y, width, height, surface])
   const enterStartLine = useGameStore((s) => s.enterStartLine)
   const finishSpeedRun = useGameStore((s) => s.finishSpeedRun)
   const gameStoreAPI = useGameStoreAPI()
@@ -191,14 +204,13 @@ const SpeedRunLine: FC<Props> = ({ kind, position, width, height }) => {
   const lineNodes = isStartLine ? startLineNodes : finishLineNodes
 
   return (
-    <group position={position}>
+    <group position={[0, 0, z]}>
       <RigidBody
         type="fixed"
-        rotation={[-Math.PI / 2, 0, 0]}
         colliders={false}
         userData={userData}>
-        <CuboidCollider
-          args={[width / 2, height / 2, PLAYER_RADIUS * 2]}
+        <TrimeshCollider
+          args={[collision.vertices, collision.indices]}
           sensor={true}
           activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
           mass={0}
@@ -206,14 +218,15 @@ const SpeedRunLine: FC<Props> = ({ kind, position, width, height }) => {
           onIntersectionEnter={onIntersectionEnter}
           collisionGroups={COLLISION_GROUPS.finishLineSensor}
         />
-        <mesh position={[0, 0, 0.01]} renderOrder={2}>
-          <planeGeometry args={[width, height]} />
+        <mesh renderOrder={2}>
+          <primitive object={geometry} attach="geometry" />
           <LineMaterial colorNode={lineNodes.colorNode} opacityNode={lineNodes.opacityNode} />
         </mesh>
       </RigidBody>
       <Text
         text={isStartLine ? 'START' : 'FINISH'}
-        position={[0, 0.02, LINE_LABEL_Z_OFFSET]}
+        position={[x, y + 0.02, LINE_LABEL_Z_OFFSET]}
+        surface={surface}
         width={LINE_LABEL_WIDTH}
         height={LINE_LABEL_HEIGHT}
         textCanvasOptions={{

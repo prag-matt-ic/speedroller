@@ -3,6 +3,7 @@ import type { Vector3Tuple } from 'three'
 import { COLUMNS, PLATFORM_BATCH_ROWS, RAISED_Y, type RowData, TILE_SIZE, colToX } from '@/utils/tiles'
 
 export type TileBatch = {
+  columns: number
   startRow: number
   positions: Vector3Tuple[]
   seeds: Float32Array
@@ -19,19 +20,20 @@ const tileSeed = (row: number, column: number) => {
 
 export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
   const batches: TileBatch[] = []
+  const columns = rows[0]?.isRaised.length ?? COLUMNS
   for (let startRow = 0; startRow < rows.length; startRow += PLATFORM_BATCH_ROWS) {
     const positions: Vector3Tuple[] = []
     const seeds: number[] = []
     const highlights: number[] = []
-    const cellToInstance = new Int32Array(PLATFORM_BATCH_ROWS * COLUMNS).fill(-1)
+    const cellToInstance = new Int32Array(PLATFORM_BATCH_ROWS * columns).fill(-1)
     const endRow = Math.min(startRow + PLATFORM_BATCH_ROWS, rows.length)
 
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       const row = rows[rowIndex]
-      for (let column = 0; column < COLUMNS; column++) {
+      for (let column = 0; column < columns; column++) {
         if (row.isRaised[column] !== 1) continue
-        cellToInstance[(rowIndex - startRow) * COLUMNS + column] = positions.length
-        positions.push([colToX(column), RAISED_Y, -(rowIndex - startRow) * TILE_SIZE])
+        cellToInstance[(rowIndex - startRow) * columns + column] = positions.length
+        positions.push([colToX(column, columns), RAISED_Y, -(rowIndex - startRow) * TILE_SIZE])
         seeds.push(tileSeed(rowIndex, column))
         highlights.push(row.isHighlighted?.[column] ?? 0)
       }
@@ -39,6 +41,7 @@ export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
 
     if (positions.length > 0) {
       batches.push({
+        columns,
         startRow,
         positions,
         seeds: new Float32Array(seeds),

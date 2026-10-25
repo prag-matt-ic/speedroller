@@ -12,6 +12,7 @@ import {
 } from '@/model/schema'
 import type { TotalCounts } from '@/stores/totalCounts'
 import type { RowData } from '@/utils/tiles'
+import type { CourseSurface } from '@/utils/platform/courseSurface'
 
 export enum Stage {
   HOME = 1,
@@ -205,6 +206,7 @@ export type PlayerSlice = {
 }
 
 export type GameSlice = {
+  courseSurface: CourseSurface
   stage: Stage
   goToStage: (stage: Stage) => void
 

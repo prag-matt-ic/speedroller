@@ -1,5 +1,9 @@
-/* eslint-disable react-hooks/immutability */
 'use client'
+
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { type CourseSurface, surfaceRadius } from '@/utils/platform/courseSurface'
+import { coursePositionNode } from '@/resources/tsl/courseSurface'
+/* eslint-disable react-hooks/immutability */
 
 import { useThree } from '@react-three/fiber'
 import {
@@ -42,7 +46,6 @@ import { useGameFrame } from '@/hooks/useGameFrame'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { sampleTilesPalette } from '@/resources/tsl/tilesPalette'
 import {
-  COLUMNS,
   PLATFORM_BATCH_ROWS,
   type RowData,
   TILE_SIZE,
@@ -57,7 +60,6 @@ const EPSILON = 1e-5
 const COLUMN_JITTER_RANGE = 0.6
 const PALETTE_MIX = 0.4
 const EXTRA_SIDE_COLUMNS = 4
-const GRID_COLS = COLUMNS + EXTRA_SIDE_COLUMNS * 2
 const TILE_THICKNESS = 0.1
 const BOX_SIZE_SCALE = 0.5
 const Y_MIN = -8
@@ -82,12 +84,15 @@ type FloatingBatchData = {
   count: number
 }
 
-const createSpawnData = (rows: readonly RowData[]) => {
+const createSpawnData = (rows: readonly RowData[], surface: CourseSurface) => {
+  const COLUMNS = surface.columns
+  const margin = surface.topology === 'flat' ? EXTRA_SIDE_COLUMNS : 0
+  const GRID_COLS = COLUMNS + margin * 2
   const mask = new Float32Array(GRID_COLS * rows.length)
   const spawnableCells: number[] = []
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
     for (let column = 0; column < GRID_COLS; column++) {
-      const platformColumn = column - EXTRA_SIDE_COLUMNS
+      const platformColumn = column - margin
       const isPlatformTile =
         platformColumn >= 0 &&
         platformColumn < COLUMNS &&
@@ -111,12 +116,14 @@ const FloatingBatch: FC<{
   batch: FloatingBatchData
   uDeltaTime: UniformNode<'float', number>
 }> = ({ batch, uDeltaTime }) => {
+  const surface = useCourseSurface()
+  const GRID_COLS = surface.columns + (surface.topology === 'flat' ? EXTRA_SIDE_COLUMNS * 2 : 0)
   const renderer = useThree((state) => state.renderer)
   const isPlatformReady = useGameStore((state) => state.isPlatformReady)
   const meshRef = useRef<InstancedMesh>(null)
   // Written by the mesh's onFramed callback; false until the first frame reports it.
   const isFramedRef = useRef(false)
-  const spawnData = useMemo(() => createSpawnData(batch.rows), [batch.rows])
+  const spawnData = useMemo(() => createSpawnData(batch.rows, surface), [batch.rows, surface])
   const originZ = rowToWorldZ(batch.startRow)
 
   const createNodes = useCallback(
@@ -172,12 +179,12 @@ const FloatingBatch: FC<{
 
       return {
         simulation,
-        positionNode: positionGeometry.add(localPosition),
+        positionNode: coursePositionNode(positionGeometry.add(localPosition), surface),
         colorNode: sampleTilesPalette(paletteT).mul(PALETTE_MIX),
         opacityNode: alpha as Node<'float'>,
       }
     },
-    [batch.count, batch.rows.length, originZ, spawnData, uDeltaTime],
+    [batch.count, batch.rows.length, originZ, spawnData, uDeltaTime, surface, GRID_COLS],
   )
 
   const { colorNode, opacityNode, positionNode, simulation } = useLocalNodes(createNodes, [
@@ -200,9 +207,16 @@ const FloatingBatch: FC<{
       new Vector3(-halfWidth, Y_MIN - BOX_HEIGHT / 2, -(batch.rows.length - 1) * TILE_SIZE - BOX_WIDTH / 2),
       new Vector3(halfWidth, Y_MAX + BOX_HEIGHT / 2, BOX_WIDTH / 2),
     )
+    if (surface.topology === 'cylinder') {
+      const radius = surfaceRadius(surface)
+      mesh.boundingBox.min.x = -radius - Y_MAX - BOX_WIDTH
+      mesh.boundingBox.max.x = radius + Y_MAX + BOX_WIDTH
+      mesh.boundingBox.min.y = Y_MIN - BOX_WIDTH
+      mesh.boundingBox.max.y = radius * 2 + Y_MAX + BOX_WIDTH
+    }
     mesh.boundingSphere = mesh.boundingBox.getBoundingSphere(new Sphere())
     mesh.updateWorldMatrix(true, false)
-  }, [batch])
+  }, [batch, surface, GRID_COLS])
 
   useEffect(() => () => simulation.dispose(), [simulation])
   useEffect(() => () => spawnData.texture.dispose(), [spawnData])

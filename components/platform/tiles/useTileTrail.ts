@@ -1,10 +1,11 @@
+import { surfaceDeltaX, wrapColumn } from '@/utils/platform/courseSurface'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { InstancedBufferAttribute } from 'three'
 
 import { useGameFrame } from '@/hooks/useGameFrame'
-import { usePlayerPosition } from '@/hooks/usePlayerPosition'
+import { usePlayerCoursePosition } from '@/hooks/usePlayerCoursePosition'
 import type { TileBatch } from '@/utils/platform/terrainBatches'
 import {
-  COLUMNS,
   PLATFORM_BATCH_ROWS,
   TILE_SIZE,
   TILE_SURFACE_Y,
@@ -61,7 +62,9 @@ export const createTileTrail = (batches: readonly TileBatch[]): TileTrail => {
  * each tile was last touched.
  */
 export const useTileTrail = (trail: TileTrail, rowCount: number) => {
-  const { playerPosition } = usePlayerPosition()
+  const surface = useCourseSurface()
+  const COLUMNS = surface.columns
+  const { playerPosition } = usePlayerCoursePosition()
 
   useGameFrame((state) => {
     const [playerX, playerY, playerZ] = playerPosition.current
@@ -71,7 +74,7 @@ export const useTileTrail = (trail: TileTrail, rowCount: number) => {
     if (heightAboveSurface < 0 || heightAboveSurface > TRAIL_MAX_PLAYER_HEIGHT) return
 
     const playerRow = worldZToRowIndex(playerZ, rowCount)
-    const playerColumn = worldXToColumn(playerX)
+    const playerColumn = worldXToColumn(playerX, COLUMNS)
 
     for (let row = playerRow - TRAIL_CELL_RADIUS; row <= playerRow + TRAIL_CELL_RADIUS; row++) {
       if (row < 0 || row >= rowCount) continue
@@ -83,13 +86,14 @@ export const useTileTrail = (trail: TileTrail, rowCount: number) => {
       let hasStampedTiles = false
 
       for (
-        let column = playerColumn - TRAIL_CELL_RADIUS;
-        column <= playerColumn + TRAIL_CELL_RADIUS;
-        column++
+        let rawColumn = playerColumn - TRAIL_CELL_RADIUS;
+        rawColumn <= playerColumn + TRAIL_CELL_RADIUS;
+        rawColumn++
       ) {
-        if (column < 0 || column >= COLUMNS) continue
+        const column = surface.topology === 'cylinder' ? wrapColumn(rawColumn, COLUMNS) : rawColumn
+      if (column < 0 || column >= COLUMNS) continue
 
-        const offsetX = colToX(column) - playerX
+        const offsetX = surfaceDeltaX(playerX, colToX(column, COLUMNS), surface)
         const offsetZ = rowToWorldZ(row) - playerZ
         if (offsetX * offsetX + offsetZ * offsetZ > TRAIL_BRUSH_RADIUS_SQ) continue
 

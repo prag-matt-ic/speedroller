@@ -1,8 +1,10 @@
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { courseToWorld, surfaceRotation } from '@/utils/platform/courseSurface'
 import { type FC, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { Euler, InstancedMesh, Matrix4, Quaternion, Vector3 } from 'three'
 import type { Vector3Tuple } from 'three'
 
-import { COLUMNS, ON_TILE_Y, type RowData, TILE_SIZE, colToX, rowToWorldZ } from '@/utils/tiles'
+import { ON_TILE_Y, type RowData, TILE_SIZE, colToX, rowToWorldZ } from '@/utils/tiles'
 
 const DECORATION_SCALE = 0.84
 const DECORATION_Y = ON_TILE_Y + 0.012
@@ -19,8 +21,8 @@ const collectDecorationPositions = (rows: readonly RowData[]): Vector3Tuple[] =>
   const positions: Vector3Tuple[] = []
   rows.forEach((row, rowIndex) => {
     ;(row.decorationColumns ?? []).forEach((columnIndex) => {
-      if (columnIndex < 0 || columnIndex >= COLUMNS) return
-      positions.push([colToX(columnIndex), DECORATION_Y, rowToWorldZ(rowIndex)])
+      if (columnIndex < 0 || columnIndex >= row.isRaised.length) return
+      positions.push([colToX(columnIndex, row.isRaised.length), DECORATION_Y, rowToWorldZ(rowIndex)])
     })
   })
   return positions
@@ -31,6 +33,7 @@ const collectDecorationPositions = (rows: readonly RowData[]): Vector3Tuple[] =>
  * the collidable floor, ring placement, or safe-respawn search.
  */
 const Decorations: FC<Props> = ({ rows, onReadyChange }) => {
+  const surface = useCourseSurface()
   const positions = useMemo(() => collectDecorationPositions(rows), [rows])
   const meshRef = useRef<InstancedMesh>(null)
 
@@ -40,11 +43,14 @@ const Decorations: FC<Props> = ({ rows, onReadyChange }) => {
 
     const matrix = new Matrix4()
     const position = new Vector3()
-    const quaternion = new Quaternion().setFromEuler(FLAT_QUAD_ROTATION)
+    const quaternion = new Quaternion()
+    const flatRotation = new Quaternion().setFromEuler(FLAT_QUAD_ROTATION)
     const scale = new Vector3(DECORATION_SCALE, DECORATION_SCALE, 1)
 
     positions.forEach(([x, y, z], index) => {
-      position.set(x, y, z)
+      courseToWorld(x, y, z, surface, position)
+      surfaceRotation(x, surface, quaternion)
+      quaternion.multiply(flatRotation)
       matrix.compose(position, quaternion, scale)
       mesh.setMatrixAt(index, matrix)
     })
@@ -52,7 +58,7 @@ const Decorations: FC<Props> = ({ rows, onReadyChange }) => {
     mesh.instanceMatrix.needsUpdate = true
     mesh.computeBoundingBox()
     mesh.computeBoundingSphere()
-  }, [positions])
+  }, [positions, surface])
 
   useEffect(() => {
     onReadyChange(true)

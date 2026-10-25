@@ -1,14 +1,15 @@
+import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { useMediaQuery } from '@mantine/hooks'
 import Image from 'next/image'
 import { type FC, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
-import { usePlayerPosition } from '@/hooks/usePlayerPosition'
+import { usePlayerCoursePosition } from '@/hooks/usePlayerCoursePosition'
 import { PLATFORM_VERSION } from '@/resources/rowsData'
 import { GameMode, InputType, SpeedRunStage } from '@/stores/types'
 import { getFinishRowIndex, getStartRowIndex } from '@/utils/platform/raceMarkers'
-import { COLUMNS, TILE_SIZE } from '@/utils/tiles'
+import { TILE_SIZE } from '@/utils/tiles'
 
 const MINI_MAP_ASSET_BASE = `/maps/${PLATFORM_VERSION}`
 const MINI_MAP_ASSET_PATHS: Record<GameMode, string> = {
@@ -40,6 +41,8 @@ const getProgressWindow = (totalRows: number): ProgressWindow => {
 }
 
 const MiniMap: FC = () => {
+  const surface = useCourseSurface()
+  const COLUMNS = surface.columns
   const gameStoreAPI = useGameStoreAPI()
   const mode = useGameStore((s) => s.mode)
   const rowsData = useGameStore((s) => s.rowsData)
@@ -80,10 +83,10 @@ const MiniMap: FC = () => {
   const miniMapAsset = MINI_MAP_ASSET_PATHS[mode] ?? MINI_MAP_ASSET_PATHS[GameMode.SPEEDRUN]
 
   const progressRef = useRef<HTMLDivElement | null>(null)
-  const mapRef = useRef<HTMLImageElement | null>(null)
+  const mapRef = useRef<HTMLDivElement | null>(null)
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const { playerPosition } = usePlayerPosition()
+  const { playerPosition } = usePlayerCoursePosition()
 
   useEffect(() => {
     const { maxRowIndex } = getProgressWindow(totalRows)
@@ -180,20 +183,25 @@ const MiniMap: FC = () => {
           : 'overflow-hidden bg-black/50',
       )}
       style={{
-        width: COLUMNS * mapTileSizePx,
-        height: isExpanded ? '100%' : (COLUMNS + 8) * mapTileSizePx,
+        width: 33 * mapTileSizePx,
+        height: isExpanded ? '100%' : 41 * mapTileSizePx,
       }}>
-      <Image
-        src={miniMapAsset}
+      <div
         ref={mapRef}
-        alt="Mini Map"
-        width={mapTileSizePx * COLUMNS}
-        height={mapTileSizePx * totalRows}
-        className="pointer-events-none absolute bottom-0 opacity-35 transition-transform duration-100 ease-linear will-change-transform select-none"
-        style={{
-          transform: 'translate3d(0,0,0)',
-        }}
-      />
+        className="pointer-events-none absolute bottom-0 will-change-transform"
+        style={{ width: COLUMNS * mapTileSizePx, height: totalRows * mapTileSizePx }}>
+        {(surface.topology === 'cylinder' ? [-1, 0, 1] : [0]).map(copy => (
+          <Image
+            key={copy}
+            src={miniMapAsset}
+            alt={copy === 0 ? 'Mini Map' : ''}
+            width={mapTileSizePx * COLUMNS}
+            height={mapTileSizePx * totalRows}
+            className="absolute bottom-0 max-w-none opacity-35 select-none"
+            style={{ left: copy * COLUMNS * mapTileSizePx }}
+          />
+        ))}
+      </div>
       <div
         id="mini-map-player"
         className="absolute z-30 rounded-full bg-white"

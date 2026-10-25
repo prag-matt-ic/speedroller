@@ -1,3 +1,4 @@
+import { useCoursePlacement } from '@/hooks/useCoursePlacement'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { BallCollider, type IntersectionEnterHandler, RigidBody } from '@react-three/rapier'
 import gsap from 'gsap'
@@ -41,7 +42,7 @@ const Rings: FC<Props> = ({ rows, onReadyChange }) => {
         <PlacedRing
           key={getRingKey(indexes[0], indexes[1])}
           indexes={indexes}
-          position={[colToX(columnIndex), RING_WORLD_Y, rowToWorldZ(rowIndex)]}
+          position={[colToX(columnIndex, row.isRaised.length), RING_WORLD_Y, rowToWorldZ(rowIndex)]}
         />
       )
     }),
@@ -54,6 +55,7 @@ type PlacedRingProps = {
 }
 
 const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
+  const placement = useCoursePlacement(position)
   const ringKey = getRingKey(indexes[0], indexes[1])
   const isCollected = useGameStore((s) => Boolean(s.collectedRings[ringKey]))
   const attemptId = useGameStore((s) => s.attemptId)
@@ -103,7 +105,7 @@ const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
   return (
     <RigidBody
       type="fixed"
-      position={position}
+      {...placement}
       userData={userData}
       colliders={false}>
       {!isCollected && <BallCollider

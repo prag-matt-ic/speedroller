@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
+import { worldCourseNode } from '@/resources/tsl/courseSurface'
 
 import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { type FC, type RefObject, Suspense, useCallback, useRef } from 'react'
@@ -83,6 +85,7 @@ type MarbleProps = {
 }
 
 export const Marble: FC<MarbleProps> = ({ ref }) => {
+  const surface = useCourseSurface()
   const config = usePerformanceStore((s) => s.sceneConfig.marble)
   const isLowQuality = usePerformanceStore((s) => s.sceneQuality === SceneQuality.LOW)
   const { segments, isFlat, enableVeins } = config
@@ -202,7 +205,7 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
       const worldCentre = modelWorldMatrix.mul(vec4(0, 0, 0, 1))
       const respawnFade: Node<'float'> = vertexStage(
         clamp(
-          float(RESPAWN_FADE_START_Y).sub(worldCentre.y).div(RESPAWN_FADE_RANGE),
+          float(RESPAWN_FADE_START_Y).sub(worldCourseNode(worldCentre.xyz, surface).y).div(RESPAWN_FADE_RANGE),
           float(0),
           float(1),
         ),
@@ -214,7 +217,7 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
         emissiveNode: baseMarbleColor.mul(BALL_EMISSIVE_STRENGTH),
       }
     },
-    [enableVeins, isFlat],
+    [enableVeins, isFlat, surface],
   )
 
   const { colorNode, opacityNode, emissiveNode } = useLocalNodes(createNodes, [createNodes])

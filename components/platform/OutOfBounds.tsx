@@ -3,6 +3,7 @@
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { type FC } from 'react'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
 
 import { useGameStore } from '@/components/GameProvider'
 import type { OutOfBoundsUserData } from '@/model/schema'
@@ -13,11 +14,14 @@ const userData: OutOfBoundsUserData = { type: 'out-of-bounds' }
 const COURSE_MARGIN = 10
 
 const OutOfBounds: FC = () => {
+  const surface = useCourseSurface()
   const rowCount = useGameStore((s) => s.rowsData.length)
   const firstRowZ = rowToWorldZ(0)
   const lastRowZ = rowToWorldZ(Math.max(0, rowCount - 1))
   const courseCenterZ = (firstRowZ + lastRowZ) / 2
   const courseHalfLength = (Math.abs(firstRowZ - lastRowZ) + TILE_SIZE) / 2
+
+  if (surface.topology === 'cylinder') return null
 
   return (
     <RigidBody
