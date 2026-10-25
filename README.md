@@ -80,6 +80,18 @@ Each entry records the time, the player, the **accident count**, and **rings col
 
 The renderer runs on Three.js' **WebGPU** backend with materials written in **TSL** rather than GLSL. The migration is very nearly complete — see [`docs/webgpu-tsl-migration-plan.md`](https://github.com/prag-matt-ic/speedroller/blob/main/docs/webgpu-tsl-migration-plan.md) for the full write-up. Two components still sit on the legacy GLSL path: the gem particles and the post-processing pass.
 
+## CodeGraph
+
+[CodeGraph](https://github.com/colbymchenry/codegraph) is installed as a pinned development dependency. After `npm ci`, build the local code index once:
+
+```sh
+npm run codegraph -- init --yes
+npm run codegraph -- status
+npm run codegraph -- explore "How does the player respawn?"
+```
+
+The index lives in `.codegraph/` and is ignored by Git. The project-scoped Codex MCP configuration is in `.codex/config.toml`; restart Codex in this trusted project to load it. The MCP server automatically syncs source changes while running, with telemetry disabled. To update the index outside an agent session, run `npm run codegraph -- sync`.
+
 ## Colour Palette 🌈
 
 ![Palette](https://github.com/prag-matt-ic/speedroller/blob/main/public/screenshots/palette.webp?raw=true)

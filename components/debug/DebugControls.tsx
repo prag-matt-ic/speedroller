@@ -8,6 +8,7 @@ import { useGameStore } from '@/components/GameProvider'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
 import { GameMode, Overlay } from '@/stores/types'
 import { DEFAULT_MAX_DPR, MAX_DPR } from '@/utils/dpr'
+import { rowToWorldZ } from '@/utils/tiles'
 
 type Option<T> = {
   label: string
@@ -40,6 +41,7 @@ const OVERLAY_OPTIONS: Option<Overlay>[] = Object.values(Overlay).map((value) =>
 }))
 
 const DebugControls: FC = () => {
+  const respawnPlayer = useGameStore((s) => s.respawnPlayer)
   const sceneQuality = usePerformanceStore((s) => s.sceneQuality)
   const setSceneQuality = usePerformanceStore((s) => s.setSceneQuality)
   const maxDpr = usePerformanceStore((s) => s.maxDPR)
@@ -84,6 +86,10 @@ const DebugControls: FC = () => {
     <div className="fixed bottom-24 left-0 z-5001 max-w-56 space-y-2 bg-black p-1 text-xs text-white">
       {isOpen && (
         <>
+          <button className="block" disabled={mode !== GameMode.SPEEDRUN} onClick={() => respawnPlayer([0, 1, rowToWorldZ(632)])}>
+            Inspect recovery in game
+          </button>
+          <a className="block" href="/dev/recovery" target="_blank" rel="noreferrer">Pillar orbit inspection</a>
           <SelectRow
             id="performance-debug-scene-quality"
             label="Quality"
@@ -150,7 +156,7 @@ const DebugControls: FC = () => {
         </>
       )}
 
-      <button onClick={() => setIsOpen((prev) => !prev)}>
+      <button aria-label="Toggle debug controls" onClick={() => setIsOpen((prev) => !prev)}>
         <WrenchIcon />
       </button>
     </div>

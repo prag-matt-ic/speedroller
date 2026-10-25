@@ -7,10 +7,10 @@ import gsap from 'gsap'
 import { type FC, Suspense, useMemo } from 'react'
 
 import Camera, {
-  CAMERA_FAR,
   CAMERA_POSITION_DESKTOP,
   CAMERA_POSITION_MOBILE,
 } from '@/components/Camera'
+import { CAMERA_FAR } from '@/utils/sceneDistances'
 import GameUniforms from '@/components/GameUniforms'
 import InputSmoother from '@/components/InputSmoother'
 import { usePerformanceStore } from '@/components/PerformanceProvider'

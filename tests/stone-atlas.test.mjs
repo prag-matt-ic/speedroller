@@ -3,8 +3,8 @@ import { test } from 'node:test'
 import sharp from 'sharp'
 
 // Asset contract: all nine cells must retain their duplicated gutters after encoding.
-test('ivory atlas has nine distinct 512px cells with 16px edge padding', async () => {
-  const { data, info } = await sharp('assets/textures/platform/ivory-stone-atlas.webp')
+for (const asset of ['ivory-stone-atlas.webp', 'ivory-stone-height.png', 'ivory-stone-normal.png']) test(`${asset} has nine distinct 512px cells with 16px edge padding`, async () => {
+  const { data, info } = await sharp(`assets/textures/platform/${asset}`)
     .removeAlpha().raw().toBuffer({ resolveWithObject: true })
   assert.equal(info.width, 1536)
   assert.equal(info.height, 1536)

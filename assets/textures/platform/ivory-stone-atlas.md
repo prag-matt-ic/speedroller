@@ -13,8 +13,7 @@ Check this again if replacing the atlas with strongly contrasting samples.
 
 The tile shader selects a stable cell from the existing tile seed with TSL spritesheetUV.
 Broad noise and optional detail noise multiply the sampled colour by a bounded brightness.
-Highlight tiles receive less darkening. Existing geometry, tilt, trail and contact shadow
-are retained. There are no baked shadows, normal maps or roughness maps in this pass.
+Highlight tiles receive less darkening. The bevelled slab update retains tilt, trail and contact shadow, and adds a companion normal atlas. See `docs/race-course/ivory-tile-slabs.md` for its source, baker and material setup. The colour atlas itself is unchanged.
 
 ## Generation prompt
 

@@ -4,6 +4,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { type FC, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import type { PerspectiveCamera } from 'three'
 
+import { CAMERA_FAR } from '@/utils/sceneDistances'
+
 import { Stage, useGameStore } from '@/components/GameProvider'
 import useCameraControls from '@/hooks/cameraControls/useCameraControls'
 import { usePlayerInput } from '@/hooks/usePlayerInput'
@@ -20,11 +22,6 @@ type StageCameraPosition = {
 // framing, so more of the road ahead fills the frame at speed; both values are playtest targets.
 export const CAMERA_POSITION_DESKTOP: StageCameraPosition = { y: 5, z: 7 }
 export const CAMERA_POSITION_MOBILE: StageCameraPosition = { y: 6, z: 9 }
-
-// Far plane: the terrain dissolve ends 84 units ahead of the player, plus the camera's own
-// trailing distance and the course's diagonal spread. A larger far plane than the old 50 keeps
-// the road from being clipped before its fade completes.
-export const CAMERA_FAR = 110
 
 export const CAMERA_ZOOM_FOR_STAGE_DESKTOP: Record<Stage, number> = {
   [Stage.HOME]: 1.2,

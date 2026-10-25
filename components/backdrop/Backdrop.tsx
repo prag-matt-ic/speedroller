@@ -13,7 +13,9 @@ import {
   type Texture,
 } from 'three/webgpu'
 
-import backdrop from '@/assets/textures/backdrop/environment-sky-1024.webp'
+import HeightFog from '@/components/backdrop/HeightFog'
+
+import backdrop from '@/assets/textures/backdrop/environment-sky-soft-1024.webp'
 import { bakeEnvironmentMap } from '@/components/backdrop/environmentBlur'
 
 const Backdrop: FC = () => {
@@ -48,7 +50,10 @@ const Backdrop: FC = () => {
     }
   }, [renderer, source])
 
-  return map ? <Environment background="only" map={map} /> : null
+  return map ? <>
+    <Environment background="only" map={map} />
+    <HeightFog map={map} />
+  </> : null
 }
 
 export default Backdrop

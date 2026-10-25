@@ -1,0 +1,767 @@
+[
+  {
+    "id": "course-pillar-16",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -44.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 16
+  },
+  {
+    "id": "course-pillar-40",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -68.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 40
+  },
+  {
+    "id": "course-pillar-64",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -92.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 64
+  },
+  {
+    "id": "course-pillar-88",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -32,
+      -116.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 88
+  },
+  {
+    "id": "course-pillar-112",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -140.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 112
+  },
+  {
+    "id": "course-pillar-136",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -164.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 136
+  },
+  {
+    "id": "course-pillar-160",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -188.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 160
+  },
+  {
+    "id": "course-pillar-184",
+    "module": "pillar",
+    "position": [
+      28.5,
+      -32,
+      -212.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 184
+  },
+  {
+    "id": "course-pillar-208",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -236.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 208
+  },
+  {
+    "id": "course-pillar-232",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -260.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 232
+  },
+  {
+    "id": "course-pillar-256",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 256
+  },
+  {
+    "id": "course-pillar-280",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -32,
+      -308.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 280
+  },
+  {
+    "id": "course-pillar-304",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -332.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 304
+  },
+  {
+    "id": "course-pillar-328",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -356.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 328
+  },
+  {
+    "id": "course-pillar-352",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -380.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 352
+  },
+  {
+    "id": "course-pillar-376",
+    "module": "pillar",
+    "position": [
+      28.5,
+      -32,
+      -404.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 376
+  },
+  {
+    "id": "course-pillar-400",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 400
+  },
+  {
+    "id": "course-pillar-424",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -452.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 424
+  },
+  {
+    "id": "course-pillar-448",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -476.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 448
+  },
+  {
+    "id": "course-pillar-472",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -32,
+      -500.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 472
+  },
+  {
+    "id": "course-pillar-496",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -524.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 496
+  },
+  {
+    "id": "course-pillar-520",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -548.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 520
+  },
+  {
+    "id": "course-pillar-544",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -572.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 544
+  },
+  {
+    "id": "course-pillar-568",
+    "module": "pillar",
+    "position": [
+      28.5,
+      -32,
+      -596.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 568
+  },
+  {
+    "id": "course-pillar-592",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -620.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 592
+  },
+  {
+    "id": "recovery-pillar-47-140",
+    "module": "pillar",
+    "position": [
+      -30,
+      -32,
+      -644.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 616
+  },
+  {
+    "id": "recovery-pillar-123-130",
+    "module": "pillar",
+    "position": [
+      48,
+      -32,
+      -652.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 624
+  },
+  {
+    "id": "recovery-pillar-107-105",
+    "module": "pillar",
+    "position": [
+      30,
+      -32,
+      -678.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 650
+  },
+  {
+    "id": "recovery-pillar-20-93",
+    "module": "pillar",
+    "position": [
+      -54,
+      -32,
+      -688.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 660
+  },
+  {
+    "id": "recovery-pillar-44-65",
+    "module": "pillar",
+    "position": [
+      -32,
+      -32,
+      -718.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 690
+  },
+  {
+    "id": "recovery-pillar-127-50",
+    "module": "pillar",
+    "position": [
+      52,
+      -32,
+      -732.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 704
+  },
+  {
+    "id": "recovery-pillar-48-16",
+    "module": "pillar",
+    "position": [
+      -28,
+      -32,
+      -766.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 738
+  },
+  {
+    "id": "recovery-pillar-104-16",
+    "module": "pillar",
+    "position": [
+      28,
+      -32,
+      -766.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 738
+  },
+  {
+    "id": "course-pillar-784",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -812.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 784
+  },
+  {
+    "id": "course-pillar-808",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -836.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 808
+  },
+  {
+    "id": "course-pillar-832",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -32,
+      -860.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 832
+  },
+  {
+    "id": "course-pillar-856",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -884.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 856
+  },
+  {
+    "id": "course-pillar-880",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -908.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 880
+  },
+  {
+    "id": "course-pillar-904",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -932.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 904
+  },
+  {
+    "id": "course-pillar-928",
+    "module": "pillar",
+    "position": [
+      28.5,
+      -32,
+      -956.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 928
+  },
+  {
+    "id": "course-pillar-952",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -980.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 952
+  },
+  {
+    "id": "course-pillar-976",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -1004.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 976
+  },
+  {
+    "id": "course-pillar-1000",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -1028.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 1000
+  },
+  {
+    "id": "course-pillar-1024",
+    "module": "pillar",
+    "position": [
+      30.5,
+      -32,
+      -1052.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 1024
+  },
+  {
+    "id": "course-pillar-1048",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -1076.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 1048
+  },
+  {
+    "id": "course-pillar-1072",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -1100.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 1072
+  },
+  {
+    "id": "course-pillar-1096",
+    "module": "pillar",
+    "position": [
+      -28.5,
+      -32,
+      -1124.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 1096
+  },
+  {
+    "id": "course-pillar-1120",
+    "module": "pillar",
+    "position": [
+      28.5,
+      -32,
+      -1148.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 1120
+  },
+  {
+    "id": "course-pillar-1144",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -1172.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 1144
+  },
+  {
+    "id": "course-pillar-1168",
+    "module": "pillar",
+    "position": [
+      29.5,
+      -32,
+      -1196.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 1168
+  },
+  {
+    "id": "course-pillar-1192",
+    "module": "pillar",
+    "position": [
+      -27.5,
+      -32,
+      -1220.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 1192
+  }
+]

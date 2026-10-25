@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/*.test.mjs",
+    "codegraph": "codegraph",
     "build-platform": "tsc --project scripts/tsconfig.platform.json && node .tmp/platformRows/scripts/buildPlatformRows.js"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@colbymchenry/codegraph": "1.6.2",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",

@@ -23,7 +23,9 @@ import {
   max,
   mix,
   mx_noise_float,
-  normalLocal,
+  transformNormalToView,
+  lights,
+  color,
   positionGeometry,
   positionLocal,
   positionWorld,
@@ -39,6 +41,9 @@ import {
   vertexStage,
 } from 'three/tsl'
 import {
+  AmbientLight,
+  DirectionalLight,
+  NoColorSpace,
   ClampToEdgeWrapping,
   type InstancedBufferAttribute,
   InstancedMesh,
@@ -49,7 +54,10 @@ import {
   SRGBColorSpace,
   Texture,
 } from 'three'
-import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
+import type { MeshLambertNodeMaterial, Node, UniformNode } from 'three/webgpu'
+
+import ivoryStoneNormals from '@/assets/textures/platform/ivory-stone-normal.png'
+import { createTileSlabGeometry, TILE_SLAB_RADIUS } from '@/utils/platform/tileSlabGeometry'
 
 import ivoryStoneAtlas from '@/assets/textures/platform/ivory-stone-atlas.webp'
 import tileDetailNoise2 from '@/assets/textures/platform/tile-noise-2.webp'
@@ -59,13 +67,11 @@ import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvi
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { createTileTrail, useTileTrail } from '@/components/platform/tiles/useTileTrail'
 import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
+import { TILE_PLAYER_FADE_FULL_RADIUS, TILE_PLAYER_FADE_MIN_ALPHA, TILE_PLAYER_FADE_MIN_RADIUS } from '@/utils/sceneDistances'
 import { samplePlayerPalette } from '@/resources/tsl/playerPalette'
 import {
   type RowData,
   rowToWorldZ,
-  TILE_PLAYER_FADE_FULL_RADIUS,
-  TILE_PLAYER_FADE_MIN_ALPHA,
-  TILE_PLAYER_FADE_MIN_RADIUS,
   TILE_SIZE,
   TILE_THICKNESS,
   TRAIL_FADE_SECONDS,
@@ -76,8 +82,6 @@ const TILE_UNIFORM_SCOPE = 'platformTiles'
 // Carried over from tile.vert / tile.frag.
 const TILE_FADE_ROTATE_MAX = 0.3
 const AXIS_EPSILON = 0.001
-const UP_THRESHOLD = 0.5
-const DARKEN_FACTOR = 0.4
 const HIGHLIGHTED_MIX_MIN = 0.04
 const HIGHLIGHTED_MIX_MAX = 0.10
 const REGULAR_MIX = 0.24
@@ -96,6 +100,8 @@ const STONE_CELL_PIXELS = 512
 const STONE_CELL_PADDING = 16
 const STONE_UV_INSET = (STONE_CELL_PADDING + 0.5) / STONE_CELL_PIXELS
 const STONE_MIN_BRIGHTNESS = 0.65
+const TILE_AMBIENT_INTENSITY = 1.4
+const TILE_KEY_INTENSITY = 2.2
 
 const configureStoneAtlas = (map: Texture) => {
   map.colorSpace = SRGBColorSpace
@@ -146,6 +152,8 @@ type TileNodes = {
   opacityNode: Node<'float'>
   positionNode: Node<'vec3'>
   emissiveNode: Node<'vec3'>
+  normalNode: Node<'vec3'>
+  lightsNode: ReturnType<typeof lights>
 }
 
 type PlatformTilesProps = {
@@ -162,16 +170,14 @@ type TerrainBatchProps = {
 const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) => {
   const meshRef = useRef<InstancedMesh>(null)
 
-  // MeshBasicNodeMaterial does not declare `emissiveNode`, but NodeMaterial reads it when building
-  // the lighting graph. Assign it after the material exists and let it recompile once.
-  const attachMaterial = useCallback(
-    (material: MeshBasicNodeMaterial | null) => {
-      if (!material) return
-      Object.assign(material, { emissiveNode: nodes.emissiveNode })
-      material.needsUpdate = true
-    },
-    [nodes.emissiveNode],
-  )
+  // Installed Three types omit emissiveNode; the lighting graph supports it.
+  const attachMaterial = useCallback((material: MeshLambertNodeMaterial | null) => {
+    if (!material) return
+    Object.assign(material, { emissiveNode: nodes.emissiveNode })
+    material.needsUpdate = true
+  }, [nodes.emissiveNode])
+  const geometry = useMemo(() => createTileSlabGeometry(), [])
+  useEffect(() => () => geometry.dispose(), [geometry])
 
   useLayoutEffect(() => {
     const mesh = meshRef.current
@@ -185,7 +191,7 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
     mesh.computeBoundingBox()
     // The GPU tilts each tile around its centre. Expand the CPU bounds by the largest possible
     // vertex displacement so tilted edges cannot disappear at a frustum boundary.
-    const tileRadius = Math.hypot(TILE_SIZE, TILE_THICKNESS, TILE_SIZE) / 2
+    const tileRadius = TILE_SLAB_RADIUS
     mesh.boundingBox!.expandByScalar(2 * tileRadius * Math.sin(TILE_FADE_ROTATE_MAX / 2))
     mesh.boundingSphere = mesh.boundingBox!.getBoundingSphere(new Sphere())
   }, [batch])
@@ -210,18 +216,20 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
         args={[undefined, undefined, batch.positions.length]}
         count={batch.positions.length}
         frustumCulled>
-        <boxGeometry args={[TILE_SIZE, TILE_THICKNESS, TILE_SIZE]}>
+        <primitive object={geometry} attach="geometry">
           <instancedBufferAttribute attach="attributes-seed" args={[batch.seeds, 1]} />
           <instancedBufferAttribute attach="attributes-isHighlighted" args={[batch.highlights, 1]} />
           <primitive object={trailAttribute} attach="attributes-trailTouchedAt" />
-        </boxGeometry>
+        </primitive>
         <Suspense fallback={null}>
-          <meshBasicNodeMaterial
+          <meshLambertNodeMaterial
             ref={attachMaterial}
+            normalNode={nodes.normalNode}
+            lightsNode={nodes.lightsNode}
             colorNode={nodes.colorNode}
             opacityNode={nodes.opacityNode}
             positionNode={nodes.positionNode}
-            transparent
+            transparent={true}
             alphaTest={ALPHA_TEST}
           />
         </Suspense>
@@ -234,6 +242,10 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
   const addDetailNoise = usePerformanceStore((s) => s.sceneConfig.platformTiles.addDetailNoise)
   const sceneQuality = usePerformanceStore((s) => s.sceneQuality)
   const stoneAtlasTexture = useTexture(ivoryStoneAtlas.src, configureStoneAtlas)
+  const stoneNormalTexture = useTexture(ivoryStoneNormals.src, (map) => {
+    configureStoneAtlas(map)
+    map.colorSpace = NoColorSpace
+  })
   const detailNoiseTextures = useTexture([
     tileDetailNoise1.src,
     tileDetailNoise2.src,
@@ -257,7 +269,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
   // Every varying is recomputed in-graph: per-instance attributes are read directly, the sphere-side
   // values are not needed, and world position comes from positionWorld, which already folds in the
   // instance matrix for an instanced mesh.
-  const { colorNode, opacityNode, positionNode, emissiveNode } = useLocalNodes(
+  const { colorNode, opacityNode, positionNode, emissiveNode, normalNode, lightsNode } = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
       const { uPlayerWorldPos, uTime, uPlayerPaletteIndex } =
@@ -314,12 +326,6 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       const tiltedGeometry = rotateWithTrig(positionGeometry, tiltAxis, tiltSin, tiltCos).add(
         instanceCenter,
       )
-      const isFacingUp = step(
-        float(UP_THRESHOLD),
-        rotateWithTrig(normalLocal, tiltAxis, tiltSin, tiltCos).normalize().y,
-      )
-      const shade = mix(float(DARKEN_FACTOR), float(1), isFacingUp)
-
       // --- fragment stage ---
       const backgroundNoisePosition = positionWorld
         .mul(0.06)
@@ -357,6 +363,23 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         stoneFrame,
       )
       const stoneColour = texture(stoneAtlasTexture, stoneUv).rgb
+      const surface = attribute<'float'>('slabSurface')
+      const isIvory = step(0.5, surface)
+      const isTop = step(1.5, surface)
+      const geometryNormal = attribute<'vec3'>('normal')
+      const sampledNormal = sceneQuality === SceneQuality.LOW ? geometryNormal : (() => {
+        const tangentNormal = texture(stoneNormalTexture, stoneUv).rgb.mul(2).sub(1)
+        // The top UV basis is +X / -Z; the baked normal's Z points out of the stone.
+        return mix(geometryNormal, vec3(tangentNormal.x, tangentNormal.z, tangentNormal.y.negate()), isTop)
+      })()
+      const tiltedNormal = rotateWithTrig(sampledNormal, tiltAxis, tiltSin, tiltCos)
+      const normalNode = transformNormalToView(tiltedNormal).normalize()
+      const ambient = new AmbientLight('#ffffff', TILE_AMBIENT_INTENSITY)
+      const key = new DirectionalLight('#fff2df', TILE_KEY_INTENSITY)
+      key.position.set(-3, 6, 4)
+      key.updateMatrixWorld()
+      key.target.updateMatrixWorld()
+      const lightsNode = lights([ambient, key])
 
       // Per-instance scalar mix derived only from the seed and highlight flag: hoist it to the
       // vertex stage so the fragment stage reads a varying instead of re-deriving it per pixel.
@@ -418,16 +441,18 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
       const shadowed = backgroundWithTrail
         .mul(float(1).sub(shadow.mul(SHADOW_STRENGTH)))
-        .mul(shade)
+
 
       return {
         positionNode: tiltedGeometry,
-        colorNode: shadowed,
+        colorNode: mix(color('#32343a'), shadowed, isIvory),
+        normalNode,
+        lightsNode,
         opacityNode: alpha as Node<'float'>,
-        emissiveNode: trailEmissive,
+        emissiveNode: trailEmissive.mul(isTop),
       }
     },
-    [detailNoiseTextures, stoneAtlasTexture],
+    [detailNoiseTextures, stoneAtlasTexture, stoneNormalTexture, sceneQuality],
   )
 
   useEffect(() => {
@@ -444,7 +469,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
           key={batch.startRow}
           batch={batch}
           trailAttribute={attribute}
-          nodes={{ colorNode, opacityNode, positionNode, emissiveNode }}
+          nodes={{ colorNode, opacityNode, positionNode, emissiveNode, normalNode, lightsNode }}
         />
       ))}
     </group>

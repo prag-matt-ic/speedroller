@@ -1,17 +1,12 @@
 import { cameraPosition, float, modelWorldMatrix, smoothstep, vec4 } from 'three/tsl'
 import type { Node } from 'three/webgpu'
 
-import { ELEMENT_FADE_DISTANCE, TILE_PLAYER_FADE_FULL_RADIUS } from '@/utils/tiles'
-
-// Fade by distance ahead of the player, becoming solid alongside the tiles underneath.
-export const FADE_IN_START = TILE_PLAYER_FADE_FULL_RADIUS
-export const FADE_IN_END = ELEMENT_FADE_DISTANCE
-
-// The fade-out is about the view rather than the track — signage getting out of the way as it
-// reaches the lens — so it stays measured from the camera: still opaque FADE_OUT_START away, gone
-// within FADE_OUT_END of it.
-export const FADE_OUT_START = 8.0
-export const FADE_OUT_END = 14.0
+import {
+  FADE_OUT_START,
+  FADE_OUT_END,
+  TILE_PLAYER_FADE_FULL_RADIUS,
+  TILE_PLAYER_FADE_MIN_RADIUS,
+} from '@/utils/sceneDistances'
 
 const OBJECT_ORIGIN = /*#__PURE__*/ vec4(0, 0, 0, 1).toConst()
 
@@ -50,7 +45,7 @@ export const fadeInOut = (
   }: FadeInOutOptions = {},
 ): Node<'float'> => {
   const aheadOfPlayer = playerZ.sub(worldZ)
-  const fadeIn = float(1).sub(smoothstep(FADE_IN_START, FADE_IN_END, aheadOfPlayer))
+  const fadeIn = float(1).sub(smoothstep(TILE_PLAYER_FADE_FULL_RADIUS, TILE_PLAYER_FADE_MIN_RADIUS, aheadOfPlayer))
 
   if (!fadeOut) return fadeIn
 

@@ -14,6 +14,7 @@ This is the race-flow implementation handoff for a new agent. Read
 preserved-course layout and introduces a longer branching course, 45–60-second runs,
 automatic forward movement, and braking to a complete stop with no reverse. Terrain
 remains flat throughout; Stage 3 adds The Fold architecture, materials and TSL height fog.
+The first architecture pass is implemented: see the [recovery pillar blockout](race-course/recovery-pillars.md) for its source bitmap, generated placements, previews and remaining acceptance checks.
 
 The approved layout, exact ring/hole/decorative placements, coordinate mapping, and staged
 acceptance are in [the course design](race-course-and-speed-design.md). Its checked-in

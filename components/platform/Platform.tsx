@@ -10,10 +10,11 @@ import ConfettiRows from '@/components/platform/confetti/ConfettiRows'
 import FloatingHeadings from '@/components/platform/floatingHeadings/FloatingHeadings'
 import InfoZones from '@/components/platform/infoZones/InfoZones'
 import Rings from '@/components/platform/rings/Rings'
-import Decorations from '@/components/platform/scenery/Decorations'
+import Pillars from '@/components/platform/scenery/Pillars'
 import { PlatformTiles } from '@/components/platform/tiles/Tiles'
 import { useGameFrame } from '@/hooks/useGameFrame'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
+import { GameMode } from '@/stores/types'
 import { worldZToRowIndex } from '@/utils/tiles'
 
 import SpeedRunElements from './speedRun/SpeedRunElements'
@@ -22,6 +23,7 @@ import useReadyState, { type ReadyState, type ReadyStateKey } from './useReadySt
 
 const Course: FC = () => {
   const gameStore = useGameStoreAPI()
+  const mode = useGameStore((s) => s.mode)
   const rows = useGameStore((s) => s.rowsData)
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
   const { playerPosition } = usePlayerPosition()
@@ -53,7 +55,7 @@ const Course: FC = () => {
     <group>
       <FloatingTiles rows={rows} onReadyChange={readyChangeHandlers.floatingTiles} />
       <PlatformTiles rows={rows} onReadyChange={readyChangeHandlers.tiles} />
-      <Decorations rows={rows} onReadyChange={readyChangeHandlers.decorations} />
+      <Pillars enabled={mode === GameMode.SPEEDRUN} onReadyChange={readyChangeHandlers.pillars} />
       <FloatingHeadings rows={rows} onReadyChange={readyChangeHandlers.headings} />
       <ConfettiRows rows={rows} onReadyChange={readyChangeHandlers.confetti} />
       <InfoZones rows={rows} onReadyChange={readyChangeHandlers.infoZones} />

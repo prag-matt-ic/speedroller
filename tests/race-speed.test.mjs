@@ -91,7 +91,7 @@ test('the trial constants stay inside the design targets', () => {
 
 test('the solid course preview covers two seconds at maximum speed', () => {
   const { ELEMENT_FADE_DISTANCE, TILE_PLAYER_FADE_FULL_RADIUS, TILE_PLAYER_FADE_MIN_RADIUS } =
-    load('utils/tiles.ts')
+    load('utils/sceneDistances.ts')
 
   const solidPreviewSeconds = TILE_PLAYER_FADE_FULL_RADIUS / RACE_MAX_SPEED
   const fadePreviewSeconds = TILE_PLAYER_FADE_MIN_RADIUS / RACE_MAX_SPEED

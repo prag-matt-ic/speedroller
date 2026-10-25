@@ -1,0 +1,122 @@
+[
+  {
+    "id": "recovery-pillar-47-140",
+    "module": "pillar",
+    "position": [
+      -30,
+      -32,
+      -644.5
+    ],
+    "dimensions": [
+      6,
+      43.56,
+      8
+    ],
+    "distance": 616
+  },
+  {
+    "id": "recovery-pillar-123-130",
+    "module": "pillar",
+    "position": [
+      48,
+      -32,
+      -652.5
+    ],
+    "dimensions": [
+      10,
+      71.56,
+      12
+    ],
+    "distance": 624
+  },
+  {
+    "id": "recovery-pillar-107-105",
+    "module": "pillar",
+    "position": [
+      30,
+      -32,
+      -678.5
+    ],
+    "dimensions": [
+      6,
+      55.56,
+      10
+    ],
+    "distance": 650
+  },
+  {
+    "id": "recovery-pillar-20-93",
+    "module": "pillar",
+    "position": [
+      -54,
+      -32,
+      -688.5
+    ],
+    "dimensions": [
+      12,
+      71.56,
+      14
+    ],
+    "distance": 660
+  },
+  {
+    "id": "recovery-pillar-44-65",
+    "module": "pillar",
+    "position": [
+      -32,
+      -32,
+      -718.5
+    ],
+    "dimensions": [
+      8,
+      55.56,
+      10
+    ],
+    "distance": 690
+  },
+  {
+    "id": "recovery-pillar-127-50",
+    "module": "pillar",
+    "position": [
+      52,
+      -32,
+      -732.5
+    ],
+    "dimensions": [
+      10,
+      55.56,
+      12
+    ],
+    "distance": 704
+  },
+  {
+    "id": "recovery-pillar-48-16",
+    "module": "pillar",
+    "position": [
+      -28,
+      -32,
+      -766.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 738
+  },
+  {
+    "id": "recovery-pillar-104-16",
+    "module": "pillar",
+    "position": [
+      28,
+      -32,
+      -766.5
+    ],
+    "dimensions": [
+      8,
+      71.56,
+      12
+    ],
+    "distance": 738
+  }
+]

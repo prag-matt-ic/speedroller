@@ -46,3 +46,6 @@ next-env.d.ts
 .tmp/
 
 .idea/
+
+# local CodeGraph index
+/.codegraph/

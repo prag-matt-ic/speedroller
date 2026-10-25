@@ -1,3 +1,4 @@
+import { createCoursePillars } from './utils/createCoursePillars'
 /**
  * PLATFORM ROW DATA BUILDER
  *
@@ -14,6 +15,8 @@
  *   public/maps/{version}/{mode}.svg mini map assets (one per GameMode).
  */
 /* eslint-disable no-console */
+import { architecturePreview } from './utils/architecturePreview'
+import { parseArchitecture, validateArchitectureClearance } from './utils/parseArchitecture'
 import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
@@ -228,6 +231,7 @@ function buildOutputFile({
   return `import { GameMode } from '@/stores/types'
 import type { TotalCounts } from '@/stores/totalCounts'
 import type { RowData } from '@/utils/tiles'
+import { placeRowElementsOnTiles } from '@/utils/platform/placeRowElementsOnTiles'
 
 export type PlatformModeData = {
   rows: RowData[]
@@ -247,8 +251,8 @@ const DEV_COUNTS: TotalCounts = ${devCounts}
 export const PLATFORM_DATA: PlatformRowsData = {
   version: '${version}',
   modes: {
-    [GameMode.SPEEDRUN]: { rows: SPEEDRUN_ROWS, totalCounts: SPEEDRUN_COUNTS },
-    [GameMode.DEV]: { rows: DEV_ROWS, totalCounts: DEV_COUNTS },
+    [GameMode.SPEEDRUN]: { rows: SPEEDRUN_ROWS.map(placeRowElementsOnTiles), totalCounts: SPEEDRUN_COUNTS },
+    [GameMode.DEV]: { rows: DEV_ROWS.map(placeRowElementsOnTiles), totalCounts: DEV_COUNTS },
   },
 }
 export const PLATFORM_VERSION = PLATFORM_DATA.version
@@ -1120,6 +1124,19 @@ async function main() {
   }
 
   validateRaceMode(modes[GameMode.SPEEDRUN])
+  const architecturePath = path.join(directory, 'architecture/recovery.png')
+  const architectureImage = await sharp(architecturePath).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+  const pillars = parseArchitecture(architectureImage.data, architectureImage.info.width, architectureImage.info.height)
+  validateArchitectureClearance(pillars, modes[GameMode.SPEEDRUN].rows)
+  const preview = architecturePreview(pillars, modes[GameMode.SPEEDRUN].rows)
+  fs.writeFileSync(path.join(process.cwd(), 'docs/race-course/recovery-pillars.svg'), preview)
+  await sharp(Buffer.from(preview)).png().toFile(path.join(process.cwd(), 'docs/race-course/recovery-pillars.png'))
+  fs.writeFileSync(path.join(process.cwd(), 'resources/recoveryPillars.json'), JSON.stringify(pillars, null, 2) + '\n')
+
+  const coursePillars = createCoursePillars(pillars, modes[GameMode.SPEEDRUN].rows)
+  validateArchitectureClearance(coursePillars, modes[GameMode.SPEEDRUN].rows)
+  fs.writeFileSync(path.join(process.cwd(), 'resources/coursePillars.json'), JSON.stringify(coursePillars, null, 2) + '\n')
+
   writeMiniMapAssets(modes, version)
 
   const output = buildOutputFile({ version, modes })
