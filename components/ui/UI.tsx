@@ -30,7 +30,7 @@ const UI: FC<Props> = ({ isMobile }) => {
   const setOverlay = useGameStore((s) => s.setOverlay)
   const isLobby = speedRunStage === SpeedRunStage.LOBBY
   const isRunning = speedRunStage === SpeedRunStage.RUNNING
-  const isDashboardAvailable = isLobby || isRunning
+  const isDashboardAvailable = (isLobby || isRunning) && overlay !== Overlay.MULTIPLAYER
   const isCountdown = overlay === Overlay.SPEEDRUN_COUNTDOWN
   const showOverlayBackdrop = overlay !== Overlay.NONE && !isCountdown
 

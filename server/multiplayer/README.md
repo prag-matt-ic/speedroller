@@ -1,9 +1,10 @@
 # Multiplayer room service
 
-Phase 1 of the [prototype plan](../../docs/multiplayer-prototype-plan.md). One Node.js
+Room service for Phases 1–2 of the [prototype plan](../../docs/multiplayer-prototype-plan.md). One Node.js
 HTTP/WebSocket service holds private rooms in memory. Each room admits **2–5 racers**
 and **20 external spectators**. The server coordinates membership, timing and results;
-physics remain local and remote racers do not collide. No frontend is connected yet.
+physics remain local and remote racers do not collide. The frontend now connects room
+entry, readiness, and start controls; playable racing and spectator rendering are later phases.
 
 The Phase 0 relay was extended here, not retained as a second server. Its recorded
 [measurements](../../docs/multiplayer-phase0-results.json) are historical evidence;
@@ -52,6 +53,7 @@ supplied owner or member identity. Commands operate only on the socket's current
 | Client command | Payload / behaviour |
 | --- | --- |
 | `create` | `profile: {name, colour}`, `course`. Returns a full snapshot with server-generated room/member IDs and owner. |
+| `inspect` | Room ID and course. Returns `room-info` phase and capacity without taking a slot or refreshing room expiry. |
 | `join` | `roomId`, `role: racer / spectator`, profile, course. Exact course match required for either role. |
 | `ping` | `clientTime` from `performance.now()`. Returns `pong` with echoed time, server monotonic time and a one-use token. |
 | `sync` | Five distinct tokens from recent pongs (within 30 s). Returns `synced`; required before readiness. Tokens are socket-bound. |
@@ -65,9 +67,11 @@ supplied owner or member identity. Commands operate only on the socket's current
 | `leave` | Removes membership and acknowledges `left`. Owner departure before GO closes the room. |
 
 Course fields are `layoutVersion`, `rulesVersion`, `topology`, `columns`. The owner
-provides the supported build's versions; Phase 2/3 must derive them from actual generated
-course content and rules, not arbitrary user input. Only flat-course creation is enabled
-for v1; the schema also describes cylinder topology for explicit incompatibility handling.
+provides the supported build's versions. The UI hashes loaded rows/surface with SHA-256
+and sends `race-v1:<platformVersion>` for rules; bump this identifier with rule changes.
+Room admission accepts flat/cylinder courses with exact matching, because the current
+game's default course is cylindrical. This is lobby compatibility, not a promise of
+completed cylinder multiplayer physics or spectating.
 
 Profile names use the existing 6–12 character rule, contract-tested against the solo
 schema without importing game modules. Colours are six-digit hex strings. UI must render
@@ -145,3 +149,18 @@ The load harness uses this same service with a real clock, five publishers and 2
 spectators; it asserts sustained updates for **every** client. Its traffic is synthetic
 and excludes rendering/TLS/WAN. The Phase 0 latency gate and fresh-user manual loading
 baseline remain outstanding; they do not block this isolated backend work.
+
+
+## Frontend room UI
+
+In development the UI defaults to `ws://<browser-host>:8080`; production needs
+`NEXT_PUBLIC_MULTIPLAYER_URL=wss://<service-domain>` at frontend build time. Match
+`ALLOWED_ORIGINS` to the actual game origin, including port. Solo entry does not connect
+or depend on this service. Restart the service after protocol changes; hot-refreshing
+the persistent provider ends its current room connection and requires re-entry.
+
+The loaded game's layout hash includes rows and surface metadata. Serve both clients
+from the same build; course edits during development can correctly produce a mismatch.
+The UI only sends `ready` after existing loading/warmup/placement gates and clock sync.
+The race remains a room preview after Start in Phase 2, with local solo submission
+blocked. Phase 3 connects the game lifecycle; Phase 4 supplies spectator rendering.

@@ -1,7 +1,7 @@
 # Player Versus Player Prototype Plan
 
-Status: **Phase 1 room service implemented and tested locally. Fresh-user manual baseline
-still outstanding; no multiplayer gameplay integration or deployment.** See the
+Status: **Phase 2 mode choice and room UI implemented locally. Racing/spectator rendering
+and deployment are still later phases; fresh-user manual baseline remains outstanding.** See the
 [Phase 0 report](multiplayer-phase0-validation.md) for measurements and remaining gates.
 
 Updated: **25 October 2026**
@@ -313,16 +313,49 @@ unauthorized commands and cross-room messages cannot change it.
 
 ### Phase 2 Start choice and room UI
 
-- [ ] Add Single player/Multiplayer at physical START for new and returning players;
+- [x] Add Single player/Multiplayer at physical START for new and returning players;
   preserve the existing username component, controls, and solo retry behaviour.
-- [ ] Mount one persistent session owner; connect only on multiplayer/watch entry and
+- [x] Mount one persistent session owner; connect only on multiplayer/watch entry and
   tear down on room exit. Transient overlays must not own sockets.
-- [ ] Create a room on Multiplayer selection, display and copy its URL, and show racer
+- [x] Create a room on Multiplayer selection, display and copy its URL, and show racer
   readiness, spectators, owner label, and the correctly enabled Start button.
-- [ ] Resolve shared links after landing/loading. Offer Join race/Watch appropriately,
+- [x] Resolve shared links after landing/loading. Offer Join race/Watch appropriately,
   including full rooms, countdown, active races, ended races, and invalid links.
-- [ ] Support cancellation, accessible status announcements, keyboard focus, copy failure,
+- [x] Support cancellation, accessible status announcements, keyboard focus, copy failure,
   and mobile layout. Keep session state out of persisted solo preferences.
+
+Implementation: the persistent `MultiplayerProvider` wraps the landing flow and game,
+with a separate non-persisted session store. Physical START always offers the two modes;
+solo Retry still enters its existing countdown directly. Native modal dialogs provide
+focus containment, Escape/Leave, status announcements and a scrollable narrow-screen layout.
+Copy failure leaves a selectable URL. Room state and poses never enter saved solo preferences.
+
+Invite lookup uses the new validated `inspect`/`room-info` messages without claiming a
+slot. Inspection respects course compatibility, connection/rate limits and room expiry.
+The same connection becomes the room session after Join/Watch. `watch=1` auto-enters for
+saved valid names; new names require explicit confirmation. Missing configuration,
+connection failures, expired/invalid links and course mismatches offer a clear return path.
+
+Current generated terrain is cylindrical. Room admission now supports both protocol
+topologies with exact course matching; this does not extend gameplay acceptance to
+cylinder racing. Layout identity is SHA-256 of the loaded rows and surface; rules use
+`race-v1:<platformVersion>` and must be bumped when gameplay rules change. No terrain,
+lighting, materials, cameras, or renderer files were edited for this phase.
+
+Development defaults to `ws://<current-host>:8080`; production requires
+`NEXT_PUBLIC_MULTIPLAYER_URL`. Start the separate relay with matching `ALLOWED_ORIGINS`.
+Without configuration, solo still works and multiplayer explains its unavailability.
+A started room remains in the room preview; the local solo attempt stays frozen, cannot
+submit a solo score, and does not pretend to provide playable multiplayer yet.
+
+Verification: 95 game tests and 18 service/client tests passed, along with root/service
+typechecks, targeted lint, the service build, and the Next.js production build. Browser
+checks confirmed mode choice with a saved name, create/share/copy, automatic readiness,
+a second racer joining through the landing flow, owner-only enabled Start, and closed
+entry after Start. A later watch-link browser check stalled in the loading screen and
+browser inspection became unresponsive; no renderer changes were made to investigate.
+Late-watch admission is covered by client/service tests. Mobile-device, copy-denial and
+fresh-user manual checks remain unverified; see remaining Phase 0/4/6 checks.
 
 Exit: two to five browser clients can enter a room and only the owner can close entry;
 solo racing still works without contacting the multiplayer service.

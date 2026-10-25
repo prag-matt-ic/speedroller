@@ -1,32 +1,65 @@
 'use client'
-import { useCourseSurface } from '@/hooks/useCourseSurface'
-import { courseToWorld, surfaceRotation } from '@/utils/platform/courseSurface'
 
+import { useTexture } from '@react-three/fiber/webgpu'
 import { useLocalNodes } from '@react-three/tsl'
 import { type FC, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { Quaternion, Vector3, BoxGeometry, InstancedBufferAttribute, InstancedMesh, Matrix4 } from 'three'
-import { MeshBasicNodeMaterial } from 'three/webgpu'
-import { attribute, clamp, color, dot, normalWorld, vec3 } from 'three/tsl'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
+import { attribute, normalMap, spritesheetUV, texture, uv, vec2 } from 'three/tsl'
+import {
+  type BoxGeometry,
+  ClampToEdgeWrapping,
+  InstancedBufferAttribute,
+  InstancedMesh,
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  Matrix4,
+  MeshLambertNodeMaterial,
+  NoColorSpace,
+  Quaternion,
+  SRGBColorSpace,
+  type Texture,
+  Vector3,
+} from 'three/webgpu'
 
+import ivoryStoneAtlas from '@/assets/textures/platform/ivory-stone-atlas.webp'
+import ivoryStoneNormals from '@/assets/textures/platform/ivory-stone-normal.png'
 import { useRouteFadeIn } from '@/hooks/useRouteFadeIn'
 import pillarData from '@/resources/coursePillars.json'
 import type { PillarPlacement } from '@/utils/platform/architecture'
+import { courseToWorld, surfaceRotation, type CourseSurface } from '@/utils/platform/courseSurface'
+import { createPillarBlocks } from '@/utils/platform/pillarBlocks'
 
 const BATCH_LENGTH = 32
+const BLOCK_BEVEL_RADIUS = 0.01
+const STONE_ATLAS_GRID = 3
+const STONE_UV_INSET = 16.5 / 512
+const STONE_BRIGHTNESS = 0.88
+const STONE_NORMAL_STRENGTH = 0.4
 const placements = pillarData as PillarPlacement[]
-const batches = Object.values(Object.groupBy(placements, (pillar) => Math.floor(pillar.distance / BATCH_LENGTH)))
+const batches = Object.values(Object.groupBy(createPillarBlocks(placements), (pillar) => Math.floor(pillar.distance / BATCH_LENGTH)))
 
-type Props = { enabled?: boolean; fadeEnabled?: boolean; onReadyChange?: (ready: boolean) => void }
+const configureStoneAtlas = (map: Texture) => {
+  map.colorSpace = SRGBColorSpace
+  map.wrapS = map.wrapT = ClampToEdgeWrapping
+  map.magFilter = LinearFilter
+  map.minFilter = LinearMipmapLinearFilter
+  map.generateMipmaps = true
+  map.needsUpdate = true
+}
 
-type BatchProps = { pillars: PillarPlacement[]; geometry: BoxGeometry; material: MeshBasicNodeMaterial }
+type Props = { surface: CourseSurface; enabled?: boolean; fadeEnabled?: boolean; onReadyChange?: (ready: boolean) => void }
 
-const PillarBatch: FC<BatchProps> = ({ pillars, geometry, material }) => {
-  const surface = useCourseSurface()
+type BatchProps = { surface: CourseSurface; pillars: PillarPlacement[]; geometry: BoxGeometry; material: MeshLambertNodeMaterial }
+
+const PillarBatch: FC<BatchProps> = ({ surface, pillars, geometry, material }) => {
   const meshRef = useRef<InstancedMesh>(null)
   const batchGeometry = useMemo(() => {
     const clone = geometry.clone()
     clone.setAttribute('pillarWorldZ', new InstancedBufferAttribute(
       new Float32Array(pillars.map((pillar) => pillar.position[2])), 1,
+    ))
+    clone.setAttribute('stoneFrame', new InstancedBufferAttribute(
+      new Float32Array(pillars.map((_, index) => index % (STONE_ATLAS_GRID * STONE_ATLAS_GRID))), 1,
     ))
     return clone
   }, [geometry, pillars])
@@ -56,23 +89,34 @@ const PillarBatch: FC<BatchProps> = ({ pillars, geometry, material }) => {
   )
 }
 
-const Pillars: FC<Props> = ({ enabled = true, fadeEnabled = true, onReadyChange }) => {
-  const { colorNode, pillarWorldZ } = useLocalNodes(() => ({
-    pillarWorldZ: attribute<'float'>('pillarWorldZ', 'float'),
-    colorNode: color('#e8ddc9').mul(
-      clamp(dot(normalWorld, vec3(-0.5, 0.8, 0.3).normalize()), 0, 1).mul(0.45).add(0.55),
-    ),
-  }), [])
+const Pillars: FC<Props> = ({ surface, enabled = true, fadeEnabled = true, onReadyChange }) => {
+  const stoneAtlas = useTexture(ivoryStoneAtlas.src, configureStoneAtlas)
+  const stoneNormals = useTexture(ivoryStoneNormals.src, (map) => {
+    configureStoneAtlas(map)
+    map.colorSpace = NoColorSpace
+  })
+  const { colorNode, normalNode, pillarWorldZ } = useLocalNodes(() => {
+    const stoneUv = spritesheetUV(
+      vec2(STONE_ATLAS_GRID),
+      uv().mul(1 - 2 * STONE_UV_INSET).add(STONE_UV_INSET),
+      attribute<'float'>('stoneFrame', 'float'),
+    )
+    return {
+      pillarWorldZ: attribute<'float'>('pillarWorldZ', 'float'),
+      colorNode: texture(stoneAtlas, stoneUv).rgb.mul(STONE_BRIGHTNESS),
+      normalNode: normalMap(texture(stoneNormals, stoneUv).rgb, vec2(STONE_NORMAL_STRENGTH)),
+    }
+  }, [stoneAtlas, stoneNormals])
   const opacityNode = useRouteFadeIn(pillarWorldZ, fadeEnabled)
-  const geometry = useMemo(() => new BoxGeometry(), [])
-  const material = useMemo(() => new MeshBasicNodeMaterial({ colorNode, opacityNode, transparent: true, depthWrite: true, alphaTest: 0.001 }), [colorNode, opacityNode])
+  const geometry = useMemo(() => new RoundedBoxGeometry(1, 1, 1, 1, BLOCK_BEVEL_RADIUS), [])
+  const material = useMemo(() => new MeshLambertNodeMaterial({ colorNode, normalNode, opacityNode, transparent: true, depthWrite: true, alphaTest: 0.001 }), [colorNode, normalNode, opacityNode])
   useEffect(() => () => geometry.dispose(), [geometry])
   useEffect(() => () => material.dispose(), [material])
   useEffect(() => {
     onReadyChange?.(true)
     return () => onReadyChange?.(false)
   }, [onReadyChange, enabled])
-  return <group visible={enabled}>{batches.map((pillars) => pillars && <PillarBatch key={pillars[0].id} pillars={pillars} geometry={geometry} material={material} />)}</group>
+  return <group visible={enabled}>{batches.map((pillars) => pillars && <PillarBatch key={pillars[0].id} surface={surface} pillars={pillars} geometry={geometry} material={material} />)}</group>
 }
 
 export default Pillars

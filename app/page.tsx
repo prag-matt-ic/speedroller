@@ -3,6 +3,7 @@ import { type FC } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { insertSpeedRun, skipEditorSpeedRun } from '@/app/actions'
+import { MultiplayerProvider } from '@/components/multiplayer/MultiplayerProvider'
 import { GameProvider } from '@/components/GameProvider'
 import { QueryProvider } from '@/components/QueryProvider'
 import { SoundProvider } from '@/components/SoundProvider'
@@ -29,9 +30,10 @@ export default async function Home(props: PageProps) {
         <SoundProvider>
           <QueryProvider>
             <GameProvider isMobile={isMobile} insertSpeedRun={isEditorPreview ? skipEditorSpeedRun : insertSpeedRun}>
+              <MultiplayerProvider>
               <LandingOverlay isMobile={isMobile} />
               <Main isMobile={isMobile} isDebug={isDebug} />
-              {/* <PWAInstall isMobile={isMobile} /> */}
+              </MultiplayerProvider>
             </GameProvider>
           </QueryProvider>
         </SoundProvider>

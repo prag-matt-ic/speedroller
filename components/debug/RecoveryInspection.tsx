@@ -5,10 +5,10 @@ import { useLayoutEffect, useRef } from 'react'
 import { InstancedMesh, Matrix4 } from 'three'
 
 import WebGPUCanvas from '@/components/WebGPUCanvas'
-import Backdrop from '@/components/backdrop/Backdrop'
 import Pillars from '@/components/platform/scenery/Pillars'
 import { PLATFORM_DATA } from '@/resources/rowsData'
 import { GameMode } from '@/stores/types'
+import { FLAT_SURFACE } from '@/utils/platform/courseSurface'
 import { colToX, RAISED_Y, rowToWorldZ, TILE_SIZE, TILE_THICKNESS, TILE_SURFACE_Y } from '@/utils/tiles'
 
 const rows = PLATFORM_DATA.modes[GameMode.SPEEDRUN].rows
@@ -41,12 +41,14 @@ function Floor({ cells, color }: { cells: typeof tiles; color: string }) {
 export default function RecoveryInspection() {
   return <main className="h-dvh w-full">
     <div className="fixed left-4 top-4 z-10 rounded bg-black/70 p-3 text-sm text-white">
-      Recovery pillar blockout · drag to orbit, scroll to zoom<br />
+      Stone pillar inspection · drag to orbit, scroll to zoom<br />
       Simplified floor colours; exact generated geometry and ring positions.
     </div>
     <WebGPUCanvas camera={{ position: [105, 65, rowToWorldZ(620)], far: 500, fov: 55 }} dpr={1}>
-      <Backdrop />
-      <Pillars fadeEnabled={false} />
+      <color attach="background" args={['#c8c4bd']} />
+      <ambientLight intensity={1.6} />
+      <directionalLight position={[-40, 60, 50]} intensity={2} />
+      <Pillars surface={FLAT_SURFACE} fadeEnabled={false} />
       <Floor cells={plain} color="#c8bca5" />
       <Floor cells={bright} color="#f4ebd9" />
       {rings.map((position, index) => <mesh key={index} position={[position[0], TILE_SURFACE_Y + 1, position[2]]}>

@@ -174,12 +174,15 @@ const createSavedRun = (overrides = {}) => ({
   ...overrides,
 })
 
-test('race lifecycle: valid name starts countdown, GO sets the timing origin', async () => {
+test('race lifecycle: saved name sees mode choice, solo selection starts countdown', async () => {
   const submission = deferred()
   const race = createRaceStore({ insertSpeedRun: () => submission.promise })
   const { store, markers, SpeedRunStage, Overlay, PLAYER_RESTING_Y } = race
 
   store.getState().enterStartLine()
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+  assert.equal(store.getState().overlay, Overlay.SPEEDRUN_START)
+  store.getState().startCountdown()
   let state = store.getState()
   assert.equal(state.speedRunStage, SpeedRunStage.COUNTDOWN)
   assert.equal(state.overlay, Overlay.SPEEDRUN_COUNTDOWN)
@@ -207,6 +210,7 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   const { store, SpeedRunStage, submissionCalls } = race
 
   store.getState().enterStartLine()
+  store.getState().startCountdown()
   store.getState().onCountdownComplete(1)
   await new Promise((resolve) => setTimeout(resolve, 20))
 
@@ -243,6 +247,7 @@ test('race lifecycle: retry resets the attempt and a late save cannot change it'
 
   store.setState({ paletteIndex: 2 })
   store.getState().enterStartLine()
+  store.getState().startCountdown()
   store.getState().onCountdownComplete(1)
   await new Promise((resolve) => setTimeout(resolve, 20))
   store.getState().finishSpeedRun(1)
@@ -302,6 +307,7 @@ test('race lifecycle: back to lobby restores the entrance spawn and clears the a
   const { store, SpeedRunStage, Overlay } = race
 
   store.getState().enterStartLine()
+  store.getState().startCountdown()
   store.getState().onCountdownComplete(1)
   store.setState({ collectedRings: { '32:16': true }, outOfBoundsEvents: [{ hudId: null, timestamp: 1 }] })
   assert.equal(store.getState().collectedRings['32:16'], true)
@@ -329,7 +335,8 @@ test('race lifecycle: lobby contacts and pre-GO finish contacts are ignored', ()
   store.getState().enterStartLine()
   store.getState().enterStartLine() // repeated contact must not restart the attempt
   assert.equal(store.getState().attemptId, 1)
-  assert.equal(store.getState().speedRunStage, SpeedRunStage.COUNTDOWN)
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+  store.getState().startCountdown()
 
   store.getState().finishSpeedRun(1)
   assert.equal(store.getState().speedRunStage, SpeedRunStage.COUNTDOWN)
@@ -341,6 +348,7 @@ test('race lifecycle: a failed save keeps the current result and shows Time not 
   const { store, SpeedRunStage } = race
 
   store.getState().enterStartLine()
+  store.getState().startCountdown()
   store.getState().onCountdownComplete(1)
   await new Promise((resolve) => setTimeout(resolve, 20))
   store.getState().finishSpeedRun(1)
@@ -361,4 +369,20 @@ test('race lifecycle: a failed save keeps the current result and shows Time not 
   assert.equal(state.attemptResult, submittedResult)
   assert.equal(state.speedRunTimeCS, submittedCentiseconds)
   assert.deepEqual(state.completedSpeedRuns, {})
+})
+
+
+test('race lifecycle: multiplayer room freezes the attempt and cannot submit solo results', () => {
+  const race = createRaceStore({ insertSpeedRun: () => Promise.resolve(null) })
+  const { store, SpeedRunStage, Overlay, submissionCalls } = race
+  store.getState().prepareMultiplayer()
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+  assert.equal(store.getState().overlay, Overlay.MULTIPLAYER)
+  store.getState().startCountdown()
+  store.getState().onCountdownComplete(store.getState().attemptId)
+  store.getState().finishSpeedRun()
+  assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
+  assert.equal(submissionCalls.length, 0)
+  store.getState().returnToLobby()
+  assert.equal(store.getState().overlay, Overlay.NONE)
 })

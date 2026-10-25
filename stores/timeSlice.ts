@@ -154,11 +154,16 @@ export const createTimeSlice =
         if (state.speedRunStage !== SpeedRunStage.LOBBY) return
         if (state.playerStatus !== 'safe') return
         if (!state.isPlatformReady) return
-        beginAttempt(getAttemptStartPhase(state.username))
+        beginAttempt(SpeedRunStage.START)
+      },
+      prepareMultiplayer: () => {
+        const state = get()
+        if (state.speedRunStage !== SpeedRunStage.LOBBY && state.speedRunStage !== SpeedRunStage.START) return
+        if (beginAttempt(SpeedRunStage.START)) set({ overlay: Overlay.MULTIPLAYER })
       },
       startCountdown: () => {
         const state = get()
-        if (state.speedRunStage !== SpeedRunStage.START) return
+        if (state.speedRunStage !== SpeedRunStage.START || state.overlay !== Overlay.SPEEDRUN_START) return
         if (!isValidUsername(state.username)) return
         set({
           speedRunStage: SpeedRunStage.COUNTDOWN,

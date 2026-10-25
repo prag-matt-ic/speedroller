@@ -29,6 +29,7 @@ const command = <T extends z.ZodRawShape>(shape: T) => z.object({ protocolVersio
 export const clientMessageSchema = z.discriminatedUnion('type', [
   command({ type: z.literal('create'), profile: profileSchema, course: courseSchema }),
   command({ type: z.literal('join'), roomId: id, role: z.enum(['racer', 'spectator']), profile: profileSchema, course: courseSchema }),
+  command({ type: z.literal('inspect'), roomId: id, course: courseSchema }),
   command({ type: z.literal('leave') }),
   command({ type: z.literal('snapshot') }),
   command({ type: z.literal('ping'), clientTime: time }),
@@ -59,8 +60,15 @@ export const errorCodes = ['invalid-message', 'protocol-mismatch', 'already-join
   'room-missing', 'course-mismatch', 'unsupported-course', 'full', 'server-full', 'rate-limit',
   'owner-only', 'stale-room', 'entry-closed', 'not-ready', 'need-opponent', 'wrong-phase', 'stale-race',
   'racer-only', 'invalid-time', 'clock-sync-required', 'invalid-sync', 'stale-pose'] as const
+export const roomInfoSchema = z.object({
+  type: z.literal('room-info'), roomId: id, phase: z.enum(['waiting', 'countdown', 'racing', 'results']),
+  racers: z.number().int().min(0).max(5), spectators: z.number().int().min(0).max(20),
+}).strict()
+export type RoomInfo = z.infer<typeof roomInfoSchema>
+
 export const serverMessageSchema = z.discriminatedUnion('type', [
   snapshotSchema,
+  roomInfoSchema,
   z.object({ type: z.literal('poses'), protocolVersion: z.literal(PROTOCOL_VERSION), roomId: id,
     raceId: id, revision: sequence, serverTime: time, entrants: z.array(entrantSchema).max(5) }).strict(),
   z.object({ type: z.literal('pong'), clientTime: time, serverTime: time, token: id }).strict(),

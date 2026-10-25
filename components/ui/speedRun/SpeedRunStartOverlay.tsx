@@ -1,110 +1,67 @@
 'use client'
-import { Play, X } from 'lucide-react'
-import { type FC, type Ref, useEffect, useRef } from 'react'
-import { type TransitionStatus } from 'react-transition-group'
-import { twJoin } from 'tailwind-merge'
 
+import { useEffect, useRef, useState, type FC, type Ref } from 'react'
+import { type TransitionStatus } from 'react-transition-group'
 import { useGameStore } from '@/components/GameProvider'
+import { useMultiplayer } from '@/components/multiplayer/MultiplayerProvider'
 import Button from '@/components/ui/Button'
 import { PointerProvider } from '@/components/ui/PointerProvider'
 import SpeedPanel from '@/components/ui/dashboard/SpeedPanel'
 import { Input } from '@/components/ui/input/Input'
 import { useUsernameInput } from '@/components/ui/input/useUsernameInput'
 
-type Props = {
-  ref: Ref<HTMLDivElement>
-  transitionStatus: TransitionStatus
-}
+type Props = { ref: Ref<HTMLDivElement>; transitionStatus: TransitionStatus }
 
-// Start overlay handles the username input if needed and countdown
 export const SpeedRunStartOverlay: FC<Props> = ({ ref, transitionStatus }) => {
-  const isMobile = useGameStore((s) => s.isMobile)
-  const username = useGameStore((s) => s.username)
-  const startCountdown = useGameStore((s) => s.startCountdown)
-  const cancelStartLine = useGameStore((s) => s.cancelStartLine)
+  const isMobile = useGameStore(state => state.isMobile)
+  const startCountdown = useGameStore(state => state.startCountdown)
+  const cancelStartLine = useGameStore(state => state.cancelStartLine)
+  const multiplayer = useMultiplayer()
+  const input = useUsernameInput()
+  const dialog = useRef<HTMLDialogElement>(null)
+  const title = useRef<HTMLHeadingElement>(null)
   const usernameInput = useRef<HTMLInputElement>(null)
-  const inputProps = useUsernameInput()
-
-  const start = () => {
-    if (!inputProps.isValid) return
-    startCountdown()
-  }
+  const [mode, setMode] = useState<'solo' | 'multiplayer' | null>(null)
+  const active = transitionStatus === 'entered' || transitionStatus === 'entering'
 
   useEffect(() => {
-    if (!!username) return
-
-    const timeout = setTimeout(() => {
-      usernameInput.current?.focus()
-    }, 50)
-    return () => clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const element = dialog.current
+    element?.showModal(); title.current?.focus()
+    return () => element?.close()
   }, [])
+  useEffect(() => { if (mode) usernameInput.current?.focus() }, [mode])
+  function start(selected: 'solo' | 'multiplayer') {
+    if (!input.isValid) { setMode(selected); return }
+    dialog.current?.close()
+    if (selected === 'solo') startCountdown()
+    else multiplayer.create()
+  }
+  function cancel() { dialog.current?.close(); cancelStartLine() }
 
-  return (
-    <PointerProvider isMobile={isMobile}>
-      <div
-        ref={ref}
-        className={twJoin(
-          'fixed inset-0 z-500 flex size-full items-center justify-center transition-opacity ease-out',
-          transitionStatus === 'entering' && 'opacity-100 duration-300',
-          transitionStatus === 'entered' && 'opacity-100',
-          transitionStatus === 'exiting' && 'opacity-0 duration-500',
-          transitionStatus === 'exited' && 'opacity-0',
-        )}>
-        <section className="flex max-h-full max-w-xl flex-col gap-4 overflow-y-auto px-2 py-4 xl:gap-6">
-          <h2 className="font-unbounded text-center text-2xl font-semibold lg:text-3xl">
-            Enter a username to race
-          </h2>
-          <p className="mx-auto max-w-md text-center text-sm text-white/70 xl:text-base">
-            You are on the starting grid. A valid name is saved with your time and shown on the
-            leaderboard.
-          </p>
-
-          <Input
-            ref={usernameInput}
-            {...inputProps}
-            autoCapitalize="off"
-            autoComplete="off"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === 'NumpadEnter') {
-                e.preventDefault()
-                start()
-              }
-            }}
-            endAdornment={
-              <Button
-                variant="primary"
-                aria-label="Start countdown"
-                onClick={start}
-                disabled={!inputProps.isValid}
-                className={twJoin(
-                  'flex h-full items-center justify-center gap-2 overflow-hidden rounded-none! border-none',
-                  inputProps.isValid
-                    ? 'text-teal-300 hover:text-teal-200'
-                    : 'cursor-not-allowed! text-neutral-600 before:opacity-20',
-                )}
-                endIcon={Play}>
-                <span className="relative animate-pulse text-lg tracking-wide uppercase">
-                  Start
-                </span>
-              </Button>
-            }
-          />
-
+  return <PointerProvider isMobile={isMobile}>
+    <div ref={ref}>
+      <dialog ref={dialog} aria-labelledby="race-mode-heading" onCancel={event => { event.preventDefault(); cancel() }}
+        className="fixed inset-0 m-auto max-h-[90dvh] w-[min(36rem,95vw)] overflow-y-auto rounded-2xl border border-teal-200/20 bg-neutral-950 p-5 text-white shadow-2xl backdrop:bg-black/75 sm:p-8">
+        <section className="flex flex-col gap-5">
+          <h2 ref={title} tabIndex={-1} id="race-mode-heading" className="font-unbounded text-2xl font-semibold outline-none">{mode ? 'Enter your racer name' : 'Choose your race'}</h2>
+          {!mode ? <>
+            <p className="text-sm text-white/70">Race against the clock, or invite friends to a private race.</p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button variant="primary" disabled={!active} onClick={() => start('solo')}>Single player</Button>
+              <Button variant="primary" disabled={!active} onClick={() => start('multiplayer')}>Multiplayer</Button>
+            </div>
+            <p className="text-sm text-white/60">Multiplayer supports up to five racers. Share your room link to invite racers and spectators.</p>
+          </> : <form className="flex flex-col gap-4" onSubmit={event => { event.preventDefault(); start(mode) }}>
+            <label htmlFor="race-username" className="text-sm">Your name</label>
+            <Input ref={usernameInput} {...input} id="race-username" autoCapitalize="off" autoComplete="off" aria-describedby="race-name-help" />
+            <p id="race-name-help" className="text-xs text-white/60">Use 6–12 characters. {mode === 'solo' ? 'Your name appears with your leaderboard time.' : 'Other people in the room will see your name.'}</p>
+            <Button type="submit" variant="primary" disabled={!active || !input.isValid}>{mode === 'solo' ? 'Start countdown' : 'Create room'}</Button>
+            <Button type="button" variant="secondary" onClick={() => setMode(null)}>Change mode</Button>
+          </form>}
           <SpeedPanel />
-
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={cancelStartLine}
-            className=""
-            size="sm"
-            aria-label="Back to lobby"
-            endIcon={X}>
-            Back to lobby
-          </Button>
+          <Button variant="secondary" onClick={cancel}>Back to lobby</Button>
         </section>
-      </div>
-    </PointerProvider>
-  )
+      </dialog>
+    </div>
+  </PointerProvider>
 }

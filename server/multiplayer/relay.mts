@@ -180,12 +180,22 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
       }
       connection.synced = true; connection.tokens.clear(); send(connection, { type: 'synced' }); return
     }
+    if (message.type === 'inspect') {
+      const room = rooms.get(message.roomId)
+      if (!room) { reject(connection, 'room-missing'); return }
+      if (!sameCourse(room.course, message.course)) { reject(connection, 'course-mismatch'); return }
+      connection.joinedAt = now()
+      const members = [...room.members]
+      send(connection, { type: 'room-info', roomId: room.id, phase: room.phase,
+        racers: members.filter(member => member.role === 'racer').length,
+        spectators: members.filter(member => member.role === 'spectator').length })
+      return
+    }
     if (message.type === 'create' || message.type === 'join') {
       if (connection.room) { reject(connection, 'already-joined'); return }
       if (message.type === 'create') {
         if (!allowSource(connection.ip, 'creations', LIMITS.creationsPerMinute)) { reject(connection, 'rate-limit'); return }
         if (rooms.size >= LIMITS.rooms) { reject(connection, 'server-full'); return }
-        if (message.course.topology !== 'flat') { reject(connection, 'unsupported-course'); return }
         const room: Room = { id: randomUUID(), ownerId: connection.id, course: message.course, phase: 'waiting',
           revision: 0, members: new Set(), entrants: [], raceId: null, startAt: null, activeAt: now() }
         rooms.set(room.id, room); join(connection, room, 'racer', message.profile); return

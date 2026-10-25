@@ -83,6 +83,7 @@ export type TimeSlice = {
   saveStatus: SaveStatus
 
   enterStartLine: () => void
+  prepareMultiplayer: () => void
   startCountdown: () => void
   cancelStartLine: () => void
   onCountdownComplete: (attemptId: number) => void
@@ -124,6 +125,7 @@ export enum Overlay {
   DASHBOARD = 'dashboard',
   SUBSCRIBE = 'subscribe',
   SPEEDRUN_START = 'speedrun-start',
+  MULTIPLAYER = 'multiplayer',
   SPEEDRUN_COUNTDOWN = 'speedrun-countdown',
   SPEEDRUN_END = 'speedrun-end',
 }
