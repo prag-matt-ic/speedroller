@@ -1,21 +1,26 @@
 import { useCoursePlacement } from '@/hooks/useCoursePlacement'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { BallCollider, type IntersectionEnterHandler, RigidBody } from '@react-three/rapier'
 import gsap from 'gsap'
-import { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { Vector3Tuple } from 'three'
+import { type FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { PointLight, Vector3Tuple } from 'three'
 
 import { type RingIndex, useGameStore } from '@/components/GameProvider'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
+import {
+  createRingLightPlacements,
+  extinguishRingLights,
+  poseRingLights,
+  setRingLightLit,
+} from '@/components/lighting/ringLights'
 import Ring, { type RingMaterial } from '@/components/platform/rings/ring/Ring'
+import { RING_MAJOR_RADIUS, RING_TUBE_RADIUS } from '@/components/platform/rings/ringConfig'
 import type { RigidBodyUserData, RingUserData } from '@/model/schema'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { getRingKey } from '@/utils/rings'
-import { COLUMNS, ON_TILE_Y, type RowData, colToX, rowToWorldZ } from '@/utils/tiles'
+import { COLUMNS, type RowData } from '@/utils/tiles'
 
-const RING_MAJOR_RADIUS = 0.32
-const RING_TUBE_RADIUS = 0.06
-const RING_WORLD_Y = ON_TILE_Y + RING_MAJOR_RADIUS * 2
 const TAU = Math.PI * 2
 
 const hashRingIndex = (index: number): number => {
@@ -29,33 +34,37 @@ type Props = {
 }
 
 const Rings: FC<Props> = ({ rows, onReadyChange }) => {
+  const surface = useCourseSurface()
+  // One placement per ring, in row/column order. It owns both the fixed world pose the ring mesh
+  // uses and the shared light slot co-located with it.
+  const ringPlacements = useMemo(
+    () => createRingLightPlacements(rows, surface),
+    [rows, surface],
+  )
+
+  useLayoutEffect(() => {
+    poseRingLights(ringPlacements)
+    return extinguishRingLights
+  }, [ringPlacements])
+
   useEffect(() => {
     onReadyChange(true)
     return () => onReadyChange(false)
   }, [onReadyChange])
 
-  return rows.flatMap((row, rowIndex) =>
-    (row.rings ?? []).map((hasRing, columnIndex) => {
-      if (!hasRing) return null
-      const indexes: RingIndex = [row.rowIndex ?? rowIndex, columnIndex]
-      return (
-        <PlacedRing
-          key={getRingKey(indexes[0], indexes[1])}
-          indexes={indexes}
-          position={[colToX(columnIndex, row.isRaised.length), RING_WORLD_Y, rowToWorldZ(rowIndex)]}
-        />
-      )
-    }),
-  )
+  return ringPlacements.map(({ key, indexes, light, coursePosition }) => (
+    <PlacedRing key={key} indexes={indexes} light={light} coursePosition={coursePosition} />
+  ))
 }
 
 type PlacedRingProps = {
   indexes: RingIndex
-  position: Vector3Tuple
+  coursePosition: Vector3Tuple
+  light: PointLight | null
 }
 
-const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
-  const placement = useCoursePlacement(position)
+const PlacedRing: FC<PlacedRingProps> = ({ indexes, coursePosition, light }) => {
+  const placement = useCoursePlacement(coursePosition)
   const ringKey = getRingKey(indexes[0], indexes[1])
   const isCollected = useGameStore((s) => Boolean(s.collectedRings[ringKey]))
   const attemptId = useGameStore((s) => s.attemptId)
@@ -69,6 +78,15 @@ const PlacedRing: FC<PlacedRingProps> = ({ indexes, position }) => {
   const isExiting = exitAttemptId === attemptId
   const seed = hashRingIndex(indexes[0] * COLUMNS + indexes[1])
   const userData: RingUserData = { type: 'ring', rowIndex: indexes[0], columnIndex: indexes[1] }
+
+  // The pool starts dark and `Rings` extinguishes it on unmount. Turning the light off only when
+  // this ring is collected keeps a retry (which clears `isCollected`) on the same light.
+  useLayoutEffect(() => {
+    setRingLightLit(light, !isCollected)
+    return () => {
+      setRingLightLit(light, false)
+    }
+  }, [isCollected, light])
 
   useEffect(() => () => {
     exitTween.current?.kill()

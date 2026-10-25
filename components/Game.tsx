@@ -16,6 +16,8 @@ import InputSmoother from '@/components/InputSmoother'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import WebGPUCanvas from '@/components/WebGPUCanvas'
 import Backdrop from '@/components/backdrop/Backdrop'
+import SceneLights from '@/components/lighting/SceneLights'
+import { createSceneRenderer } from '@/components/lighting/lightNodes'
 import OutOfBounds from '@/components/platform/OutOfBounds'
 import Platform from '@/components/platform/Platform'
 import Player from '@/components/player/Player'
@@ -56,6 +58,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
   return (
     <WebGPUCanvas
       className="fixed! inset-0! h-dvh! w-full"
+      createRenderer={createSceneRenderer}
       dpr={dpr}
       rendererProps={rendererProps}
       camera={{
@@ -70,7 +73,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
         onIncline={() => onPerformanceChange(true, dpr)}
         onDecline={() => onPerformanceChange(false, dpr)}
         flipflops={2}>
-        {/* <ambientLight intensity={1.0} /> */}
+        
 
         <Suspense>
           <GameUniforms />
@@ -79,6 +82,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
           <Camera isMobile={isMobile} position={cameraPosition} />
           {isDebug && <Stats />}
           <Backdrop />
+          <SceneLights />
           <Physics debug={isPhysicsDebug} timeStep={physicsTimeStep}>
             <OutOfBounds />
             <Platform />

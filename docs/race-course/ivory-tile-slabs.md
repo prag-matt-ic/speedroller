@@ -10,7 +10,7 @@ The local top stays at `TILE_THICKNESS / 2` around the existing pivot. Visual de
 
 ## Material and relief
 
-`Tiles.tsx` uses MeshLambertNodeMaterial with a material-specific light list: white ambient fill and a warm-white key from (-3, 6, 4). No scene lights or shadow maps are added. The proposed 0.8/1.6 intensities made ivory too dim in the actual course; visual tuning uses **1.4 ambient / 2.2 directional**. The old binary side-darkening is removed.
+`Tiles.tsx` uses MeshLambertNodeMaterial and inherits the renderer's clustered scene-lighting node. The tile material no longer carries a private light list: scene-owned white ambient fill (1.4) and a warm-white key from (-3, 6, 4) (2.2) preserve the previous look, while a palette-coloured player point light and one gold point light per ring add moving pools on the actual floor. No shadow maps are added. The proposed 0.8/1.6 pair made ivory too dim in the actual course, so the scene lights keep the **1.4 ambient / 2.2 directional** tuning. See [clustered lighting](../clustered-lighting.md) for pool ownership and capacity.
 
 The existing colour atlas, stable seed selection, brightness variation and highlighted markings remain. Only ivory tops receive micro-relief. Tangent normals map into the top's +X/-Z UV basis, then rotate with the tile before conversion to view space. Bevels and graphite use geometric normals. Trail tint, emissive MRT, contact shadow, transparency, tilt and background-matched fog remain connected.
 

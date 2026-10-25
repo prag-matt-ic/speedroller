@@ -190,6 +190,12 @@ Replaced wholesale by a `RenderPipeline` with a `pass()` node. No shader port at
 > `marble`'s `LIGHT_DIR = normalize(vec3(1,1,1))` + ambient `0.8` / diffuse `0.5` / specular `^10`
 > becomes the same expressions with TSL `dot`/`pow`/`mix` nodes. Re-authoring the lighting to use
 > real lights is a **separate, deliberate art decision** — not part of this migration.
+>
+> **Update — clustered scene lighting (Stage 3A).** The zero-lights statement above is historical.
+> The tile floor now inherits a renderer-owned clustered node with scene-owned ambient and key
+> lights, a palette-coloured player light and one light per ring. The four fake-lit surfaces listed
+> in this bucket are unchanged and still hand-roll their lighting. See
+> [clustered lighting](clustered-lighting.md).
 
 **D. GPGPU positional pass** — `floatingTiles/shaders/position.frag`
 Not a fragment shader at all: it reads `texturePosition`, packs `vec4(column, y, row, speed)` into

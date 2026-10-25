@@ -13,18 +13,16 @@ import {
   vec3,
   vertexStage,
 } from 'three/tsl'
-import { Color, Sphere, type TorusGeometry, Vector3 } from 'three'
+import { Sphere, type TorusGeometry, Vector3 } from 'three'
 import type { MeshBasicNodeMaterial, Node, UniformNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
+import { RING_COLOR, RING_EMISSIVE } from '@/components/platform/rings/ringConfig'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 
 // Normalized direction from (0.46, 0.8, 0.5) — carried over from ring.vert.
 const LIGHT_DIR = /*#__PURE__*/ vec3(0.4383, 0.7622, 0.4764).toConst()
-
-export const RING_COLOR = new Color('#ffe066')
-export const RING_EMISSIVE = new Color('#ffd43b')
 
 // Strong enough to bloom clearly through the emissive MRT pass; the ring still keeps its base colour.
 const RING_EMISSIVE_STRENGTH = 1.25

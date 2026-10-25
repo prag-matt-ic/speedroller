@@ -32,7 +32,6 @@ import {
   vec4,
   mx_noise_float,
   transformNormalToView,
-  lights,
   color,
   positionGeometry,
   positionLocal,
@@ -49,8 +48,6 @@ import {
   vertexStage,
 } from 'three/tsl'
 import {
-  AmbientLight,
-  DirectionalLight,
   NoColorSpace,
   ClampToEdgeWrapping,
   type InstancedBufferAttribute,
@@ -109,8 +106,6 @@ const STONE_CELL_PIXELS = 512
 const STONE_CELL_PADDING = 16
 const STONE_UV_INSET = (STONE_CELL_PADDING + 0.5) / STONE_CELL_PIXELS
 const STONE_MIN_BRIGHTNESS = 0.65
-const TILE_AMBIENT_INTENSITY = 1.4
-const TILE_KEY_INTENSITY = 2.2
 
 const configureStoneAtlas = (map: Texture) => {
   map.colorSpace = SRGBColorSpace
@@ -154,7 +149,6 @@ type TileNodes = {
   positionNode: Node<'vec3'>
   emissiveNode: Node<'vec3'>
   normalNode: Node<'vec3'>
-  lightsNode: ReturnType<typeof lights>
 }
 
 type PlatformTilesProps = {
@@ -238,7 +232,6 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
           <meshLambertNodeMaterial
             ref={attachMaterial}
             normalNode={nodes.normalNode}
-            lightsNode={nodes.lightsNode}
             colorNode={nodes.colorNode}
             opacityNode={nodes.opacityNode}
             positionNode={nodes.positionNode}
@@ -283,7 +276,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
   // Every varying is recomputed in-graph: per-instance attributes are read directly, the sphere-side
   // values are not needed, and world position comes from positionWorld, which already folds in the
   // instance matrix for an instanced mesh.
-  const { colorNode, opacityNode, positionNode, emissiveNode, normalNode, lightsNode } = useLocalNodes(
+  const { colorNode, opacityNode, positionNode, emissiveNode, normalNode } = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
       const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
       const { uPlayerWorldPos, uTime, uPlayerPaletteIndex } =
@@ -384,12 +377,6 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       })()
       const tiltedNormal = rotateWithTrig(sampledNormal, tiltAxis, tiltSin, tiltCos)
       const normalNode = transformNormalToView(courseNormalNode(tiltedNormal, positionLocal.x, surface)).normalize()
-      const ambient = new AmbientLight('#ffffff', TILE_AMBIENT_INTENSITY)
-      const key = new DirectionalLight('#fff2df', TILE_KEY_INTENSITY)
-      key.position.set(-3, 6, 4)
-      key.updateMatrixWorld()
-      key.target.updateMatrixWorld()
-      const lightsNode = lights([ambient, key])
 
       // Per-instance scalar mix derived only from the seed and highlight flag: hoist it to the
       // vertex stage so the fragment stage reads a varying instead of re-deriving it per pixel.
@@ -457,7 +444,6 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         positionNode: coursePositionNode(tiltedGeometry, surface),
         colorNode: mix(color('#32343a'), shadowed, isIvory),
         normalNode,
-        lightsNode,
         opacityNode: alpha as Node<'float'>,
         emissiveNode: trailEmissive.mul(isTop),
       }
@@ -479,7 +465,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
           key={batch.startRow}
           batch={batch}
           trailAttribute={attribute}
-          nodes={{ colorNode, opacityNode, positionNode, emissiveNode, normalNode, lightsNode }}
+          nodes={{ colorNode, opacityNode, positionNode, emissiveNode, normalNode }}
         />
       ))}
     </group>
