@@ -2,7 +2,6 @@ import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js'
 import ClusteredLightsNode from 'three/addons/tsl/lighting/ClusteredLightsNode.js'
 import {
   AmbientLight,
-  DirectionalLight,
   PointLight,
   WebGPURenderer,
   type WebGPURendererParameters,
@@ -17,15 +16,12 @@ import { PLATFORM_DATA } from '@/resources/rowsData'
  * constructs a light or a temporary vector.
  */
 
-// Kept at the values the tile material used before it inherited scene lighting: a white fill and a
-// warm key from (-3, 6, 4). The proposed 0.8/1.6 pair made ivory too dim in the actual course.
-const TILE_AMBIENT_INTENSITY = 0.6
-const TILE_KEY_INTENSITY = 2.2
+// The world-fixed directional key was removed: the track wraps around the cylinder, so the key's
+// contribution fell to zero over long stretches of the course. This ambient value is the baseline a
+// course-relative key will be re-balanced against when that work is picked up again.
+const TILE_AMBIENT_INTENSITY = 1.0
 
 export const TILE_AMBIENT_LIGHT = new AmbientLight('#ffffff', TILE_AMBIENT_INTENSITY)
-
-export const TILE_KEY_LIGHT = new DirectionalLight('#fff2df', TILE_KEY_INTENSITY)
-TILE_KEY_LIGHT.position.set(-3, 6, 4)
 
 /**
  * The character light. Its colour follows the selected marble palette in `SceneLights`; the values
@@ -34,7 +30,7 @@ TILE_KEY_LIGHT.position.set(-3, 6, 4)
  * landing scene's fixture lights. Playtest tuning values, not physically calibrated ones.
  */
 export const PLAYER_LIGHT_CONSTANTS = {
-  intensity: Math.PI * 0.8,
+  intensity: Math.PI * 2.0,
   distance: 6,
   decay: 1.2,
 } as const
@@ -51,9 +47,9 @@ PLAYER_POINT_LIGHT.castShadow = false
 /** One shadowless light per ring, co-located with the torus and extinguished once it is collected. */
 export const RING_LIGHT_CONSTANTS = {
   color: RING_EMISSIVE,
-  intensity: Math.PI * 0.9,
+  intensity: Math.PI * 1.2,
   distance: 5,
-  decay: 1.2,
+  decay: 1.0,
 } as const
 
 /**

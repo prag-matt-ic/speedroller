@@ -1,6 +1,8 @@
 # Player Versus Player Prototype Plan
 
-Status: **Proposed implementation plan. No multiplayer code has been imported or implemented.**
+Status: **Phase 0 transport validated locally; fresh-user manual baseline still outstanding.
+No multiplayer gameplay integration or deployment.** See the
+[Phase 0 report](multiplayer-phase0-validation.md) for measurements and remaining gates.
 
 Updated: **25 October 2026**
 
@@ -244,21 +246,31 @@ and latency targets above still need measurement on this game.
 
 ## Phased implementation checklist
 
-Every item starts unchecked. Complete phases in order; tick an item only after its
+Complete phases in order; tick an item only after its
 behaviour or research result is verified. A phase exit is a working checkpoint, not a
 request to deploy incomplete gameplay to public users.
 
 ### Phase 0 Validate the foundation
 
-- [ ] Read current code and repository instructions again; map start, countdown, finish,
+- [x] Read current code and repository instructions again; map start, countdown, finish,
   retry, position, camera, fade, and visibility consumers, including relevant tests.
 - [ ] Record baseline solo tests and a manual fresh-user/returning-user run. Preserve
   concurrent renderer changes and keep the historical branch as a read-only reference.
-- [ ] Build a disposable local relay spike to measure five publishers plus 20 watchers;
+  **92 automated tests passed; returning-user flow checked. Fresh-origin manual run
+  remained at loading, so this item is not complete.**
+- [x] Build a disposable local relay spike to measure five publishers plus 20 watchers;
   record message sizes, round-trip time, CPU, memory, and queue behaviour. Reuse the
   successful minimal service rather than retaining a second demo implementation.
-- [ ] Check primary documentation above; record the chosen Railway region and measured
+- [x] Check primary documentation above; record the chosen Railway region and measured
   latency target. Flag any evidence requiring a transport change before game integration.
+
+Evidence: [validation report](multiplayer-phase0-validation.md),
+[raw results](multiplayer-phase0-results.json), and
+[reproducible spike](../server/multiplayer/README.md). Selected Amsterdam for staging;
+no Railway deployment yet. Five racers plus 20 spectators passed all three local profiles.
+The 150 ms RTT model estimates 315 ms p95 age with 100 ms interpolation, above the 300 ms
+target. Proceed with the room-service foundation; retain the Phase 4 rendered-latency
+gate and finish the fresh-user manual baseline before changing entry behaviour.
 
 Exit: transport and integration risks have concrete measurements and named call sites.
 

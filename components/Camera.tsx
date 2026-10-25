@@ -42,7 +42,10 @@ export const CAMERA_ZOOM_FOR_STAGE_MOBILE: Record<Stage, number> = {
 }
 
 const LOOK_AT_HEIGHT = 3
-const LOOK_AT_X_RANGE = 1.5
+// A small steer look-ahead. The input ramp is quick and asymmetric, so the offset is eased
+// separately to keep it a drift rather than a flick.
+const LOOK_AT_X_RANGE = 0.5
+const LOOK_AT_X_EASE_SECONDS = 0.35
 const INPUT_UP_Z_OFFSET = 3
 const INPUT_DOWN_Z_OFFSET = 7
 const INPUT_DOWN_LOOK_AT_Z_OFFSET = 2
@@ -52,6 +55,18 @@ const OVERLAY_Z_OFFSET = 5
 const COLLECTIBLE_ZOOM_OFFSET = 0.3
 
 type SetZoom = (zoom: number, transition?: boolean) => void
+
+/**
+ * Symmetric, frame-rate independent ease for the steering look-ahead. This is deliberately slower
+ * than the input ramp so the small offset trails the key instead of flicking with it.
+ */
+const easeLookAtX = (
+  currentOffset: number,
+  targetOffset: number,
+  deltaSeconds: number,
+): number =>
+  currentOffset +
+  (targetOffset - currentOffset) * (1 - Math.exp(-deltaSeconds / LOOK_AT_X_EASE_SECONDS))
 
 /**
  * Zoom policy for the hook that owns the lens: the stage picks the base zoom, and an on-screen
@@ -109,10 +124,11 @@ const FlatCamera: FC<Props> = ({ isMobile, position }) => {
   }, [camera])
 
   const { input } = usePlayerInput()
+  const easedLookX = useRef(0)
 
   useStageZoom(setZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
 
-  useFrame(() => {
+  useFrame((_, deltaSeconds) => {
     const lookAt = cameraLookAtPosition ?? playerPosition.current
     // The race accelerates and brakes by itself, so racing input must not dolly the camera. The z
     // offsets stay for manual lobby travel, where up/down is real movement.
@@ -122,8 +138,14 @@ const FlatCamera: FC<Props> = ({ isMobile, position }) => {
     // Offset the camera along z from player input
     const inputZOffset =
       backwardInput * INPUT_DOWN_Z_OFFSET + forwardInput * INPUT_UP_Z_OFFSET
-    // Look left or right based on player input
-    const lookAtX = lookAt[0] + (input.current.right - input.current.left) * LOOK_AT_X_RANGE
+    // Ease the look-ahead so it drifts toward the steering direction.
+    const steeringX = input.current.right - input.current.left
+    easedLookX.current = easeLookAtX(
+      easedLookX.current,
+      steeringX * LOOK_AT_X_RANGE,
+      deltaSeconds,
+    )
+    const lookAtX = lookAt[0] + easedLookX.current
     const backwardLookAtOffset =
       cameraLookAtPosition === null ? backwardInput * INPUT_DOWN_LOOK_AT_Z_OFFSET : 0
 
@@ -157,7 +179,7 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
   const state = useRef({
     player: new Vector3(), course: new Vector3(), up: new Vector3(), right: new Vector3(),
     eye: new Vector3(), target: new Vector3(), matrix: new Matrix4(), rotation: new Quaternion(),
-    zoom: 1.2, respawnTick: -1,
+    zoom: 1.2, lookX: 0, respawnTick: -1,
   })
   const setZoom = useCallback((zoom: number) => { state.current.zoom = zoom }, [])
   useStageZoom(setZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
@@ -171,8 +193,10 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
     frame.eye.z += position.z + (raised ? OVERLAY_Z_OFFSET : 0)
     if (lookAtOverride) frame.target.fromArray(lookAtOverride)
     else frame.target.copy(frame.player)
+    const steeringX = input.current.right - input.current.left
+    frame.lookX = easeLookAtX(frame.lookX, steeringX * LOOK_AT_X_RANGE, delta)
     frame.target.addScaledVector(frame.up, LOOK_AT_HEIGHT)
-      .addScaledVector(frame.right, (input.current.right - input.current.left) * LOOK_AT_X_RANGE)
+      .addScaledVector(frame.right, frame.lookX)
     frame.matrix.lookAt(frame.eye, frame.target, frame.up)
     frame.rotation.setFromRotationMatrix(frame.matrix)
     const blend = frame.respawnTick !== respawnTick ? 1 : 1 - Math.exp(-8 * Math.min(delta, 1 / 15))

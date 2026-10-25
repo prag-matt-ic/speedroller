@@ -8,14 +8,14 @@ import {
   PLAYER_POINT_LIGHT,
   RING_POINT_LIGHTS,
   TILE_AMBIENT_LIGHT,
-  TILE_KEY_LIGHT,
 } from '@/components/lighting/lightNodes'
 import { getPlayerLightColour } from '@/components/lighting/playerLight'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 
 /**
- * Mounts the scene's lights once at the root. Tiles inherit the renderer's clustered node; the
- * player and ring pools are the shadowless point lights that node culls per cluster.
+ * Mounts the scene's lighting once at the root: the ambient fill plus the clustered player and ring
+ * pools. The world-fixed directional key is intentionally absent until a course-relative key rig is
+ * designed; see `docs/clustered-lighting.md`.
  *
  * The player light follows the published world position (the same value the tile shader reads) and
  * takes its colour from the selected palette. Ring positions are posed by `Rings`; ring intensity
@@ -39,7 +39,6 @@ const SceneLights: FC = () => {
   return (
     <>
       <primitive object={TILE_AMBIENT_LIGHT} />
-      <primitive object={TILE_KEY_LIGHT} />
       <primitive object={PLAYER_POINT_LIGHT} />
       {RING_POINT_LIGHTS.map((light) => (
         <primitive key={light.uuid} object={light} />

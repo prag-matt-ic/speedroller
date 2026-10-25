@@ -51,15 +51,11 @@ test('the clustered node separates scene fills from the point-light pool', () =>
     ...lightNodes.RING_POINT_LIGHTS,
   ]
   const lighting = lightNodes.createSceneLighting()
-  const node = lighting.createNode([
-    lightNodes.TILE_AMBIENT_LIGHT,
-    lightNodes.TILE_KEY_LIGHT,
-    ...pointLights,
-  ])
+  const node = lighting.createNode([lightNodes.TILE_AMBIENT_LIGHT, ...pointLights])
 
   assert.equal(node.maxLights, lightNodes.SCENE_POINT_LIGHT_COUNT)
   assert.equal(node.maxLightsPerCluster, lightNodes.SCENE_POINT_LIGHT_COUNT)
-  assert.deepEqual(node.materialLights, [lightNodes.TILE_AMBIENT_LIGHT, lightNodes.TILE_KEY_LIGHT])
+  assert.deepEqual(node.materialLights, [lightNodes.TILE_AMBIENT_LIGHT])
   assert.equal(node.clusteredLights.length, pointLights.length)
   pointLights.forEach((light, index) => assert.equal(node.clusteredLights[index], light))
 

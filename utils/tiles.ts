@@ -15,9 +15,9 @@ export const worldZToRowIndex = (worldZ: number, rowCount: number): number => {
   if (rowCount === 0) return -1
   return Math.max(0, Math.min(rowCount - 1, Math.round((INITIAL_ROW_START_Z - worldZ) / TILE_SIZE)))
 }
-// Tile trail: how long a touched tile stays tinted, and the radius of tiles the ball stamps.
+// Tile trail: how long a touched tile stays lit, and the radius of tiles the ball stamps.
 export const TRAIL_FADE_SECONDS = 0.4
-export const TRAIL_BRUSH_RADIUS = TILE_SIZE * 0.75
+export const TRAIL_BRUSH_RADIUS = TILE_SIZE * 0.6
 export const TRAIL_MAX_PLAYER_HEIGHT = 1.2
 
 export const EPSILON = {

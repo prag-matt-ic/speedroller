@@ -28,6 +28,12 @@ export const PLAYER_PALETTE_PARAMS: readonly CosinePaletteParams[] = [
 /** Channels per palette (a, b, c, d), the stride of the flat parameter array. */
 const PALETTE_CHANNEL_COUNT = 4
 
+/**
+ * Palette position shared by the player light and the touched-tile afterglow. Both should read as
+ * the same colour, so they sample the same band of the marble palette's brighter half.
+ */
+export const PLAYER_LIGHT_PALETTE_T = 0.8
+
 /** The four palettes flattened to `(palette * 4 + channel)` vec3 slots. */
 const PALETTE_ARRAY = /*#__PURE__*/ uniformArray<'vec3'>(
   PLAYER_PALETTE_PARAMS.flatMap((params) => [

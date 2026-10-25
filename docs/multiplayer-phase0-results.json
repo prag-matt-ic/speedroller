@@ -1,0 +1,188 @@
+{
+  "node": "v24.22.1",
+  "platform": "darwin",
+  "arch": "arm64",
+  "cpu": "Apple M4 Pro",
+  "methodology": "Separate relay process; real loopback WebSockets; seeded ordered application delay, not WAN/TCP loss; JSON payload bytes exclude framing/TLS; interpolation age is an estimate, not rendered.",
+  "runs": [
+    {
+      "scenario": {
+        "name": "loopback",
+        "oneWayMs": 0,
+        "jitterMs": 0
+      },
+      "durationSeconds": 30,
+      "racers": 5,
+      "spectators": 20,
+      "rttMs": {
+        "p50": 1.014540999998644,
+        "p95": 14.915541000002122,
+        "samples": 725
+      },
+      "sourceToReceiveMs": {
+        "p50": 50.58720800000083,
+        "p95": 53.32379199999923,
+        "samples": 73575
+      },
+      "estimatedAgeWith100msInterpolationP95": 153.32379199999923,
+      "joinBootstrapP95Ms": 11.715833999999973,
+      "meanPoseBytes": 217.88976109215017,
+      "meanBatchBytes": 1553.7402376910018,
+      "outboundPayloadBytesPerSecond": 763925.6052316823,
+      "server": {
+        "type": "metrics",
+        "inboundBytes": 664836,
+        "outboundBytes": 22923679,
+        "batches": 589,
+        "batchBytes": 915153,
+        "maxBatchBytes": 1614,
+        "maxBufferedBytes": 0,
+        "skippedBatches": 0,
+        "congestedDisconnects": 0,
+        "acceptedPoses": 2930,
+        "durationMs": 30007.737459,
+        "cpuPercentOneCore": 3.3489062658357747,
+        "heapStartBytes": 14887656,
+        "heapEndBytes": 15239232,
+        "peakRssBytes": 111427584,
+        "eventLoopP99Ms": 17.809407
+      },
+      "pressure": {
+        "skippedBatches": 28694,
+        "maxBufferedBytes": 65824,
+        "congestedDisconnects": 1,
+        "healthyRacersStillConnected": 5
+      },
+      "assertions": [
+        "five-racer limit",
+        "owner needs opponent",
+        "owner-only start",
+        "late-racer rejection",
+        "20-spectator limit",
+        "spectator finish rejection",
+        "bootstrap before live data",
+        "10 late spectators get five current poses",
+        "stationary bootstrap with prior finish",
+        "results bootstrap",
+        "consistent final results",
+        "nominal traffic has no congestion"
+      ]
+    },
+    {
+      "scenario": {
+        "name": "150ms-round-trip-model",
+        "oneWayMs": 75,
+        "jitterMs": 15
+      },
+      "durationSeconds": 30,
+      "racers": 5,
+      "spectators": 20,
+      "rttMs": {
+        "p50": 152.98262499999691,
+        "p95": 173.02820800000336,
+        "samples": 725
+      },
+      "sourceToReceiveMs": {
+        "p50": 165.96858399999473,
+        "p95": 215.35874999999942,
+        "samples": 74440
+      },
+      "estimatedAgeWith100msInterpolationP95": 315.3587499999994,
+      "joinBootstrapP95Ms": 171.83908299999894,
+      "meanPoseBytes": 218.3275167785235,
+      "meanBatchBytes": 1555.8322147651006,
+      "outboundPayloadBytesPerSecond": 774054.6184269186,
+      "server": {
+        "type": "metrics",
+        "inboundBytes": 677226,
+        "outboundBytes": 23227055,
+        "batches": 596,
+        "batchBytes": 927276,
+        "maxBatchBytes": 1614,
+        "maxBufferedBytes": 0,
+        "skippedBatches": 0,
+        "congestedDisconnects": 0,
+        "acceptedPoses": 2980,
+        "durationMs": 30006.997499999998,
+        "cpuPercentOneCore": 3.7534944974084796,
+        "heapStartBytes": 14991856,
+        "heapEndBytes": 15237024,
+        "peakRssBytes": 111624192,
+        "eventLoopP99Ms": 11.706367
+      },
+      "pressure": null,
+      "assertions": [
+        "five-racer limit",
+        "owner needs opponent",
+        "owner-only start",
+        "late-racer rejection",
+        "20-spectator limit",
+        "spectator finish rejection",
+        "bootstrap before live data",
+        "10 late spectators get five current poses",
+        "stationary bootstrap with prior finish",
+        "results bootstrap",
+        "consistent final results",
+        "nominal traffic has no congestion"
+      ]
+    },
+    {
+      "scenario": {
+        "name": "300ms-round-trip-model",
+        "oneWayMs": 150,
+        "jitterMs": 30
+      },
+      "durationSeconds": 30,
+      "racers": 5,
+      "spectators": 20,
+      "rttMs": {
+        "p50": 305.8357079999987,
+        "p95": 340.8287080000009,
+        "samples": 725
+      },
+      "sourceToReceiveMs": {
+        "p50": 327.4224169999943,
+        "p95": 376.15604099999473,
+        "samples": 74255
+      },
+      "estimatedAgeWith100msInterpolationP95": 476.15604099999473,
+      "joinBootstrapP95Ms": 332.47833299999184,
+      "meanPoseBytes": 219.0563758389262,
+      "meanBatchBytes": 1559.358585858586,
+      "outboundPayloadBytesPerSecond": 773255.5574862498,
+      "server": {
+        "type": "metrics",
+        "inboundBytes": 681012,
+        "outboundBytes": 23202120,
+        "batches": 594,
+        "batchBytes": 926259,
+        "maxBatchBytes": 1617,
+        "maxBufferedBytes": 0,
+        "skippedBatches": 0,
+        "congestedDisconnects": 0,
+        "acceptedPoses": 2986,
+        "durationMs": 30005.759124999997,
+        "cpuPercentOneCore": 3.92923570134805,
+        "heapStartBytes": 15015568,
+        "heapEndBytes": 15210488,
+        "peakRssBytes": 111542272,
+        "eventLoopP99Ms": 12.042239
+      },
+      "pressure": null,
+      "assertions": [
+        "five-racer limit",
+        "owner needs opponent",
+        "owner-only start",
+        "late-racer rejection",
+        "20-spectator limit",
+        "spectator finish rejection",
+        "bootstrap before live data",
+        "10 late spectators get five current poses",
+        "stationary bootstrap with prior finish",
+        "results bootstrap",
+        "consistent final results",
+        "nominal traffic has no congestion"
+      ]
+    }
+  ]
+}

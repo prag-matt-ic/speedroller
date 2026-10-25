@@ -76,7 +76,7 @@ import { createTileTrail, useTileTrail } from '@/components/platform/tiles/useTi
 import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
 import { GHOST_DROP_DEPTH } from '@/utils/platform/ghostTiles'
 import { ghostTileMotion } from '@/resources/tsl/ghostTileMotion'
-import { samplePlayerPalette } from '@/resources/tsl/playerPalette'
+import { samplePlayerPalette, PLAYER_LIGHT_PALETTE_T } from '@/resources/tsl/playerPalette'
 import {
   type RowData,
   rowToWorldZ,
@@ -116,12 +116,11 @@ const configureStoneAtlas = (map: Texture) => {
   map.needsUpdate = true
 }
 
-// Trail tint: the marble palette darkened toward black so the trail reads as a painted shadow.
-// The emissive glow keeps the undarkened player colour so the bloom still picks the trail up.
-const TRAIL_PALETTE_T = 0.5
-const TRAIL_DARKEN = 0.4
-const TRAIL_STRENGTH = 0.85
-const TRAIL_EMISSIVE_STRENGTH = 0.35
+// Touched-tile afterglow: a small additive palette lift plus a fainter emissive halo. It has to sit
+// under the player point light, not replace it, so both values stay low; the timestamp attribute
+// refreshes while the ball stays on a tile and fades once it leaves.
+const TRAIL_GLOW_STRENGTH = 0.1
+const TRAIL_EMISSIVE_STRENGTH = 0.4
 
 // tile.frag's early `if (vAlpha <= 0.001) discard;`. A discard needs a statement stack, which a
 // material graph built at React render time does not have, so the material's own alpha test does it.
@@ -389,26 +388,13 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       const brightness = clamp(float(1).sub(darkening), STONE_MIN_BRIGHTNESS, 1)
       const background = stoneColour.mul(brightness)
 
-      // Trail: tiles the ball has just crossed keep a darkened player-colour tint. The tint and its
-      // fade are constant across a tile's fragments, so both are hoisted to the vertex stage like
-      // the mixes above and the fragment stage pays for a single mix.
+      // Touched-tile afterglow. The fade is constant across a tile's fragments, so the palette
+      // colour is multiplied in the vertex stage; the fragment stage only adds the varying.
       const trailAge = uTime.sub(trailTouchedAt)
-      const trailAmount = vertexStage(
-        float(1)
-          .sub(smoothstep(float(0), float(TRAIL_FADE_SECONDS), trailAge))
-          .mul(TRAIL_STRENGTH),
-      )
-      const playerTrailColour = samplePlayerPalette(
-        float(TRAIL_PALETTE_T),
-        uPlayerPaletteIndex.toInt(),
-      )
-      const trailColour = vertexStage(mix(playerTrailColour, vec3(0), float(TRAIL_DARKEN)))
-      const backgroundWithTrail = mix(background, trailColour, trailAmount)
-
-      // The trail still publishes the undarkened player colour to the emissive MRT, so the bloom
-      // keeps a faint halo around it without whitening the painted tile.
-      const trailEmissive = vertexStage(
-        playerTrailColour.mul(trailAmount).mul(TRAIL_EMISSIVE_STRENGTH),
+      const trailEnergy = vertexStage(
+        samplePlayerPalette(float(PLAYER_LIGHT_PALETTE_T), uPlayerPaletteIndex.toInt()).mul(
+          float(1).sub(smoothstep(float(0), float(TRAIL_FADE_SECONDS), trailAge)),
+        ),
       )
 
       // Player contact shadow. `distanceSquared` is already derived above, so reuse it instead of
@@ -436,16 +422,16 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         .mul(shadowHeightFade)
         .mul(scoped.uShadowEnabled)
 
-      const shadowed = backgroundWithTrail
-        .mul(float(1).sub(shadow.mul(SHADOW_STRENGTH)))
-
+      const shadowed = background.mul(float(1).sub(shadow.mul(SHADOW_STRENGTH)))
+      // Add the afterglow after the contact shadow so the fake shadow cannot eat the glow.
+      const shadowedWithTrail = shadowed.add(trailEnergy.mul(TRAIL_GLOW_STRENGTH))
 
       return {
         positionNode: coursePositionNode(tiltedGeometry, surface),
-        colorNode: mix(color('#32343a'), shadowed, isIvory),
+        colorNode: mix(color('#32343a'), shadowedWithTrail, isIvory),
         normalNode,
         opacityNode: alpha as Node<'float'>,
-        emissiveNode: trailEmissive.mul(isTop),
+        emissiveNode: trailEnergy.mul(TRAIL_EMISSIVE_STRENGTH).mul(isTop),
       }
     },
     [detailNoiseTextures, stoneAtlasTexture, stoneNormalTexture, sceneQuality, surface],

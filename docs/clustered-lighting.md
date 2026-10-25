@@ -1,9 +1,12 @@
 # Clustered scene lighting
 
-The race floor is lit by one clustered scene-lighting node: a white ambient fill, a warm
-directional key, a player light that follows the marble, and one point light co-located with every
-ring. The setup mirrors the Threenix landing flight, adapted to the cylinder course and its
-60 authored rings.
+The race floor is lit by one clustered scene-lighting node: a white ambient fill, a player light
+that follows the marble, and one point light co-located with every ring. The setup mirrors the
+Threenix landing flight, adapted to the cylinder course and its 60 authored rings.
+
+A world-fixed directional key has been removed for now. The track wraps around the cylinder, so a
+key fixed in world space loses the floor for long stretches of the course; a course-relative key rig
+is the next decision. The ambient value below is the baseline that rig will be balanced against.
 
 Before this pass the tiles owned a private light list (`lights([ambient, key])`) and the scene had
 no lights. The new point lights are what makes clustered lighting necessary: the default Three
@@ -14,7 +17,7 @@ lighting node would unroll every one of the 61 point lights into every tile frag
 | File | Owns |
 | --- | --- |
 | `components/lighting/lightNodes.ts` | light objects, pool capacity, `ClusteredLighting`, renderer factory |
-| `components/lighting/SceneLights.tsx` | mounts ambient/key/player/ring lights at the scene root, syncs player position and palette colour |
+| `components/lighting/SceneLights.tsx` | mounts the ambient, player and ring lights at the scene root, syncs player position and palette colour |
 | `components/lighting/playerLight.ts` | clamps a palette sample into a usable light colour |
 | `components/lighting/ringLights.ts` | ring course/world poses, pool posing, ring intensity policy |
 | `components/platform/rings/ringConfig.ts` | ring radius, centre height and colours shared by mesh and light |
@@ -61,18 +64,29 @@ Zero-intensity lights still occupy the pool. All 60 slots stay mounted in every 
 
 `SceneLights` mounts:
 
-- `TILE_AMBIENT_LIGHT` — white, intensity 1.4. Kept at the old material value.
-- `TILE_KEY_LIGHT` — warm white from `(-3, 6, 4)`, intensity 2.2. Also kept at the old value.
+- `TILE_AMBIENT_LIGHT` — white, intensity 1.0.
 - `PLAYER_POINT_LIGHT` — shadowless, reach 6, decay 1.2.
 - `RING_POINT_LIGHTS` — 60 shadowless slots, reach 5, decay 1.2, gold `#ffd43b`.
 
-The ambient and directional lights are not clustered; `ClusteredLightsNode.setLights` keeps them in
-`materialLights` and sends only the shadowless point lights to `clusteredLights`.
+The ambient light is not clustered; `ClusteredLightsNode.setLights` keeps it in `materialLights` and
+sends only the shadowless point lights to `clusteredLights`.
 
 `Tiles.tsx` no longer passes a material `lightsNode`. `NodeMaterial.setupLighting` resolves
 `this.lightsNode || builder.lightsNode`, so every tile batch inherits the renderer-owned clustered
 node. The marble, gem, rings and other hand-lit surfaces remain `MeshBasicNodeMaterial` and are
 unaffected.
+
+### Directional key (removed)
+
+The former key was a `DirectionalLight('#fff2df', 2.2)` fixed at world `(-3, 6, 4)` and aimed at the
+origin. The cylinder's floor normal rotates with course position, so the key's `NdotL` fell from
+about `0.78` at the start to zero and below over the middle of the course. With the ambient fill at
+the 0.6 used during that test, those stretches were about 74% darker than the start. Ring lights did
+not fill the gaps: their
+5-unit reach left long ambient-only runs between rings.
+
+Do not restore the same fixed light. Revisit this with a rig that follows the surface frame (or a
+course-space key in the tile shader), and re-balance the ambient fill against it.
 
 ## Player light
 
@@ -86,6 +100,11 @@ are the linear values the marble shader consumes, so `Color.setRGB` is called wi
 conversion. `getPaletteHex` is deliberately not used: it encodes those values as if they were sRGB,
 which turned the palette-0 pool into a dark red and palette 3 nearly black. A regression test covers
 all four palettes.
+
+The tile shader samples the same palette position for its touched-tile afterglow, so the lingering
+tile glow and the pool match in colour. The afterglow strengths are deliberately low (additive
+`0.10`, emissive `0.06`): it reads as a fading reminder of where the ball has been, not as a second
+light source competing with the pool.
 
 ## Ring lights
 
@@ -111,7 +130,7 @@ ring is behind the camera either; they only add a local pool next to the ring.
 
 `PLAYER_LIGHT_CONSTANTS` and `RING_LIGHT_CONSTANTS` in `lightNodes.ts` are playtest targets, not
 calibrated values. The course is at a much smaller world scale than the landing flight (1-unit
-tiles, a 0.45-unit ball, ambient 1.4 and key 2.2 on the tiles), so intensities are tens rather than
+tiles, a 0.45-unit ball, ambient 1.0 with no directional key), so intensities are tens rather than
 the hundreds of π-scaled units used there.
 
 ## Verification
@@ -119,7 +138,7 @@ the hundreds of π-scaled units used there.
 `tests/clustered-lighting.test.mjs` checks:
 
 - the pool covers every mode's authored ring count and the scene total is player + rings;
-- the clustered node splits ambient/directional from the point pool, respects both capacities, and
+- the clustered node splits the ambient fill from the point pool, respects both capacities, and
   survives a zero-sized drawing buffer;
 - every ring's course pose, world pose and light slot agree, including the cylinder wrap;
 - ring intensity policy and null-slot safety;
