@@ -213,3 +213,8 @@ export async function submitFeedback(data: FeedbackSubmission): InsertFeedbackRe
     return null
   }
 }
+
+/** Editor playtests deliberately do not create leaderboard or personal-best records. */
+export async function skipEditorSpeedRun(): InsertSpeedRunResponse {
+  return null
+}

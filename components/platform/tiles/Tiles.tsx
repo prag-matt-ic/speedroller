@@ -28,6 +28,8 @@ import {
   fract,
   max,
   mix,
+  modelWorldMatrix,
+  vec4,
   mx_noise_float,
   transformNormalToView,
   lights,
@@ -75,7 +77,8 @@ import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvi
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { createTileTrail, useTileTrail } from '@/components/platform/tiles/useTileTrail'
 import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
-import { TILE_PLAYER_FADE_FULL_RADIUS, TILE_PLAYER_FADE_MIN_ALPHA, TILE_PLAYER_FADE_MIN_RADIUS } from '@/utils/sceneDistances'
+import { GHOST_DROP_DEPTH } from '@/utils/platform/ghostTiles'
+import { ghostTileMotion } from '@/resources/tsl/ghostTileMotion'
 import { samplePlayerPalette } from '@/resources/tsl/playerPalette'
 import {
   type RowData,
@@ -87,8 +90,6 @@ import {
 
 const TILE_UNIFORM_SCOPE = 'platformTiles'
 
-// Carried over from tile.vert / tile.frag.
-const TILE_FADE_ROTATE_MAX = 0.3
 const AXIS_EPSILON = 0.001
 const HIGHLIGHTED_MIX_MIN = 0.04
 const HIGHLIGHTED_MIX_MAX = 0.10
@@ -133,9 +134,6 @@ const ALPHA_TEST = 0.001
 
 // One registration owns settings shared by every terrain batch.
 type TileShaderUniforms = {
-  uFadeFullRadiusSq: UniformNode<'float', number>
-  uFadeMinRadiusSq: UniformNode<'float', number>
-  uFadeMinAlpha: UniformNode<'float', number>
   uAddDetailNoise: UniformNode<'float', number>
   uShadowEnabled: UniformNode<'float', number>
 }
@@ -145,12 +143,7 @@ type TileConfig = {
   isLowQuality: boolean
 }
 
-// Radii are squared on the CPU once per mount: the shader compares squared distances, so this
-// avoids re-squaring each radius per fragment and per vertex.
 const createTileUniforms = ({ addDetailNoise, isLowQuality }: TileConfig) => () => ({
-  uFadeFullRadiusSq: TILE_PLAYER_FADE_FULL_RADIUS * TILE_PLAYER_FADE_FULL_RADIUS,
-  uFadeMinRadiusSq: TILE_PLAYER_FADE_MIN_RADIUS * TILE_PLAYER_FADE_MIN_RADIUS,
-  uFadeMinAlpha: TILE_PLAYER_FADE_MIN_ALPHA,
   uAddDetailNoise: Number(addDetailNoise),
   uShadowEnabled: isLowQuality ? 0 : 1,
 })
@@ -177,7 +170,7 @@ type TerrainBatchProps = {
 
 const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) => {
   const surface = useCourseSurface()
-  const collision = useMemo(() => surface.topology === 'cylinder' ? createSurfaceColliders(batch.positions, surface) : null, [batch, surface])
+  const collision = useMemo(() => surface.topology === 'cylinder' && batch.solidPositions.length > 0 ? createSurfaceColliders(batch.solidPositions, surface) : null, [batch, surface])
   const meshRef = useRef<InstancedMesh>(null)
 
   // Installed Three types omit emissiveNode; the lighting graph supports it.
@@ -208,34 +201,35 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
       }
       mesh.boundingBox = bounds.expandByScalar(TILE_SLAB_RADIUS)
     }
-    // The GPU tilts each tile around its centre. Expand the CPU bounds by the largest possible
-    // vertex displacement so tilted edges cannot disappear at a frustum boundary.
+    // GPU falling and rotation must stay inside the CPU culling bounds.
     const tileRadius = TILE_SLAB_RADIUS
-    mesh.boundingBox!.expandByScalar(2 * tileRadius * Math.sin(TILE_FADE_ROTATE_MAX / 2))
+    mesh.boundingBox!.expandByScalar(GHOST_DROP_DEPTH + 2 * tileRadius)
     mesh.boundingSphere = mesh.boundingBox!.getBoundingSphere(new Sphere())
   }, [batch, surface])
 
   return (
-    <RigidBody
-      type="fixed"
-      colliders={false}
-      position={[0, 0, rowToWorldZ(batch.startRow)]}
-      userData={{ type: 'tile' }}
-      friction={0}>
-      {collision ? <TrimeshCollider args={[collision.vertices, collision.indices]} friction={0} /> : batch.positions.map((position, index) => (
-        <CuboidCollider
-          key={index}
-          position={position}
-          args={[TILE_SIZE / 2, TILE_THICKNESS / 2, TILE_SIZE / 2]}
-          friction={0}
-        />
-      ))}
+    <group position={[0, 0, rowToWorldZ(batch.startRow)]}>
+      {batch.solidPositions.length > 0 && (
+        <RigidBody type="fixed" colliders={false} userData={{ type: 'tile' }} friction={0}>
+          {collision ? (
+            <TrimeshCollider args={[collision.vertices, collision.indices]} friction={0} />
+          ) : batch.solidPositions.map((position, index) => (
+            <CuboidCollider
+              key={index}
+              position={position}
+              args={[TILE_SIZE / 2, TILE_THICKNESS / 2, TILE_SIZE / 2]}
+              friction={0}
+            />
+          ))}
+        </RigidBody>
+      )}
       <instancedMesh
         ref={meshRef}
         args={[undefined, undefined, batch.positions.length]}
         count={batch.positions.length}
         frustumCulled>
         <primitive object={geometry} attach="geometry">
+          <instancedBufferAttribute attach="attributes-isGhost" args={[batch.ghosts, 1]} />
           <instancedBufferAttribute attach="attributes-seed" args={[batch.seeds, 1]} />
           <instancedBufferAttribute attach="attributes-isHighlighted" args={[batch.highlights, 1]} />
           <primitive object={trailAttribute} attach="attributes-trailTouchedAt" />
@@ -253,7 +247,7 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
           />
         </Suspense>
       </instancedMesh>
-    </RigidBody>
+    </group>
   )
 }
 
@@ -271,7 +265,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
     tileDetailNoise2.src,
     tileDetailNoise3.src,
   ]) as [Texture, Texture, Texture]
-  const batches = useMemo(() => createTileBatches(rows), [rows])
+  const batches = useMemo(() => createTileBatches(rows, true), [rows])
   const trail = useMemo(() => createTileTrail(batches), [batches])
 
   useTileTrail(trail, rows.length)
@@ -308,24 +302,17 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       const playerOffset = vec2(offsetX, fragmentCourse.z.sub(playerCourse.z))
       const distanceSquared = dot(playerOffset, playerOffset)
 
-      const fadeAmount = smoothstep(
-        scoped.uFadeFullRadiusSq,
-        scoped.uFadeMinRadiusSq,
-        distanceSquared,
-      )
-      const radialAlpha = mix(float(1), float(scoped.uFadeMinAlpha), fadeAmount)
-      const alpha = radialAlpha
-
-      // Per-instance tilt, suppressed for highlighted tiles. Rotation is about the tile's own
-      // centre, so the offset is rotated in place and added back.
+      const isGhost = attribute<'float'>('isGhost')
+      const instanceCenter = positionLocal.sub(positionGeometry)
+      const tileWorldZ = modelWorldMatrix.mul(vec4(instanceCenter, 1)).z
+      const ahead = uPlayerWorldPos.z.sub(tileWorldZ)
       const isHighlighted = step(float(0.5), tileIsHighlighted)
-      const tiltAmount = float(1).sub(radialAlpha).mul(float(1).sub(isHighlighted))
       const axisSeeds = vec2(hashFloat(tileSeed.mul(3.17)), hashFloat(tileSeed.mul(7.92)))
       const rawAxis = vec3(axisSeeds.x.sub(0.5), float(0), axisSeeds.y.sub(0.5))
       const tiltAxis = rawAxis.div(max(rawAxis.length(), AXIS_EPSILON))
 
       const signedNoise = hashFloat(tileSeed.mul(11)).mul(2).sub(1)
-      const tiltAngle = tiltAmount.mul(TILE_FADE_ROTATE_MAX).mul(signedNoise)
+      const { angle: tiltAngle, offsetY, opacity: alpha } = ghostTileMotion(ahead, isGhost, signedNoise)
       const tiltSin = sin(tiltAngle)
       const tiltCos = sin(tiltAngle.add(Math.PI / 2))
 
@@ -346,10 +333,9 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       // runs, which makes the difference between the two the instance centre — tile.vert's
       // `instanceCenter`, and what the tilt rotated about. It is the centre rather than a rotated
       // offset because the platform only ever translates its tiles.
-      const instanceCenter = positionLocal.sub(positionGeometry)
       const tiltedGeometry = rotateWithTrig(positionGeometry, tiltAxis, tiltSin, tiltCos).add(
         instanceCenter,
-      )
+      ).add(vec3(0, offsetY, 0))
       // --- fragment stage ---
       const backgroundNoisePosition = positionWorld
         .mul(0.06)

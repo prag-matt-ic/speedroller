@@ -243,8 +243,18 @@ test('native fixed sensors report player intersections only with KINEMATIC_FIXED
 
 // --- Approved Course draft C integration -------------------------------------------------------
 
-const raceRows = PLATFORM_DATA.modes.speedrun.rows
-const raceCounts = PLATFORM_DATA.modes.speedrun.totalCounts
+// Historical artwork assertions exercise its preserved PNG fixture, not the editable course.
+let raceRows
+let raceCounts
+before(async () => {
+  const { createBitmapParser } = loadTypeScript('scripts/platformCompiler.ts')
+  const sources = ['lobby', 'launch', 'sweeps', 'slalom', 'recovery', 'finale', 'sprint'].map((name, index) => ({
+    file: `race-${name}.png`, decorationFile: `decoration/race-${name}.png`, stage: index === 0 ? 1 : index === 6 ? 5 : 3,
+  }))
+  const historical = await createBitmapParser({ topology: 'cylinder', columns: 132 }).buildModeData(path.join(projectRoot, 'assets/platform/1.3.0'), sources)
+  raceRows = historical.rows
+  raceCounts = historical.totalCounts
+})
 const RACE_COLUMNS = 132
 const shiftedColumn = (column, row) => {
   const progress = Math.max(0, Math.min(1, (row - 36) / (1228 - 36)))
@@ -253,7 +263,6 @@ const shiftedColumn = (column, row) => {
 const RACE_NAMES = ['lobby', 'launch', 'sweeps', 'slalom', 'recovery', 'finale', 'sprint']
 
 test('race course: approved counts, section stages and physical markers are generated', () => {
-  assert.equal(PLATFORM_DATA.version, '1.3.0')
   assert.equal(raceRows.length, 1247)
   assert.equal(raceCounts.rows, 1247)
   assert.equal(raceCounts.rings, 60)

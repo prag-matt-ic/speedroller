@@ -1,4 +1,6 @@
 import { loadTypeScript } from './loadTypeScript.mjs'
+
+const { PLATFORM_VERSION } = loadTypeScript('resources/rowsData.ts')
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import Module, { createRequire } from 'node:module'
@@ -163,7 +165,7 @@ const createSavedRun = (overrides = {}) => ({
   date: new Date().toISOString(),
   attempt: 1,
   input_type: 'keyboard',
-  level_id: '1.3.0',
+  level_id: PLATFORM_VERSION,
   accidents: 0,
   rings: 0,
   ip: '127.0.0.1',
@@ -219,7 +221,7 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   assert.ok(state.attemptResult.timeSeconds > 0)
   assert.equal(state.attemptResult.username, 'racer123')
   assert.equal(submissionCalls.length, 1)
-  assert.equal(submissionCalls[0].level_id, '1.3.0')
+  assert.equal(submissionCalls[0].level_id, PLATFORM_VERSION)
 
   // Repeated finish contacts cannot submit twice.
   store.getState().finishSpeedRun(1)
@@ -230,8 +232,8 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   state = store.getState()
   assert.equal(state.speedRunStage, SpeedRunStage.END)
   assert.equal(state.saveStatus, 'saved')
-  assert.equal(state.completedSpeedRuns['1.3.0'].length, 1)
-  assert.equal(state.completedSpeedRuns['1.3.0'][0].id, 77)
+  assert.equal(state.completedSpeedRuns[PLATFORM_VERSION].length, 1)
+  assert.equal(state.completedSpeedRuns[PLATFORM_VERSION][0].id, 77)
 })
 
 test('race lifecycle: retry resets the attempt and a late save cannot change it', async () => {
@@ -266,8 +268,8 @@ test('race lifecycle: retry resets the attempt and a late save cannot change it'
   assert.equal(state.saveStatus, 'idle')
   assert.equal(state.attemptResult, null)
   // A late successful response still appends to history.
-  assert.equal(state.completedSpeedRuns['1.3.0'].length, 1)
-  assert.equal(state.completedSpeedRuns['1.3.0'][0].id, 88)
+  assert.equal(state.completedSpeedRuns[PLATFORM_VERSION].length, 1)
+  assert.equal(state.completedSpeedRuns[PLATFORM_VERSION][0].id, 88)
 })
 
 test('race lifecycle: missing name opens setup, cancel returns to lobby row 22', () => {

@@ -28,7 +28,7 @@ export function loadTypeScript(relativePath, overrides = {}, cache = new Map()) 
     return nativeRequire(specifier)
   }
   const { outputText } = ts.transpileModule(readFileSync(filename, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    compilerOptions: { esModuleInterop: true, module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: filename,
   })
   loaded._compile(outputText, filename)

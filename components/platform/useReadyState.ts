@@ -10,7 +10,6 @@ export type ReadyState = {
   speedRun: boolean
   floatingTiles: boolean
   colourPicker: boolean
-  decorations: boolean
   pillars: boolean
 }
 export type ReadyStateKey = keyof ReadyState
@@ -27,7 +26,6 @@ const INITIAL_READY_STATE: ReadyState = {
   speedRun: false,
   floatingTiles: false,
   colourPicker: false,
-  decorations: false,
   pillars: false,
 }
 

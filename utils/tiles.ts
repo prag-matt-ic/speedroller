@@ -81,5 +81,5 @@ export type RowData = {
   finishLinePosition?: [number, number, number] // Finish line position
   confettiPlacements?: ConfettiPlacement[] // Confetti platforms rendered on the platform
   colourPickerPlacement?: IndexedPlacement // Colour picker placement (single instance)
-  decorationColumns?: number[] // Detached, non-collidable scenery cells in this row
+  decorationColumns?: number[] // Non-collidable ghost overlay; excluded from playable floor
 }

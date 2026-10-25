@@ -6,9 +6,11 @@ export type TileBatch = {
   columns: number
   startRow: number
   positions: Vector3Tuple[]
+  solidPositions: Vector3Tuple[]
+  ghosts: Float32Array
   seeds: Float32Array
   highlights: Float32Array
-  /** Instance index for each cell in the batch's row band, or -1 when the cell has no tile. */
+  /** Instance index for each cell in the batch's row band, or -1 for empty/ghost cells. */
   cellToInstance: Int32Array
 }
 
@@ -18,12 +20,14 @@ const tileSeed = (row: number, column: number) => {
   return value - Math.floor(value)
 }
 
-export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
+export const createTileBatches = (rows: readonly RowData[], includeGhosts = false): TileBatch[] => {
   const batches: TileBatch[] = []
   const columns = rows[0]?.isRaised.length ?? COLUMNS
   for (let startRow = 0; startRow < rows.length; startRow += PLATFORM_BATCH_ROWS) {
     const positions: Vector3Tuple[] = []
     const seeds: number[] = []
+    const ghosts: number[] = []
+    const solidPositions: Vector3Tuple[] = []
     const highlights: number[] = []
     const cellToInstance = new Int32Array(PLATFORM_BATCH_ROWS * columns).fill(-1)
     const endRow = Math.min(startRow + PLATFORM_BATCH_ROWS, rows.length)
@@ -31,9 +35,15 @@ export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       const row = rows[rowIndex]
       for (let column = 0; column < columns; column++) {
-        if (row.isRaised[column] !== 1) continue
-        cellToInstance[(rowIndex - startRow) * columns + column] = positions.length
-        positions.push([colToX(column, columns), RAISED_Y, -(rowIndex - startRow) * TILE_SIZE])
+        const isGhost = row.decorationColumns?.includes(column) ?? false
+        if (isGhost ? !includeGhosts : row.isRaised[column] !== 1) continue
+        const position: Vector3Tuple = [colToX(column, columns), RAISED_Y, -(rowIndex - startRow) * TILE_SIZE]
+        if (!isGhost) {
+          cellToInstance[(rowIndex - startRow) * columns + column] = positions.length
+          solidPositions.push(position)
+        }
+        positions.push(position)
+        ghosts.push(Number(isGhost))
         seeds.push(tileSeed(rowIndex, column))
         highlights.push(row.isHighlighted?.[column] ?? 0)
       }
@@ -44,6 +54,8 @@ export const createTileBatches = (rows: readonly RowData[]): TileBatch[] => {
         columns,
         startRow,
         positions,
+        solidPositions,
+        ghosts: new Float32Array(ghosts),
         seeds: new Float32Array(seeds),
         highlights: new Float32Array(highlights),
         cellToInstance,

@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic'
 import { type FC } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-import { insertSpeedRun } from '@/app/actions'
+import { insertSpeedRun, skipEditorSpeedRun } from '@/app/actions'
 import { GameProvider } from '@/components/GameProvider'
 import { QueryProvider } from '@/components/QueryProvider'
 import { SoundProvider } from '@/components/SoundProvider'
@@ -20,6 +20,7 @@ export default async function Home(props: PageProps) {
   const isMobile = await isMobileServer()
   const searchParams = await props.searchParams
   const isDebug = searchParams?.debug === 'true'
+  const isEditorPreview = process.env.NODE_ENV === 'development' && searchParams?.editor === 'true'
 
   return (
     <>
@@ -27,7 +28,7 @@ export default async function Home(props: PageProps) {
         className={twJoin('w-full overflow-hidden select-none', isMobile ? 'h-dvh' : 'h-vh')}>
         <SoundProvider>
           <QueryProvider>
-            <GameProvider isMobile={isMobile} insertSpeedRun={insertSpeedRun}>
+            <GameProvider isMobile={isMobile} insertSpeedRun={isEditorPreview ? skipEditorSpeedRun : insertSpeedRun}>
               <LandingOverlay isMobile={isMobile} />
               <Main isMobile={isMobile} isDebug={isDebug} />
               {/* <PWAInstall isMobile={isMobile} /> */}
@@ -35,6 +36,7 @@ export default async function Home(props: PageProps) {
           </QueryProvider>
         </SoundProvider>
       </main>
+      {isEditorPreview && <div className="pointer-events-none fixed top-2 left-1/2 z-50 -translate-x-1/2 rounded bg-black/80 px-3 py-1 text-xs text-teal-200">Local course preview · times are not submitted</div>}
       <StructuredData />
     </>
   )
