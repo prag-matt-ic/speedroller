@@ -242,7 +242,7 @@ Each generated row owns its surface placements. The public course contains:
 - 60 ring markers, and
 - 682 detached decoration cells rendered from separate scenery masks.
 
-Info zones, collectibles, floating promotional headings, and confetti remain supported for the developer map, but are absent from the public course. Start and finish lines are always rendered from explicit start/finish marker data, never inferred from the current mode.
+Info zones, collectibles and floating promotional headings remain supported for the developer map but are absent from the public course. Confetti is authored from the course editor: one marker arms a row, the paired burst spans that row's solid floor, and rows wider than 16 tiles are rejected. Start and finish lines are always rendered from explicit start/finish marker data, never inferred from the current mode.
 
 ### Tile Shader 🧊
 
@@ -263,7 +263,9 @@ The course is drawn, not scripted. Each section is a PNG bitmap where one pixel 
 | `#ffff00` | physical FINISH marker |
 | `#808080` | floating heading (developer map only) |
 | `#00ffff` | highlighted tile |
-| `#ff0080` | confetti (developer map only) |
+| `#ff0080` | confetti row marker |
+
+The active layered race is authored in the course editor at `/dev/course-editor`; the PNG palette above still describes the developer map. In the layered course, confetti is a row marker: one marker arms a row, the paired burst spans its solid floor, and rows wider than 16 tiles are rejected.
 
 The approved `1.2.0` sources are copied into `assets/platform/1.2.0/` from `docs/race-course/bitmaps/1.2.0/`, with aligned black/white scenery masks in `assets/platform/1.2.0/decoration/`. Legacy PNGs stay in the copy for reference but are not part of the public source list; `test.png` remains available for the developer map.
 
@@ -272,13 +274,13 @@ The approved `1.2.0` sources are copied into `assets/platform/1.2.0/` from `docs
 - `resources/rowsData.ts` — the pre-computed row data, marker positions, scenery columns, and totals, so the client never parses a bitmap at runtime.
 - `public/maps/<version>/speedrun.svg` and `dev.svg` — the minimap, generated from the same rows, including distinct start and finish markers.
 
-The generator validates the public course against the approved counts before writing: 1,247 rows, 17,683 floor cells, 2,581 highlighted tiles, 60 supported rings, six holes, 682 separated decoration cells, one START, one FINISH, one colour picker, no more than three floor passages per row, and a fully connected floor. It also verifies that the complete nine-by-five start and finish footprints have floor support.
+The generator validates the public course against the approved counts before writing: 1,247 rows, 17,683 floor cells, 2,581 highlighted tiles, 60 supported rings, six holes, 682 separated decoration cells, one START, one FINISH, one colour picker, no more than three floor passages per row, and a fully connected floor. It also verifies that the complete nine-by-five start and finish footprints have floor support. Save & Build from the course editor uses the same generator and additionally checks that every confetti row has solid floor and a span of no more than 16 tiles.
 
-The generator reads rows from a JSON payload rather than inlining a 1,200-row object literal: TypeScript otherwise builds an unrepresentable union over the row literals. Laying out a course is still done in a pixel editor; bumping the version folder starts a fresh leaderboard.
+The generator reads rows from a JSON payload rather than inlining a 1,200-row object literal: TypeScript otherwise builds an unrepresentable union over the row literals. The developer map is still laid out in a pixel editor; the layered race is laid out in the course editor. Bumping the version folder starts a fresh leaderboard.
 
 ## Confetti ✨
 
-Confetti bursts punctuate the course, fired from paired emitters either side of the platform as each confetti row comes into view.
+Confetti bursts punctuate the course, fired from paired emitters either side of the platform as each confetti row comes into view. In the course editor, confetti is a row-level layer: one marker arms the row, the burst spans its solid floor, and erasing anywhere in the row removes it. Cylinder rows use the shortest arc around the seam, and rows wider than 16 tiles are rejected.
 
 ## Floating Background Tiles ✨
 

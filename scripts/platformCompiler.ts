@@ -1,7 +1,7 @@
-import { courseDocumentSchema, validateCourse, type CourseDocument } from '../utils/editor/courseDocument'
+import { courseDocumentSchema, MAX_CONFETTI_ROW_WIDTH, validateCourse, type CourseDocument } from '../utils/editor/courseDocument'
 import { createCoursePillars } from './utils/createCoursePillars'
 import { createCylinderPillars } from './utils/createCylinderPillars'
-import { type CourseSurface, FLAT_SURFACE, wrapColumn } from '../utils/platform/courseSurface'
+import { findSolidColumnArc, type CourseSurface, FLAT_SURFACE, wrapColumn } from '../utils/platform/courseSurface'
 /**
  * PLATFORM ROW DATA BUILDER
  *
@@ -834,23 +834,18 @@ function createConfettiPlacement({
 function getRaisedSpanForRow(
   raisedMask: (0 | 1)[],
 ): { centerX: number; width: number; depth: number } | null {
-  let minColumn = Infinity
-  let maxColumn = -Infinity
-
+  const raisedColumns: number[] = []
   raisedMask.forEach((value, columnIndex) => {
-    if (value !== 1) return
-    if (columnIndex < minColumn) minColumn = columnIndex
-    if (columnIndex > maxColumn) maxColumn = columnIndex
+    if (value === 1) raisedColumns.push(columnIndex)
   })
 
-  if (!Number.isFinite(minColumn) || !Number.isFinite(maxColumn)) return null
+  const arc = findSolidColumnArc(raisedColumns, COLUMNS, surface.topology)
+  if (!arc || arc.width > MAX_CONFETTI_ROW_WIDTH) return null
 
-  const centerColumn = (minColumn + maxColumn) * 0.5
-  const width = (maxColumn - minColumn + 1) * TILE_SIZE
-
+  const centerColumn = arc.start + (arc.width - 1) * 0.5
   return {
     centerX: colToX(centerColumn),
-    width,
+    width: arc.width * TILE_SIZE,
     depth: CONFETTI_ROW_DEPTH,
   }
 }
@@ -1126,7 +1121,8 @@ function buildLayeredModeData(document: CourseDocument): ModeRows {
       startLineColumns: row.objects.filter(object => object.type === 'start').map(object => object.column),
       finishLineColumns: row.objects.filter(object => object.type === 'finish').map(object => object.column),
       colourPickerColumns: row.objects.filter(object => object.type === 'paintShop').map(object => object.column),
-      infoZoneColumns: [], collectibleColumns: [], floatingHeadingColumns: [], confettiColumns: [],
+      infoZoneColumns: [], collectibleColumns: [], floatingHeadingColumns: [],
+      confettiColumns: row.confetti ?? [],
     }))
     rows.push(...buildRowDataFromBitmapRows({ rows: bitmapRows, stage: section.stage, globalIndexes: totalCounts }))
     for (const row of bitmapRows) {

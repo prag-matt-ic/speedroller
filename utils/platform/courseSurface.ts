@@ -7,8 +7,39 @@ export const CYLINDER_SURFACE: CourseSurface = { topology: 'cylinder', columns: 
 type Position = { x: number; y: number; z: number }
 type Rotation = { set: (x: number, y: number, z: number, w: number) => unknown }
 
+export type ColumnArc = { start: number; width: number }
+
 export const surfaceRadius = (surface: CourseSurface) => surface.columns * TILE_SIZE / (2 * Math.PI)
 export const wrapColumn = (column: number, columns: number) => ((column % columns) + columns) % columns
+
+/**
+ * Shortest arc covering every column. A cylinder wraps, so a footprint on both sides of the seam
+ * is a narrow arc rather than a span across the whole circumference.
+ */
+export function findSolidColumnArc(
+  columns: readonly number[],
+  columnCount: number,
+  topology: CourseSurface['topology'],
+): ColumnArc | null {
+  if (columns.length === 0) return null
+
+  const sorted = [...new Set(columns)].sort((a, b) => a - b)
+  if (topology === 'flat') {
+    return { start: sorted[0], width: sorted[sorted.length - 1] - sorted[0] + 1 }
+  }
+
+  let largestGap = -1
+  let start = sorted[0]
+  for (let index = 0; index < sorted.length; index++) {
+    const next = index === sorted.length - 1 ? sorted[0] + columnCount : sorted[index + 1]
+    const gap = next - sorted[index] - 1
+    if (gap <= largestGap) continue
+    largestGap = gap
+    start = next % columnCount
+  }
+
+  return { start, width: columnCount - largestGap }
+}
 
 /** Signed shortest distance in unrolled surface units; never wraps the forward axis. */
 export function surfaceDeltaX(from: number, to: number, surface: CourseSurface) {

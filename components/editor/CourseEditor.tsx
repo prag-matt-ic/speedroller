@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { twJoin } from 'tailwind-merge'
 import Button from '@/components/ui/Button'
 import {
-  COURSE_COLUMNS, OBJECT_TYPES, brushCells, courseDocumentSchema, courseRows,
-  editHistory, paintCells, redo, undo, validateCourse,
+  COURSE_COLUMNS, MAX_CONFETTI_ROW_WIDTH, OBJECT_TYPES, brushCells, canPlaceConfetti, confettiRowArc,
+  courseDocumentSchema, courseRows, editHistory, paintCells, redo, undo, validateCourse,
   type Cell, type CourseDocument, type History, type Layer, type ObjectKind, type Paint,
 } from '@/utils/editor/courseDocument'
 
@@ -15,10 +15,12 @@ type Draft = { document: CourseDocument; revision: string }
 type Tool = 'paint' | 'erase' | 'rectangle' | 'pan'
 type Gesture = { start: Cell; last: Cell; document: CourseDocument; paint: Paint; rectangle: boolean }
 const DRAFT_KEY = 'speedroller-course-editor-1.4.0'
-const LAYERS: Layer[] = ['floor', 'ghosts', 'highlights', 'objects']
+const LAYERS: Layer[] = ['floor', 'ghosts', 'highlights', 'confetti', 'objects']
 const OBJECT_COLOURS: Record<ObjectKind, string> = { ring: '#ff637c', start: '#b6a0ff', finish: '#ffe174', paintShop: '#ffad66' }
+const CONFETTI_COLOUR = '#ff0080'
+const CONFETTI_BAND = 'rgba(255, 0, 128, 0.18)'
 const CONTROL = 'rounded border border-white/20 bg-zinc-900 px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-teal-300'
-const LABELS: Record<Layer, string> = { floor: 'Floor', ghosts: 'Ghosts', highlights: 'Highlights', objects: 'Objects' }
+const LABELS: Record<Layer, string> = { floor: 'Floor', ghosts: 'Ghosts', highlights: 'Highlights', confetti: 'Confetti', objects: 'Objects' }
 
 export default function CourseEditor() {
   const [loaded, setLoaded] = useState<Loaded | null>(null)
@@ -26,7 +28,7 @@ export default function CourseEditor() {
   const [working, setWorking] = useState<CourseDocument | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [layer, setLayer] = useState<Layer>('ghosts')
-  const [visible, setVisible] = useState<Record<Layer, boolean>>({ floor: true, ghosts: true, highlights: true, objects: true })
+  const [visible, setVisible] = useState<Record<Layer, boolean>>({ floor: true, ghosts: true, highlights: true, confetti: true, objects: true })
   const [tool, setTool] = useState<Tool>('paint')
   const [size, setSize] = useState(1)
   const [object, setObject] = useState<ObjectKind>('ring')
@@ -42,6 +44,7 @@ export default function CourseEditor() {
   const positioned = useRef(false)
   const document = working ?? history?.present ?? null
   const rows = useMemo(() => document ? courseRows(document) : [], [document])
+  const confettiRowCount = useMemo(() => rows.filter(row => row.confetti?.length).length, [rows])
   const issues = useMemo(() => history ? validateCourse(history.present) : [], [history])
   const dirty = !!history && !!loaded && JSON.stringify(history.present) !== JSON.stringify(loaded.document)
   const sections = useMemo(() => {
@@ -148,6 +151,21 @@ export default function CourseEditor() {
           context.stroke()
         }
       }
+      if (visible.confetti && row.confetti?.length) {
+        const arc = confettiRowArc(row)
+        if (arc && arc.width <= MAX_CONFETTI_ROW_WIDTH) {
+          const firstWidth = Math.min(arc.width, COURSE_COLUMNS - arc.start)
+          const tailWidth = arc.width - firstWidth
+          context.fillStyle = CONFETTI_BAND
+          context.fillRect(arc.start * zoom - viewport.left, y, firstWidth * zoom, zoom)
+          if (tailWidth > 0) context.fillRect(-viewport.left, y, tailWidth * zoom, zoom)
+          context.fillStyle = CONFETTI_COLOUR
+          const tick = Math.max(2, zoom * 0.2)
+          context.fillRect(arc.start * zoom - viewport.left, y, tick, zoom)
+          const endColumn = tailWidth > 0 ? tailWidth : arc.start + arc.width
+          context.fillRect(endColumn * zoom - viewport.left - tick, y, tick, zoom)
+        }
+      }
       if (visible.objects) for (const object of row.objects) {
         context.fillStyle = OBJECT_COLOURS[object.type]
         context.beginPath()
@@ -168,8 +186,10 @@ export default function CourseEditor() {
     context.lineWidth = 2
     for (const issue of issues) context.strokeRect(issue.column * zoom - viewport.left, (rows.length - 1 - issue.row) * zoom - viewport.top, zoom, zoom)
     context.strokeStyle = '#ffffff'
+    const cursorRow = rows[cursor.row]
+    if (layer === 'confetti' && cursorRow && !canPlaceConfetti(cursorRow)) context.strokeStyle = '#fbbf24'
     context.strokeRect(cursor.column * zoom - viewport.left, (rows.length - 1 - cursor.row) * zoom - viewport.top, zoom, zoom)
-  }, [rows, viewport, visible, zoom, cursor, sections, issues])
+  }, [rows, viewport, visible, zoom, cursor, sections, issues, layer])
 
   const locate = (event: React.PointerEvent<HTMLCanvasElement>): Cell => {
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -240,10 +260,12 @@ export default function CourseEditor() {
           </div>)}<p className="mt-2 text-xs text-zinc-400">Ghosts mask out floor collision. Hiding a layer only changes this view.</p></div>
           <label className="block">Tool<select className={twJoin(CONTROL, 'mt-1 w-full')} value={tool} onChange={event => setTool(event.target.value as Tool)}>{(['paint', 'erase', 'rectangle', 'pan'] as const).map(tool => <option key={tool}>{tool}</option>)}</select></label>
           {layer === 'objects' ? <label className="block">Object<select className={twJoin(CONTROL, 'mt-1 w-full')} value={object} onChange={event => setObject(event.target.value as ObjectKind)}>{OBJECT_TYPES.map(kind => <option key={kind}>{kind}</option>)}</select></label> : <label className="block">Brush size<select className={twJoin(CONTROL, 'mt-1 w-full')} value={size} onChange={event => setSize(Number(event.target.value))}>{[1, 3, 5].map(size => <option value={size} key={size}>{size} × {size}</option>)}</select></label>}
+          {layer === 'confetti' && <p className="text-xs leading-relaxed text-zinc-400">{confettiRowCount} marked row{confettiRowCount === 1 ? '' : 's'} · two emitters each. One marker per row; the burst spans the solid floor. Rows wider than {MAX_CONFETTI_ROW_WIDTH} tiles are skipped.</p>}
           <label className="block">Section<select className={twJoin(CONTROL, 'mt-1 w-full')} defaultValue="" onChange={event => jumpTo(Number(event.target.value))}><option value="" disabled>Jump to section</option>{sections.map(section => <option key={section.id} value={section.start}>{section.id.replace('race-', '')}</option>)}</select></label>
           <label className="block">Zoom · {zoom}px / tile<input aria-label="Zoom" className="mt-2 w-full accent-teal-300" type="range" min="1" max="24" step="1" value={zoom} onChange={event => changeZoom(Number(event.target.value))} /></label>
         </fieldset>
         <p className="mt-6 text-xs leading-relaxed text-zinc-400">Drag to paint. Middle-drag or Pan to move. Focus the map: arrows move a cell; Space paints; Delete erases; Cmd/Ctrl Z undoes, Shift Z redoes.</p>
+        <p className="mt-2 text-xs leading-relaxed text-zinc-400">Confetti paints whole rows; erasing anywhere in a row removes its burst.</p>
         <output className="mt-3 block text-xs" aria-live="polite">Row {cursor.row} · Column {cursor.column}</output>
         {!!issues.length && <div className="mt-5"><h2 className="text-rose-300">{issues.length} issue{issues.length === 1 ? '' : 's'}</h2><ul className="mt-2 space-y-2">{issues.slice(0, 20).map((issue, index) => <li key={index}><button className="text-left text-xs text-rose-200 underline" onClick={() => jumpTo(issue.row, issue.column)}>{issue.message} · {issue.row}:{issue.column}</button></li>)}</ul></div>}
       </aside>

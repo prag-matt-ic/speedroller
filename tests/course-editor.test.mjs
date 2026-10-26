@@ -10,12 +10,14 @@ const editor = loadTypeScript('utils/editor/courseDocument.ts')
 const { createBitmapParser } = loadTypeScript('scripts/platformCompiler.ts')
 const { createTileBatches } = loadTypeScript('utils/platform/terrainBatches.ts')
 const { findSafeRespawnPosition } = loadTypeScript('utils/platform/playerRespawn.ts')
-const { rowToWorldZ } = loadTypeScript('utils/tiles.ts')
+const { findSolidColumnArc } = loadTypeScript('utils/platform/courseSurface.ts')
+const { colToX, ON_TILE_Y, rowToWorldZ, TILE_SIZE } = loadTypeScript('utils/tiles.ts')
 const { placeRowElementsOnTiles } = loadTypeScript('utils/platform/placeRowElementsOnTiles.ts')
 const { PLATFORM_DATA } = loadTypeScript('resources/rowsData.ts')
 const document = editor.courseDocumentSchema.parse(JSON.parse(readFileSync('assets/platform/1.4.0/race.course.json', 'utf8')))
 const compiler = createBitmapParser(document.surface)
 const paint = { layer: 'ghosts', erase: false, object: 'ring' }
+const confettiPaint = { ...paint, layer: 'confetti' }
 
 test('layered source round-trips and compiles to the current runtime with independent layers', () => {
   assert.deepEqual(editor.courseDocumentSchema.parse(JSON.parse(JSON.stringify(document))), document)
@@ -53,6 +55,70 @@ test('ghost overlay removes collision and trail membership, and erasing restores
   assert.deepEqual(restored, highlighted)
 })
 
+test('solid column arcs wrap the seam and stay linear on flat surfaces', () => {
+  assert.deepEqual(findSolidColumnArc([10, 11, 12], 132, 'cylinder'), { start: 10, width: 3 })
+  assert.deepEqual(findSolidColumnArc([130, 131, 0, 1], 132, 'cylinder'), { start: 130, width: 4 })
+  assert.deepEqual(findSolidColumnArc([2, 3], 33, 'flat'), { start: 2, width: 2 })
+  assert.equal(findSolidColumnArc([], 132, 'cylinder'), null)
+})
+
+test('confetti marks a whole row once, compiles to one burst and erases cleanly', () => {
+  const rowIndex = 50
+  const sourceRow = editor.courseRows(document)[rowIndex]
+  const marked = editor.paintCells(document, [{ row: rowIndex, column: 66 }], confettiPaint)
+  const markedRow = editor.courseRows(marked)[rowIndex]
+  assert.deepEqual(markedRow.confetti, [66])
+  assert.deepEqual(markedRow.floor, sourceRow.floor)
+  assert.deepEqual(markedRow.highlights, sourceRow.highlights)
+  assert.deepEqual(editor.paintCells(marked, [{ row: rowIndex, column: 67 }], confettiPaint), marked)
+
+  const rows = editor.courseRows(marked)
+  const solid = rows[rowIndex].floor.filter(column => !rows[rowIndex].ghosts.includes(column))
+  const arc = findSolidColumnArc(solid, 132, 'cylinder')
+  const compiled = compiler.buildLayeredModeData(marked)
+  assert.deepEqual(compiled.rows[rowIndex].confettiPlacements, [{
+    position: [colToX(arc.start + (arc.width - 1) / 2, 132), ON_TILE_Y, 0],
+    width: arc.width * TILE_SIZE,
+    depth: TILE_SIZE,
+    contentIndex: 0,
+  }])
+  assert.equal(compiled.totalCounts.confetti, 1)
+
+  const erased = editor.paintCells(marked, [{ row: rowIndex, column: 67 }], { ...confettiPaint, erase: true })
+  assert.deepEqual(editor.courseRows(erased), editor.courseRows(document))
+  assert.equal(compiler.buildLayeredModeData(erased).totalCounts.confetti, 0)
+
+  const history = editor.editHistory({ past: [], present: document, future: [] }, marked)
+  assert.equal(editor.undo(history).present, document)
+  assert.equal(editor.redo(editor.undo(history)).present, marked)
+})
+
+test('seam rows keep their narrow burst and over-wide rows cannot take confetti', () => {
+  const seamRow = 599
+  const seamMarked = editor.paintCells(document, [{ row: seamRow, column: 120 }], confettiPaint)
+  const seamSource = editor.courseRows(seamMarked)[seamRow]
+  assert.deepEqual(seamSource.confetti, [120])
+  const solid = seamSource.floor.filter(column => !seamSource.ghosts.includes(column))
+  assert.equal(Math.max(...solid) - Math.min(...solid) + 1, 132)
+  assert.deepEqual(findSolidColumnArc(solid, 132, 'cylinder'), { start: 119, width: 16 })
+  const compiled = compiler.buildLayeredModeData(seamMarked)
+  assert.deepEqual(compiled.rows[seamRow].confettiPlacements, [{
+    position: [colToX(126.5, 132), ON_TILE_Y, 0],
+    width: 16 * TILE_SIZE,
+    depth: TILE_SIZE,
+    contentIndex: 0,
+  }])
+
+  const wideRow = 569
+  const wide = editor.paintCells(document, [{ row: wideRow, column: 66 }], confettiPaint)
+  assert.equal(editor.courseRows(wide)[wideRow].confetti, undefined)
+
+  const forged = structuredClone(document)
+  editor.courseRows(forged)[wideRow].confetti = [66]
+  assert.ok(editor.validateCourse(forged).some(issue => issue.message.includes(`at most ${editor.MAX_CONFETTI_ROW_WIDTH}`)))
+  assert.equal(compiler.buildLayeredModeData(forged).rows[wideRow].confettiPlacements, undefined)
+})
+
 test('brushes wrap the cylinder, preserve other layers and undo/redo one gesture', () => {
   const cells = editor.brushCells({ row: 50, column: 0 }, { row: 50, column: 0 }, 3)
   const changed = editor.paintCells(document, cells, paint)
@@ -87,6 +153,26 @@ test('validation rejects unsupported markers, disconnected floor and changed dim
   assert.equal(editor.courseDocumentSchema.safeParse({ ...document, sections: document.sections.slice(1) }).success, false)
 })
 
+test('confetti needs solid floor, at most one marker and a row inside the width limit', () => {
+  const rowIndex = 50
+  const sourceRow = editor.courseRows(document)[rowIndex]
+  const ghosted = editor.paintCells(document, sourceRow.floor.map(column => ({ row: rowIndex, column })), paint)
+  const blocked = editor.paintCells(ghosted, [{ row: rowIndex, column: 66 }], confettiPaint)
+  assert.equal(editor.courseRows(blocked)[rowIndex].confetti, undefined)
+
+  const marked = editor.paintCells(document, [{ row: rowIndex, column: 66 }], confettiPaint)
+  const markedGhosted = editor.paintCells(marked, sourceRow.floor.map(column => ({ row: rowIndex, column })), paint)
+  assert.ok(editor.validateCourse(markedGhosted).some(issue => issue.message.includes('Confetti row needs solid floor')))
+
+  const twoMarkers = structuredClone(document)
+  editor.courseRows(twoMarkers)[rowIndex].confetti = [1, 2]
+  assert.equal(editor.courseDocumentSchema.safeParse(twoMarkers).success, false)
+
+  const outOfRange = structuredClone(document)
+  editor.courseRows(outOfRange)[rowIndex].confetti = [132]
+  assert.equal(editor.courseDocumentSchema.safeParse(outOfRange).success, false)
+})
+
 test('save rejects stale revisions and serializes concurrent updates without losing the winner', async () => {
   let source = JSON.stringify(document)
   let writes = 0
@@ -96,7 +182,7 @@ test('save rejects stale revisions and serializes concurrent updates without los
     './replaceFiles': { replaceFiles: async outputs => { writes++; source = outputs.at(-1).content } },
   })
   const loaded = await files.readCourse()
-  const changed = editor.paintCells(document, [{ row: 50, column: 0 }], paint)
+  const changed = editor.paintCells(document, [{ row: 50, column: 66 }], confettiPaint)
   const results = await Promise.allSettled([files.saveCourse(changed, loaded.revision), files.saveCourse(document, loaded.revision)])
   assert.equal(results[0].status, 'fulfilled')
   assert.equal(results[1].status, 'rejected')

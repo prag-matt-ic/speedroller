@@ -1,5 +1,11 @@
 import { z } from 'zod'
 import { COLOUR_PICKER_COLUMN_OFFSETS } from '../platform/homeSection'
+import {
+  CYLINDER_SURFACE,
+  findSolidColumnArc,
+  type ColumnArc,
+  type CourseSurface,
+} from '../platform/courseSurface'
 
 export const COURSE_SECTIONS = [
   ['race-lobby', 32, 1], ['race-launch', 180, 3], ['race-sweeps', 200, 3],
@@ -8,8 +14,9 @@ export const COURSE_SECTIONS = [
 ] as const
 export const COURSE_COLUMNS = 132
 export const OBJECT_TYPES = ['ring', 'start', 'finish', 'paintShop'] as const
+export const MAX_CONFETTI_ROW_WIDTH = 16
 export type ObjectKind = typeof OBJECT_TYPES[number]
-export type Layer = 'floor' | 'ghosts' | 'highlights' | 'objects'
+export type Layer = 'floor' | 'ghosts' | 'highlights' | 'objects' | 'confetti'
 export type Cell = { row: number; column: number }
 const column = z.number().int().min(0).max(COURSE_COLUMNS - 1)
 const columns = z.array(column).max(COURSE_COLUMNS).refine(values => new Set(values).size === values.length, 'Duplicate columns')
@@ -20,6 +27,7 @@ export const courseDocumentSchema = z.object({
     id: z.string(), stage: z.number().int(),
     rows: z.array(z.object({
       floor: columns, ghosts: columns, highlights: columns,
+      confetti: z.array(column).max(1, 'Only one confetti marker per row').optional(),
       objects: z.array(z.object({ column, type: z.enum(OBJECT_TYPES) }).strict()).max(COURSE_COLUMNS)
         .refine(values => new Set(values.map(value => value.column)).size === values.length, 'Only one object per cell'),
     }).strict()).max(260),
@@ -38,6 +46,24 @@ export type CourseIssue = Cell & { message: string }
 export const courseRows = (document: CourseDocument): CourseRow[] => document.sections.flatMap(section => section.rows)
 export const wrapColumn = (column: number) => ((column % COURSE_COLUMNS) + COURSE_COLUMNS) % COURSE_COLUMNS
 export const isSolid = (row: CourseRow | undefined, column: number): boolean => !!row && row.floor.includes(wrapColumn(column)) && !row.ghosts.includes(wrapColumn(column))
+
+const solidColumns = (row: CourseRow): number[] =>
+  row.floor.filter(column => !row.ghosts.includes(column))
+
+/** The burst span the compiler will use for a confetti row. */
+export const confettiRowArc = (
+  row: CourseRow,
+  surface: CourseSurface = CYLINDER_SURFACE,
+): ColumnArc | null =>
+  findSolidColumnArc(solidColumns(row), surface.columns, surface.topology)
+
+export const canPlaceConfetti = (
+  row: CourseRow,
+  surface: CourseSurface = CYLINDER_SURFACE,
+): boolean => {
+  const arc = confettiRowArc(row, surface)
+  return !!arc && arc.width <= MAX_CONFETTI_ROW_WIDTH
+}
 
 export function validateCourse(document: CourseDocument): CourseIssue[] {
   const rows = courseRows(document)
@@ -64,6 +90,13 @@ export function validateCourse(document: CourseDocument): CourseIssue[] {
         }
       }
     })
+    if (row.confetti?.length) {
+      const arc = confettiRowArc(row, document.surface)
+      if (!arc) report(rowIndex, row.confetti[0], 'Confetti row needs solid floor')
+      else if (arc.width > MAX_CONFETTI_ROW_WIDTH) {
+        report(rowIndex, row.confetti[0], `Confetti rows must be at most ${MAX_CONFETTI_ROW_WIDTH} tiles wide`)
+      }
+    }
   })
   for (const kind of ['start', 'finish', 'paintShop'] as const) {
     if (markers.get(kind)?.length !== 1) report(0, 66, `Place exactly one ${kind}`)
@@ -102,6 +135,17 @@ export function validateCourse(document: CourseDocument): CourseIssue[] {
 }
 
 export type Paint = { layer: Layer; erase: boolean; object: ObjectKind }
+
+const withConfettiMarker = (row: CourseRow, column: number): CourseRow =>
+  row.confetti?.length ? row : { ...row, confetti: [column] }
+
+const withoutConfettiMarker = (row: CourseRow): CourseRow => {
+  if (!row.confetti) return row
+  const nextRow = { ...row }
+  delete nextRow.confetti
+  return nextRow
+}
+
 export function paintCells(document: CourseDocument, cells: readonly Cell[], paint: Paint): CourseDocument {
   const targets = new Map<number, Set<number>>()
   for (const cell of cells) {
@@ -109,11 +153,23 @@ export function paintCells(document: CourseDocument, cells: readonly Cell[], pai
     columns.add(wrapColumn(cell.column))
     targets.set(cell.row, columns)
   }
+  // Confetti is a row-level burst, so only the marker's row matters; the last cell wins.
+  const confettiMarkers = new Map<number, number>()
+  if (paint.layer === 'confetti') {
+    for (const cell of cells) confettiMarkers.set(cell.row, wrapColumn(cell.column))
+  }
   const singleton = paint.layer === 'objects' && !paint.erase && paint.object !== 'ring'
   const last = cells.at(-1)
   let globalRow = 0
   return { ...document, sections: document.sections.map(section => ({ ...section, rows: section.rows.map(row => {
     const rowIndex = globalRow++
+    if (paint.layer === 'confetti') {
+      const markerColumn = confettiMarkers.get(rowIndex)
+      if (markerColumn == null) return row
+      if (paint.erase) return withoutConfettiMarker(row)
+      if (!canPlaceConfetti(row, document.surface)) return row
+      return withConfettiMarker(row, markerColumn)
+    }
     const columns = targets.get(rowIndex)
     if (paint.layer === 'objects') {
       let objects = row.objects.filter(object => !(singleton && object.type === paint.object))
