@@ -7,11 +7,10 @@ import { Transition } from 'react-transition-group'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore } from '@/components/GameProvider'
-import LobbyGuidance from '@/components/ui/LobbyGuidance'
 import SpeedUI from '@/components/ui/SpeedUI'
 import MovementControls from '@/components/ui/controls/Controls'
 import { Dashboard } from '@/components/ui/dashboard/Dashboard'
-import MiniMap from '@/components/ui/miniMap/MiniMap'
+// import MiniMap from '@/components/ui/miniMap/MiniMap'
 import { Overlay, SpeedRunStage } from '@/stores/types'
 
 import { SubscribeOverlay } from './SubscribeOverlay'
@@ -58,7 +57,6 @@ const UI: FC<Props> = ({ isMobile }) => {
             !isRunning && 'col-span-2',
             overlay === Overlay.LANDING ? 'opacity-0' : 'opacity-100',
           )}>
-          {isLobby && <LobbyGuidance />}
           {isRunning && <SpeedRunControls />}
         </section>
 
