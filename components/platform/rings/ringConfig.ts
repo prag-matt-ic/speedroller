@@ -8,5 +8,5 @@ export const RING_MAJOR_RADIUS = 0.32
 export const RING_TUBE_RADIUS = 0.06
 export const RING_WORLD_Y = ON_TILE_Y + RING_MAJOR_RADIUS * 2
 
-export const RING_COLOR = new Color('#ffe066')
-export const RING_EMISSIVE = new Color('#ffd43b')
+export const RING_COLOR = new Color('#FCB11C')
+export const RING_EMISSIVE = new Color('#FFCC02')

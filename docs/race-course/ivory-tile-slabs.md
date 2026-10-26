@@ -14,7 +14,7 @@ The local top stays at `TILE_THICKNESS / 2` around the existing pivot. Visual de
 
 The existing colour atlas, stable seed selection, brightness variation and highlighted markings remain. Only ivory tops receive micro-relief. Tangent normals map into the top's +X/-Z UV basis, then rotate with the tile before conversion to view space. Bevels and graphite use geometric normals. The touched-tile afterglow adds a small palette lift (`0.10`) after the contact shadow, plus a faint top-only emissive halo (`0.06`); it refreshes while the ball stays on a tile and fades over 0.4 s once it leaves. It is deliberately subordinate to the player light. Emissive MRT, contact shadow, transparency, tilt and background-matched fog remain connected.
 
-Low omits the normal-map sample. Medium/High/Ultra sample the same normal atlas; geometry and collider dimensions are identical at every quality. Normal data is loaded with NoColorSpace, mipmaps and the same padded cell coordinates as colour data.
+Low omits the normal-map sample. Medium/High sample the same normal atlas; geometry and collider dimensions are identical at every quality. Normal data is loaded with NoColorSpace, mipmaps and the same padded cell coordinates as colour data.
 
 ## Asset authoring
 
@@ -35,7 +35,7 @@ Physical mobile GPU timing and final visual approval remain outstanding. This pa
 
 ### Browser comparison, 25 October 2026
 
-Actual game scene at recovery distance 600, 1280×800 viewport, DPR cap 1.5, Ultra quality, idle sphere. Temporary `useFrame` instrumentation discarded 180 frames and sampled 360, then was removed. Baseline used the previous box/basic-material implementation with the current shared course and distance constants. Two runs per variant:
+Actual game scene at recovery distance 600, 1280×800 viewport, DPR cap 1.5, Ultra quality (tier since removed), idle sphere. Temporary `useFrame` instrumentation discarded 180 frames and sampled 360, then was removed. Baseline used the previous box/basic-material implementation with the current shared course and distance constants. Two runs per variant:
 
 | Variant | Draw calls | Visible triangles | Median frame spacing | p05–p95, run 1 / run 2 |
 | --- | ---: | ---: | ---: | --- |

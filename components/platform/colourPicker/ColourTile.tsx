@@ -30,9 +30,11 @@ import { type ColourTileUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
 import { getColourFromPalette } from '@/resources/tsl/playerPalette'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
+import { TILE_JOINT_WIDTH, TILE_BEVEL_WIDTH } from '@/utils/platform/tileSlabGeometry'
 import { COLOUR_TILE_SIZE } from '@/utils/platform/homeSection'
 
 // Carried over from colourTile.frag.
+const COLOUR_TILE_VISIBLE_SIZE = COLOUR_TILE_SIZE - TILE_JOINT_WIDTH - TILE_BEVEL_WIDTH * 2
 const BORDER_THICKNESS = 0.04
 const INNER_EDGE = 0.5 - BORDER_THICKNESS
 const NOISE_SCALE = 0.6
@@ -68,14 +70,11 @@ type ColourTileProps = {
 const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
   const surface = useCourseSurface()
   const [x, y, z] = option.position
-  const geometry = useMemo(() => createCoursePlaneGeometry(COLOUR_TILE_SIZE, COLOUR_TILE_SIZE, x, y, surface), [x, y, surface])
+  const geometry = useMemo(() => createCoursePlaneGeometry(COLOUR_TILE_VISIBLE_SIZE, COLOUR_TILE_VISIBLE_SIZE, x, y, surface, 1), [x, y, surface])
   useEffect(() => () => geometry.dispose(), [geometry])
-  const collision = useMemo(() => {
-    const columns = Math.ceil(COLOUR_TILE_SIZE)
-    const width = COLOUR_TILE_SIZE / columns
-    const cells = Array.from({ length: columns }, (_, column): Vector3Tuple => [x + (column + 0.5) * width - COLOUR_TILE_SIZE / 2, y, 0])
-    return createSurfaceColliders(cells, surface, width, PLAYER_RADIUS * 4, COLOUR_TILE_SIZE)
-  }, [x, y, surface])
+  const collision = useMemo(() => createSurfaceColliders(
+    [[x, y, 0]], surface, COLOUR_TILE_SIZE, PLAYER_RADIUS * 4, COLOUR_TILE_SIZE,
+  ), [x, y, surface])
   const useNoise = usePerformanceStore((s) => s.sceneConfig.colourTile.useNoise)
   const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
 

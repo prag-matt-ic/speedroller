@@ -41,6 +41,7 @@ import {
 import { PLAYER_RADIUS } from '@/utils/player'
 import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { surfaceFrame, worldToCourse } from '@/utils/platform/courseSurface'
+import { updateColourTileContacts } from '@/utils/platform/colourTileContacts'
 import { EPSILON } from '@/utils/tiles'
 
 // https://rapier.rs/docs/user_guides/javascript/rigid_bodies
@@ -102,6 +103,7 @@ const LocalPlayer: FC = () => {
   const { controllerRef } = usePlayerController()
 
   // Refs for physics bodies and meshes
+  const colourTileContacts = useRef<number[]>([])
   const bodyRef = useRef<RapierRigidBody>(null)
   const ballColliderRef = useRef<RapierCollider | null>(null)
   const sphereMeshRef = useRef<Mesh>(null)
@@ -264,6 +266,13 @@ const LocalPlayer: FC = () => {
     publishSpeedMirror(!canMove)
   })
 
+  const updateColourTileContact = (paletteIndex: number, entering: boolean) => {
+    const previous = colourTileContacts.current.at(-1) ?? null
+    colourTileContacts.current = updateColourTileContacts(colourTileContacts.current, paletteIndex, entering)
+    const current = colourTileContacts.current.at(-1) ?? null
+    if (current !== previous) setConfirmingPaletteIndex(current)
+  }
+
   const onIntersectionEnter: IntersectionEnterHandler = (event) => {
     const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
     if (!otherUserData) return
@@ -274,7 +283,7 @@ const LocalPlayer: FC = () => {
     }
 
     if (otherUserData.type === 'colour-tile') {
-      setConfirmingPaletteIndex(otherUserData.paletteIndex)
+      updateColourTileContact(otherUserData.paletteIndex, true)
       return
     }
 
@@ -294,7 +303,7 @@ const LocalPlayer: FC = () => {
     }
 
     if (otherUserData.type === 'colour-tile') {
-      setConfirmingPaletteIndex(null)
+      updateColourTileContact(otherUserData.paletteIndex, false)
       return
     }
   }
@@ -303,6 +312,7 @@ const LocalPlayer: FC = () => {
 
   useEffect(() => {
     if (!isPlatformReady || !isRespawning || !bodyRef.current || !spawnPosition) return
+    colourTileContacts.current = []
     nextPosition.current.x = spawnPosition[0]
     nextPosition.current.y = spawnPosition[1]
     nextPosition.current.z = spawnPosition[2]

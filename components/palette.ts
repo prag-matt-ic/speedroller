@@ -1,6 +1,5 @@
-// Typescript colour helpers aligned with GLSL palettes
 import { CSS_LEVEL4, css, oklch, srgb, rgb as toLinearRgb } from '@thi.ng/color'
-import { type Vector3Tuple } from 'three'
+import { Color, SRGBColorSpace, type Vector3Tuple } from 'three'
 
 type PaletteGradientMode = 'rgb' | 'oklch'
 
@@ -15,53 +14,24 @@ export type PaletteGradientOptions = PaletteSampleOptions & {
   angle?: number
 }
 
-type PaletteParams = {
-  a: Vector3Tuple
-  b: Vector3Tuple
-  c: Vector3Tuple
-  d: Vector3Tuple
-}
-
-const TAU = Math.PI * 2
-
-// Keep these parameters in sync with resources/glsl/playerPalette.glsl
-
-const PLAYER_PALETTE_PARAMS: PaletteParams = {
-  a: [0.47, 0.5, 0.5],
-  b: [0.5, 0.5, 0.5],
-  c: [1.0, 1.0, 0.49],
-  d: [0.75, 0.91, 0.3],
-}
-
-const PLAYER_PALETTE_PARAMS_ALT_1: PaletteParams = {
-  a: [1.0, 0.5, 0.5],
-  b: [0.5, 0.5, 0.5],
-  c: [0.568, 1.0, 0.667],
-  d: [0.8, 1.0, 0.333],
-}
-
-const PLAYER_PALETTE_PARAMS_ALT_2: PaletteParams = {
-  a: [0.2, 0.47, 0.542],
-  b: [0.731, 0.486, 0.4],
-  c: [0.619, 0.864, 0.95],
-  d: [0.38, 0.29, 0.28],
-}
-
-const PLAYER_PALETTE_PARAMS_ALT_3: PaletteParams = {
-  a: [0.5, 0.5, 0.5],
-  b: [0.5, 0.5, 0.5],
-  c: [1.0, 0.7, 0.4],
-  d: [0.0, 0.15, 0.2],
-}
-
-const PALETTES: readonly PaletteParams[] = [
-  PLAYER_PALETTE_PARAMS,
-  PLAYER_PALETTE_PARAMS_ALT_1,
-  PLAYER_PALETTE_PARAMS_ALT_2,
-  PLAYER_PALETTE_PARAMS_ALT_3,
+export const PLAYER_BASE_COLOURS = [
+  '#D6BB06', '#4BD606', '#0BCFAE', '#0B8ECF',
+  '#1B44BF', '#9116E9', '#E212D5', '#DE171B',
 ] as const
 
-export const PALETTE_COUNT = PALETTES.length
+type PaletteStops = readonly [Vector3Tuple, Vector3Tuple, Vector3Tuple]
+
+export function createPaletteStops(baseColour: string): PaletteStops {
+  const base = new Color(baseColour)
+  const { h, s, l } = base.getHSL({ h: 0, s: 0, l: 0 }, SRGBColorSpace)
+  const shadow = new Color().setHSL(h, Math.min(1, s * 1.1), l * 0.55, SRGBColorSpace)
+  const highlight = new Color().setHSL(h, s * 0.75, l + (1 - l) * 0.35, SRGBColorSpace)
+  return [[shadow.r, shadow.g, shadow.b], [base.r, base.g, base.b], [highlight.r, highlight.g, highlight.b]]
+}
+
+// Linear RGB stops are shared by CPU sampling and GPU uniforms.
+export const PLAYER_PALETTE_STOPS = PLAYER_BASE_COLOURS.map(createPaletteStops)
+export const PALETTE_COUNT = PLAYER_BASE_COLOURS.length
 export const GRADIENT_STEPS = 8
 
 export const PLAYER_PALETTE_INDEX = 0
@@ -76,17 +46,23 @@ const clampPaletteIndex = (index: number): number => {
 export const clampPaletteIndexSafe = clampPaletteIndex
 const clampT = (t: number): number => clampUnit(Number.isFinite(t) ? t : 0)
 
-const cosinePalette = (t: number, { a, b, c, d }: PaletteParams): Vector3Tuple => {
+export function samplePaletteLinearColour(paletteIndex: number, t: number): Vector3Tuple {
+  const stops = PLAYER_PALETTE_STOPS[clampPaletteIndex(paletteIndex)]
+  const position = clampT(t) * 2
+  const segment = Math.min(1, Math.floor(position))
+  const amount = position - segment
+  const start = stops[segment]
+  const end = stops[segment + 1]
   return [
-    a[0] + b[0] * Math.cos(TAU * (c[0] * t + d[0])),
-    a[1] + b[1] * Math.cos(TAU * (c[1] * t + d[1])),
-    a[2] + b[2] * Math.cos(TAU * (c[2] * t + d[2])),
+    start[0] + (end[0] - start[0]) * amount,
+    start[1] + (end[1] - start[1]) * amount,
+    start[2] + (end[2] - start[2]) * amount,
   ]
 }
 
 export function samplePaletteColour(paletteIndex: number, t: number): Vector3Tuple {
-  const params = PALETTES[clampPaletteIndex(paletteIndex)]
-  return cosinePalette(clampT(t), params)
+  const colour = new Color(...samplePaletteLinearColour(paletteIndex, t)).convertLinearToSRGB()
+  return [colour.r, colour.g, colour.b]
 }
 
 const toSrgbColor = (rgb: Vector3Tuple) =>
@@ -171,7 +147,7 @@ export const createPaletteCustomProperties = (
 }
 
 export const getPalettePreviewStops = (): readonly string[] =>
-  PALETTES.map((_, index) =>
+  PLAYER_BASE_COLOURS.map((_, index) =>
     createPaletteStopString(index, {
       steps: GRADIENT_STEPS,
       mode: 'rgb',

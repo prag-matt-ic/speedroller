@@ -6,11 +6,17 @@ import { DEFAULT_MAX_DPR, MIN_AUTO_DPR, stepMaxDprDown } from '@/utils/dpr'
 export type RapierSimFPS = 0 | 30 | 60 | 120 // 0 = 'vary'
 
 export enum SceneQuality {
-  ULTRA = 'Ultra',
   HIGH = 'High',
   MEDIUM = 'Medium',
   LOW = 'Low',
 }
+
+/** Lowest to highest; the order the automatic quality ladder walks. */
+export const SCENE_QUALITY_ORDER = [
+  SceneQuality.LOW,
+  SceneQuality.MEDIUM,
+  SceneQuality.HIGH,
+] as const satisfies readonly SceneQuality[]
 
 export type SceneConfig = {
   isDistanceFadeEnabled: boolean
@@ -62,20 +68,6 @@ const logPerformanceDebug = (...payload: unknown[]) => {
 
 // Floating scenery is temporarily disabled while the floor material is being refined.
 const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
-  [SceneQuality.ULTRA]: {
-    isDistanceFadeEnabled: true,
-    marble: { segments: 80, isFlat: false, enableVeins: true },
-    ring: { radialSegments: 24, tubularSegments: 48 },
-    gem: { particleCount: 180 },
-    floatingTiles: { instanceCount: 0 },
-    platformTiles: { addDetailNoise: true },
-    colourTile: { useNoise: true },
-    floatingHeading: { shouldRotate: true, useNoiseFade: true },
-    infoZoneSphere: { segments: 64, enableVeins: true },
-    confetti: { particleCount: 240 },
-    postProcessing: { blurSamples: 24 },
-    particles: { fps: 0 },
-  },
   [SceneQuality.HIGH]: {
     isDistanceFadeEnabled: true,
     marble: { segments: 64, isFlat: false, enableVeins: true },
@@ -204,10 +196,12 @@ const createPerformanceStore = (initialState: Pick<PerformanceState, 'isMobile'>
         return
       }
 
-      const order = Object.values(SceneQuality).reverse() // [Low, Medium, High]
-      const currentIndex = order.indexOf(sceneQuality)
-      const nextIndex = Math.min(order.length - 1, Math.max(0, currentIndex + (up ? 1 : -1)))
-      const nextMode = order[nextIndex]
+      const currentIndex = SCENE_QUALITY_ORDER.indexOf(sceneQuality)
+      const nextIndex = Math.min(
+        SCENE_QUALITY_ORDER.length - 1,
+        Math.max(0, currentIndex + (up ? 1 : -1)),
+      )
+      const nextMode = SCENE_QUALITY_ORDER[nextIndex]
 
       if (nextMode === sceneQuality) {
         const shouldDropDpr = !up && sceneQuality === SceneQuality.LOW && currentDpr > MIN_AUTO_DPR

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { COLOUR_PICKER_COLUMN_OFFSETS } from '../platform/homeSection'
 
 export const COURSE_SECTIONS = [
   ['race-lobby', 32, 1], ['race-launch', 180, 3], ['race-sweeps', 200, 3],
@@ -49,12 +50,13 @@ export function validateCourse(document: CourseDocument): CourseIssue[] {
       cells.push({ row: rowIndex, column: object.column })
       markers.set(object.type, cells)
       if (!isSolid(row, object.column)) report(rowIndex, object.column, `${object.type} needs solid floor`)
-      const halfWidth = object.type === 'paintShop' ? 5 : 4
+      const firstColumn = object.type === 'paintShop' ? COLOUR_PICKER_COLUMN_OFFSETS[0] : -4
+      const lastColumn = object.type === 'paintShop' ? COLOUR_PICKER_COLUMN_OFFSETS.at(-1)! : 4
       const firstRow = object.type === 'paintShop' ? 0 : -2
-      const lastRow = object.type === 'paintShop' ? 1 : 2
+      const lastRow = object.type === 'paintShop' ? 0 : 2
       if (object.type === 'ring') return
       for (let offsetRow = firstRow; offsetRow <= lastRow; offsetRow++) {
-        for (let offsetColumn = -halfWidth; offsetColumn <= halfWidth; offsetColumn++) {
+        for (let offsetColumn = firstColumn; offsetColumn <= lastColumn; offsetColumn++) {
           if (!isSolid(rows[rowIndex + offsetRow], object.column + offsetColumn)) {
             report(rowIndex, object.column, `${object.type} footprint needs solid floor`)
             return

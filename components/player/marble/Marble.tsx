@@ -134,7 +134,7 @@ export const Marble: FC<MarbleProps> = ({ ref }) => {
       const { uConfirmingPaletteIndex, uConfirmingProgress } = scoped
 
       // applyConfirmingReveal: the GLSL early-returns when there is no confirming palette. The
-      // confirming lookup is a cosine palette (3 cos + 4 uniform loads) per fragment, so it moves
+      // confirming lookup is only needed during a colour change, so it moves
       // behind a uniform branch: `hasConfirmingPalette` derives from uniforms, so the branch has no
       // per-fragment divergence and skips the whole reveal subtree the rest of the time.
       const hasConfirmingPalette = uConfirmingPaletteIndex

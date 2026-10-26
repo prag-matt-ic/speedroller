@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
+import { COLOUR_PICKER_COLUMN_OFFSETS, colourPickerRowIndex } from '../../utils/platform/homeSection'
 import { type IndexedPlacement, type RowData, TILE_SIZE, clamp } from '../../utils/tiles'
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
@@ -9,7 +10,6 @@ const POINT_OF_INTEREST_COLOUR = '#37D6C7'
 const INFO_COLLECTIBLE_AREA_SIZE = { width: 5, height: 5 }
 const START_LINE_AREA_SIZE = { width: 9, height: 5 }
 const FINISH_LINE_AREA_SIZE = { width: 9, height: 5 }
-const COLOUR_PICKER_AREA_SIZE = { width: 11, height: 2 }
 
 type MiniMapPalette = {
   raised: string
@@ -311,21 +311,17 @@ const collectColourPickerCells = (rows: RowData[], columnCount: number): Indicat
     const placement = row.colourPickerPlacement
     if (!placement) return
     const [x, , relativeZ, contentIndex] = placement
-    const targetRow = getRowIndexFromRelativeZ(rowIndex, relativeZ, rowCount)
+    const targetRow = colourPickerRowIndex(rowIndex, relativeZ)
     const columnIndex = getColumnIndexFromX(x, columnCount)
+    if (targetRow < 0 || targetRow >= rowCount || columnIndex == null) return
 
-    if (targetRow == null || columnIndex == null) return
-
-    pushIndicatorAreaCells({
-      centerRow: targetRow,
-      centerColumn: columnIndex,
-      contentIndex,
-      columnCount,
-      rowCount,
-      areaSize: COLOUR_PICKER_AREA_SIZE,
-      seen,
-      cells,
-    })
+    for (const offset of COLOUR_PICKER_COLUMN_OFFSETS) {
+      const column = (columnIndex + offset + columnCount) % columnCount
+      const key = `${targetRow}:${column}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      cells.push({ rowIndex: targetRow, columnIndex: column, contentIndex })
+    }
   })
 
   return cells

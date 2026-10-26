@@ -12,7 +12,7 @@ import {
 import { type FC } from 'react'
 
 import { useGameStore } from '@/components/GameProvider'
-import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
+import { SCENE_QUALITY_ORDER, usePerformanceStore } from '@/components/PerformanceProvider'
 import { useSoundStore } from '@/components/SoundProvider'
 import { ButtonGroup } from '@/components/ui/ButtonGroup'
 import Panel from '@/components/ui/panel/Panel'
@@ -89,12 +89,10 @@ export const SettingsPanel: FC<Props> = ({ className }) => {
           <ButtonGroup
             value={sceneQuality}
             onChange={setSceneQuality}
-            items={Object.values(SceneQuality)
-              .reverse()
-              .map((quality) => ({
-                label: quality,
-                value: quality,
-              }))}
+            items={SCENE_QUALITY_ORDER.map((quality) => ({
+              label: quality,
+              value: quality,
+            }))}
           />
         </div>
       </div>

@@ -5,7 +5,11 @@ import { type ChangeEvent, type FC, type ReactNode, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { useGameStore } from '@/components/GameProvider'
-import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
+import {
+  SCENE_QUALITY_ORDER,
+  SceneQuality,
+  usePerformanceStore,
+} from '@/components/PerformanceProvider'
 import { GameMode, Overlay } from '@/stores/types'
 import { DEFAULT_MAX_DPR, MAX_DPR } from '@/utils/dpr'
 import { rowToWorldZ } from '@/utils/tiles'
@@ -95,7 +99,7 @@ const DebugControls: FC = () => {
             label="Quality"
             value={sceneQuality}
             onChange={handleQualityChange}>
-            {Object.values(SceneQuality).map((quality) => (
+            {[...SCENE_QUALITY_ORDER].reverse().map((quality) => (
               <option key={quality} value={quality}>
                 {quality}
               </option>

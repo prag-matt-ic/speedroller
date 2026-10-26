@@ -3,8 +3,8 @@ import { PlaneGeometry, Vector3 } from 'three'
 import { type CourseSurface, courseToWorld, surfaceRadius } from './courseSurface'
 
 /** World X/Y, local Z: mount at [0, 0, z] so object-distance fades still use the real row. */
-export function createCoursePlaneGeometry(width: number, depth: number, x: number, y: number, surface: CourseSurface) {
-  const geometry = new PlaneGeometry(width, depth, Math.max(1, Math.ceil(width * 2)), 1)
+export function createCoursePlaneGeometry(width: number, depth: number, x: number, y: number, surface: CourseSurface, widthSegments = Math.max(1, Math.ceil(width * 2))) {
+  const geometry = new PlaneGeometry(width, depth, widthSegments, 1)
   geometry.rotateX(-Math.PI / 2)
   const positions = geometry.getAttribute('position')
   const point = new Vector3()

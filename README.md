@@ -303,7 +303,7 @@ _(Those are top-of-the-range devices; lower-powered machines also held >30fps on
 
 Course version **1.2.0** is roughly five times longer, with more terrain colliders, scenery instances and floating-tile batches. The measurements above are historical and have not yet been re-run against the new map. The speed/performance stage includes profiling warmup, frame time, collision workload, and mobile performance on the actual generated course before public release.
 
-Visual quality is managed by a small Zustand store `PerformanceProvider`. It exposes a `sceneQuality` mode (Ultra/High/Medium/Low) and a derived `sceneConfig` which is used across components to scale the detail and reduce GPU work.
+Visual quality is managed by a small Zustand store `PerformanceProvider`. It exposes a `sceneQuality` mode (High/Medium/Low) and a derived `sceneConfig` which is used across components to scale the detail and reduce GPU work.
 
 The main scene is wrapped in Drei's `PerformanceMonitor`. It monitors FPS and calls `onIncline`/`onDecline`, which in turn invokes `onPerformanceChange` from the provider to step the quality up or down.
 
