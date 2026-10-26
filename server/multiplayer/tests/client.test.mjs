@@ -125,7 +125,7 @@ for (const count of [2, 3, 5]) test(`${count} browser controllers agree on poses
   await waitFor(() => sessions.every(s => s.store.getState().snapshot.phase === 'racing'))
   for (const session of sessions) {
     assert.equal(session.publishPose(raceId, [1, 2, 3], 0), true)
-    assert.equal(session.publishPose(raceId, [2, 3, 4], 0), false, '20 Hz cap')
+    assert.equal(session.publishPose(raceId, [2, 3, 4], 0), false, '30 Hz cap')
   }
   await waitFor(() => f.relay.metrics.acceptedPoses === count)
   await f.advance(50)
@@ -212,7 +212,7 @@ test('spectators bootstrap every phase, follow finish/DNF, reconnect and survive
   assert.equal(waiting.store.getState().snapshot.members.find(m => m.id === waiting.store.getState().snapshot.selfId).role, 'spectator')
 })
 
-test('publisher keeps its 20 Hz schedule through timer jitter without catch-up bursts', () => {
+test('publisher keeps its 30 Hz schedule through timer jitter without catch-up bursts', () => {
   let time = 0
   const commands = []
   const socket = { readyState: 1, bufferedAmount: 0, close() {}, send: value => commands.push(JSON.parse(value)) }
@@ -220,7 +220,7 @@ test('publisher keeps its 20 Hz schedule through timer jitter without catch-up b
   try {
     session.connect({ type: 'create', profile })
     session.store.setState({ status: 'joined', snapshot: { selfId: 'me', raceId: 'race', phase: 'racing', entrants: [{ id: 'me', status: 'racing' }] } })
-    for (const tick of [0, 51, 100, 151, 200, 251, 300]) {
+    for (const tick of [0, 34, 67, 101, 134, 167, 201]) {
       time = tick
       assert.equal(session.publishPose('race', [0, 0, 0], 0), true)
       assert.equal(session.publishPose('race', [0, 0, 0], 0), false)

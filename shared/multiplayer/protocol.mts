@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-export const PROTOCOL_VERSION = 1
+export const PROTOCOL_VERSION = 2
+export const POSE_INTERVAL_MS = 1000 / 30
 export const LIMITS = {
   racers: 5, spectators: 20, rooms: 100, connections: 500,
   payloadBytes: 8192, posesPerSecond: 40, controlsPerSecond: 10,
@@ -25,6 +26,28 @@ export const poseSchema = z.object({
     .refine(q => Math.abs(q.reduce((sum, value) => sum + value * value, 0) - 1) < 0.01, 'Expected unit quaternion'),
   respawn: sequence,
 }).strict()
+// Wire-only tuples; game code continues to use named Pose fields.
+export const compactPoseSchema = z.tuple([
+  sequence, sequence, coordinate, coordinate, coordinate,
+  z.number().finite(), z.number().finite(), z.number().finite(), z.number().finite(),
+]).refine(p => Math.abs(p[5] ** 2 + p[6] ** 2 + p[7] ** 2 + p[8] ** 2 - 1) < 0.01, 'Expected unit quaternion')
+export type CompactPose = z.infer<typeof compactPoseSchema>
+export function encodePose(pose: Pose): CompactPose {
+  return [pose.sequence, pose.respawn,
+    ...pose.position.map(value => Math.round(value * 1000) / 1000),
+    ...pose.rotation.map(value => Math.round(value * 10000) / 10000)] as CompactPose
+}
+export function decodePose(pose: CompactPose): Pose {
+  const length = Math.hypot(pose[5], pose[6], pose[7], pose[8])
+  return { sequence: pose[0], respawn: pose[1], position: [pose[2], pose[3], pose[4]],
+    rotation: [pose[5] / length, pose[6] / length, pose[7] / length, pose[8] / length] }
+}
+const movementSchema = z.tuple([z.number().int().min(1).max(5), time, sequence, sequence, coordinate, coordinate, coordinate, z.number().finite(), z.number().finite(), z.number().finite(), z.number().finite()])
+  .refine(value => compactPoseSchema.safeParse(value.slice(2)).success, 'Invalid pose')
+  .transform(value => ({ slot: value[0], receivedAt: value[1], pose: decodePose(value.slice(2) as CompactPose) }))
+export function encodeMovement(entrant: Entrant): z.input<typeof movementSchema> {
+  return [entrant.slot, Math.round(entrant.receivedAt), ...encodePose(entrant.pose)]
+}
 const command = <T extends z.ZodRawShape>(shape: T) => z.object({ protocolVersion: z.literal(PROTOCOL_VERSION), ...shape }).strict()
 export const clientMessageSchema = z.discriminatedUnion('type', [
   command({ type: z.literal('create'), profile: profileSchema, course: courseSchema }),
@@ -38,7 +61,7 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
   command({ type: z.literal('start'), revision: sequence }),
   command({ type: z.literal('new-race'), raceId: id }),
   command({ type: z.literal('claim-slot') }),
-  command({ type: z.literal('pose'), raceId: id, pose: poseSchema }),
+  command({ type: z.literal('pose'), raceId: id, pose: compactPoseSchema.transform(decodePose) }),
   command({ type: z.literal('finish'), raceId: id, elapsedMs: time, pose: poseSchema }),
 ])
 export const memberSchema = z.object({
@@ -70,7 +93,7 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
   snapshotSchema,
   roomInfoSchema,
   z.object({ type: z.literal('poses'), protocolVersion: z.literal(PROTOCOL_VERSION), roomId: id,
-    raceId: id, revision: sequence, serverTime: time, entrants: z.array(entrantSchema).max(5) }).strict(),
+    raceId: id, revision: sequence, serverTime: time, entrants: z.array(movementSchema).max(5).refine(entries => new Set(entries.map(entry => entry.slot)).size === entries.length, 'Duplicate slot') }).strict(),
   z.object({ type: z.literal('pong'), clientTime: time, serverTime: time, token: id }).strict(),
   z.object({ type: z.literal('synced') }).strict(),
   z.object({ type: z.literal('left') }).strict(),
@@ -78,7 +101,7 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('closed'), reason: z.enum(['owner-left', 'expired', 'shutdown']) }).strict(),
 ])
 export type ClientMessage = z.infer<typeof clientMessageSchema>
-export type ServerMessage = z.infer<typeof serverMessageSchema>
+export type ServerMessage = z.input<typeof serverMessageSchema>
 export type Snapshot = z.infer<typeof snapshotSchema>
 export type Course = z.infer<typeof courseSchema>
 export type Profile = z.infer<typeof profileSchema>

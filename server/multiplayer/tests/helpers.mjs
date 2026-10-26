@@ -3,7 +3,7 @@ import { once } from 'node:events'
 import { setTimeout as sleep } from 'node:timers/promises'
 import WebSocket from 'ws'
 import { createRelay } from '../relay.mts'
-import { PROTOCOL_VERSION, serverMessageSchema } from '../../../shared/multiplayer/protocol.mts'
+import { PROTOCOL_VERSION, encodePose, serverMessageSchema } from '../../../shared/multiplayer/protocol.mts'
 
 export const course = { layoutVersion: 'test-flat-1', rulesVersion: 'test-rules-1', topology: 'flat', columns: 33 }
 export const profile = { name: 'PlayerOne', colour: '#abcdef' }
@@ -35,7 +35,7 @@ export async function fixture(t, options = {}) {
     clients.push(client)
     await once(socket, 'open')
     client.send = message => socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION,
-      ...(message.type === 'start' ? { revision: client.latest?.revision } : {}), ...message }))
+      ...(message.type === 'start' ? { revision: client.latest?.revision } : {}), ...message, ...(message.type === 'pose' ? { pose: encodePose(message.pose) } : {}) }))
     client.request = async (message, predicate) => {
       const start = client.messages.length
       client.send(message)

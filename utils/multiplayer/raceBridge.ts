@@ -1,3 +1,4 @@
+import { POSE_INTERVAL_MS } from '../../shared/multiplayer/protocol.mts'
 import type { StoreApi } from 'zustand/vanilla'
 import { Overlay, SpeedRunStage, type GameStore } from '@/stores/types'
 import { getResetInputState } from '@/stores/inputSlice'
@@ -96,7 +97,7 @@ export function bindMultiplayerRace(game: StoreApi<GameStore>, session: RoomSess
   const unsubscribeGame = game.subscribe((state, previous) => {
     if (state.multiplayerFinish !== previous.multiplayerFinish && state.multiplayerFinish) publish()
   })
-  const timer = options.automaticTick === false ? null : setInterval(tick, 50)
+  const timer = options.automaticTick === false ? null : setInterval(tick, POSE_INTERVAL_MS)
   synchronize()
   return { tick, dispose() {
     disposed = true; unsubscribeSession(); unsubscribeGame()

@@ -5,19 +5,19 @@ import type { Logger } from 'pino'
 import { WebSocket, WebSocketServer } from 'ws'
 import { clientIp } from './clientIp.mts'
 import { queueAction } from './queue.mts'
-import { clientMessageSchema, LIMITS, PROTOCOL_VERSION, sameCourse } from '../../shared/multiplayer/protocol.mts'
+import { clientMessageSchema, POSE_INTERVAL_MS, encodeMovement, LIMITS, PROTOCOL_VERSION, sameCourse } from '../../shared/multiplayer/protocol.mts'
 import type { ClientMessage, Course, Entrant, ErrorCode, Pose, Profile, ServerMessage, Snapshot } from '../../shared/multiplayer/protocol.mts'
 
 type Connection = {
   socket: WebSocket; ip: string; id: string; room: Room | null; profile: Profile | null;
   role: 'racer' | 'spectator'; ready: boolean; initialPose: Pose | null;
   synced: boolean; tokens: Map<string, number>; joinedAt: number; lastPong: number;
-  lastPing: number; congestedAt: number | null; windowAt: number; poses: number; controls: number;
+  needsFullPoses: boolean; lastPing: number; congestedAt: number | null; windowAt: number; poses: number; controls: number;
 }
 type Room = {
   id: string; traceId: string; ownerId: string; course: Course; phase: Snapshot['phase']; revision: number;
   members: Set<Connection>; entrants: Entrant[]; raceId: string | null;
-  startAt: number | null; activeAt: number;
+  startAt: number | null; activeAt: number; sentSequences: Map<string, number>;
 }
 type Options = { allowedOrigins: readonly string[]; now?: () => number; automaticTick?: boolean; trustRailwayProxy?: boolean; logger?: Logger }
 
@@ -57,7 +57,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     sockets.handleUpgrade(request, socket, head, webSocket => {
       const connection: Connection = { socket: webSocket, ip, id: randomUUID(), room: null, profile: null,
         role: 'spectator', ready: false, initialPose: null, synced: false, tokens: new Map(),
-        joinedAt: now(), lastPong: now(), lastPing: now(), congestedAt: null,
+        joinedAt: now(), lastPong: now(), needsFullPoses: false, lastPing: now(), congestedAt: null,
         windowAt: now(), poses: 0, controls: 0 }
       connections.add(connection)
       logger?.info({ event: 'ws.client.connected', connectionId: connection.id, connections: connections.size })
@@ -99,7 +99,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
     })
   })
 
-  function send(connection: Connection, message: ServerMessage, replaceable = false) {
+  function send(connection: Connection, message: ServerMessage, replaceable = false, encoded?: string) {
     if (connection.socket.readyState !== WebSocket.OPEN) return
     const queued = connection.socket.bufferedAmount
     metrics.maxBufferedBytes = Math.max(metrics.maxBufferedBytes, queued)
@@ -109,12 +109,13 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
       metrics.congestedDisconnects++; connection.socket.terminate(); return
     }
     if (action === 'skip') {
-      connection.congestedAt ??= now(); metrics.skippedBatches++; return
+      connection.needsFullPoses = true; connection.congestedAt ??= now(); metrics.skippedBatches++; return
     }
     connection.congestedAt = null
-    const encoded = JSON.stringify(message)
+    encoded ??= JSON.stringify(message)
     metrics.outboundBytes += Buffer.byteLength(encoded)
     connection.socket.send(encoded)
+    if (message.type === 'snapshot' || message.type === 'poses') connection.needsFullPoses = false
   }
   function reject(connection: Connection, code: ErrorCode) {
     logger?.warn({ event: 'ws.command.rejected', connectionId: connection.id, traceId: connection.room?.traceId, code })
@@ -161,7 +162,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
       closeRoom(room, 'owner-left'); return
     }
     if (connection.role === 'racer' && room.phase === 'countdown') {
-      room.phase = 'waiting'; room.raceId = null; room.startAt = null; room.entrants = []
+      room.sentSequences.clear(); room.phase = 'waiting'; room.raceId = null; room.startAt = null; room.entrants = []
       room.members.forEach(member => { member.ready = false; member.initialPose = null })
     } else if (room.phase === 'racing') {
       room.entrants = room.entrants.map(entrant => entrant.id === connection.id && entrant.status === 'racing'
@@ -222,7 +223,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
         if (!allowSource(connection.ip, 'creations', LIMITS.creationsPerMinute)) { reject(connection, 'rate-limit'); return }
         if (rooms.size >= LIMITS.rooms) { reject(connection, 'server-full'); return }
         const room: Room = { id: randomUUID(), traceId: randomUUID(), ownerId: connection.id, course: message.course, phase: 'waiting',
-          revision: 0, members: new Set(), entrants: [], raceId: null, startAt: null, activeAt: now() }
+          revision: 0, members: new Set(), entrants: [], raceId: null, startAt: null, activeAt: now(), sentSequences: new Map() }
         rooms.set(room.id, room); join(connection, room, 'racer', message.profile); return
       }
       const room = rooms.get(message.roomId)
@@ -255,7 +256,7 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
       if (message.type === 'new-race') {
         if (message.raceId !== room.raceId) { reject(connection, 'stale-race'); return }
         if (room.phase !== 'results') { reject(connection, 'wrong-phase'); return }
-        room.phase = 'waiting'; room.raceId = null; room.startAt = null; room.entrants = []
+        room.sentSequences.clear(); room.phase = 'waiting'; room.raceId = null; room.startAt = null; room.entrants = []
         room.members.forEach(member => { member.ready = false; member.initialPose = null })
       } else {
         if (room.phase !== 'waiting') { reject(connection, 'wrong-phase'); return }
@@ -297,18 +298,28 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
         }
       }
       for (const [ip, source] of sources) if (now() - source.since >= 60000) sources.delete(ip)
-      if (now() - lastBatch < 50) return
-      lastBatch += Math.floor((now() - lastBatch) / 50) * 50
+      if (now() - lastBatch < POSE_INTERVAL_MS) return
+      lastBatch += Math.floor((now() - lastBatch) / POSE_INTERVAL_MS) * POSE_INTERVAL_MS
       for (const room of rooms.values()) {
         if (room.phase !== 'racing') continue
+        const changed = room.entrants.filter(entrant => entrant.status === 'racing' && room.sentSequences.get(entrant.id) !== entrant.pose.sequence)
+        const recovering = [...room.members].some(member => member.needsFullPoses)
+        if (!changed.length && !recovering) continue
         metrics.broadcasts++
         const message: ServerMessage = { type: 'poses', protocolVersion: PROTOCOL_VERSION, roomId: room.id,
-          raceId: room.raceId!, revision: room.revision, serverTime: now(), entrants: room.entrants }
-        room.members.forEach(member => send(member, message, true))
+          raceId: room.raceId!, revision: room.revision, serverTime: Math.round(now()), entrants: changed.map(encodeMovement) }
+        const encoded = changed.length ? JSON.stringify(message) : undefined
+        const recovery = recovering ? { ...message, entrants: room.entrants.map(encodeMovement) } : null
+        const encodedRecovery = recovery ? JSON.stringify(recovery) : undefined
+        for (const member of room.members) {
+          if (member.needsFullPoses && recovery) send(member, recovery, true, encodedRecovery)
+          else if (encoded) send(member, message, true, encoded)
+        }
+        for (const entrant of changed) room.sentSequences.set(entrant.id, entrant.pose.sequence)
       }
     } finally { tickDuration.record(Math.max(1, Math.round((performance.now() - startedAt) * 1e6))) }
   }
-  const timer = automaticTick ? setInterval(tick, 50) : null
+  const timer = automaticTick ? setInterval(tick, POSE_INTERVAL_MS) : null
   async function close() {
     if (stopping) return
     stopping = true

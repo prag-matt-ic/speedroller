@@ -2,9 +2,8 @@ import { followTarget } from './spectating'
 import { appendPose, createPlayback, samplePlayback, createPresentationClock, type Playback, type PoseSample } from './interpolation'
 import { createStore } from 'zustand/vanilla'
 import { estimateClockOffset, type ClockSample } from '../../shared/multiplayer/clock.mts'
-import { PROTOCOL_VERSION, serverMessageSchema, type ClientMessage, type Course, type Pose, type Profile, type RoomInfo, type Snapshot } from '../../shared/multiplayer/protocol.mts'
+import { PROTOCOL_VERSION, POSE_INTERVAL_MS, encodePose, serverMessageSchema, type ClientMessage, type Course, type Pose, type Profile, type RoomInfo, type Snapshot } from '../../shared/multiplayer/protocol.mts'
 
-const POSE_INTERVAL_MS = 50
 
 type Command = ClientMessage extends infer Message ? Message extends ClientMessage ? Omit<Message, 'protocolVersion'> : never : never
 type Entry = { type: 'create'; profile: Profile } | { type: 'inspect'; roomId: string }
@@ -82,7 +81,8 @@ export function createRoomSession(options: {
   function send(command: Command) {
     if (!socket || socket.readyState !== 1) return false
     if (socket.bufferedAmount > 65536) { fail('Connection is too slow. Leave and rejoin to synchronize.'); return false }
-    socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, ...command }))
+    socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, ...command,
+      ...(command.type === 'pose' ? { pose: encodePose(command.pose) } : {}) }))
     return true
   }
   function markReady() {
@@ -180,9 +180,11 @@ export function createRoomSession(options: {
         const snapshot = store.getState().snapshot
         if (snapshot?.raceId === message.raceId && snapshot.roomId === message.roomId && message.revision >= snapshot.revision) {
           latestPoses = message
-          for (const entrant of message.entrants) {
+          for (const movement of message.entrants) {
+            const entrant = snapshot.entrants.find(entrant => entrant.slot === movement.slot)
+            if (!entrant) { fail('Received an unknown racer. Please rejoin.'); return }
             const buffer = poseBuffers.get(entrant.id)
-            if (buffer) appendPose(buffer, entrant)
+            if (buffer) appendPose(buffer, { ...entrant, pose: movement.pose, receivedAt: movement.receivedAt })
           }
         }
       }

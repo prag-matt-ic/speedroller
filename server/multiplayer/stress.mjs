@@ -1,3 +1,4 @@
+import { POSE_INTERVAL_MS } from '../../shared/multiplayer/protocol.mts'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 import { once } from 'node:events'
@@ -83,11 +84,11 @@ if (process.argv.includes('--server')) {
       for (const room of rooms) {
         let sequence = 0
         const raceId = room.owner.latest.raceId
-        publishers.push(setInterval(() => { sequence++; for (const racer of room.racers) racer.send({ type: 'pose', raceId, pose: pose(sequence) }) }, 50))
+        publishers.push(setInterval(() => { sequence++; for (const racer of room.racers) racer.send({ type: 'pose', raceId, pose: pose(sequence) }) }, POSE_INTERVAL_MS))
       }
       publishers.push(setInterval(() => rooms.forEach(room => room.owner.send({ type: 'ping', clientTime: performance.now() })), 1000))
       const started = performance.now(); await sleep(seconds * 1000); elapsedMs = performance.now() - started
-      assert(clients.every(client => client.batches >= seconds * 18), 'every client receives >=18 batches/sec')
+      assert(clients.every(client => client.batches >= seconds * 27), 'every client receives >=27 batches/sec')
       assert(clients.every(client => client.socket.readyState === 1 && client.errors === 0 && client.invalid.length === 0), 'all clients healthy')
       assert(rtt.count > 0 && rtt.percentile(99) / 1e6 < 100, 'local ping p99 <100ms')
     } catch (error) { failure = error }
@@ -106,7 +107,7 @@ if (process.argv.includes('--server')) {
       assert(events.some(event => event.event === 'ws.command.completed' && event.traceId), 'correlated command traces captured')
       assert.equal(last.skippedBatches, 0); assert.equal(last.congestedDisconnects, 0)
       assert.equal(last.rooms, 0); assert.equal(last.connections, 0)
-      assert(last.acceptedPoses >= roomCount * 5 * seconds * 18, 'server accepted expected publishing rate')
+      assert(last.acceptedPoses >= roomCount * 5 * seconds * 27, 'server accepted expected publishing rate')
       assert(metrics.every(event => Number.isFinite(event.eventLoopP99Ms) && event.eventLoopP99Ms < 100))
       for (const room of rooms) assert(!events.some(event => JSON.stringify(event).includes(room.owner.latest.roomId)), 'no invite IDs in logs')
     } catch (error) { failure ??= error }

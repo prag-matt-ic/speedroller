@@ -1,3 +1,4 @@
+import { POSE_INTERVAL_MS } from '../../shared/multiplayer/protocol.mts'
 import assert from 'node:assert/strict'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { writeFile } from 'node:fs/promises'
@@ -16,7 +17,7 @@ try {
   await owner.request({ type: 'start' }, m => m.type === 'snapshot' && m.phase === 'countdown')
   const raceId = owner.latest.raceId
   await waitFor(() => owner.latest.phase === 'racing', 'scheduled GO', 5000)
-  publisher = setInterval(() => racers.forEach(racer => racer.send({ type: 'pose', raceId, pose: pose(++sequence) })), 50)
+  publisher = setInterval(() => racers.forEach(racer => racer.send({ type: 'pose', raceId, pose: pose(++sequence) })), POSE_INTERVAL_MS)
   for (let i = 0; i < 20; i++) {
     const watcher = await f.connect(); await watcher.join(owner.latest.roomId, 'spectator'); watchers.push(watcher)
     assert.equal(watcher.messages[0].entrants.length, 5)
@@ -28,7 +29,7 @@ try {
   await sleep(durationSeconds * 1000)
   const elapsedMs = performance.now() - start
   const batchesPerClient = members.map((client, index) => client.messages.filter(m => m.type === 'poses').length - received[index])
-  assert(batchesPerClient.every(count => count >= durationSeconds * 18))
+  assert(batchesPerClient.every(count => count >= durationSeconds * 27))
   assert.equal(f.relay.metrics.skippedBatches, 0)
   assert(members.every(client => client.socket.readyState === 1 && client.invalid.length === 0 && !client.messages.some(m => m.type === 'error')))
   const result = { protocolVersion: 1, methodology: 'Real local relay and WebSocket clients; no renderer or WAN simulation.',

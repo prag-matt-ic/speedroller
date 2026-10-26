@@ -1,3 +1,4 @@
+import { PROTOCOL_VERSION } from '../../../shared/multiplayer/protocol.mts'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createServer, connect } from 'node:net'
@@ -41,7 +42,7 @@ test('actual process SIGTERM notifies rooms and exits within drain budget even w
   const socket = new WebSocket(`ws://127.0.0.1:${port}`, { origin: 'http://localhost:3000' })
   t.after(() => socket.terminate()); await once(socket, 'open')
   const messages = []; socket.on('message', data => messages.push(JSON.parse(data)))
-  socket.send(JSON.stringify({ protocolVersion: 1, type: 'create', profile, course }))
+  socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, type: 'create', profile, course }))
   await waitFor(() => messages.some(m => m.type === 'snapshot'))
   const slowHttp = connect(port, '127.0.0.1'); slowHttp.on('error', () => {}); t.after(() => slowHttp.destroy())
   await once(slowHttp, 'connect'); slowHttp.write('GET /health HTTP/1.1\r\nHost: localhost\r\n')

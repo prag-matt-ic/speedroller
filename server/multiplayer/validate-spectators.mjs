@@ -1,3 +1,4 @@
+import { POSE_INTERVAL_MS } from '../../shared/multiplayer/protocol.mts'
 // Controlled network simulation around real WebSockets; samples interpolation, not GPU presentation.
 import assert from 'node:assert/strict'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -32,7 +33,7 @@ async function measure(rtt) {
     publisher = setInterval(() => {
       const current = ++sequence; captures.set(current, performance.now())
       later(() => racers.forEach(racer => racer.send({ type: 'pose', raceId, pose: pose(current) })), rtt / 2)
-    }, 50)
+    }, POSE_INTERVAL_MS)
     await Promise.all(Array.from({ length: 20 }, async (_, index) => {
       let nextDelivery = 0, messages = 0
       const session = createRoomSession({ endpoint: f.url, course: owner.latest.course, initialPose: pose(),

@@ -4,7 +4,7 @@ import { once } from 'node:events'
 import { setTimeout as sleep } from 'node:timers/promises'
 import WebSocket from 'ws'
 import { course, profile, pose, waitFor } from './tests/helpers.mjs'
-import { PROTOCOL_VERSION, serverMessageSchema } from '../../shared/multiplayer/protocol.mts'
+import { PROTOCOL_VERSION, encodePose, serverMessageSchema } from '../../shared/multiplayer/protocol.mts'
 
 const url = new URL(process.env.MULTIPLAYER_URL)
 assert.equal(url.protocol, 'wss:')
@@ -26,7 +26,7 @@ async function connect(options = {}) {
   await once(socket, 'open')
   client.request = async (command, predicate) => {
     const start = client.messages.length
-    socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, ...command }))
+    socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, ...command, ...(command.type === 'pose' ? { pose: encodePose(command.pose) } : {}) }))
     await waitFor(() => client.messages.slice(start).some(predicate), command.type, 10000)
     return client.messages.slice(start).find(predicate)
   }
@@ -87,8 +87,8 @@ try {
     await watcher.join(roomId, 'spectator')
     assert.equal(watcher.latest.entrants.length, 5)
     assert(watcher.latest.entrants.every(entrant => entrant.pose))
-    for (const racer of racers) racer.socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, type: 'pose', raceId, pose: pose(1) }))
-    await waitFor(() => watcher.messages.some(m => m.type === 'poses' && m.entrants.length === 5 && m.entrants.every(e => e.pose?.sequence === 1)), 'five live poses', 10000)
+    for (const racer of racers) racer.socket.send(JSON.stringify({ protocolVersion: PROTOCOL_VERSION, type: 'pose', raceId, pose: encodePose(pose(1)) }))
+    await waitFor(() => new Set(watcher.messages.filter(m => m.type === 'poses').flatMap(m => m.entrants.filter(e => e.pose.sequence === 1).map(e => e.slot))).size === 5, 'five live poses', 10000)
     await watcher.error({ type: 'pose', raceId, pose: pose(1) }, 'racer-only')
     console.log('PASS WSS health, origins, five racers, closed entry, late snapshot/live updates, protocol/course mismatch')
     if (process.env.WAIT_FOR_RESTART === 'true') {
