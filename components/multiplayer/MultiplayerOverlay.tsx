@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { twJoin } from 'tailwind-merge'
+import { PLAYER_BASE_COLOURS } from '@/components/palette'
 import { useGameStore } from '@/components/GameProvider'
 import Button from '@/components/ui/Button'
 import { PointerProvider } from '@/components/ui/PointerProvider'
@@ -10,6 +12,8 @@ import { profileSchema, roomUrl } from '@/shared/multiplayer/protocol.mts'
 import { canStartRace } from '@/utils/multiplayer/session'
 import { useMultiplayer, useRoomState } from './MultiplayerProvider'
 
+const COLOUR_NAMES = ['Yellow', 'Green', 'Teal', 'Light blue', 'Blue', 'Purple', 'Pink', 'Red']
+
 export function MultiplayerOverlay() {
   const { session, busy, problem, watchLink, create, join, leave, reconnect } = useMultiplayer()
   const status = useRoomState(state => state.status)
@@ -18,6 +22,8 @@ export function MultiplayerOverlay() {
   const error = useRoomState(state => state.error)
   const pendingStart = useRoomState(state => state.pendingStart)
   const isMobile = useGameStore(state => state.isMobile)
+  const paletteIndex = useGameStore(state => state.paletteIndex)
+  const setPaletteIndex = useGameStore(state => state.setPaletteIndex)
   const username = useGameStore(state => state.username)
   const [hasSavedName] = useState(() => profileSchema.safeParse({ name: username, colour: '#37d6c7' }).success)
   const input = useUsernameInput()
@@ -66,6 +72,21 @@ export function MultiplayerOverlay() {
           <label htmlFor="room-name" className="text-sm">Your name</label>
           <Input {...input} id="room-name" autoComplete="off" autoCapitalize="off" aria-describedby="room-name-help" />
           <p id="room-name-help" className="text-xs text-white/60">Use 6–12 characters. Your saved name can be changed here.</p>
+          <fieldset>
+            <legend className="mb-3 text-sm">Your colour</legend>
+            <div className="flex flex-wrap gap-2">
+              {PLAYER_BASE_COLOURS.map((colour, index) => <button
+                key={colour}
+                type="button"
+                aria-label={COLOUR_NAMES[index]}
+                aria-pressed={paletteIndex === index}
+                onClick={() => setPaletteIndex(index)}
+                className={twJoin('flex size-11 items-center justify-center rounded-full border-2 text-xl font-bold text-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white', paletteIndex === index ? 'border-white' : 'border-transparent')}
+                style={{ backgroundColor: colour }}>
+                <span aria-hidden="true">{paletteIndex === index ? '✓' : ''}</span>
+              </button>)}
+            </div>
+          </fieldset>
         </>}
         {status === 'preview' && info && !problem && <>
           <div className="flex flex-wrap gap-3">

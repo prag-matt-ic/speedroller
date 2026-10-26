@@ -354,7 +354,7 @@ const LocalPlayer: FC = () => {
         <Marble ref={sphereMeshRef} />
         <PlayerHUD />
       </RigidBody>
-      <RemoteRacers localMesh={sphereMeshRef} />
+      <RemoteRacers />
     </>
   )
 }

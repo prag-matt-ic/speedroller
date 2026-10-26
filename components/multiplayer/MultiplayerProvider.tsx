@@ -5,6 +5,7 @@ import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import { type Profile, type Course } from '@/shared/multiplayer/protocol.mts'
+import { PLAYER_BASE_COLOURS, clampPaletteIndexSafe } from '@/components/palette'
 import { Overlay } from '@/stores/types'
 import { getStartGridPosition } from '@/utils/platform/raceMarkers'
 import { PLAYER_RESTING_Y } from '@/utils/player'
@@ -37,7 +38,8 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
   const inspectedInvite = useRef(false)
 
   function profile(): Profile {
-    return { name: game.getState().username ?? '', colour: '#37d6c7' }
+    const { username, paletteIndex } = game.getState()
+    return { name: username ?? '', colour: PLAYER_BASE_COLOURS[clampPaletteIndexSafe(paletteIndex)] }
   }
   function cleanUrl() {
     const url = new URL(window.location.href)

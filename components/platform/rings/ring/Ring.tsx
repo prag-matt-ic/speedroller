@@ -25,7 +25,7 @@ import { fadeInOut } from '@/resources/tsl/fadeInOut'
 const LIGHT_DIR = /*#__PURE__*/ vec3(0.4383, 0.7622, 0.4764).toConst()
 
 // Strong enough to bloom clearly through the emissive MRT pass; the ring still keeps its base colour.
-const RING_EMISSIVE_STRENGTH = 1.25
+const RING_EMISSIVE_STRENGTH = 0.8
 
 // The only value Rings.tsx drives is `uExitProgress`, tweened by gsap on collect. Animation time
 // comes from TSL's built-in `time` node, which the renderer updates itself, so it needs no uniform.
