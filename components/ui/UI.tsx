@@ -95,7 +95,7 @@ const UI: FC<Props> = ({ isMobile }) => {
         )}
       </button>
 
-      <MiniMap />
+      {/* <MiniMap /> */}
 
       {!isSpectating && <MovementControls />}
 
@@ -110,7 +110,7 @@ const UI: FC<Props> = ({ isMobile }) => {
           <div
             ref={overlayBackdropRef}
             className={twJoin(
-              'pointer-events-none fixed inset-0 z-200 bg-linear-0 from-black/25 via-black/80 to-black/25 backdrop-blur-md duration-250 xl:backdrop-blur-lg',
+              'pointer-events-none fixed inset-0 z-200 bg-black/30 backdrop-blur-md duration-250 xl:backdrop-blur-lg',
               status === 'entered' && 'opacity-100',
               (status === 'exiting' || status === 'exited') && 'opacity-0',
             )}

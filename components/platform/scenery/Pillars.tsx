@@ -34,7 +34,7 @@ const BLOCK_BEVEL_RADIUS = 0.01
 const STONE_ATLAS_GRID = 3
 const STONE_UV_INSET = 16.5 / 512
 const STONE_BRIGHTNESS = 0.88
-const STONE_NORMAL_STRENGTH = 0.4
+const STONE_NORMAL_STRENGTH = 0.6
 const placements = pillarData as PillarPlacement[]
 const batches = Object.values(Object.groupBy(createPillarBlocks(placements), (pillar) => Math.floor(pillar.distance / BATCH_LENGTH)))
 

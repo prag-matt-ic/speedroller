@@ -31,8 +31,8 @@ export default async function Home(props: PageProps) {
           <QueryProvider>
             <GameProvider isMobile={isMobile} insertSpeedRun={isEditorPreview ? skipEditorSpeedRun : insertSpeedRun}>
               <MultiplayerProvider>
-              <LandingOverlay isMobile={isMobile} />
-              <Main isMobile={isMobile} isDebug={isDebug} />
+                <LandingOverlay isMobile={isMobile} />
+                <Main isMobile={isMobile} isDebug={isDebug} />
               </MultiplayerProvider>
             </GameProvider>
           </QueryProvider>
