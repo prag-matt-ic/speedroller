@@ -80,6 +80,7 @@ export type TimeSlice = {
   attemptStartedAtMs: number | null
   attemptInputType: InputType | null
   attemptResult: RaceResult | null
+  savedRunId: number | null
   saveStatus: SaveStatus
 
   enterStartLine: () => void
@@ -90,6 +91,7 @@ export type TimeSlice = {
   multiplayerFinish: { raceId: string; attemptId: number; elapsedMs: number } | null
   scheduleMultiplayerRace: (raceId: string, startAtMs: number) => void
   startMultiplayerRace: (raceId: string, nowMs: number) => void
+  confirmMultiplayerFinish: (raceId: string, elapsedMs: number) => void
   stopMultiplayerRace: (raceId: string) => void
   startCountdown: () => void
   cancelStartLine: () => void

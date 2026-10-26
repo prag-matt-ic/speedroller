@@ -9,6 +9,8 @@ import { PointerProvider } from '@/components/ui/PointerProvider'
 import { Input } from '@/components/ui/input/Input'
 import { useUsernameInput } from '@/components/ui/input/useUsernameInput'
 import { profileSchema, roomUrl } from '@/shared/multiplayer/protocol.mts'
+import { RaceStandings } from './RaceStandings'
+import { MultiplayerGlobalRank } from './MultiplayerGlobalRank'
 import { canStartRace } from '@/utils/multiplayer/session'
 import { useMultiplayer, useRoomState } from './MultiplayerProvider'
 
@@ -102,12 +104,8 @@ export function MultiplayerOverlay() {
               <span>{index + 1}. {member.profile.name}{member.id === snapshot.ownerId ? ' · Owner' : ''}{member.id === snapshot.selfId ? ' · You' : ''}</span>
               <span className="text-teal-200">{member.ready ? 'Ready' : 'Loading…'}</span>
             </li>)}
-          </ol> : <ol aria-label="Race standings" className="flex flex-col gap-2">
-            {[...snapshot.entrants].sort((a, b) => (a.place ?? Infinity) - (b.place ?? Infinity) || a.slot - b.slot).map(entrant => <li key={entrant.id} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 p-3 text-sm">
-              <span>{entrant.place ? `${entrant.place}. ` : ''}{entrant.profile.name}{entrant.id === snapshot.selfId ? ' · You' : ''}</span>
-              <span className="text-teal-200">{entrant.status === 'finished' ? `${((entrant.elapsedMs ?? 0) / 1000).toFixed(2)} s` : entrant.status === 'dnf' ? 'DNF' : snapshot.phase === 'countdown' ? 'On the grid' : 'Racing…'}</span>
-            </li>)}
-          </ol>}
+          </ol> : <RaceStandings />}
+          <MultiplayerGlobalRank />
           <label htmlFor="race-share-url" className="text-sm">Invite racers and spectators</label>
           <input ref={linkInput} id="race-share-url" readOnly value={link} className="min-w-0 w-full rounded-lg border border-white/20 bg-black px-3 py-2 text-sm" onFocus={event => event.target.select()} />
           <div className="flex flex-wrap gap-3">

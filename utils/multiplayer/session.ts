@@ -76,7 +76,13 @@ export function createRoomSession(options: {
     socket?.close(); socket = null; readySent = false; latestPoses = null; poseBuffers.clear(); playbacks.clear(); presentationClock.reset()
   }
   function fail(error: string) {
-    disconnect(); store.setState({ status: 'error', error, pendingStart: false })
+    const snapshot = store.getState().snapshot
+    // Keep the last received positions for paused standings after playback buffers are cleared.
+    const frozen = snapshot && { ...snapshot, entrants: snapshot.entrants.map(entrant => {
+      const latest = poseBuffers.get(entrant.id)?.at(-1)
+      return latest ? { ...entrant, pose: latest.pose, receivedAt: latest.time } : entrant
+    }) }
+    disconnect(); store.setState({ status: 'error', error, pendingStart: false, snapshot: frozen })
   }
   function send(command: Command) {
     if (!socket || socket.readyState !== 1) return false

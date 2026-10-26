@@ -6,6 +6,8 @@ import { createStore } from 'zustand/vanilla'
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
 import { type Profile, type Course } from '@/shared/multiplayer/protocol.mts'
 import { PLAYER_BASE_COLOURS, clampPaletteIndexSafe } from '@/components/palette'
+import { useQueryClient } from '@tanstack/react-query'
+import { RaceStandings } from './RaceStandings'
 import { Overlay } from '@/stores/types'
 import { getStartGridPosition } from '@/utils/platform/raceMarkers'
 import { PLAYER_RESTING_Y } from '@/utils/player'
@@ -24,6 +26,7 @@ const endpoint = process.env.NEXT_PUBLIC_MULTIPLAYER_URL
 
 export function MultiplayerProvider({ children }: PropsWithChildren) {
   const game = useGameStoreAPI()
+  const queryClient = useQueryClient()
   const overlay = useGameStore(state => state.overlay)
   const hydrated = useGameStore(state => state._isHydrated)
   const platformReady = useGameStore(state => state.isPlatformReady)
@@ -92,6 +95,11 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
     game.getState().returnToLobby()
     game.getState().setOverlay(Overlay.NONE)
   }
+  useEffect(() => game.subscribe((state, previous) => {
+    if (state.completedSpeedRuns === previous.completedSpeedRuns) return
+    void queryClient.invalidateQueries({ queryKey: ['speedrun-leaderboard'] })
+    void queryClient.invalidateQueries({ queryKey: ['speedrun-recent-run'] })
+  }), [game, queryClient])
   useEffect(() => () => { generation.current++; active.current?.dispose() }, [])
   useEffect(() => {
     if (!session) return
@@ -119,6 +127,7 @@ export function MultiplayerProvider({ children }: PropsWithChildren) {
 
   return <Context value={{ session, busy, problem, watchLink, create, join, leave, reconnect }}>
     {children}
+    {session && overlay === Overlay.NONE && <RacerStandings />}
     {overlay === Overlay.MULTIPLAYER && <MultiplayerOverlay />}
     {overlay === Overlay.SPECTATING && <SpectatorControls />}
     {overlay === Overlay.MULTIPLAYER_COUNTDOWN && <MultiplayerCountdown />}
@@ -133,4 +142,12 @@ export function useMultiplayer() {
 export function useRoomState<T>(selector: (state: SessionState) => T) {
   const context = useOptionalMultiplayer()
   return useStore(context?.session?.store ?? emptyStore, selector)
+}
+
+function RacerStandings() {
+  const snapshot = useRoomState(state => state.snapshot)
+  if (snapshot?.phase !== 'racing' || !snapshot.entrants.some(entrant => entrant.id === snapshot.selfId)) return null
+  return <div className="pointer-events-none fixed top-24 right-3 z-100 w-52 rounded-xl bg-black/75 p-3 text-white sm:w-64 xl:top-28">
+    <RaceStandings />
+  </div>
 }

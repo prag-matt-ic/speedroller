@@ -231,3 +231,31 @@ test('publisher keeps its 30 Hz schedule through timer jitter without catch-up b
     assert.equal(commands.length, 8)
   } finally { session.dispose() }
 })
+
+test('connection loss freezes latest server poses in the snapshot while clearing predictive playback', async t => {
+  const f = await fixture(t)
+  const { owner, roomId } = await f.race(2)
+  await f.advance(3000)
+  let socket
+  const session = createRoomSession({ endpoint: f.url, course, initialPose: pose(), socket: url => {
+    socket = new WebSocket(url, { origin: 'http://localhost:3000' }); return socket
+  } })
+  t.after(() => session.dispose())
+  session.connect({ type: 'inspect', roomId })
+  await waitFor(() => session.store.getState().status === 'preview')
+  session.join('spectator', profile)
+  await waitFor(() => session.store.getState().status === 'joined')
+  const ownerId = owner.latest.selfId
+  owner.send({ type: 'pose', raceId: owner.latest.raceId, pose: pose(8) })
+  await new Promise(resolve => setTimeout(resolve, 20))
+  await f.advance(50)
+  await waitFor(() => session.getPoseBuffer(ownerId)?.at(-1)?.pose.sequence === 8)
+  socket.terminate()
+  await waitFor(() => session.store.getState().status === 'error')
+  assert.equal(session.store.getState().snapshot.entrants.find(entrant => entrant.id === ownerId).pose.sequence, 8)
+  assert.equal(session.getPoseBuffer(ownerId), undefined)
+  session.updatePlayback()
+  assert.equal(session.getRenderedPose(ownerId), undefined)
+  session.leave()
+  assert.equal(session.store.getState().snapshot, null)
+})

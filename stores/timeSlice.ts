@@ -21,6 +21,7 @@ import {
   Overlay,
   SpeedRunStage,
   type TimeSlice,
+  type RaceResult,
   getOverlayForSpeedRunStage,
 } from './types'
 
@@ -31,13 +32,14 @@ const LOBBY_CANCEL_COLUMN = 16
 
 export const RESET_TIME_STATE: Pick<
   TimeSlice,
-  'speedRunTimeCS' | 'speedRunStage' | 'attemptStartedAtMs' | 'attemptResult' | 'saveStatus' |
+  'speedRunTimeCS' | 'speedRunStage' | 'attemptStartedAtMs' | 'attemptResult' | 'savedRunId' | 'saveStatus' |
   'multiplayerRaceId' | 'multiplayerStartAtMs' | 'multiplayerFinish' | 'isSpectating'
 > = {
   speedRunTimeCS: 0,
   speedRunStage: SpeedRunStage.LOBBY,
   attemptStartedAtMs: null,
   attemptResult: null,
+  savedRunId: null,
   saveStatus: 'idle',
   isSpectating: false,
   multiplayerRaceId: null,
@@ -72,6 +74,55 @@ export const createTimeSlice =
       get().resetPlayerSpeedState()
     }
 
+    const saveResult = async (result: RaceResult) => {
+      if (!isValidUsername(result.username)) {
+        if (get().attemptId === result.attemptId) {
+          set({ speedRunStage: SpeedRunStage.END, saveStatus: 'failed' })
+        }
+        return
+      }
+
+      const submission: ServerSpeedRunSubmission = {
+        username: result.username,
+        time: result.timeSeconds,
+        date: result.date,
+        input_type: result.inputType,
+        level_id: result.platformVersion,
+        accidents: result.raceFalls,
+        rings: result.rings,
+      }
+
+      const appendRun = (run: SpeedRunDatabase) => {
+        set((previous) => {
+          const versionKey = result.platformVersion
+          const existingRuns = previous.completedSpeedRuns[versionKey] ?? []
+          return {
+            completedSpeedRuns: {
+              ...previous.completedSpeedRuns,
+              [versionKey]: [
+                ...existingRuns,
+                { ...run, level_id: run.level_id ?? versionKey },
+              ],
+            },
+          }
+        })
+      }
+
+      try {
+        const savedRun = await insertSpeedRun(submission)
+        if (!savedRun) throw new Error('Inserting speedrun returned null')
+        appendRun(savedRun)
+        if (get().attemptId === result.attemptId) {
+          set({ speedRunStage: SpeedRunStage.END, saveStatus: 'saved', savedRunId: savedRun.id })
+        }
+      } catch (error) {
+        console.error('Error inserting speedrun:', error)
+        if (get().attemptId === result.attemptId) {
+          set({ speedRunStage: SpeedRunStage.END, saveStatus: 'failed' })
+        }
+      }
+    }
+
     const beginAttempt = (phase: SpeedRunStage): boolean => {
       const state = get()
       const startGridPosition = getStartGridPosition(state.rowsData, PLAYER_RESTING_Y, state.courseSurface)
@@ -94,6 +145,7 @@ export const createTimeSlice =
         attemptStartedAtMs: null,
         attemptInputType: state.inputType,
         attemptResult: null,
+        savedRunId: null,
         saveStatus: 'idle',
         speedRunTimeCS: 0,
         collectedRings: {},
@@ -128,6 +180,7 @@ export const createTimeSlice =
         attemptStartedAtMs: null,
         attemptInputType: null,
         attemptResult: null,
+        savedRunId: null,
         saveStatus: 'idle',
         speedRunTimeCS: 0,
         collectedRings: {},
@@ -198,6 +251,17 @@ export const createTimeSlice =
         state.resetPlayerSpeedState()
         set({ speedRunStage: SpeedRunStage.END, overlay: Overlay.MULTIPLAYER, ...getResetInputState() })
       },
+      confirmMultiplayerFinish: (raceId, elapsedMs) => {
+        const state = get()
+        const finish = state.multiplayerFinish
+        const result = state.attemptResult
+        if (state.isSpectating || state.multiplayerRaceId !== raceId || finish?.raceId !== raceId ||
+          finish.attemptId !== state.attemptId || result?.attemptId !== state.attemptId ||
+          state.saveStatus !== 'idle' || !Number.isFinite(elapsedMs) || elapsedMs < 0) return
+        const accepted = { ...result, timeSeconds: toCentisecondSeconds(elapsedMs / 1000) }
+        set({ attemptResult: accepted, saveStatus: 'saving', speedRunTimeCS: Math.round(elapsedMs / 10) })
+        void saveResult(accepted)
+      },
       startCountdown: () => {
         const state = get()
         if (state.speedRunStage !== SpeedRunStage.START || state.overlay !== Overlay.SPEEDRUN_START) return
@@ -229,14 +293,6 @@ export const createTimeSlice =
         if (state.attemptStartedAtMs === null) return
 
         const finishedAt = getMonotonicNow()
-        if (state.multiplayerRaceId) {
-          const elapsedMs = Math.max(0, finishedAt - state.attemptStartedAtMs)
-          state.resetPlayerSpeedState()
-          set({ multiplayerFinish: { raceId: state.multiplayerRaceId, attemptId: state.attemptId, elapsedMs },
-            speedRunTimeCS: Math.round(elapsedMs / 10), speedRunStage: SpeedRunStage.END,
-            overlay: Overlay.MULTIPLAYER, ...getResetInputState() })
-          return
-        }
         const timeSeconds = toCentisecondSeconds(
           (finishedAt - state.attemptStartedAtMs) / 1000,
         )
@@ -251,6 +307,16 @@ export const createTimeSlice =
           rings: Object.keys(state.collectedRings).length,
         }
 
+        if (state.multiplayerRaceId) {
+          const elapsedMs = Math.max(0, finishedAt - state.attemptStartedAtMs)
+          state.resetPlayerSpeedState()
+          set({ multiplayerFinish: { raceId: state.multiplayerRaceId, attemptId: state.attemptId, elapsedMs },
+            attemptResult: result, saveStatus: 'idle', savedRunId: null,
+            speedRunTimeCS: Math.round(elapsedMs / 10), speedRunStage: SpeedRunStage.END,
+            overlay: Overlay.MULTIPLAYER, ...getResetInputState() })
+          return
+        }
+
         set({
           speedRunStage: SpeedRunStage.SUBMITTING,
           overlay: getOverlayForSpeedRunStage(SpeedRunStage.SUBMITTING),
@@ -259,56 +325,7 @@ export const createTimeSlice =
           saveStatus: 'saving',
         })
 
-        const saveResult = async () => {
-          if (!isValidUsername(result.username)) {
-            if (get().attemptId === result.attemptId) {
-              set({ speedRunStage: SpeedRunStage.END, saveStatus: 'failed' })
-            }
-            return
-          }
-
-          const submission: ServerSpeedRunSubmission = {
-            username: result.username,
-            time: result.timeSeconds,
-            date: result.date,
-            input_type: result.inputType,
-            level_id: result.platformVersion,
-            accidents: result.raceFalls,
-            rings: result.rings,
-          }
-
-          const appendRun = (run: SpeedRunDatabase) => {
-            set((previous) => {
-              const versionKey = result.platformVersion
-              const existingRuns = previous.completedSpeedRuns[versionKey] ?? []
-              return {
-                completedSpeedRuns: {
-                  ...previous.completedSpeedRuns,
-                  [versionKey]: [
-                    ...existingRuns,
-                    { ...run, level_id: run.level_id ?? versionKey },
-                  ],
-                },
-              }
-            })
-          }
-
-          try {
-            const savedRun = await insertSpeedRun(submission)
-            if (!savedRun) throw new Error('Inserting speedrun returned null')
-            appendRun(savedRun)
-            if (get().attemptId === result.attemptId) {
-              set({ speedRunStage: SpeedRunStage.END, saveStatus: 'saved' })
-            }
-          } catch (error) {
-            console.error('Error inserting speedrun:', error)
-            if (get().attemptId === result.attemptId) {
-              set({ speedRunStage: SpeedRunStage.END, saveStatus: 'failed' })
-            }
-          }
-        }
-
-        void saveResult()
+        void saveResult(result)
       },
       retryRace: () => {
         const state = get()

@@ -74,6 +74,9 @@ export function bindMultiplayerRace(game: StoreApi<GameStore>, session: RoomSess
       state.scheduleMultiplayerRace(snapshot.raceId, snapshot.startAt - clockOffset)
       previousRace = snapshot.raceId
     }
+    if (entrant.status === 'finished' && entrant.elapsedMs !== null) {
+      game.getState().confirmMultiplayerFinish(snapshot.raceId, entrant.elapsedMs)
+    }
     if (snapshot.phase === 'results' || entrant.status !== 'racing') {
       game.getState().stopMultiplayerRace(snapshot.raceId)
       return

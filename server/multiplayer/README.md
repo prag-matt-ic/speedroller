@@ -179,9 +179,11 @@ The loaded game's layout hash includes rows and surface metadata. Serve both cli
 from the same build; course edits during development can correctly produce a mismatch.
 The UI only sends `ready` after existing loading/warmup/placement gates and clock sync.
 Phase 3 connects the shared GO time to the local attempt, sends poses at up to 30 Hz,
-and displays interpolated remote marbles without physics bodies. Finishes go only to
-the room service; results include ties/DNF and the owner can reopen the room for a
-rematch. Countdown cancellation and rematch both require fresh grid readiness.
+and displays interpolated remote marbles without physics bodies. Live standings use
+the latest received positions at a 200 ms UI cadence. Results include ties/DNF; after
+the relay confirms a local finish, that browser saves it through the existing Next.js
+leaderboard action and shows its own global rank for the course and input category.
+The owner can reopen the room for a rematch. Countdown cancellation and rematch both require fresh grid readiness.
 Spectators now receive a watch-only scene, racer selection, close/wide camera controls,
 live progress/results and an explicit reconnect action. They never mount a local physics
 body or send racer updates. Late arrivals and rematches bootstrap from the newest snapshot. Remote marbles temporarily share the local palette/effects to keep this

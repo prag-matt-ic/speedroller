@@ -387,7 +387,7 @@ test('race lifecycle: multiplayer room freezes the attempt and cannot submit sol
   assert.equal(store.getState().overlay, Overlay.NONE)
 })
 
-test('multiplayer GO preserves the shared origin; finishes never enter solo persistence', () => {
+test('multiplayer GO preserves the shared origin; unconfirmed finishes do not save', () => {
   const { store, Overlay, SpeedRunStage, submissionCalls } = createRaceStore()
   store.getState().prepareMultiplayer()
   store.setState({ playerStatus: 'safe' })
@@ -498,4 +498,88 @@ test('spectator asset loading uses the newest snapshot, never the race seen befo
   assert.equal(store.getState().multiplayerRaceId, null)
   assert.equal(store.getState().attemptStartedAtMs, null)
   bridge.dispose()
+})
+
+function startMultiplayerAttempt(store) {
+  store.getState().prepareMultiplayer()
+  store.setState({ playerStatus: 'safe', _isHydrated: true })
+  const start = performance.now() - 15000
+  store.getState().scheduleMultiplayerRace('ranked-race', start)
+  store.getState().startMultiplayerRace('ranked-race', performance.now())
+}
+
+test('confirmed multiplayer finish saves frozen metadata and accepted time exactly once', async () => {
+  const submission = deferred()
+  const { store, submissionCalls, Overlay } = createRaceStore({ insertSpeedRun: () => submission.promise })
+  startMultiplayerAttempt(store)
+  store.setState({ collectedRings: { one: true, two: true }, outOfBoundsEvents: [{ timestamp: 1 }], inputType: 'joystick' })
+  store.getState().finishSpeedRun()
+  const captured = store.getState().attemptResult
+  assert.equal(submissionCalls.length, 0)
+  store.setState({ username: 'changed123', collectedRings: {}, outOfBoundsEvents: [] })
+  store.getState().confirmMultiplayerFinish('old-race', 12000)
+  assert.equal(submissionCalls.length, 0)
+  store.getState().confirmMultiplayerFinish('ranked-race', 12345)
+  store.getState().confirmMultiplayerFinish('ranked-race', 12345)
+  store.getState().finishSpeedRun()
+  assert.equal(submissionCalls.length, 1)
+  assert.deepEqual(submissionCalls[0], { username: captured.username, date: captured.date, time: 12.35,
+    input_type: 'keyboard', level_id: PLATFORM_VERSION, accidents: 1, rings: 2 })
+  assert.equal(store.getState().overlay, Overlay.MULTIPLAYER)
+  submission.resolve(createSavedRun({ id: 123, time: 12.35 }))
+  await flushAsync()
+  assert.equal(store.getState().savedRunId, 123)
+  assert.equal(store.getState().saveStatus, 'saved')
+  store.getState().confirmMultiplayerFinish('ranked-race', 12345)
+  assert.equal(submissionCalls.length, 1)
+})
+
+test('bridge submits only server-confirmed local finishes, never DNF or unconfirmed results', async () => {
+  const { bindMultiplayerRace } = loadTypeScript('utils/multiplayer/raceBridge.ts')
+  for (const status of ['racing', 'dnf', 'finished']) {
+    const { store, submissionCalls } = createRaceStore({ insertSpeedRun: async () => createSavedRun() })
+    startMultiplayerAttempt(store)
+    store.getState().finishSpeedRun()
+    const snapshot = { selfId: 'me', members: [{ id: 'me', role: 'racer' }], raceId: 'ranked-race', startAt: 0,
+      phase: 'racing', entrants: [{ id: 'me', status, elapsedMs: status === 'finished' ? 12340 : null }] }
+    const room = createStore(() => ({ status: 'joined', clockOffset: 0, snapshot }))
+    const bridge = bindMultiplayerRace(store, { store: room, finish() {} }, { automaticTick: false })
+    bridge.tick(); room.setState({ snapshot: { ...snapshot } }); bridge.tick()
+    assert.equal(submissionCalls.length, status === 'finished' ? 1 : 0)
+    bridge.dispose()
+    await flushAsync()
+  }
+})
+
+test('late multiplayer saves append history without changing a rematch or lobby result', async () => {
+  for (const leave of [false, true]) {
+    const submission = deferred()
+    const { store } = createRaceStore({ insertSpeedRun: () => submission.promise })
+    startMultiplayerAttempt(store)
+    store.getState().finishSpeedRun()
+    store.getState().confirmMultiplayerFinish('ranked-race', 12340)
+    if (leave) store.getState().returnToLobby()
+    else store.getState().prepareMultiplayer()
+    submission.resolve(createSavedRun({ id: 321 }))
+    await flushAsync()
+    assert.equal(store.getState().savedRunId, null)
+    assert.equal(store.getState().attemptResult, null)
+    assert.equal(store.getState().saveStatus, 'idle')
+    assert.equal(store.getState().completedSpeedRuns[PLATFORM_VERSION][0].id, 321)
+  }
+})
+
+test('multiplayer save failures keep the result and cannot trigger automatic resubmission', async () => {
+  const { store, submissionCalls } = createRaceStore({ insertSpeedRun: async () => null })
+  startMultiplayerAttempt(store)
+  store.getState().confirmMultiplayerFinish('ranked-race', 12340)
+  assert.equal(submissionCalls.length, 0, 'no local finish')
+  store.getState().finishSpeedRun()
+  store.getState().confirmMultiplayerFinish('ranked-race', 12340)
+  await flushAsync()
+  assert.equal(store.getState().saveStatus, 'failed')
+  assert.equal(store.getState().savedRunId, null)
+  assert.equal(store.getState().attemptResult.timeSeconds, 12.34)
+  store.getState().confirmMultiplayerFinish('ranked-race', 12340)
+  assert.equal(submissionCalls.length, 1)
 })

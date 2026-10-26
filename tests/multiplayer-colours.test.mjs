@@ -19,6 +19,7 @@ test('join profile reads the current saved colour, including a selection made af
   const state = { username: 'PlayerOne', paletteIndex: 0, prepareMultiplayer() {} }
   const { MultiplayerProvider } = loadTypeScript('components/multiplayer/MultiplayerProvider.tsx', {
     react: { ...hooks, useState: initial => [stateIndex++ === 0 ? session : initial, () => {}] },
+    '@tanstack/react-query': { useQueryClient: () => ({}) },
     zustand: {}, 'zustand/vanilla': { createStore: () => ({}) },
     '@/components/GameProvider': { useGameStore: select => select(state), useGameStoreAPI: () => ({ getState: () => state }) },
     '@/utils/platform/raceMarkers': {}, '@/utils/player': {},
