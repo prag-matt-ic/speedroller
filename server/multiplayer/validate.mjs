@@ -1,11 +1,14 @@
-import { POSE_INTERVAL_MS } from '../../shared/multiplayer/protocol.mts'
+import { POSE_INTERVAL_MS, LIMITS, PROTOCOL_VERSION } from '../../shared/multiplayer/protocol.mts'
 import assert from 'node:assert/strict'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { writeFile } from 'node:fs/promises'
 import { fixture, pose, waitFor } from './tests/helpers.mjs'
 
+const SETUP_BUDGET_MS = 30000
+const maxDurationSeconds = Math.floor((LIMITS.raceMs - SETUP_BUDGET_MS) / 1000)
 const durationSeconds = Number(process.env.SPIKE_SECONDS ?? 30)
-assert(Number.isFinite(durationSeconds) && durationSeconds >= 3 && durationSeconds <= 300)
+assert(Number.isFinite(durationSeconds) && durationSeconds >= 3 && durationSeconds <= maxDurationSeconds,
+  `SPIKE_SECONDS must be between 3 and ${maxDurationSeconds}; reserve 30 seconds for spectator setup before the race deadline`)
 const cleanups = []
 const f = await fixture({ after: callback => cleanups.push(callback) }, { realTime: true })
 const racers = [], watchers = []
@@ -26,13 +29,15 @@ try {
   const received = members.map(client => client.messages.filter(m => m.type === 'poses').length)
   const before = { ...f.relay.metrics }
   const start = performance.now()
+  assert(start + durationSeconds * 1000 < owner.latest.startAt + LIMITS.raceMs - 1000,
+    'Spectator setup took too long for this duration; reduce SPIKE_SECONDS')
   await sleep(durationSeconds * 1000)
   const elapsedMs = performance.now() - start
   const batchesPerClient = members.map((client, index) => client.messages.filter(m => m.type === 'poses').length - received[index])
   assert(batchesPerClient.every(count => count >= durationSeconds * 27))
   assert.equal(f.relay.metrics.skippedBatches, 0)
   assert(members.every(client => client.socket.readyState === 1 && client.invalid.length === 0 && !client.messages.some(m => m.type === 'error')))
-  const result = { protocolVersion: 1, methodology: 'Real local relay and WebSocket clients; no renderer or WAN simulation.',
+  const result = { protocolVersion: PROTOCOL_VERSION, methodology: 'Real local relay and WebSocket clients; no renderer or WAN simulation.',
     durationSeconds, racers: 5, spectators: 20, batchesPerClient,
     acceptedPoses: f.relay.metrics.acceptedPoses - before.acceptedPoses,
     outboundPayloadBytesPerSecond: (f.relay.metrics.outboundBytes - before.outboundBytes) / (elapsedMs / 1000),

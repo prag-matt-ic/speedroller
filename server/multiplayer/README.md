@@ -7,7 +7,7 @@ physics remain local and remote racers do not collide. The frontend connects roo
 
 The Phase 0 relay was extended here, not retained as a second server. Its recorded
 [measurements](../../docs/multiplayer-phase0-results.json) are historical evidence;
-`validate.mjs` now exercises protocol v1 against this service.
+`validate.mjs` now exercises protocol v2 against this service.
 
 ## Run and build
 
@@ -39,12 +39,12 @@ Locally connect to `ws://localhost:8080`. Railway staging terminates TLS for pub
 and SIGINT notify rooms, close sockets, and force remaining connections shut after one
 second. A restart loses all rooms. There is no database or solo leaderboard access.
 
-## Protocol v1
+## Protocol v2
 
 [Shared protocol](../../shared/multiplayer/protocol.mts) exports Zod schemas and inferred
 types for both directions, limits, course matching and `roomUrl()`. Browser consumers
 must parse incoming messages with `serverMessageSchema`. Every client command includes
-`protocolVersion: 1`; unknown properties are rejected. No command accepts a client-
+`protocolVersion: 2`; unknown properties are rejected. No command accepts a client-
 supplied owner or member identity. Commands operate only on the socket's current room.
 
 | Client command | Payload / behaviour |
@@ -56,7 +56,7 @@ supplied owner or member identity. Commands operate only on the socket's current
 | `sync` | Five distinct tokens from recent pongs (within 30 s). Returns `synced`; required before readiness. Tokens are socket-bound. |
 | `ready` | Matching course and initial pose. Send only after assets/course and clock sync are ready. No Ready button is needed. |
 | `start` | Latest snapshot `revision`. Owner-only, 2–5 connected ready racers; atomically closes entry and schedules GO 3 seconds ahead. Stale revision requires a fresh snapshot and explicit retry. |
-| `pose` | Current `raceId`, pose. Racer-only during racing; at most 40/s accepted, clients should send 20/s. |
+| `pose` | Current `raceId`, compact pose tuple (see below). Racer-only during racing; at most 40/s accepted, clients should send 30/s. |
 | `finish` | Current race ID, elapsed milliseconds and a final pose with a newer sequence. Accepted once; no later pose changes that finish. |
 | `snapshot` | Request fresh complete state; useful after asset loading. Does not extend room lifetime. |
 | `new-race` | Completed race ID, owner-only. Reopens the same room URL and resets readiness/poses; needs another explicit Start. |
@@ -80,6 +80,20 @@ A pose has increasing integer `sequence`, bounded world `position`, unit quatern
 client timestamp is treated as authoritative. Keep initial, respawn and finish samples
 explicit. No physics correctness or anti-cheat verification is claimed.
 
+The `pose` command uses `pose: [sequence, respawn, x, y, z, qx, qy, qz, qw]`.
+Use `encodePose()` to round positions to three decimal places and rotation to four.
+The server validates the tuple and normalizes its quaternion when decoding. `ready`,
+`finish` and full snapshots retain named pose fields. Local physics stays full precision.
+
+Movement batches retain the `type`, `protocolVersion`, `roomId`, `raceId`, `revision`
+and `serverTime` envelope. Their `entrants` entries are
+`[slot, receivedAt, sequence, respawn, x, y, z, qx, qy, qz, qw]`, with whole-millisecond
+timestamps. Parsing with `serverMessageSchema` yields `{slot, receivedAt, pose}` objects;
+look up identity and colour by slot in the latest snapshot. Only changed racing poses
+are broadcast, and empty batches are skipped. Congested recipients receive all latest
+poses on recovery. Full snapshots still deliver membership, colours, finishes and DNF
+state, including to late spectators. Version 1 clients must refresh.
+
 `estimateClockOffset()` in [clock.mts](../../shared/multiplayer/clock.mts) uses the
 lowest-RTT sample from at least five exchanges. Record the receipt time locally, apply
 the returned offset to `performance.now()`, and refresh periodically in the future client.
@@ -90,7 +104,7 @@ resuming; never restart a private countdown.
 Every admission receives a `snapshot` before live updates: self/owner identity, owner
 connection status, room revision, course, phase, race ID, GO time, current members and
 frozen entrant slots with poses/status/finishes. Spectators can join waiting, countdown,
-racing or results. The server broadcasts `poses` at up to 20 Hz during racing. The client
+racing or results. The server broadcasts `poses` at up to 30 Hz during racing. The client
 must ignore obsolete race IDs/revisions and use bounded interpolation buffers.
 
 Finishes are sorted by accepted elapsed time rounded to centiseconds; ties share place
@@ -142,6 +156,11 @@ start, countdown cancellation, stale/cross-room messages, late snapshots, finish
 rules, rematch, expiry, heartbeat, validation, connection/message limits and shutdown.
 Queue policy boundaries and the solo username contract have focused checks.
 
+`validate.mjs` accepts `SPIKE_SECONDS` from 3 to 150 seconds with the current
+180-second race limit. Its maximum is derived from `LIMITS.raceMs`, reserving 30 seconds
+for spectator setup; unusually slow setup fails explicitly before measurement. Saved
+results use the shared `PROTOCOL_VERSION`.
+
 The load harness uses this same service with a real clock, five publishers and 20 late
 spectators; it asserts sustained updates for **every** client. Its traffic is synthetic
 and excludes rendering/TLS/WAN. The Phase 0 latency gate and fresh-user manual loading
@@ -159,7 +178,7 @@ the persistent provider ends its current room connection and requires re-entry.
 The loaded game's layout hash includes rows and surface metadata. Serve both clients
 from the same build; course edits during development can correctly produce a mismatch.
 The UI only sends `ready` after existing loading/warmup/placement gates and clock sync.
-Phase 3 connects the shared GO time to the local attempt, sends poses at up to 20 Hz,
+Phase 3 connects the shared GO time to the local attempt, sends poses at up to 30 Hz,
 and displays interpolated remote marbles without physics bodies. Finishes go only to
 the room service; results include ties/DNF and the owner can reopen the room for a
 rematch. Countdown cancellation and rematch both require fresh grid readiness.
@@ -303,12 +322,12 @@ STRESS_SECONDS=3 npm run stress --prefix server/multiplayer
 ```
 
 The harness starts a separate Node server process per scenario, synchronizes five
-racers per room, admits 20 late spectators per room, and publishes at 20 Hz. It saves
+racers per room, admits 20 late spectators per room, and publishes at 30 Hz. It saves
 `results.json` and `server-1-rooms.jsonl` / `server-10-rooms.jsonl` in a unique directory
 under the repository's `.tmp/multiplayer-stress/` (or `STRESS_OUTPUT`). It exits nonzero
 on failed assertions, retains evidence, and shuts down all owned sockets/processes.
 
-Checks require every client to receive at least 18 batches/second, no unexpected errors
+Checks require every client to receive at least 27 batches/second, no unexpected errors
 or disconnects, no congestion/drop counters, enough accepted poses, local ping p99 and
 server event-loop p99 below 100 ms, captured timing/correlation events, and no rooms or
 connections left after cleanup. Reports show the largest per-window server p99, not a

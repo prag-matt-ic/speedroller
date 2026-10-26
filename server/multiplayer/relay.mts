@@ -49,10 +49,10 @@ export function createRelay({ allowedOrigins, now = () => performance.now(), aut
   http.on('upgrade', (request, socket, head) => {
     const ip = clientIp(request, trustRailwayProxy)
     if (!ip || stopping || !request.headers.origin || !allowedOrigins.includes(request.headers.origin)) {
-      socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return
+      socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n', () => socket.destroy()); return
     }
     if (connections.size >= LIMITS.connections || !allowSource(ip, 'connections', LIMITS.connectionsPerMinute)) {
-      socket.end('HTTP/1.1 429 Too Many Requests\r\nConnection: close\r\n\r\n'); return
+      socket.end('HTTP/1.1 429 Too Many Requests\r\nConnection: close\r\n\r\n', () => socket.destroy()); return
     }
     sockets.handleUpgrade(request, socket, head, webSocket => {
       const connection: Connection = { socket: webSocket, ip, id: randomUUID(), room: null, profile: null,
