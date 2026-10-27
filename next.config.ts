@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   reactCompiler: true,
   allowedDevOrigins,
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'speedroller.vercel.app' }],
+        destination: 'https://speedroller.threenix.io/:path*',
+        permanent: true,
+      },
+    ]
+  },
   experimental: {
     cssChunking: true,
     turbopackFileSystemCacheForDev: false,
