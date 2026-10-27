@@ -6,6 +6,7 @@ import { twJoin } from 'tailwind-merge'
 
 import { type PlayerInput, useGameStore } from '@/components/GameProvider'
 import Joystick, { type OnJoystickMove } from '@/components/ui/controls/Joystick'
+import { Keycap } from '@/components/ui/controls/Keycap'
 import { usePageHidden } from '@/hooks/usePageVisibility'
 import { InputType, Overlay, isMovementInputStage } from '@/stores/types'
 
@@ -58,13 +59,9 @@ type KeyProps = {
 
 const Key: FC<KeyProps> = ({ Icon, isActive }) => {
   return (
-    <div
-      className={twJoin(
-        'flex h-7 w-10 items-center bg-stone-900 justify-center rounded-md ',
-        isActive ? 'text-amber-100' : 'text-stone-500',
-      )}>
+    <Keycap isActive={isActive} className="h-7 w-10">
       <Icon size={20} strokeWidth={3} />
-    </div>
+    </Keycap>
   )
 }
 

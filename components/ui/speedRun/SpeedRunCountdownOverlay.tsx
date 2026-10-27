@@ -1,6 +1,6 @@
 'use client'
 import gsap from 'gsap'
-import { LogOutIcon } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowRight, LogOutIcon } from 'lucide-react'
 import { type FC, type Ref, useEffect } from 'react'
 import { type TransitionStatus } from 'react-transition-group'
 import { twJoin } from 'tailwind-merge'
@@ -8,6 +8,7 @@ import { twJoin } from 'tailwind-merge'
 import { useGameStore } from '@/components/GameProvider'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
 import Button from '@/components/ui/Button'
+import { Keycap } from '@/components/ui/controls/Keycap'
 import { usePageHidden } from '@/hooks/usePageVisibility'
 import { InputType, SpeedRunStage } from '@/stores/types'
 
@@ -35,11 +36,6 @@ export const SpeedRunCountdownOverlay: FC<Props> = ({ ref, transitionStatus }) =
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
   const stopSoundFX = useSoundStore((s) => s.stopSoundFX)
   const isPageHidden = usePageHidden()
-
-  const controlsHint =
-    inputType === InputType.JOYSTICK
-      ? 'Stick left and right to steer · pull down to brake · the ball accelerates automatically'
-      : 'A/D or ←/→ to steer · S or ↓ to brake · the ball accelerates automatically'
 
   const isPlacedOnGrid = playerStatus === 'safe'
   const canStart =
@@ -84,11 +80,13 @@ export const SpeedRunCountdownOverlay: FC<Props> = ({ ref, transitionStatus }) =
         'pointer-events-none fixed inset-0 z-200 flex size-full flex-col items-center justify-center gap-6 transition-opacity',
         transitionStatus === 'entering' && 'opacity-100 duration-300',
         transitionStatus === 'entered' && 'opacity-100',
-        transitionStatus === 'exiting' && 'opacity-0 duration-300',
+        transitionStatus === 'exiting' && 'opacity-0 duration-600',
         transitionStatus === 'exited' && 'opacity-0',
       )}>
+      {/* The numbers are absolutely stacked, so the block needs a definite height or the hint
+          rises through them. */}
       <div
-        className="relative flex items-center justify-center"
+        className="relative flex h-[190px] items-center justify-center xl:h-[230px]"
         role="status"
         aria-live="assertive"
         aria-label="Race countdown">
@@ -98,9 +96,7 @@ export const SpeedRunCountdownOverlay: FC<Props> = ({ ref, transitionStatus }) =
         <CountdownNumber id="countdown-go" label="GO" />
       </div>
 
-      <p className="max-w-[min(90vw,32rem)] rounded-full bg-black/50 px-4 py-2 text-center text-sm text-white/80 xl:text-base">
-        {controlsHint}
-      </p>
+      <ControlHint inputType={inputType} />
 
       <div className="pointer-events-auto absolute inset-x-0 bottom-6 flex justify-center">
         <Button
@@ -117,9 +113,49 @@ export const SpeedRunCountdownOverlay: FC<Props> = ({ ref, transitionStatus }) =
   )
 }
 
+const ControlHint: FC<{ inputType: InputType }> = ({ inputType }) => (
+  <div className="flex max-w-[min(90vw,34rem)] flex-col items-center gap-2 rounded-2xl border border-stone-800 bg-stone-950 px-5 py-3 text-center">
+    {inputType === InputType.JOYSTICK ? (
+      <p className="text-sm text-stone-200 xl:text-base">
+        Stick left and right to steer · pull down to brake
+      </p>
+    ) : (
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-stone-200 xl:text-base">
+        <span className="flex items-center gap-2">
+          <span className="flex items-center gap-1">
+            <Keycap className="size-6 text-stone-200">A</Keycap>
+            <Keycap className="size-6 text-stone-200">D</Keycap>
+          </span>
+          <span className="text-xs text-stone-500">or</span>
+          <span className="flex items-center gap-1">
+            <Keycap className="size-6 text-stone-200">
+              <ArrowLeft size={13} strokeWidth={3} aria-hidden="true" />
+            </Keycap>
+            <Keycap className="size-6 text-stone-200">
+              <ArrowRight size={13} strokeWidth={3} aria-hidden="true" />
+            </Keycap>
+          </span>
+          Steer
+        </span>
+        <span className="flex items-center gap-2">
+          <Keycap className="size-6 text-stone-200">S</Keycap>
+          <span className="text-xs text-stone-500">or</span>
+          <Keycap className="size-6 text-stone-200">
+            <ArrowDown size={13} strokeWidth={3} aria-hidden="true" />
+          </Keycap>
+          Brake
+        </span>
+      </div>
+    )}
+    <p className="text-xs text-stone-400 xl:text-sm">The ball accelerates automatically</p>
+  </div>
+)
+
 const CountdownNumber: FC<{ id: string; label: string }> = ({ id, label }) => {
   return (
-    <div id={id} className="absolute text-[120px] font-black opacity-0 xl:text-[140px]">
+    <div
+      id={id}
+      className="absolute text-[180px] leading-none font-black opacity-0 xl:text-[220px]">
       {label}
     </div>
   )

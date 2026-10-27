@@ -149,7 +149,7 @@ const UI: FC<Props> = ({ isMobile }) => {
 
       <Transition
         in={overlay === Overlay.SPEEDRUN_COUNTDOWN}
-        timeout={{ enter: 0, exit: 300 }}
+        timeout={{ enter: 0, exit: 600 }}
         mountOnEnter={true}
         unmountOnExit={true}
         nodeRef={speedRunCountdownOverlay}>
