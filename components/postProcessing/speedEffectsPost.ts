@@ -30,12 +30,12 @@ import type { Node, TextureNode, UniformNode } from 'three/webgpu'
 // Speed-effect tuning, with shallow colour-relative edge grain.
 const BLUR_INTENSITY_EPSILON = 0.001
 const EDGE_BLUR_THRESHOLD = 0.04
-const VIGNETTE_DARKNESS = 0.6
+const VIGNETTE_DARKNESS = 0.5
 const BLUR_BASE_MIX = 0.4
 const BLUR_STEP_FALLOFF = 0.6
 const VIGNETTE_START = 0.4
 const VIGNETTE_SPEED_SHIFT = 0.15
-const VIGNETTE_END = 0.8
+const VIGNETTE_END = 0.9
 const SAMPLE_UV_MIN = 0.001
 const SAMPLE_UV_MAX = 0.999
 const NOISE_DARKEN_AMOUNT = 0.1
