@@ -1,0 +1,3650 @@
+[
+  {
+    "id": "structure-72-gate-column--1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column--1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -21.44,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column--1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -14.440000000000001,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column--1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -7.440000000000001,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -28.44,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -21.44,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -14.440000000000001,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -7.440000000000001,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      7,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column--1-0",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      -0.44,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      6,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column--1-1",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      5.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      6,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column--1-2",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      11.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      6,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-0",
+    "module": "pillar",
+    "position": [
+      18.5,
+      -0.44,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      6,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-1",
+    "module": "pillar",
+    "position": [
+      18.5,
+      5.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      6,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-column-1-2",
+    "module": "pillar",
+    "position": [
+      18.5,
+      11.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      6,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-lintel-0",
+    "module": "pillar",
+    "position": [
+      -17.5,
+      17.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      3,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-lintel-1",
+    "module": "pillar",
+    "position": [
+      -8.5,
+      17.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      3,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-lintel-2",
+    "module": "pillar",
+    "position": [
+      0.5,
+      17.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      3,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-lintel-3",
+    "module": "pillar",
+    "position": [
+      9.5,
+      17.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      3,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-72-gate-lintel-4",
+    "module": "pillar",
+    "position": [
+      18.5,
+      17.56,
+      -68.5
+    ],
+    "dimensions": [
+      9,
+      3,
+      4
+    ],
+    "distance": 40,
+    "frameX": 0.5
+  },
+  {
+    "id": "structure-144-tower-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -32,
+      -28.44,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -32,
+      -20.44,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -32,
+      -12.440000000000001,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-0",
+    "module": "pillar",
+    "position": [
+      -32,
+      -4.44,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-1",
+    "module": "pillar",
+    "position": [
+      -30,
+      -0.2400000000000011,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-2",
+    "module": "pillar",
+    "position": [
+      -32,
+      3.959999999999998,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-3",
+    "module": "pillar",
+    "position": [
+      -30,
+      8.16,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-144-tower-4",
+    "module": "pillar",
+    "position": [
+      -32,
+      12.359999999999996,
+      -140.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 112,
+    "frameX": -31
+  },
+  {
+    "id": "structure-216-cantilever-column-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -8,
+      -28.44,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-column-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -8,
+      -20.10666666666667,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-column-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -8,
+      -11.773333333333333,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-column-0",
+    "module": "pillar",
+    "position": [
+      -8,
+      -3.44,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-column-1",
+    "module": "pillar",
+    "position": [
+      -8,
+      0.7599999999999993,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-column-2",
+    "module": "pillar",
+    "position": [
+      -8,
+      4.959999999999999,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-column-3",
+    "module": "pillar",
+    "position": [
+      -8,
+      9.16,
+      -212.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-216-cantilever-cap",
+    "module": "pillar",
+    "position": [
+      -3.5,
+      13.359999999999998,
+      -212.5
+    ],
+    "dimensions": [
+      18,
+      2.0999999999999996,
+      4
+    ],
+    "distance": 184,
+    "frameX": 9.5
+  },
+  {
+    "id": "structure-288-wall-0-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -32,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-0-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -32,
+      -19.773333333333333,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-0-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -32,
+      -11.10666666666667,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -26,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -26,
+      -19.773333333333333,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -26,
+      -11.10666666666667,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-2-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -20,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-2-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -20,
+      -19.773333333333333,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-2-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -20,
+      -11.10666666666667,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -14,
+      -28.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -14,
+      -19.773333333333333,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -14,
+      -11.10666666666667,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-0-0",
+    "module": "pillar",
+    "position": [
+      -32,
+      -2.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-1-0",
+    "module": "pillar",
+    "position": [
+      -26,
+      -2.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-1-1",
+    "module": "pillar",
+    "position": [
+      -26,
+      1.56,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-2-0",
+    "module": "pillar",
+    "position": [
+      -20,
+      -2.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-2-1",
+    "module": "pillar",
+    "position": [
+      -20,
+      1.56,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-2-2",
+    "module": "pillar",
+    "position": [
+      -20,
+      5.5600000000000005,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-0",
+    "module": "pillar",
+    "position": [
+      -14,
+      -2.44,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-1",
+    "module": "pillar",
+    "position": [
+      -14,
+      1.56,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-2",
+    "module": "pillar",
+    "position": [
+      -14,
+      5.5600000000000005,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-288-wall-3-3",
+    "module": "pillar",
+    "position": [
+      -14,
+      9.56,
+      -284.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 256,
+    "frameX": -23
+  },
+  {
+    "id": "structure-360-gate-column--1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column--1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      -21.44,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column--1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      -14.440000000000001,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column--1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      -7.440000000000001,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      -28.44,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      -21.44,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      -14.440000000000001,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      -7.440000000000001,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column--1-0",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      -0.44,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column--1-1",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      5.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column--1-2",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      11.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-0",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      -0.44,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-1",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      5.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-column-1-2",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      11.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-lintel-0",
+    "module": "pillar",
+    "position": [
+      -0.16666666666666785,
+      17.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-lintel-1",
+    "module": "pillar",
+    "position": [
+      12.166666666666666,
+      17.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-lintel-2",
+    "module": "pillar",
+    "position": [
+      24.5,
+      17.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-lintel-3",
+    "module": "pillar",
+    "position": [
+      36.833333333333336,
+      17.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-360-gate-lintel-4",
+    "module": "pillar",
+    "position": [
+      49.16666666666667,
+      17.56,
+      -356.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 328,
+    "frameX": 24.5
+  },
+  {
+    "id": "structure-432-tower-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      66,
+      -28.44,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      66,
+      -20.44,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      66,
+      -12.440000000000001,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-0",
+    "module": "pillar",
+    "position": [
+      66,
+      -4.44,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-1",
+    "module": "pillar",
+    "position": [
+      68,
+      -0.2400000000000011,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-2",
+    "module": "pillar",
+    "position": [
+      66,
+      3.959999999999998,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-3",
+    "module": "pillar",
+    "position": [
+      68,
+      8.16,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-432-tower-4",
+    "module": "pillar",
+    "position": [
+      66,
+      12.359999999999996,
+      -428.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 400,
+    "frameX": 67
+  },
+  {
+    "id": "structure-504-cantilever-column-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      63,
+      -28.44,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-column-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      63,
+      -20.10666666666667,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-column-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      63,
+      -11.773333333333333,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-column-0",
+    "module": "pillar",
+    "position": [
+      63,
+      -3.44,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-column-1",
+    "module": "pillar",
+    "position": [
+      63,
+      0.7599999999999993,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-column-2",
+    "module": "pillar",
+    "position": [
+      63,
+      4.959999999999999,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-column-3",
+    "module": "pillar",
+    "position": [
+      63,
+      9.16,
+      -500.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-504-cantilever-cap",
+    "module": "pillar",
+    "position": [
+      58.5,
+      13.359999999999998,
+      -500.5
+    ],
+    "dimensions": [
+      18,
+      2.0999999999999996,
+      4
+    ],
+    "distance": 472,
+    "frameX": 41
+  },
+  {
+    "id": "structure-576-wall-0-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      91,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-0-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      91,
+      -19.773333333333333,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-0-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      91,
+      -11.10666666666667,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      97,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      97,
+      -19.773333333333333,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      97,
+      -11.10666666666667,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-2-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      103,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-2-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      103,
+      -19.773333333333333,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-2-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      103,
+      -11.10666666666667,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      109,
+      -28.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      109,
+      -19.773333333333333,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      109,
+      -11.10666666666667,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-0-0",
+    "module": "pillar",
+    "position": [
+      91,
+      -2.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-1-0",
+    "module": "pillar",
+    "position": [
+      97,
+      -2.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-1-1",
+    "module": "pillar",
+    "position": [
+      97,
+      1.56,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-2-0",
+    "module": "pillar",
+    "position": [
+      103,
+      -2.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-2-1",
+    "module": "pillar",
+    "position": [
+      103,
+      1.56,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-2-2",
+    "module": "pillar",
+    "position": [
+      103,
+      5.5600000000000005,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-0",
+    "module": "pillar",
+    "position": [
+      109,
+      -2.44,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-1",
+    "module": "pillar",
+    "position": [
+      109,
+      1.56,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-2",
+    "module": "pillar",
+    "position": [
+      109,
+      5.5600000000000005,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-576-wall-3-3",
+    "module": "pillar",
+    "position": [
+      109,
+      9.56,
+      -572.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 544,
+    "frameX": 100
+  },
+  {
+    "id": "structure-648-gate-column--1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column--1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      -21.44,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column--1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      -14.440000000000001,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column--1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      -7.440000000000001,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      -28.44,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      -21.44,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      -14.440000000000001,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      -7.440000000000001,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      7,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column--1-0",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      -0.44,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      6,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column--1-1",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      5.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      6,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column--1-2",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      11.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      6,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-0",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      -0.44,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      6,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-1",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      5.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      6,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-column-1-2",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      11.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      6,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-lintel-0",
+    "module": "pillar",
+    "position": [
+      51.16666666666667,
+      17.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      3,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-lintel-1",
+    "module": "pillar",
+    "position": [
+      60.833333333333336,
+      17.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      3,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-lintel-2",
+    "module": "pillar",
+    "position": [
+      70.5,
+      17.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      3,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-lintel-3",
+    "module": "pillar",
+    "position": [
+      80.16666666666667,
+      17.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      3,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-648-gate-lintel-4",
+    "module": "pillar",
+    "position": [
+      89.83333333333333,
+      17.56,
+      -644.5
+    ],
+    "dimensions": [
+      9.666666666666666,
+      3,
+      4
+    ],
+    "distance": 616,
+    "frameX": 70.5
+  },
+  {
+    "id": "structure-720-tower-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -81,
+      -28.44,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -81,
+      -20.44,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -81,
+      -12.440000000000001,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-0",
+    "module": "pillar",
+    "position": [
+      -81,
+      -4.44,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-1",
+    "module": "pillar",
+    "position": [
+      -79,
+      -0.2400000000000011,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-2",
+    "module": "pillar",
+    "position": [
+      -81,
+      3.959999999999998,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-3",
+    "module": "pillar",
+    "position": [
+      -79,
+      8.16,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-720-tower-4",
+    "module": "pillar",
+    "position": [
+      -81,
+      12.359999999999996,
+      -716.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 688,
+    "frameX": -80
+  },
+  {
+    "id": "structure-792-cantilever-column-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -57,
+      -28.44,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-column-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -57,
+      -20.10666666666667,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-column-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -57,
+      -11.773333333333333,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-column-0",
+    "module": "pillar",
+    "position": [
+      -57,
+      -3.44,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-column-1",
+    "module": "pillar",
+    "position": [
+      -57,
+      0.7599999999999993,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-column-2",
+    "module": "pillar",
+    "position": [
+      -57,
+      4.959999999999999,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-column-3",
+    "module": "pillar",
+    "position": [
+      -57,
+      9.16,
+      -788.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-792-cantilever-cap",
+    "module": "pillar",
+    "position": [
+      -52.5,
+      13.359999999999998,
+      -788.5
+    ],
+    "dimensions": [
+      18,
+      2.0999999999999996,
+      4
+    ],
+    "distance": 760,
+    "frameX": -39.5
+  },
+  {
+    "id": "structure-864-wall-0-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -82,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-0-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -82,
+      -19.773333333333333,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-0-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -82,
+      -11.10666666666667,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -76,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -76,
+      -19.773333333333333,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -76,
+      -11.10666666666667,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-2-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -70,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-2-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -70,
+      -19.773333333333333,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-2-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -70,
+      -11.10666666666667,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -64,
+      -28.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -64,
+      -19.773333333333333,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -64,
+      -11.10666666666667,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-0-0",
+    "module": "pillar",
+    "position": [
+      -82,
+      -2.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-1-0",
+    "module": "pillar",
+    "position": [
+      -76,
+      -2.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-1-1",
+    "module": "pillar",
+    "position": [
+      -76,
+      1.56,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-2-0",
+    "module": "pillar",
+    "position": [
+      -70,
+      -2.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-2-1",
+    "module": "pillar",
+    "position": [
+      -70,
+      1.56,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-2-2",
+    "module": "pillar",
+    "position": [
+      -70,
+      5.5600000000000005,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-0",
+    "module": "pillar",
+    "position": [
+      -64,
+      -2.44,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-1",
+    "module": "pillar",
+    "position": [
+      -64,
+      1.56,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-2",
+    "module": "pillar",
+    "position": [
+      -64,
+      5.5600000000000005,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-864-wall-3-3",
+    "module": "pillar",
+    "position": [
+      -64,
+      9.56,
+      -860.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 832,
+    "frameX": -73
+  },
+  {
+    "id": "structure-936-gate-column--1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column--1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      -21.44,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column--1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      -14.440000000000001,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column--1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      -7.440000000000001,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      -28.44,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      -21.44,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      -14.440000000000001,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-0-foundation-block-3",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      -7.440000000000001,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      7,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column--1-0",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      -0.44,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column--1-1",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      5.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column--1-2",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      11.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-0",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      -0.44,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-1",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      5.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-column-1-2",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      11.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      6,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-lintel-0",
+    "module": "pillar",
+    "position": [
+      -45.16666666666667,
+      17.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-lintel-1",
+    "module": "pillar",
+    "position": [
+      -32.833333333333336,
+      17.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-lintel-2",
+    "module": "pillar",
+    "position": [
+      -20.5,
+      17.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-lintel-3",
+    "module": "pillar",
+    "position": [
+      -8.166666666666666,
+      17.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-936-gate-lintel-4",
+    "module": "pillar",
+    "position": [
+      4.166666666666668,
+      17.56,
+      -932.5
+    ],
+    "dimensions": [
+      12.333333333333334,
+      3,
+      4
+    ],
+    "distance": 904,
+    "frameX": -20.5
+  },
+  {
+    "id": "structure-1008-tower-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      23,
+      -28.44,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      23,
+      -20.44,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      23,
+      -12.440000000000001,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      8,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-0",
+    "module": "pillar",
+    "position": [
+      23,
+      -4.44,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-1",
+    "module": "pillar",
+    "position": [
+      25,
+      -0.2400000000000011,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-2",
+    "module": "pillar",
+    "position": [
+      23,
+      3.959999999999998,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-3",
+    "module": "pillar",
+    "position": [
+      25,
+      8.16,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1008-tower-4",
+    "module": "pillar",
+    "position": [
+      23,
+      12.359999999999996,
+      -1004.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      6
+    ],
+    "distance": 976,
+    "frameX": 24
+  },
+  {
+    "id": "structure-1080-cantilever-column-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      13,
+      -28.44,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-column-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      13,
+      -20.10666666666667,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-column-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      13,
+      -11.773333333333333,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      8.333333333333334,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-column-0",
+    "module": "pillar",
+    "position": [
+      13,
+      -3.44,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-column-1",
+    "module": "pillar",
+    "position": [
+      13,
+      0.7599999999999993,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-column-2",
+    "module": "pillar",
+    "position": [
+      13,
+      4.959999999999999,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-column-3",
+    "module": "pillar",
+    "position": [
+      13,
+      9.16,
+      -1076.5
+    ],
+    "dimensions": [
+      6,
+      4.199999999999999,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1080-cantilever-cap",
+    "module": "pillar",
+    "position": [
+      8.5,
+      13.359999999999998,
+      -1076.5
+    ],
+    "dimensions": [
+      18,
+      2.0999999999999996,
+      4
+    ],
+    "distance": 1048,
+    "frameX": -4.5
+  },
+  {
+    "id": "structure-1152-wall-0-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      32,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-0-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      32,
+      -19.773333333333333,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-0-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      32,
+      -11.10666666666667,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-1-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      38,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-1-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      38,
+      -19.773333333333333,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-1-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      38,
+      -11.10666666666667,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-2-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      44,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-2-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      44,
+      -19.773333333333333,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-2-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      44,
+      -11.10666666666667,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-0-foundation-block-0",
+    "module": "pillar",
+    "position": [
+      50,
+      -28.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-0-foundation-block-1",
+    "module": "pillar",
+    "position": [
+      50,
+      -19.773333333333333,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-0-foundation-block-2",
+    "module": "pillar",
+    "position": [
+      50,
+      -11.10666666666667,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      8.666666666666666,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-0-0",
+    "module": "pillar",
+    "position": [
+      32,
+      -2.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-1-0",
+    "module": "pillar",
+    "position": [
+      38,
+      -2.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-1-1",
+    "module": "pillar",
+    "position": [
+      38,
+      1.56,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-2-0",
+    "module": "pillar",
+    "position": [
+      44,
+      -2.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-2-1",
+    "module": "pillar",
+    "position": [
+      44,
+      1.56,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-2-2",
+    "module": "pillar",
+    "position": [
+      44,
+      5.5600000000000005,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-0",
+    "module": "pillar",
+    "position": [
+      50,
+      -2.44,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-1",
+    "module": "pillar",
+    "position": [
+      50,
+      1.56,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-2",
+    "module": "pillar",
+    "position": [
+      50,
+      5.5600000000000005,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  },
+  {
+    "id": "structure-1152-wall-3-3",
+    "module": "pillar",
+    "position": [
+      50,
+      9.56,
+      -1148.5
+    ],
+    "dimensions": [
+      6,
+      4,
+      4
+    ],
+    "distance": 1120,
+    "frameX": 41
+  }
+]

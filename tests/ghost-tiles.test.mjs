@@ -36,9 +36,19 @@ function evaluate(node) {
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-6, `${actual} != ${expected}`)
 
 test('ghost shader drops midway, clears before arrival at maximum speed, and reverses on retreat', () => {
-  const ahead = uniform(88), isGhost = uniform(1), noise = uniform(0.5)
+  const ahead = uniform(GHOST_DROP_START + 50), isGhost = uniform(1), noise = uniform(0.5)
   const motion = ghostTileMotion(ahead, isGhost, noise)
-  for (const [distance, drop, opacity] of [[88, 0, 1], [48, 0, 1], [36, -2.5, 1], [24, -10, 0], [0, -10, 0], [-100, -10, 0], [36, -2.5, 1], [48, 0, 1]]) {
+  const dropMidpoint = (GHOST_DROP_START + GHOST_DROP_END) / 2
+  for (const [distance, drop, opacity] of [
+    [GHOST_DROP_START + 50, 0, 1],
+    [GHOST_DROP_START, 0, 1],
+    [dropMidpoint, -GHOST_DROP_DEPTH / 4, 1],
+    [GHOST_DROP_END, -GHOST_DROP_DEPTH, 0],
+    [0, -GHOST_DROP_DEPTH, 0],
+    [-100, -GHOST_DROP_DEPTH, 0],
+    [dropMidpoint, -GHOST_DROP_DEPTH / 4, 1],
+    [GHOST_DROP_START, 0, 1],
+  ]) {
     ahead.value = distance
     close(evaluate(motion.offsetY), drop)
     close(evaluate(motion.opacity), opacity)

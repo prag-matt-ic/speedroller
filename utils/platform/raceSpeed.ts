@@ -15,7 +15,7 @@
 /** Automatic speed with no boost, in world units per second. */
 export const RACE_CRUISE_SPEED = 19
 /** Hard cap, reachable only with ring boost. */
-export const RACE_MAX_SPEED = 28
+export const RACE_MAX_SPEED = 32
 /** Sideways travel while racing, independent of forward speed. */
 export const RACE_STEER_SPEED = 8
 /** Forward acceleration and brake-release ramp, in units per second squared. */
@@ -26,8 +26,8 @@ export const RACE_BRAKE_DECELERATION = 22
 export const RING_BOOST_SPEED = 2
 /** Boost ceiling, so boost alone can reach `RACE_MAX_SPEED`. */
 export const RING_BOOST_MAX = RACE_MAX_SPEED - RACE_CRUISE_SPEED
-/** Boost lost per second, so a full boost lasts six seconds. */
-export const RING_BOOST_DECAY = 1.5
+/** Boost lost per second. Lower values keep collected ring speed for longer. */
+export const RING_BOOST_DECAY = 1.2
 /** Manual movement speed outside the race, matching the lobby feel. */
 export const LOBBY_SPEED = 8
 /** Downward joystick displacement below this is noise rather than a brake. */

@@ -1,6 +1,8 @@
 import { type FC, type PropsWithChildren, createContext, useContext, useState } from 'react'
 import { type StoreApi, createStore, useStore } from 'zustand'
 
+import type { GalaxyQuality } from '@/components/player/marble/galaxySettings'
+
 import { DEFAULT_MAX_DPR, MIN_AUTO_DPR, stepMaxDprDown } from '@/utils/dpr'
 
 export type RapierSimFPS = 0 | 30 | 60 | 120 // 0 = 'vary'
@@ -20,11 +22,7 @@ export const SCENE_QUALITY_ORDER = [
 
 export type SceneConfig = {
   isDistanceFadeEnabled: boolean
-  marble: {
-    segments: number
-    isFlat: boolean
-    enableVeins: boolean
-  }
+  marble: GalaxyQuality
   ring: {
     radialSegments: number
     tubularSegments: number
@@ -67,10 +65,10 @@ const logPerformanceDebug = (...payload: unknown[]) => {
 }
 
 // Floating scenery is temporarily disabled while the floor material is being refined.
-const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
+export const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
   [SceneQuality.HIGH]: {
     isDistanceFadeEnabled: true,
-    marble: { segments: 64, isFlat: false, enableVeins: true },
+    marble: { segments: 64, samples: 6, starCount: 24 },
     ring: { radialSegments: 16, tubularSegments: 32 },
     gem: { particleCount: 160 },
     floatingTiles: { instanceCount: 0 },
@@ -84,7 +82,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
   },
   [SceneQuality.MEDIUM]: {
     isDistanceFadeEnabled: true,
-    marble: { segments: 40, isFlat: false, enableVeins: false },
+    marble: { segments: 40, samples: 4, starCount: 16 },
     ring: { radialSegments: 8, tubularSegments: 16 },
     gem: { particleCount: 80 },
     floatingTiles: { instanceCount: 0 },
@@ -98,7 +96,7 @@ const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
   },
   [SceneQuality.LOW]: {
     isDistanceFadeEnabled: false,
-    marble: { segments: 24, isFlat: true, enableVeins: false },
+    marble: { segments: 24, samples: 3, starCount: 8 },
     ring: { radialSegments: 6, tubularSegments: 12 },
     gem: { particleCount: 40 },
     floatingTiles: { instanceCount: 0 },

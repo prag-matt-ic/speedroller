@@ -213,7 +213,7 @@ rings along an achievable driving line. Establish branch separation gradually; d
 remove the floor immediately under a player who has not yet reached the decision point.
 
 Use at least two seconds of visible approach at target maximum speed for each significant
-split or lateral commitment. At 28 units/sec, this means roughly 56 units of visible road.
+split or lateral commitment. At 32 units/sec, this means roughly 64 units of visible road.
 Rings that announce a branch must be visible before that branch's turn-in point.
 
 Route identities should differ in handling, not just decoration:
@@ -369,13 +369,13 @@ values that survive; change cruise within 18–20 first, then boost decay, then 
 | Constant | Trial value | Purpose |
 | --- | --- | --- |
 | `RACE_CRUISE_SPEED` | 19 units/s | automatic speed with no boost |
-| `RACE_MAX_SPEED` | 28 units/s | hard cap, reached only with ring boost |
+| `RACE_MAX_SPEED` | 32 units/s | hard cap, reached only with ring boost |
 | `RACE_STEER_SPEED` | 8 units/s | sideways travel, unchanged from the lobby feel |
 | `RACE_FORWARD_ACCELERATION` | 14 units/s² | 0→cruise in about 1.4 s, also the brake-release ramp |
 | `RACE_BRAKE_DECELERATION` | 22 units/s² | cruise→0 in about 0.9 s and 8 units of travel |
 | `RING_BOOST_SPEED` | 2 units/s | added per collected ring |
-| `RING_BOOST_MAX` | 9 units/s | `RACE_MAX_SPEED − RACE_CRUISE_SPEED`, so boost alone reaches the cap |
-| `RING_BOOST_DECAY` | 1.5 units/s² | a full boost lasts six seconds and one ring about 1.3 s, matching the existing decay concept |
+| `RING_BOOST_MAX` | 13 units/s | `RACE_MAX_SPEED − RACE_CRUISE_SPEED`, so boost alone reaches the cap |
+| `RING_BOOST_DECAY` | 1.2 units/s² | a full boost lasts about 10.8 s and one ring about 1.7 s |
 | `LOBBY_SPEED` | 8 units/s | unchanged manual lobby movement |
 | `BRAKE_DEADZONE` | 0.15 | ignores joystick noise below this downward displacement |
 
@@ -397,7 +397,7 @@ resetRaceSpeed(state): void
 `stepRaceSpeed` owns every rule in the contract above:
 
 1. Decay `boostUnits` toward 0 by `RING_BOOST_DECAY × delta` on every racing step, braking
-   included, so boost is always a six-second allowance from the last ring.
+   included, so boost is always a timed allowance from the last ring.
 2. While braking, reduce `forwardSpeed` by `RACE_BRAKE_DECELERATION × delta` and floor it at
    exactly 0. Braking ignores the target speed, so a fresh ring cannot push through a stop.
 3. Otherwise move `forwardSpeed` toward `getRaceTargetSpeed(boostUnits)` at
@@ -472,7 +472,7 @@ test already uses:
 - 0→cruise and brake-release acceleration reach the target in the expected time.
 - Braking reaches exactly 0, never goes negative, and overrides a fresh maximum boost.
 - One ring, several rings, and more rings than the cap produce the expected target speed.
-- Boost decays to 0 after six seconds and speed follows down without exceeding the ramp.
+- Boost decays to 0 after its full allowance and speed follows down without exceeding the ramp.
 - One 33 ms step and two 16.5 ms steps agree within tolerance (frame-rate independence).
 - Steering leaves forward speed unchanged except through the brake rule.
 - Reset returns to 0 and clears boost.
@@ -485,7 +485,7 @@ test already uses:
 
 - GO accelerates from the grid to cruise; S/↓ reaches a complete stop and release re-accelerates
   without reverse or a jump.
-- Ring boost raises speed toward 28, decays, and cannot defeat a held brake.
+- Ring boost raises speed toward 32, decays, and cannot defeat a held brake.
 - Fall, retry, and lobby return all restart from rest with no boost; lobby movement is still
   8 units/s manual.
 - No per-frame allocations in the loop; the only store writes remain the position and speed
@@ -496,8 +496,8 @@ test already uses:
 #### Gap handed to the next slice
 
 Ring pickups are sampled once per movement update, and the movement clamp allows 1/15 s per
-sample. At 28 units/s the ball travels 0.47 units per 60 fps update, 0.93 per 30 fps update,
-and up to 1.87 in a clamped slow frame, against a ring-plus-ball overlap radius of about 0.8
+sample. At 32 units/s the ball travels 0.53 units per 60 fps update, 1.07 per 30 fps update,
+and up to 2.13 in a clamped slow frame, against a ring-plus-ball overlap radius of about 0.8
 units. Start and finish lines survive this because their colliders are five units deep in Z;
 rings do not. Until swept pickup or bounded substeps land, 2A results are accepted at 60 fps+
 desktop only, and 30 fps plus variable-timestep pickups are explicitly unverified. That is the
@@ -578,6 +578,17 @@ itself could not be driven there. The first playtest accepted the speed feel and
 tighter high-speed camera with more preview; the first-pass framing recorded under visibility
 above addresses that. Still open: joystick brake gestures, hidden-tab and retry re-checks in a
 device browser, full-course traversal and route timing, and the 30 fps ring-sampling gap.
+
+### Tuning update (26 October 2026)
+
+The race maximum is now 32 units/sec, up from 28; the earlier 35-unit pass was trimmed back, and
+the camera far plane came down to 120 for performance. Cruise is unchanged at 19. Ring boost still
+adds 2 units/sec per ring, but the higher ceiling now gives a 13-unit allowance; decay dropped from
+1.5 to 1.2 units/sec², so a full allowance lasts about 10.8 seconds and one ring about 1.7 seconds.
+The reveal keeps 80 units fully solid (2.5 seconds at top speed) and fades out at 100, inside the
+120 far plane; ghost tiles clear 30 units out (about 0.94 seconds). The sensor gap above is 2.13
+units per clamped frame, so 30 fps pickup reliability still needs the swept-contact or substep
+work. These remain playtest values.
 
 ## Stage 3 The Fold visual world
 

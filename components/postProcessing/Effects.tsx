@@ -1,14 +1,13 @@
 /* eslint-disable react-hooks/immutability */
 'use client'
 
-import { useFrame, useTexture, useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useRenderPipeline, useUniforms } from '@react-three/tsl'
-import { type RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import BloomNode, { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { emissive, mrt, output, uniformTexture, vec4 } from 'three/tsl'
+import { emissive, mrt, output, vec4 } from 'three/tsl'
 import { NeutralToneMapping, NoToneMapping, type PassNode } from 'three/webgpu'
 
-import noiseTexture from '@/assets/textures/postprocessing/noise.webp'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import SceneWarmup from '@/components/SceneWarmup'
 import { speedEffectsNode } from '@/components/postProcessing/speedEffectsPost'
@@ -32,7 +31,7 @@ const createEffectsUniforms = () => ({
 
 /**
  * Speed-driven post-processing: selective bloom from the emissive MRT, then radial blur, edge noise
- * darkening and a vignette.
+ * and a vignette.
  *
  * R3F's default render job calls `state.renderPipeline.render()` when no user job claims the render
  * phase, so this deliberately registers no `useFrame` render job.
@@ -45,9 +44,6 @@ const PostProcessing = () => {
     renderer.toneMapping = isNeutralToneMapping ? NeutralToneMapping : NoToneMapping
   }, [renderer, isNeutralToneMapping])
 
-  const noiseMap = useTexture(noiseTexture.src)
-  // The effect nodes take texture nodes; the loaded Texture is stable for this component's life.
-  const noiseNode = useMemo(() => uniformTexture(noiseMap), [noiseMap])
   const blurSamples = usePerformanceStore((s) => s.sceneConfig.postProcessing.blurSamples)
   const { speedUnits } = usePlayerSpeed()
   const smoothedSpeed = useRef(0)
@@ -91,7 +87,6 @@ const PostProcessing = () => {
         ? speedEffectsNode({
             sceneColor,
             uSpeed,
-            noiseTexture: noiseNode,
             stepCount: blurSamplesRef.current,
           })
         : sceneColor

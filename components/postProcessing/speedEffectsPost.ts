@@ -5,7 +5,9 @@ import {
   If,
   Loop,
   clamp,
+  dot,
   float,
+  fract,
   interleavedGradientNoise,
   length,
   mix,
@@ -14,6 +16,7 @@ import {
   screenSize,
   screenUV,
   select,
+  sin,
   smoothstep,
   time,
   vec2,
@@ -29,7 +32,7 @@ import type { Node, TextureNode, UniformNode } from 'three/webgpu'
 // `screenSize` and a built-in `time`, and a full-screen pass means `vUv` is `screenUV` and
 // `gl_FragCoord` is `screenCoordinate`. What remains here is only the effect maths.
 
-// Tuning carried over from effects.frag.
+// Tuning carried over from effects.frag, except the edge noise, which now lightens.
 const BLUR_INTENSITY_EPSILON = 0.001
 const EDGE_BLUR_THRESHOLD = 0.04
 const VIGNETTE_DARKNESS = 0.6
@@ -42,7 +45,7 @@ const VIGNETTE_SPEED_SHIFT = 0.15
 const VIGNETTE_END = 0.8
 const SAMPLE_UV_MIN = 0.001
 const SAMPLE_UV_MAX = 0.999
-const NOISE_DARKEN_AMOUNT = 0.24
+const NOISE_LIGHTEN_AMOUNT = 0.3
 const BLUR_FOCUS = /*#__PURE__*/ vec2(0.5, 0.45).toConst()
 const BLUR_DIRECTION_EPSILON = 1e-5
 
@@ -55,7 +58,7 @@ type SpeedTerms = {
   vignetteFade: Node<'float'>
   /** Inverse of the vignette: zero at the centre, one at the edges. */
   edgeMask: Node<'float'>
-  /** Edge mask times speed, clamped. Drives the blur strength. */
+  /** Edge mask times speed, clamped. Drives the blur strength and the edge noise weight. */
   intensity: Node<'float'>
 }
 
@@ -63,7 +66,7 @@ type SpeedTerms = {
  * The terms every part of the effect needs, derived once.
  *
  * The vignette start radius narrows as speed rises, so the vignette tightens under acceleration, and
- * its inverse doubles as the edge-only mask the blur and noise darkening both weight against.
+ * its inverse doubles as the edge-only mask the blur and the edge noise both weight against.
  */
 const deriveSpeedTerms = (uSpeed: UniformNode<'float', number>): SpeedTerms => {
   const signedSpeed = clamp(uSpeed, float(-1), float(1))
@@ -166,48 +169,59 @@ export const radialBlurNode = ({
   })()
 }
 
-export type NoiseDarkeningOptions = {
+// Hash terms for the classic `fract(sin(dot(p, k)) * m)` white noise.
+const WHITE_NOISE_FREQUENCY = /*#__PURE__*/ vec2(12.9898, 78.233).toConst()
+const WHITE_NOISE_MAGNITUDE = 43758.5453
+
+/**
+ * Per-pixel white noise in 0..1.
+ *
+ * Feed it UV-space coordinates rather than pixel coordinates: the hash leans on the sine's fine
+ * structure, which loses precision as the argument grows.
+ */
+export const whiteNoise = /*#__PURE__*/ Fn(([p]: readonly [p: Node<'vec2'>]) =>
+  fract(sin(dot(p, WHITE_NOISE_FREQUENCY)).mul(WHITE_NOISE_MAGNITUDE)),
+).setLayout({
+  name: 'whiteNoise',
+  type: 'float',
+  inputs: [{ name: 'p', type: 'vec2', qualifier: 'in' }],
+})
+
+export type EdgeNoiseOptions = {
   baseColor: Node<'vec3'>
-  noiseTexture: TextureNode
   terms: SpeedTerms
 }
 
 /**
- * Subtle edge noise darkening, so the motion blur does not read as flat. The GLSL's early-out is
- * expressed as a weight that goes to zero wherever the mask or the speed does, keeping it
- * branch-free.
+ * White-noise grain that lightens the edges, weighted by the same edge mask and speed that drive
+ * the radial blur, so it peaks where the blur streaks and is gone at rest and at the centre.
+ *
+ * This replaces the baked noise texture: the hash costs a few ALU ops instead of a texture fetch,
+ * and the weight already reaches zero where the GLSL's early-out used to cut the effect.
  */
-export const noiseDarkeningNode = ({
-  baseColor,
-  noiseTexture,
-  terms,
-}: NoiseDarkeningOptions): Node<'vec3'> => {
-  const noiseSample = noiseTexture.sample(screenUV).r
-  const noiseMask = clamp(noiseSample.mul(terms.edgeMask), float(0), float(1))
-  const amount = clamp(noiseMask.mul(terms.speed), float(0), float(1))
+export const edgeNoiseNode = ({ baseColor, terms }: EdgeNoiseOptions): Node<'vec3'> => {
+  const amount = whiteNoise(screenUV).mul(terms.intensity)
 
-  return mix(baseColor, baseColor.sub(vec3(NOISE_DARKEN_AMOUNT)), amount)
+  return mix(baseColor, baseColor.add(vec3(NOISE_LIGHTEN_AMOUNT)), amount)
 }
 
 export type SpeedEffectsOptions = {
   sceneColor: TextureNode
   uSpeed: UniformNode<'float', number>
-  noiseTexture: TextureNode
   stepCount: number
 }
 
-/** The whole effect: radial blur, then edge noise darkening, then the vignette. */
+/** The whole effect: radial blur, then edge noise, then the vignette. */
 export const speedEffectsNode = ({
   sceneColor,
   uSpeed,
-  noiseTexture,
   stepCount,
 }: SpeedEffectsOptions): Node<'vec4'> => {
   const terms = deriveSpeedTerms(uSpeed)
   const sampled = sceneColor.sample(screenUV)
 
   const blurred = radialBlurNode({ sceneColor, base: sampled, stepCount, terms })
-  const darkened = noiseDarkeningNode({ baseColor: blurred, noiseTexture, terms })
+  const grained = edgeNoiseNode({ baseColor: blurred, terms })
 
-  return vec4(darkened.mul(terms.vignetteFade), sampled.a)
+  return vec4(grained.mul(terms.vignetteFade), sampled.a)
 }

@@ -80,11 +80,11 @@ function simulate(state, seconds, { brake = false, frame = FRAME_60 } = {}) {
 
 test('the trial constants stay inside the design targets', () => {
   assert.ok(RACE_CRUISE_SPEED >= 18 && RACE_CRUISE_SPEED <= 20)
-  assert.equal(RACE_MAX_SPEED, 28)
+  assert.equal(RACE_MAX_SPEED, 32)
   assert.equal(RACE_STEER_SPEED, 8)
   assert.equal(RING_BOOST_SPEED, 2)
   assert.equal(RING_BOOST_MAX, RACE_MAX_SPEED - RACE_CRUISE_SPEED)
-  assert.equal(RING_BOOST_MAX / RING_BOOST_DECAY, 6)
+  assert.equal(RING_BOOST_DECAY, 1.2)
   assert.equal(LOBBY_SPEED, 8)
   assert.ok(BRAKE_DEADZONE > 0 && BRAKE_DEADZONE < 1)
 })
@@ -178,12 +178,13 @@ test('ring boost raises the ceiling and clamps at the maximum', () => {
   assert.equal(getRaceTargetSpeed(state.boostUnits), RACE_MAX_SPEED)
 })
 
-test('boost decays to zero after six seconds and speed follows it down', () => {
+test('boost decays to zero after its full allowance and speed follows it down', () => {
   const state = createRaceSpeedState()
-  addRingBoost(state, 5)
+  addRingBoost(state, Math.ceil(RING_BOOST_MAX / RING_BOOST_SPEED))
   state.forwardSpeed = RACE_MAX_SPEED
 
-  simulate(state, 6 - FRAME_60)
+  const fullAllowanceSeconds = RING_BOOST_MAX / RING_BOOST_DECAY
+  simulate(state, fullAllowanceSeconds - FRAME_60)
   assert.ok(state.boostUnits > 0)
 
   simulate(state, 2 * FRAME_60)

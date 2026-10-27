@@ -1,3 +1,4 @@
+import { createCourseStructures, mixCoursePillars } from './utils/createCourseStructures'
 import { courseDocumentSchema, MAX_CONFETTI_ROW_WIDTH, validateCourse, type CourseDocument } from '../utils/editor/courseDocument'
 import { createCoursePillars } from './utils/createCoursePillars'
 import { createCylinderPillars } from './utils/createCylinderPillars'
@@ -1166,9 +1167,11 @@ export async function compilePlatform(override?: CourseDocument, sourceDirectory
   }
   parser.validateRaceMode(modes[GameMode.SPEEDRUN], !!document)
   const outputs: PlatformOutput[] = []
+  const structures = createCourseStructures(modes[GameMode.SPEEDRUN].rows, surfaces[GameMode.SPEEDRUN])
+  outputs.push({ path: path.resolve('resources/courseStructures.json'), content: JSON.stringify(structures, null, 2) + '\n' })
   if (surfaces[GameMode.SPEEDRUN].topology === 'cylinder') {
     const pillars = createCylinderPillars(modes[GameMode.SPEEDRUN].rows, surfaces[GameMode.SPEEDRUN])
-    outputs.push({ path: path.resolve('resources/coursePillars.json'), content: JSON.stringify(pillars, null, 2) + '\n' })
+    outputs.push({ path: path.resolve('resources/coursePillars.json'), content: JSON.stringify(mixCoursePillars(pillars, structures), null, 2) + '\n' })
   } else {
     const architectureImage = await sharp(path.join(directory, 'architecture/recovery.png')).removeAlpha().raw().toBuffer({ resolveWithObject: true })
     const pillars = parseArchitecture(architectureImage.data, architectureImage.info.width, architectureImage.info.height)
@@ -1180,7 +1183,7 @@ export async function compilePlatform(override?: CourseDocument, sourceDirectory
       { path: path.resolve('docs/race-course/recovery-pillars.svg'), content: preview },
       { path: path.resolve('docs/race-course/recovery-pillars.png'), content: await sharp(Buffer.from(preview)).png().toBuffer() },
       { path: path.resolve('resources/recoveryPillars.json'), content: JSON.stringify(pillars, null, 2) + '\n' },
-      { path: path.resolve('resources/coursePillars.json'), content: JSON.stringify(coursePillars, null, 2) + '\n' },
+      { path: path.resolve('resources/coursePillars.json'), content: JSON.stringify(mixCoursePillars(coursePillars, structures), null, 2) + '\n' },
     )
   }
   for (const [mode, data] of Object.entries(modes)) {

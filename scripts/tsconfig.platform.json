@@ -15,5 +15,5 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["./buildPlatformRows.ts", "../stores/**/*", "../utils/**/*"]
+  "include": ["./buildPlatformRows.ts"]
 }

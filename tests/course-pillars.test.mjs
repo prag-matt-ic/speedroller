@@ -4,13 +4,14 @@ import { test } from 'node:test'
 import { loadTypeScript } from './loadTypeScript.mjs'
 
 const { createCylinderPillars, cylinderPillarIsClear } = loadTypeScript('scripts/utils/createCylinderPillars.ts')
+const { createCourseStructures, mixCoursePillars } = loadTypeScript('scripts/utils/createCourseStructures.ts')
 const { PLATFORM_DATA } = loadTypeScript('resources/rowsData.ts')
 const { rows, surface } = PLATFORM_DATA.modes.speedrun
 const { colToX, rowToWorldZ, TILE_SURFACE_Y } = loadTypeScript('utils/tiles.ts')
 
 test('cylinder pillars are deterministic and their entire projected volume clears all floor', () => {
   const actual = createCylinderPillars(rows, surface)
-  assert.deepEqual(actual, JSON.parse(readFileSync('resources/coursePillars.json', 'utf8')))
+  assert.deepEqual(mixCoursePillars(actual, createCourseStructures(rows, surface)), JSON.parse(readFileSync('resources/coursePillars.json', 'utf8')))
   assert.deepEqual(actual, createCylinderPillars(rows, surface))
   assert.ok(actual.length > 100)
   assert.equal(new Set(actual.map(pillar => pillar.id)).size, actual.length)

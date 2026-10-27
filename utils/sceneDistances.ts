@@ -1,8 +1,9 @@
-// World units. Keep the reveal window inside the far plane, allowing for the trailing
-// camera, pillar depth/height and the course's diagonal spread.
-export const CAMERA_FAR = 110
-export const TILE_PLAYER_FADE_FULL_RADIUS = 64
-export const TILE_PLAYER_FADE_MIN_RADIUS = 88
+// World units. The reveal is sized for the 32 u/s race maximum: 80 units of solid road is two and
+// a half seconds ahead at top speed, with the fade complete at 100. The 120 far plane leaves 20
+// units of margin for the trailing camera, pillar depth/height and the course's diagonal spread.
+export const CAMERA_FAR = 120
+export const TILE_PLAYER_FADE_FULL_RADIUS = 80
+export const TILE_PLAYER_FADE_MIN_RADIUS = 100
 export const TILE_PLAYER_FADE_MIN_ALPHA = 0
 export const ELEMENT_FADE_DISTANCE = TILE_PLAYER_FADE_MIN_RADIUS
 

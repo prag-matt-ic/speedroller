@@ -6,8 +6,8 @@ import { Vector3 } from 'three/webgpu'
 
 const MIN_TRANSITION_SPEED = 1.5
 // The follow goal moves at race speed, and an eased follow settles at roughly speed / this cap of
-// trailing distance. At 28 units/sec the old 4.8 cap trailed nearly six units behind the ball;
-// 12 keeps that under two and a half without making ordinary camera transitions snap.
+// trailing distance. 12 keeps that at about 2.7 units at the 32 units/sec race maximum without
+// making ordinary camera transitions snap.
 const MAX_TRANSITION_SPEED = 12
 const TRANSITION_DISTANCE_SCALE = 0.2
 const ZOOM_TRANSITION_SPEED = 4
