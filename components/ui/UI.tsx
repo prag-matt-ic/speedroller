@@ -49,7 +49,7 @@ const UI: FC<Props> = ({ isMobile }) => {
           'pointer-events-none fixed inset-x-0 top-0 z-100 grid w-full grid-cols-3 grid-rows-1 items-center gap-x-2 pt-2 transition-opacity duration-300 select-none xl:pt-3',
           overlay === Overlay.LANDING ? 'opacity-0' : 'opacity-100',
         )}>
-        {/* Lobby guidance, then race controls only while a run is live. */}
+        {/* Race controls only while a run is live. */}
         <section
           ref={infoContainer}
           className={twJoin(

@@ -21,8 +21,8 @@ export type PanelProps = PropsWithChildren<{
 
 const CONTAINER_STRENGTH_CLASSES: Record<Strength, string> = {
   1: 'border-amber-100/8 bg-stone-950/80',
-  2: 'border-amber-100/16 bg-stone-950/90',
-  3: 'border-amber-100/24 bg-stone-950/20',
+  2: 'border-amber-100/12 bg-stone-950/90',
+  3: 'border-amber-100/16 bg-stone-950/95',
 }
 
 const Panel: FC<PanelProps> = ({
@@ -30,7 +30,7 @@ const Panel: FC<PanelProps> = ({
   className,
   children,
   enableAttractor = true,
-  attractorClassName = 'bg-amber-400/10',
+  attractorClassName = 'bg-amber-400/35',
 }) => {
   const { ref, inViewport } = useInViewport()
   const container = useRef<HTMLDivElement>(null)
@@ -49,7 +49,7 @@ const Panel: FC<PanelProps> = ({
       ref={mergedRef}
       {...(containerHandlers ?? {})}
       className={twMerge(
-        'relative overflow-hidden rounded-2xl border p-4 backdrop-blur-sm lg:p-6',
+        'relative overflow-hidden rounded-2xl border p-4 lg:p-6',
         CONTAINER_STRENGTH_CLASSES[strength],
         className,
       )}>
