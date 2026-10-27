@@ -11,15 +11,12 @@ import {
   interleavedGradientNoise,
   length,
   mix,
-  normalize,
   screenCoordinate,
   screenSize,
   screenUV,
   sin,
   smoothstep,
-  time,
   vec2,
-  vec3,
   vec4,
 } from 'three/tsl'
 import type { Node, TextureNode, UniformNode } from 'three/webgpu'
@@ -27,15 +24,13 @@ import type { Node, TextureNode, UniformNode } from 'three/webgpu'
 // Port of postProcessing/effects.frag as composed TSL nodes.
 //
 // The GLSL ran as one full-screen shader fed by `uSceneTexture`, `uResolution` and `uTime` uniforms.
-// None of those survive: the render pipeline supplies the scene as a texture node, TSL has
-// `screenSize` and a built-in `time`, and a full-screen pass means `vUv` is `screenUV` and
-// `gl_FragCoord` is `screenCoordinate`. What remains here is only the effect maths.
+// The render pipeline supplies the scene texture, TSL provides `screenSize`, and static jitter
+// needs no time uniform. The full-screen pass uses `screenUV` and `screenCoordinate` for pixels.
 
-// Tuning carried over from effects.frag, except the edge noise, which now lightens.
+// Speed-effect tuning, with shallow colour-relative edge grain.
 const BLUR_INTENSITY_EPSILON = 0.001
 const EDGE_BLUR_THRESHOLD = 0.04
 const VIGNETTE_DARKNESS = 0.6
-const NOISE_JITTER_SCALE = 0.006
 const BLUR_BASE_MIX = 0.4
 const BLUR_STEP_FALLOFF = 0.6
 const VIGNETTE_START = 0.4
@@ -43,9 +38,8 @@ const VIGNETTE_SPEED_SHIFT = 0.15
 const VIGNETTE_END = 0.8
 const SAMPLE_UV_MIN = 0.001
 const SAMPLE_UV_MAX = 0.999
-const NOISE_DARKEN_AMOUNT = 0.3
+const NOISE_DARKEN_AMOUNT = 0.1
 const BLUR_FOCUS = /*#__PURE__*/ vec2(0.5, 0.45).toConst()
-const BLUR_DIRECTION_EPSILON = 1e-5
 
 type SpeedTerms = {
   /** Signed, clamped input speed. */
@@ -126,17 +120,11 @@ export const radialBlurNode = ({
       () => {
         const directionSign = signedSpeed.greaterThanEqual(0).select(float(1), float(-1))
         const blurOffset = BLUR_FOCUS.sub(screenUV).mul(directionSign)
-        const radialDirection = normalize(blurOffset.add(BLUR_DIRECTION_EPSILON))
-        const jitterDirection = vec2(radialDirection.y.negate(), radialDirection.x)
         const inverseSteps = float(1 / taps)
-
-        // Both offsets are tap-invariant, so they are computed once outside the loop. Each tap then only
-        // scales the blur offset by its step and adds the shared jitter.
-        const jitter = interleavedGradientNoise(screenCoordinate.xy.add(time))
-          .sub(0.5)
-          .mul(NOISE_JITTER_SCALE)
-        const jitteredUv = screenUV.add(jitterDirection.mul(jitter)).toVar()
-        const stepOffset = blurOffset.mul(intensity).mul(BLUR_BASE_MIX).toVar()
+        const sampleStep = blurOffset.mul(intensity).mul(BLUR_BASE_MIX).mul(inverseSteps).toVar()
+        // Jitter within each tap interval without extending the maximum blur reach.
+        const jitter = interleavedGradientNoise(screenCoordinate.xy).sub(1)
+        const sampleUv = screenUV.add(sampleStep.mul(jitter)).toVar()
 
         const accumulated = base.rgb.toVar()
         const weightSum = float(1).toVar()
@@ -144,12 +132,12 @@ export const radialBlurNode = ({
         Loop(taps, ({ i: stepIndex }) => {
           // The GLSL indexed taps from 1, so a zero counter must give a step of 1/taps.
           const stepT = stepIndex.add(1).toFloat().mul(inverseSteps)
-          const sampleUv = jitteredUv
-            .add(stepOffset.mul(stepT))
-            .clamp(SAMPLE_UV_MIN, SAMPLE_UV_MAX)
+          sampleUv.addAssign(sampleStep)
 
           const weight = float(1).sub(stepT.mul(BLUR_STEP_FALLOFF)).mul(intensity)
-          accumulated.addAssign(sceneColor.sample(sampleUv).rgb.mul(weight))
+          accumulated.addAssign(
+            sceneColor.sample(sampleUv.clamp(SAMPLE_UV_MIN, SAMPLE_UV_MAX)).rgb.mul(weight),
+          )
           weightSum.addAssign(weight)
         })
         blurred.assign(mix(base.rgb, accumulated.div(weightSum), intensity))
@@ -193,8 +181,8 @@ export type EdgeNoiseOptions = {
 export const edgeNoiseNode = ({ baseColor, terms }: EdgeNoiseOptions): Node<'vec3'> => {
   const amount = whiteNoise(screenUV).mul(terms.intensity)
 
-  // mix(base, base + k, amount) is base + k * amount: one mad instead of a mix.
-  return baseColor.sub(vec3(NOISE_DARKEN_AMOUNT).mul(amount))
+  // Relative darkening keeps grain shallow on shadows as well as bright backgrounds.
+  return baseColor.mul(float(1).sub(amount.mul(NOISE_DARKEN_AMOUNT)))
 }
 
 export type SpeedEffectsOptions = {

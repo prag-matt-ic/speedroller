@@ -33,18 +33,21 @@ const node = (...input) => {
     assign(other) { components.splice(0, components.length, ...values(other)) },
   }
 }
-const Fn = callback => Object.assign((...args) => callback(...args), { setLayout() { return this } })
+const Fn = callback => Object.assign((...args) => args.length ? callback(args) : callback(), { setLayout() { return this } })
 const uv = node(0.8, 0.5)
-const { radialBlurNode } = loadTypeScript('components/postProcessing/speedEffectsPost.ts', {
+let jitterNoise = 1
+const { radialBlurNode, edgeNoiseNode } = loadTypeScript('components/postProcessing/speedEffectsPost.ts', {
   'three/tsl': {
     Fn,
     If: (condition, callback) => { if (condition.values[0]) callback() },
     Loop: (count, callback) => { for (let i = 0; i < count; i++) callback({ i: node(i) }) },
     float: node, vec2: node,
-    normalize: input => input.div(Math.hypot(...input.values)),
+    dot: (a, b) => node(a.values.reduce((sum, value, index) => sum + value * b.values[index], 0)),
+    sin: input => node(Math.sin(input.values[0])),
+    fract: input => node(input.values[0] - Math.floor(input.values[0])),
     mix: (a, b, amount) => a.add(b.sub(a).mul(amount)),
-    screenUV: uv, screenCoordinate: { xy: uv }, time: 0,
-    interleavedGradientNoise: () => node(0.5),
+    screenUV: uv, screenCoordinate: { xy: uv },
+    interleavedGradientNoise: () => node(jitterNoise),
   },
 })
 
@@ -59,21 +62,42 @@ test('clear pixels and idle speed skip all taps and preserve the base colour', (
   }
 })
 
-test('active blur samples in either direction and reaches 40% of the focus distance', () => {
-  for (const direction of [-1, 1]) {
+test('jitter follows evenly spaced streak taps in either direction, within 40% reach', () => {
+  const tapCounts = Object.values(SCENE_CONFIGS).map(config => config.postProcessing.blurSamples).filter(Boolean)
+  for (const taps of tapCounts) for (const direction of [-1, 1]) for (const noise of [0, 0.5, 1]) {
+    jitterNoise = noise
     const samples = []
     const result = radialBlurNode({
       sceneColor: { sample: sampleUv => { samples.push([...sampleUv.values]); return node(1, 1, 1, 0.8) } },
-      base: node(1, 1, 1, 0.8), stepCount: 8,
+      base: node(1, 1, 1, 0.8), stepCount: taps,
       terms: { signedSpeed: node(direction), speed: node(1), edgeMask: node(1), intensity: node(1) },
     })
-    assert.equal(samples.length, 8)
-    for (let axis = 0; axis < 2; axis++) {
+    assert.equal(samples.length, taps)
+    for (let index = 0; index < samples.length; index++) for (let axis = 0; axis < 2; axis++) {
       const focus = [0.5, 0.45][axis]
-      const expected = uv.values[axis] + (focus - uv.values[axis]) * direction * 0.4
-      assert.ok(Math.abs(samples.at(-1)[axis] - expected) < 1e-12)
+      const expected = uv.values[axis] + (focus - uv.values[axis]) * direction * 0.4 * (index + noise) / taps
+      assert.ok(Math.abs(samples[index][axis] - expected) < 1e-12)
     }
     assert.ok(result.values.every(value => Math.abs(value - 1) < 1e-12), 'blur preserves a constant colour')
+  }
+})
+
+test('edge grain stays shallow on shadows and HDR colours, and vanishes at zero intensity', () => {
+  const originalUv = [...uv.values]
+  try {
+    for (const point of [[0.01, 0.3], [0.8, 0.5], [0.99, 0.99]]) {
+      uv.assign(node(...point))
+      for (const base of [0, 0.01, 0.5, 2]) {
+        const baseColor = node(base, base * 0.5, base * 0.25)
+        const shade = intensity => edgeNoiseNode({ baseColor, terms: { intensity: node(intensity) } }).values
+        assert.deepEqual(shade(0), baseColor.values)
+        const full = shade(1)
+        assert.ok(full.every((value, index) => value >= baseColor.values[index] * 0.9 && value <= baseColor.values[index]))
+        assert.ok(shade(0.5).every((value, index) => Math.abs(value - (baseColor.values[index] + full[index]) / 2) < 1e-12))
+      }
+    }
+  } finally {
+    uv.assign(node(...originalUv))
   }
 })
 
