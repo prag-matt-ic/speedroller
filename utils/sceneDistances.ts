@@ -2,6 +2,10 @@
 // a half seconds ahead at top speed, with the fade complete at 100. The 120 far plane leaves 20
 // units of margin for the trailing camera, pillar depth/height and the course's diagonal spread.
 export const CAMERA_FAR = 120
+
+// Shared by the race camera and the podium preview so the two framings match when the podium is
+// folded into the main scene.
+export const CAMERA_FOV = 65
 export const TILE_PLAYER_FADE_FULL_RADIUS = 80
 export const TILE_PLAYER_FADE_MIN_RADIUS = 100
 export const TILE_PLAYER_FADE_MIN_ALPHA = 0

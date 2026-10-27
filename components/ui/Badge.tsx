@@ -43,7 +43,7 @@ const Badge: FC<BadgeProps> = ({
   return (
     <div
       className={twMerge(
-        `badge inline-flex w-fit items-center rounded-full bg-black/80 font-medium select-none`,
+        `badge inline-flex w-fit items-center rounded-full bg-stone-900 font-medium select-none`,
         containerSize,
         withRing && ringClass,
         className,

@@ -54,7 +54,7 @@ export const SpeedrunEndOverlay: FC<Props> = ({ ref, transitionStatus, isMobile 
       )}>
       <PointerProvider isMobile={isMobile}>
         <section className="mx-auto grid max-h-full w-full max-w-xl grid-cols-1 gap-2 overflow-y-auto px-2 py-6 xl:max-w-6xl xl:grid-cols-2 xl:gap-3">
-          <Panel className="shrink-0" strength={3}>
+          <Panel className="shrink-0" strength={2}>
             <h2 className="text-2xl font-bold lg:text-4xl">
               {displayedPerformanceSummary?.heading ?? 'Race complete'}
             </h2>

@@ -20,7 +20,7 @@ export const DashboardLeaderboardPanel: FC<Props> = ({ className }) => {
   const setLeaderboardFilter = useGameStore((s) => s.setLeaderboardFilter)
 
   return (
-    <Panel strength={2} className={className} attractorClassName="bg-emerald-400/15">
+    <Panel strength={2} className={className} attractorClassName="bg-emerald-400/30">
       <PanelHeader icon={Trophy} label="Leaderboard">
         <ButtonGroup
           value={leaderboardFilter}

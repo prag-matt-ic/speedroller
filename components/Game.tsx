@@ -6,11 +6,7 @@ import { Physics } from '@react-three/rapier'
 import gsap from 'gsap'
 import { type FC, Suspense, useMemo } from 'react'
 
-import Camera, {
-  CAMERA_POSITION_DESKTOP,
-  CAMERA_POSITION_MOBILE,
-} from '@/components/Camera'
-import { CAMERA_FAR } from '@/utils/sceneDistances'
+import Camera, { CAMERA_POSITION_DESKTOP, CAMERA_POSITION_MOBILE } from '@/components/Camera'
 import GameUniforms from '@/components/GameUniforms'
 import InputSmoother from '@/components/InputSmoother'
 import { usePerformanceStore } from '@/components/PerformanceProvider'
@@ -23,6 +19,7 @@ import Platform from '@/components/platform/Platform'
 import Player from '@/components/player/Player'
 import PostProcessing from '@/components/postProcessing/Effects'
 import { resolveCanvasDpr } from '@/utils/dpr'
+import { CAMERA_FAR, CAMERA_FOV } from '@/utils/sceneDistances'
 
 gsap.registerPlugin(useGSAP)
 
@@ -64,7 +61,7 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
       camera={{
         position: [0, cameraPosition.y, cameraPosition.z],
         far: CAMERA_FAR,
-        fov: 65,
+        fov: CAMERA_FOV,
       }}>
       <PerformanceMonitor
         // Create an upper/lower FPS band relative to device refresh rate
@@ -73,8 +70,6 @@ const Game: FC<Props> = ({ isDebug, isMobile }) => {
         onIncline={() => onPerformanceChange(true, dpr)}
         onDecline={() => onPerformanceChange(false, dpr)}
         flipflops={2}>
-        
-
         <Suspense>
           <GameUniforms />
           <InputSmoother />
