@@ -57,7 +57,12 @@ export const LeaderboardTable: FC<Props> = ({
     staleTime: 30_000,
   })
 
-  const placeholderRows = useMemo(() => Array.from({ length: count + 1 }), [count])
+  // Assume a full leaderboard arrives: a shorter (or empty) result must not
+  // collapse the table and reflow the surrounding dashboard grid.
+  const skeletonRows = useMemo(() => Array.from({ length: count }), [count])
+  const topRowCount = Math.min(count, TOP_THREE_ROW_COUNT)
+  const regularRowCount = Math.max(count - TOP_THREE_ROW_COUNT, 0)
+  const reservedListHeight = `calc(${topRowCount} * var(--leaderboard-top-row-height) + ${regularRowCount} * var(--leaderboard-row-height))`
 
   const latestRun = completedSpeedRuns[completedSpeedRuns.length - 1] ?? null
 
@@ -112,14 +117,14 @@ export const LeaderboardTable: FC<Props> = ({
 
   return (
     <section
+      style={{ minHeight: reservedListHeight }}
       className={twMerge(
         'grid max-h-full w-full max-w-xl grid-cols-[auto_2fr_1fr_0.5fr] gap-x-4 overflow-y-auto',
+        ROW_HEIGHT_VARIABLES,
         className,
       )}>
       {isLoadingLeaderboard
-        ? placeholderRows.map((_, index) => (
-            <LoadingRow key={`loading-${index}`} index={index} />
-          ))
+        ? skeletonRows.map((_, index) => <LoadingRow key={`loading-${index}`} index={index} />)
         : leaderboardRuns.map((entry, index) => (
             <LeaderboardRow
               key={entry.id}
@@ -148,9 +153,14 @@ export const LeaderboardTable: FC<Props> = ({
   )
 }
 
+const TOP_THREE_ROW_COUNT = 3
+
+// Heights live here so the skeleton rows and the reserved full-list height stay in sync.
+const ROW_HEIGHT_VARIABLES =
+  '[--leaderboard-top-row-height:3rem] [--leaderboard-row-height:2.25rem] xl:[--leaderboard-top-row-height:3.5rem] xl:[--leaderboard-row-height:2.75rem]'
 const ROW_CONTAINER_CLASSES = 'relative col-span-full grid grid-cols-subgrid items-center px-2'
-const TOP_3_CONTAINER_CLASSES = 'h-12 xl:h-14 text-white'
-const NOT_TOP_3_CONTAINER_CLASSES = 'h-9 xl:h-11 text-white/90'
+const TOP_3_CONTAINER_CLASSES = 'h-[var(--leaderboard-top-row-height)] text-white'
+const NOT_TOP_3_CONTAINER_CLASSES = 'h-[var(--leaderboard-row-height)] text-white/90'
 
 type RowProps = {
   username: string
@@ -171,7 +181,7 @@ const LeaderboardRow: FC<RowProps> = ({
   isLatestRun = false,
   className,
 }) => {
-  const isTopThree = position < 4
+  const isTopThree = position <= TOP_THREE_ROW_COUNT
 
   return (
     <div
@@ -208,7 +218,7 @@ const LeaderboardRow: FC<RowProps> = ({
 }
 
 const LoadingRow: FC<{ index: number }> = ({ index }) => {
-  const isTopThree = index < 3
+  const isTopThree = index < TOP_THREE_ROW_COUNT
   return (
     <div
       className={twJoin(

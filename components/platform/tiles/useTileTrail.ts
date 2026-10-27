@@ -1,6 +1,7 @@
 import { surfaceDeltaX, wrapColumn } from '@/utils/platform/courseSurface'
 import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { InstancedBufferAttribute } from 'three'
+import { useRef } from 'react'
 
 import { useGameFrame } from '@/hooks/useGameFrame'
 import { usePlayerCoursePosition } from '@/hooks/usePlayerCoursePosition'
@@ -20,13 +21,14 @@ import {
 
 const TRAIL_CELL_RADIUS = Math.ceil(TRAIL_BRUSH_RADIUS / TILE_SIZE)
 const TRAIL_BRUSH_RADIUS_SQ = TRAIL_BRUSH_RADIUS * TRAIL_BRUSH_RADIUS
+const TRAIL_CONTACT_CAPACITY = (TRAIL_CELL_RADIUS * 2 + 1) ** 2
 
 // Older than any visible trail, so an untouched tile starts fully faded.
 const TRAIL_UNTOUCHED = -TRAIL_FADE_SECONDS
 
 export type TileTrailEntry = {
   batch: TileBatch
-  /** Per-instance last-touched time in seconds, shared with `attribute`. */
+  /** Per-instance contact-entry time in seconds, shared with `attribute`. */
   timestamps: Float32Array
   attribute: InstancedBufferAttribute
 }
@@ -57,16 +59,35 @@ export const createTileTrail = (batches: readonly TileBatch[]): TileTrail => {
 }
 
 /**
- * Stamps the tiles under and immediately behind the ball with the current game time. The tile
- * shader turns the timestamp into the short player-coloured trail; this hook only records when
- * each tile was last touched.
+ * Stamps each tile once on contact entry. The shader finishes its fade even if the ball stays;
+ * leaving the tile or eligible height range allows another flash on return.
  */
 export const useTileTrail = (trail: TileTrail, rowCount: number) => {
   const surface = useCourseSurface()
   const COLUMNS = surface.columns
   const { playerPosition } = usePlayerCoursePosition()
+  const contactsRef = useRef<{
+    trail: TileTrail
+    previous: Int32Array
+    current: Int32Array
+  } | null>(null)
 
   useGameFrame((state) => {
+    // Allocate only on initialization or when the course replaces its trail buffers.
+    if (contactsRef.current?.trail !== trail) {
+      contactsRef.current = {
+        trail,
+        previous: new Int32Array(TRAIL_CONTACT_CAPACITY).fill(-1),
+        current: new Int32Array(TRAIL_CONTACT_CAPACITY).fill(-1),
+      }
+    }
+    const contacts = contactsRef.current
+    const previous = contacts.previous
+    contacts.previous = contacts.current
+    contacts.current = previous
+    contacts.current.fill(-1)
+    let contactCount = 0
+
     const [playerX, playerY, playerZ] = playerPosition.current
     const heightAboveSurface = playerY - TILE_SURFACE_Y
 
@@ -91,7 +112,7 @@ export const useTileTrail = (trail: TileTrail, rowCount: number) => {
         rawColumn++
       ) {
         const column = surface.topology === 'cylinder' ? wrapColumn(rawColumn, COLUMNS) : rawColumn
-      if (column < 0 || column >= COLUMNS) continue
+        if (column < 0 || column >= COLUMNS) continue
 
         const offsetX = surfaceDeltaX(playerX, colToX(column, COLUMNS), surface)
         const offsetZ = rowToWorldZ(row) - playerZ
@@ -100,6 +121,10 @@ export const useTileTrail = (trail: TileTrail, rowCount: number) => {
         const instanceIndex =
           entry.batch.cellToInstance[(row - entry.batch.startRow) * COLUMNS + column]
         if (instanceIndex < 0) continue
+
+        const cell = row * COLUMNS + column
+        contacts.current[contactCount++] = cell
+        if (contacts.previous.includes(cell)) continue
 
         entry.timestamps[instanceIndex] = state.elapsed
         entry.attribute.addUpdateRange(instanceIndex, 1)

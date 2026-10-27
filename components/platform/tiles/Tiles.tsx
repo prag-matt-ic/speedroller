@@ -117,7 +117,7 @@ const configureStoneAtlas = (map: Texture) => {
 
 // Touched-tile afterglow: a small additive palette lift plus a fainter emissive halo. It has to sit
 // under the player point light, not replace it, so both values stay low; the timestamp attribute
-// refreshes while the ball stays on a tile and fades once it leaves.
+// records contact entry so the glow fades even while the ball stays on a tile.
 const TRAIL_GLOW_STRENGTH = 0.05
 const TRAIL_EMISSIVE_STRENGTH = 0.1
 
