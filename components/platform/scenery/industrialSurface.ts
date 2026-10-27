@@ -24,11 +24,11 @@ export const industrialSurface = (albedo: Node<'vec3'>, coordinate: Node<'vec2'>
   const masks = industrialPanelMasks(coordinate, size)
   const grain = albedo.r
   const steel = mix(color('#171d27'), color('#484b50'), smoothstep(0.25, 0.85, grain))
-  const wornSteel = mix(steel, color('#65513b'), masks.rim.mul(grain))
+  const wornSteel = mix(steel, color('#575451'), masks.rim.mul(grain))
   const panel = mix(wornSteel, color('#101217'), masks.seam.max(masks.housing))
   return {
-    colorNode: mix(panel, color('#71604c'), masks.bolts),
+    colorNode: mix(panel, color('#66635e'), masks.bolts),
     // shortcut: spill stays on its panel; use pooled lights if nearby surfaces must be illuminated.
-    emissiveNode: color('#ff790d').mul(masks.strip.mul(4).add(masks.spill.mul(0.12))),
+    emissiveNode: color('#ff790d').mul(masks.strip.mul(4).add(masks.spill.mul(0.07))),
   }
 }
