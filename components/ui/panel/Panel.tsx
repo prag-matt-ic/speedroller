@@ -20,9 +20,9 @@ export type PanelProps = PropsWithChildren<{
 }>
 
 const CONTAINER_STRENGTH_CLASSES: Record<Strength, string> = {
-  1: 'border-black/10 bg-black/5',
-  2: 'border-black/20 bg-black/15',
-  3: 'border-black/40 bg-black/35',
+  1: 'border-white/10 bg-white/5',
+  2: 'border-white/20 bg-white/15',
+  3: 'border-white/40 bg-white/35',
 }
 
 const Panel: FC<PanelProps> = ({

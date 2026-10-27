@@ -169,7 +169,7 @@ export function createGalaxyNodes(
       const along = offset.dot(ray).clamp(0, distance)
       const separation = offset.sub(ray.mul(along)).length()
       const starMask = float(1)
-        .sub(smoothstep(0.002, 0.014, separation))
+        .sub(smoothstep(0.004, 0.016, separation))
         .toVar()
       brightness.addAssign(starMask.mul(starMask))
     }

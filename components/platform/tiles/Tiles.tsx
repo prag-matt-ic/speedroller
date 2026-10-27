@@ -88,7 +88,7 @@ const TILE_UNIFORM_SCOPE = 'platformTiles'
 
 const AXIS_EPSILON = 0.001
 const HIGHLIGHTED_MIX_MIN = 0.04
-const HIGHLIGHTED_MIX_MAX = 0.10
+const HIGHLIGHTED_MIX_MAX = 0.12
 const REGULAR_MIX = 0.24
 const SHADOW_RADIUS = 0.9
 const SHADOW_RADIUS_MAX_SCALE = 1.5
@@ -99,7 +99,7 @@ const SHADOW_FADE_END_Y = 0.5
 const SHADOW_FADE_RANGE_INV = 1.0 / (SHADOW_FADE_START_Y - SHADOW_FADE_END_Y)
 const SHADOW_MIN_PLAYER_Y = -0.5
 
-const DETAIL_NOISE_STRENGTH = 0.12
+const DETAIL_NOISE_STRENGTH = 0.3
 const STONE_ATLAS_GRID = 3
 const STONE_CELL_PIXELS = 512
 const STONE_CELL_PADDING = 16
@@ -119,7 +119,7 @@ const configureStoneAtlas = (map: Texture) => {
 // under the player point light, not replace it, so both values stay low; the timestamp attribute
 // refreshes while the ball stays on a tile and fades once it leaves.
 const TRAIL_GLOW_STRENGTH = 0.1
-const TRAIL_EMISSIVE_STRENGTH = 0.4
+const TRAIL_EMISSIVE_STRENGTH = 2
 
 // tile.frag's early `if (vAlpha <= 0.001) discard;`. A discard needs a statement stack, which a
 // material graph built at React render time does not have, so the material's own alpha test does it.
@@ -426,7 +426,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
       return {
         positionNode: coursePositionNode(tiltedGeometry, surface),
-        colorNode: mix(color('#32343a'), shadowedWithTrail, isIvory),
+        colorNode: mix(color('#3D3935'), shadowedWithTrail, isIvory),
         normalNode,
         opacityNode: alpha as Node<'float'>,
         emissiveNode: trailEnergy.mul(TRAIL_EMISSIVE_STRENGTH).mul(isTop),

@@ -43,7 +43,7 @@ export const Dashboard: FC<DashboardProps> = ({ ref, isMobile, transitionStatus 
               <UsernamePanel className="col-span-3" />
               <Panel className="flex items-center justify-center">
                 <button
-                  className="relative rounded-xl bg-black/80 p-3 ring ring-teal-200/30 hover:ring-teal-400"
+                  className="relative rounded-xl bg-black/80 p-3 ring ring-amber-200/30 hover:ring-amber-400"
                   onClick={() => setOverlay(Overlay.SUBSCRIBE)}>
                   <MailIcon strokeWidth={1.5} size={24} className="text-white" />
                   <div className="absolute -top-1.5 -right-1.5 size-3 rounded-full bg-red-500" />
