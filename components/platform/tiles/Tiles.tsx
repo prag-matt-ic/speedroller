@@ -85,8 +85,8 @@ import {
 } from '@/utils/tiles'
 
 const AXIS_EPSILON = 0.001
-const HIGHLIGHTED_MIX_MIN = 0.04
-const HIGHLIGHTED_MIX_MAX = 0.12
+const HIGHLIGHTED_MIX_MIN = 0.08
+const HIGHLIGHTED_MIX_MAX = 0.16
 const REGULAR_MIX = 0.24
 const SHADOW_RADIUS = 0.9
 const SHADOW_RADIUS_MAX_SCALE = 1.5
@@ -127,8 +127,8 @@ const TRAIL_EMISSIVE_STRENGTH = 0.1
 const RACE_LINE_PAINT_WHITE = '#f4f0e8'
 const RACE_LINE_PAINT_BLACK = '#0d0f13'
 const RACE_LINE_EDGE = '#b41f1f'
-const RACE_LINE_PAINT_BLEND = 0.8
-const RACE_LINE_EDGE_DEPTH = 0.25
+const RACE_LINE_PAINT_BLEND = 0.2
+const RACE_LINE_EDGE_DEPTH = 0.5
 
 type PlatformTilesProps = {
   rows: readonly RowData[]

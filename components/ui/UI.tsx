@@ -53,7 +53,7 @@ const UI: FC<Props> = ({ isMobile }) => {
         <section
           ref={infoContainer}
           className={twJoin(
-            'flex h-fit items-center gap-2.5 pl-4 transition-opacity duration-200 xl:gap-3 xl:pl-5',
+            'flex h-fit items-center gap-2.5 self-start pl-4 transition-opacity duration-200 xl:gap-3 xl:pl-5',
             !isRunning && 'col-span-2',
             overlay === Overlay.LANDING ? 'opacity-0' : 'opacity-100',
           )}>
@@ -78,7 +78,7 @@ const UI: FC<Props> = ({ isMobile }) => {
         aria-disabled={!isDashboardAvailable}
         disabled={!isDashboardAvailable}
         className={twJoin(
-          'group pointer-events-auto fixed top-2 right-2 z-300 flex items-center rounded-lg p-3 text-xs uppercase transition-all duration-300 outline-none hover:bg-black/30 xl:top-3 xl:right-3',
+          'group pointer-events-auto fixed top-2 right-4 z-300 flex items-center rounded-full p-3 text-xs uppercase transition-all duration-300 outline-none hover:bg-black/30 xl:top-3 xl:right-5',
           overlay === Overlay.LANDING || !isDashboardAvailable
             ? 'pointer-events-none opacity-0'
             : 'opacity-100',

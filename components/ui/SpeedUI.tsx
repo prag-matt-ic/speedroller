@@ -13,20 +13,18 @@ const SpeedUI: FC = () => {
   const hasCollectedRings = collectedRingCount > 0
 
   return (
-    <div className="relative flex flex-col items-center place-self-center">
+    <div className="flex flex-col items-center gap-1.5 place-self-center">
       <SpeedDial className="size-24 xl:size-28" strokeWidth={6} />
       <div
         className={twJoin(
-          'absolute top-full left-1/2 z-10 flex -translate-x-1/2 -translate-y-2 items-center gap-1 rounded-full border px-2.5 py-1',
-          hasCollectedRings
-            ? 'border-amber-300/30 bg-black/70 text-amber-300'
-            : 'border-white/15 bg-black/60 text-white/70',
+          'flex items-center gap-1 rounded-full border bg-stone-900 px-2.5 py-1',
+          hasCollectedRings ? 'border-amber-600 text-amber-300' : 'border-stone-700 text-stone-400',
         )}>
         <Circle className="size-3" strokeWidth={3} aria-hidden="true" />
         <span className="font-mono text-sm leading-none font-bold tabular-nums xl:text-base">
           {collectedRingCount}
         </span>
-        <span className="text-[9px] leading-none font-semibold tracking-wider uppercase opacity-70 xl:text-[10px]">
+        <span className="text-[9px] leading-none font-semibold tracking-wider text-stone-400 uppercase xl:text-[10px]">
           Rings
         </span>
       </div>

@@ -73,7 +73,7 @@ export const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     floatingHeading: { shouldRotate: true, useNoiseFade: true },
     infoZoneSphere: { segments: 48, enableVeins: true },
     confetti: { particleCount: 160 },
-    postProcessing: { blurSamples: 16 },
+    postProcessing: { blurSamples: 6 },
     particles: { fps: 60 },
   },
   [SceneQuality.MEDIUM]: {
@@ -86,7 +86,7 @@ export const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     floatingHeading: { shouldRotate: false, useNoiseFade: true },
     infoZoneSphere: { segments: 32, enableVeins: false },
     confetti: { particleCount: 80 },
-    postProcessing: { blurSamples: 8 },
+    postProcessing: { blurSamples: 4 },
     particles: { fps: 30 },
   },
   [SceneQuality.LOW]: {

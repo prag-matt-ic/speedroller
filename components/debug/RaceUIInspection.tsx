@@ -1,6 +1,6 @@
 'use client'
 
-import { type FC, useCallback, useEffect, useRef } from 'react'
+import { type FC, useCallback, useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 import { GameProvider, useGameStore, useGameStoreAPI } from '@/components/GameProvider'
@@ -84,13 +84,11 @@ const DevToolbar: FC = () => {
   const speedRunStage = useGameStore((s) => s.speedRunStage)
   const ringCount = useGameStore((s) => Object.keys(s.collectedRings).length)
   const speedUnits = useGameStore((s) => s.playerSpeedUnits)
-  const attemptId = useRef(1)
 
   const applyStage = useCallback(
     (stage: SpeedRunStage) => {
-      attemptId.current += 1
       const attemptBase = {
-        attemptId: attemptId.current,
+        attemptId: gameStoreAPI.getState().attemptId + 1,
         playerStatus: 'safe' as const,
         isPlatformReady: true,
         isWarmupComplete: true,
@@ -194,7 +192,7 @@ const Inspection: FC = () => {
 
   return (
     <>
-      <div className="fixed inset-0" style={{ backgroundColor: DEV_PALE_BACKGROUND }} />
+      <div className="fixed inset-0 bg-stone-600"  />
       <Timer />
       <UI isMobile={false} />
       <DevToolbar />

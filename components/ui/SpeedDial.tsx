@@ -19,6 +19,8 @@ const DIAL_PATH =
 const DIAL_LENGTH = 100
 /** Gap longer than the path so an empty dial draws no stray round cap at the arc end. */
 const DIAL_DASHARRAY = `${DIAL_LENGTH} ${DIAL_LENGTH * 2}`
+const DIAL_TRACK_COLOUR = '#57534e'
+const DIAL_PROGRESS_COLOUR = '#f59e0b'
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value))
 const getSpeedFraction = (speedUnits: number) => clamp01(Math.max(0, speedUnits) / RACE_MAX_SPEED)
@@ -64,34 +66,26 @@ export const SpeedDial: FC<SpeedDialProps> = ({ progressOverride, strokeWidth = 
   return (
     <div
       className={twMerge(
-        'relative flex size-14 items-center justify-center rounded-full border border-white/15 bg-black/70 shadow-lg',
+        'relative flex size-14 items-center justify-center rounded-full border border-stone-700 bg-stone-900',
         className,
       )}>
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true" className="size-full">
-        <path d={DIAL_PATH} stroke="#ffffff4d" strokeWidth={strokeWidth} strokeLinecap="round" />
+        <path
+          d={DIAL_PATH}
+          stroke={DIAL_TRACK_COLOUR}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
         <path
           ref={pathRef}
           d={DIAL_PATH}
           pathLength={DIAL_LENGTH}
           strokeDasharray={DIAL_DASHARRAY}
           strokeDashoffset={DIAL_LENGTH}
-          stroke="url(#speed-dial-gradient)"
+          stroke={DIAL_PROGRESS_COLOUR}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
-          className="drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]"
         />
-        <defs>
-          <linearGradient
-            id="speed-dial-gradient"
-            x1="4"
-            y1="20"
-            x2="36"
-            y2="20"
-            gradientUnits="userSpaceOnUse">
-            <stop stopColor="#f59e0b" />
-            <stop offset="1" stopColor="#fcd34d" />
-          </linearGradient>
-        </defs>
       </svg>
 
       {!hasProgressOverride && (
@@ -99,14 +93,14 @@ export const SpeedDial: FC<SpeedDialProps> = ({ progressOverride, strokeWidth = 
           <div className="flex items-baseline gap-0.5">
             <span
               ref={speedTextRef}
-              className="font-mono text-3xl leading-none font-bold text-white tabular-nums xl:text-4xl">
+              className="font-mono text-2xl leading-none font-bold text-white tabular-nums xl:text-3xl">
               {formatSpeed(speedUnits.current)}
             </span>
-            <span className="font-mono text-[10px] leading-none font-semibold text-white/50 xl:text-xs">
+            <span className="font-mono text-[9px] leading-none font-semibold text-stone-400 xl:text-[10px]">
               /{RACE_MAX_SPEED}
             </span>
           </div>
-          <span className="mt-1 text-[9px] leading-none font-semibold tracking-[0.2em] text-amber-200/80 uppercase xl:text-[10px]">
+          <span className="mt-1 text-[9px] leading-none font-semibold tracking-[0.2em] text-amber-400 uppercase xl:text-[10px]">
             Speed
           </span>
         </div>

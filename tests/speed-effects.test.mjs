@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { loadTypeScript } from './loadTypeScript.mjs'
 
+const { SCENE_CONFIGS } = loadTypeScript('components/PerformanceProvider.tsx')
+
 // Evaluate the production TSL branch and count texture reads without a GPU.
 const values = value => typeof value === 'number' ? [value] : value.values
 const node = (...input) => {
@@ -76,7 +78,7 @@ test('active blur samples in either direction and reaches 40% of the focus dista
 })
 
 test('bloom is composited before blur and its input texture is disposed on rebuild and unmount', () => {
-  for (const blurSamples of [0, 8, 16]) {
+  for (const { postProcessing: { blurSamples } } of Object.values(SCENE_CONFIGS)) {
     const pipeline = {}
     const textures = []
     const blooms = []

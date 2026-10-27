@@ -6,8 +6,6 @@ import { type FC, useMemo } from 'react'
 import type { Vector3Tuple } from 'three'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
-import { Text } from '@/components/platform/Text'
-import { UNBOUNDED_FONT_FAMILY } from '@/components/platform/fonts'
 import type { RigidBodyUserData, SpeedRunLineUserData } from '@/model/schema'
 import { SpeedRunStage } from '@/stores/types'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
@@ -16,11 +14,6 @@ import { TILE_SIZE } from '@/utils/tiles'
 
 // Tall enough for the resting ball's centre to sit inside the band; nothing here is solid.
 const LINE_SENSOR_HEIGHT = PLAYER_RADIUS * 4
-
-const LINE_LABEL_Z_OFFSET = 3
-const LINE_LABEL_WIDTH = 6
-const LINE_LABEL_HEIGHT = 1.6
-const LINE_LABEL_COLOR = '#eafffb'
 
 type Props = {
   kind: 'start' | 'finish'
@@ -31,12 +24,12 @@ type Props = {
 }
 
 /**
- * The visible line is painted into the floor tiles; this component owns only the trigger and the
- * label. Its sensor covers exactly the cells the paint covers, so the two cannot drift apart.
+ * The visible line is painted into the floor tiles; this component owns only the trigger.
+ * Its sensor covers exactly the cells the paint covers, so the two cannot drift apart.
  */
 const SpeedRunLine: FC<Props> = ({ kind, position, cells }) => {
   const surface = useCourseSurface()
-  const [x, y, z] = position
+  const z = position[2]
   const collision = useMemo(
     () => createSurfaceColliders(cells, surface, TILE_SIZE, LINE_SENSOR_HEIGHT, TILE_SIZE),
     [cells, surface],
@@ -88,17 +81,6 @@ const SpeedRunLine: FC<Props> = ({ kind, position, cells }) => {
           collisionGroups={COLLISION_GROUPS.finishLineSensor}
         />
       </RigidBody>
-      <Text
-        text={isStartLine ? 'START' : 'FINISH'}
-        position={[x, y + 0.02, LINE_LABEL_Z_OFFSET]}
-        surface={surface}
-        width={LINE_LABEL_WIDTH}
-        height={LINE_LABEL_HEIGHT}
-        textCanvasOptions={{
-          color: isStartLine ? '#ffffff' : LINE_LABEL_COLOR,
-          fontFamily: UNBOUNDED_FONT_FAMILY,
-        }}
-      />
     </group>
   )
 }
