@@ -4,6 +4,8 @@ export type GalaxyQuality = {
   starCount: 8 | 16 | 24
 }
 
+export const GALAXY_LIGHT_DIRECTION = [0, 0.25, -1] as const
+
 export const GALAXY_SAMPLE_COUNT = 6
 
 export const GALAXY_DEFAULTS = {

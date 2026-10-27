@@ -36,7 +36,6 @@ import type { Node, TextureNode, UniformNode } from 'three/webgpu'
 const BLUR_INTENSITY_EPSILON = 0.001
 const EDGE_BLUR_THRESHOLD = 0.04
 const VIGNETTE_DARKNESS = 0.6
-const BLUR_EXPOSURE = 1.0
 const NOISE_JITTER_SCALE = 0.006
 const BLUR_BASE_MIX = 0.6
 const BLUR_STEP_FALLOFF = 0.6
@@ -54,19 +53,19 @@ type SpeedTerms = {
   signedSpeed: Node<'float'>
   /** Magnitude of the signed speed. */
   speed: Node<'float'>
-  /** Vignette applied toward full darkness by VIGNETTE_DARKNESS. */
+  /** Vignette multiplier: one at the centre, down by VIGNETTE_DARKNESS at the edges. */
   vignetteFade: Node<'float'>
-  /** Inverse of the vignette: zero at the centre, one at the edges. */
+  /** Radial falloff from the focus: zero at the centre, one at the edges. */
   edgeMask: Node<'float'>
-  /** Edge mask times speed, clamped. Drives the blur strength and the edge noise weight. */
+  /** Edge mask times speed. Drives the blur strength and the edge noise weight. */
   intensity: Node<'float'>
 }
 
 /**
  * The terms every part of the effect needs, derived once.
  *
- * The vignette start radius narrows as speed rises, so the vignette tightens under acceleration, and
- * its inverse doubles as the edge-only mask the blur and the edge noise both weight against.
+ * The vignette start radius narrows as speed rises, so the vignette tightens under acceleration.
+ * `edgeMask` is that same radial falloff, and both the blur and the edge noise weight against it.
  */
 const deriveSpeedTerms = (uSpeed: UniformNode<'float', number>): SpeedTerms => {
   const signedSpeed = clamp(uSpeed, float(-1), float(1))
@@ -76,21 +75,20 @@ const deriveSpeedTerms = (uSpeed: UniformNode<'float', number>): SpeedTerms => {
     screenUV.x.sub(0.5).mul(screenSize.x.div(screenSize.y)),
     screenUV.y.sub(0.5),
   )
-  const vignette = float(1).sub(
-    smoothstep(
-      float(VIGNETTE_START).sub(speed.mul(VIGNETTE_SPEED_SHIFT)),
-      float(VIGNETTE_END),
-      length(centredUv),
-    ),
+  const edgeMask = smoothstep(
+    float(VIGNETTE_START).sub(speed.mul(VIGNETTE_SPEED_SHIFT)),
+    float(VIGNETTE_END),
+    length(centredUv),
   )
-  const edgeMask = float(1).sub(vignette)
 
   return {
     signedSpeed,
     speed,
-    vignetteFade: mix(float(1), vignette, VIGNETTE_DARKNESS),
+    // A single mad: edgeMask scales how much of VIGNETTE_DARKNESS reaches the edges.
+    vignetteFade: float(1).sub(edgeMask.mul(VIGNETTE_DARKNESS)),
     edgeMask,
-    intensity: clamp(edgeMask.mul(speed), float(0), float(1)),
+    // Edge mask and speed are both in 0..1, so the product needs no clamp.
+    intensity: edgeMask.mul(speed),
   }
 }
 
@@ -121,21 +119,21 @@ export const radialBlurNode = ({
   const { signedSpeed, speed, edgeMask, intensity } = terms
 
   return Fn(() => {
-    const sampled = base
-
-    const directionSign = signedSpeed
-      .greaterThanEqual(0)
-      .select(float(1), float(-1))
-      .toVar()
-    const blurOffset = BLUR_FOCUS.sub(screenUV).mul(directionSign).toVar()
-    const radialDirection = normalize(blurOffset.add(BLUR_DIRECTION_EPSILON)).toVar()
-    const jitterDirection = vec2(radialDirection.y.negate(), radialDirection.x).toVar()
+    const directionSign = signedSpeed.greaterThanEqual(0).select(float(1), float(-1))
+    const blurOffset = BLUR_FOCUS.sub(screenUV).mul(directionSign)
+    const radialDirection = normalize(blurOffset.add(BLUR_DIRECTION_EPSILON))
+    const jitterDirection = vec2(radialDirection.y.negate(), radialDirection.x)
     const inverseSteps = float(1 / taps)
+
+    // Both offsets are tap-invariant, so they are computed once outside the loop. Each tap then only
+    // scales the blur offset by its step and adds the shared jitter.
     const jitter = interleavedGradientNoise(screenCoordinate.xy.add(time))
       .sub(0.5)
       .mul(NOISE_JITTER_SCALE)
+    const jitteredUv = screenUV.add(jitterDirection.mul(jitter)).toVar()
+    const stepOffset = blurOffset.mul(intensity).mul(BLUR_BASE_MIX).toVar()
 
-    const accumulated = sampled.rgb.toVar()
+    const accumulated = base.rgb.toVar()
     const weightSum = float(1).toVar()
 
     // `speed` is a uniform, so this branch has no per-fragment divergence: at rest the tap loop is
@@ -144,9 +142,8 @@ export const radialBlurNode = ({
       Loop(taps, ({ i: stepIndex }) => {
         // The GLSL indexed taps from 1, so a zero counter must give a step of 1/taps.
         const stepT = stepIndex.add(1).toFloat().mul(inverseSteps)
-        const sampleUv = screenUV
-          .add(blurOffset.mul(stepT.mul(BLUR_BASE_MIX).mul(intensity)))
-          .add(jitterDirection.mul(jitter))
+        const sampleUv = jitteredUv
+          .add(stepOffset.mul(stepT))
           .clamp(SAMPLE_UV_MIN, SAMPLE_UV_MAX)
 
         const weight = float(1).sub(stepT.mul(BLUR_STEP_FALLOFF)).mul(intensity)
@@ -155,17 +152,13 @@ export const radialBlurNode = ({
       })
     })
 
-    const blurred = mix(
-      sampled.rgb,
-      accumulated.div(weightSum).mul(BLUR_EXPOSURE),
-      intensity,
-    )
+    const blurred = mix(base.rgb, accumulated.div(weightSum), intensity)
 
     const skipBlur = intensity
       .lessThanEqual(BLUR_INTENSITY_EPSILON)
       .or(edgeMask.lessThanEqual(EDGE_BLUR_THRESHOLD))
 
-    return select(skipBlur, sampled.rgb, blurred)
+    return select(skipBlur, base.rgb, blurred)
   })()
 }
 
@@ -202,7 +195,8 @@ export type EdgeNoiseOptions = {
 export const edgeNoiseNode = ({ baseColor, terms }: EdgeNoiseOptions): Node<'vec3'> => {
   const amount = whiteNoise(screenUV).mul(terms.intensity)
 
-  return mix(baseColor, baseColor.add(vec3(NOISE_LIGHTEN_AMOUNT)), amount)
+  // mix(base, base + k, amount) is base + k * amount: one mad instead of a mix.
+  return baseColor.add(vec3(NOISE_LIGHTEN_AMOUNT).mul(amount))
 }
 
 export type SpeedEffectsOptions = {

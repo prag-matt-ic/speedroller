@@ -86,8 +86,18 @@ test('player light matches the selected shader palette at the shared light sampl
 })
 
 test('one-row layout and minimap agree on tile centres, including fractional legacy anchors', () => {
-  assert.deepEqual(layout.COLOUR_PICKER_COLUMN_OFFSETS, [-4, -3, -2, -1, 0, 1, 2, 3])
+  assert.deepEqual(layout.COLOUR_PICKER_COLUMN_OFFSETS, [-7, -5, -3, -1, 1, 3, 5, 7])
   assert.equal(layout.COLOUR_TILE_SIZE, 1)
+  const offsets = layout.COLOUR_PICKER_COLUMN_OFFSETS
+  assert.equal(new Set(offsets).size, 8)
+  assert.ok(!offsets.includes(0))
+  offsets.forEach((offset, index) => {
+    assert.equal(offset, -offsets.at(-index - 1))
+    if (index) assert.equal(offset - offsets[index - 1], 2)
+  })
+  // A centred player fits in every intervening cell without touching a selector sensor.
+  for (let gap = -6; gap <= 6; gap += 2)
+    assert.ok(offsets.every(offset => Math.abs(gap - offset) > 0.5 + PLAYER_RADIUS))
   for (const surface of [FLAT_SURFACE, CYLINDER_SURFACE]) {
     const centreColumn = Math.floor(surface.columns / 2)
     const x = colToX(centreColumn, surface.columns)
@@ -140,8 +150,8 @@ test('editor requires exactly the new shop footprint, not the former extra row o
   const column = rows[row].objects.find(object => object.type === 'paintShop').column
   const ghost = (r, c) => editor.paintCells(document, [{ row: r, column: c }], { layer: 'ghosts', erase: false, object: 'ring' })
   const shopIssues = doc => editor.validateCourse(doc).filter(issue => issue.message.includes('paintShop'))
-  for (const offset of layout.COLOUR_PICKER_COLUMN_OFFSETS) assert.ok(shopIssues(ghost(row, column + offset)).length)
-  for (const [r, c] of [[row, column - 5], [row, column + 4], [row + 1, column]]) assert.deepEqual(shopIssues(ghost(r, c)), [])
+  for (let offset = -7; offset <= 7; offset++) assert.ok(shopIssues(ghost(row, column + offset)).length)
+  for (const [r, c] of [[row, column - 8], [row, column + 8], [row + 1, column]]) assert.deepEqual(shopIssues(ghost(r, c)), [])
 })
 
 test('crossing adjacent sensors does not cancel the new option and reversing restores the overlapped option', () => {
@@ -155,4 +165,64 @@ test('crossing adjacent sensors does not cancel the new option and reversing res
   contacts = updateColourTileContacts(contacts, 1, false)
   contacts = updateColourTileContacts(contacts, 2, false)
   assert.deepEqual(contacts, [])
+})
+
+test('galaxy selectors share quality tiers, keep their offset clock, and use white active borders', () => {
+  const { SCENE_CONFIGS } = loadTypeScript('components/PerformanceProvider.tsx')
+  let frame, tileUniforms, nodes, receivedQuality
+  let edge = 0.5
+  const scalar = value => new Scalar(Number(value))
+  const tsl = {
+    float: scalar, vec3: scalar,
+    uniform: value => new Scalar(value),
+    uv: () => ({ sub: () => ({ x: { abs: () => scalar(edge) }, y: { abs: () => scalar(edge) } }) }),
+    max: (a, b) => scalar(Math.max(Number(a), Number(b))),
+    fwidth: () => scalar(0.001),
+    smoothstep: (a, b, x) => scalar(Number(x) >= Number(b) ? 1 : 0),
+    mix: (a, b, t) => scalar(Number(a) * (1 - Number(t)) + Number(b) * Number(t)),
+  }
+  for (const quality of Object.values(SCENE_CONFIGS)) {
+    const { default: ColourTile } = loadTypeScript('components/platform/colourPicker/ColourTile.tsx', {
+      react: { useMemo: create => create(), useCallback: fn => fn, useLayoutEffect: fn => fn(), useEffect: () => {} },
+      'three/tsl': tsl,
+      '@/resources/tsl/fadeInOut': { fadeInOut: () => scalar(1) },
+      '@/hooks/useCourseSurface': { useCourseSurface: () => FLAT_SURFACE },
+      '@/hooks/useGameFrame': { __esModule: true, default: callback => { frame = callback } },
+      '@/components/PerformanceProvider': { usePerformanceStore: select => select({ sceneConfig: { ...quality, isDistanceFadeEnabled: false } }) },
+      '@react-three/tsl': { useLocalNodes: create => {
+        nodes = create({ uniforms: { scope: () => ({}) } })
+        return nodes
+      } },
+      '@/components/player/marble/createGalaxyNodes': {
+        createGalaxyUniforms: index => {
+          assert.equal(index, 3)
+          tileUniforms = { density: { value: 2.4 }, time: { value: 0 } }
+          return tileUniforms
+        },
+        createGalaxyNodes: (uniforms, samples, stars, shape) => {
+          assert.equal(uniforms, tileUniforms)
+          assert.equal(shape, 'tile')
+          receivedQuality = [samples, stars]
+          return { colorNode: scalar(0.4), emissiveNode: scalar(0.1) }
+        },
+      },
+    })
+    const option = { index: 3, position: [0, ON_TILE_Y, 0], userData: { type: 'colour-tile', paletteIndex: 3 } }
+    for (const isActive of [false, true]) {
+      edge = 0.5
+      ColourTile({ option, isActive })
+      assert.deepEqual(receivedQuality, [quality.marble.samples, quality.marble.starCount])
+      assert.equal(tileUniforms.density.value, 4)
+      const offset = tileUniforms.time.value
+      assert.ok(offset >= 0 && offset < 1000)
+      frame({}, 0.25)
+      assert.equal(tileUniforms.time.value, offset + 0.25)
+      assert.equal(Number(nodes.colorNode), Number(isActive))
+      assert.equal(Number(nodes.emissiveNode), 0, 'border does not bloom')
+    }
+    edge = 0
+    ColourTile({ option, isActive: true })
+    assert.equal(Number(nodes.colorNode), 0.4)
+    assert.equal(Number(nodes.emissiveNode), 0.1)
+  }
 })

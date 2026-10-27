@@ -7,7 +7,6 @@ import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
 import { CuboidCollider, TrimeshCollider, RigidBody } from '@react-three/rapier'
 import {
   type FC,
-  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -184,7 +183,6 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
       mesh.setMatrixAt(index, matrix)
     }
     mesh.instanceMatrix.needsUpdate = true
-    mesh.computeBoundingBox()
     if (surface.topology === 'cylinder') {
       const bounds = new Box3()
       const center = new Vector3()
@@ -193,6 +191,8 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
         bounds.expandByPoint(center)
       }
       mesh.boundingBox = bounds.expandByScalar(TILE_SLAB_RADIUS)
+    } else {
+      mesh.computeBoundingBox()
     }
     // GPU falling and rotation must stay inside the CPU culling bounds.
     const tileRadius = TILE_SLAB_RADIUS
@@ -227,17 +227,15 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
           <instancedBufferAttribute attach="attributes-isHighlighted" args={[batch.highlights, 1]} />
           <primitive object={trailAttribute} attach="attributes-trailTouchedAt" />
         </primitive>
-        <Suspense fallback={null}>
-          <meshLambertNodeMaterial
-            ref={attachMaterial}
-            normalNode={nodes.normalNode}
-            colorNode={nodes.colorNode}
-            opacityNode={nodes.opacityNode}
-            positionNode={nodes.positionNode}
-            transparent={true}
-            alphaTest={ALPHA_TEST}
-          />
-        </Suspense>
+        <meshLambertNodeMaterial
+          ref={attachMaterial}
+          normalNode={nodes.normalNode}
+          colorNode={nodes.colorNode}
+          opacityNode={nodes.opacityNode}
+          positionNode={nodes.positionNode}
+          transparent={true}
+          alphaTest={ALPHA_TEST}
+        />
       </instancedMesh>
     </group>
   )

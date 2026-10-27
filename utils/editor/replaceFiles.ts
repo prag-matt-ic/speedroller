@@ -9,6 +9,7 @@ export async function replaceFiles(outputs: readonly Output[]) {
   const transaction = randomUUID()
   const staged: { path: string; temporary: string; previous: Buffer | null }[] = []
   const installed: typeof staged = []
+  const recoveryFiles = new Set<string>()
   try {
     for (const output of outputs) {
       await fs.mkdir(path.dirname(output.path), { recursive: true })
@@ -25,7 +26,7 @@ export async function replaceFiles(outputs: readonly Output[]) {
       installed.push(file)
     }
   } catch (error) {
-    const failures: unknown[] = []
+    const failures: string[] = []
     for (const file of installed.reverse()) {
       try {
         if (file.previous === null) await fs.unlink(file.path)
@@ -33,11 +34,14 @@ export async function replaceFiles(outputs: readonly Output[]) {
           await fs.writeFile(file.temporary, file.previous)
           await fs.rename(file.temporary, file.path)
         }
-      } catch (rollbackError) { failures.push(rollbackError) }
+      } catch (rollbackError) {
+        if (file.previous !== null) recoveryFiles.add(file.temporary)
+        failures.push(`${file.path}: ${rollbackError}`)
+      }
     }
-    if (failures.length) throw new Error(`Save failed and rollback was incomplete; inspect the working tree: ${[error, ...failures].join('; ')}`)
+    if (failures.length) throw new Error(`Save failed and rollback was incomplete; inspect the working tree: ${[error, ...failures].join('; ')}. Recovery files: ${[...recoveryFiles].join(', ')}`)
     throw error
   } finally {
-    await Promise.all(staged.map(file => fs.rm(file.temporary, { force: true })))
+    await Promise.all(staged.filter(file => !recoveryFiles.has(file.temporary)).map(file => fs.rm(file.temporary, { force: true })))
   }
 }

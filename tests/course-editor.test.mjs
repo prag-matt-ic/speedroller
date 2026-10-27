@@ -18,6 +18,8 @@ const document = editor.courseDocumentSchema.parse(JSON.parse(readFileSync('asse
 const compiler = createBitmapParser(document.surface)
 const paint = { layer: 'ghosts', erase: false, object: 'ring' }
 const confettiPaint = { ...paint, layer: 'confetti' }
+const confettiDocument = structuredClone(document)
+for (const row of editor.courseRows(confettiDocument)) delete row.confetti
 
 test('layered source round-trips and compiles to the current runtime with independent layers', () => {
   assert.deepEqual(editor.courseDocumentSchema.parse(JSON.parse(JSON.stringify(document))), document)
@@ -63,6 +65,7 @@ test('solid column arcs wrap the seam and stay linear on flat surfaces', () => {
 })
 
 test('confetti marks a whole row once, compiles to one burst and erases cleanly', () => {
+  const document = confettiDocument
   const rowIndex = 50
   const sourceRow = editor.courseRows(document)[rowIndex]
   const marked = editor.paintCells(document, [{ row: rowIndex, column: 66 }], confettiPaint)
@@ -94,6 +97,7 @@ test('confetti marks a whole row once, compiles to one burst and erases cleanly'
 })
 
 test('seam rows keep their narrow burst and over-wide rows cannot take confetti', () => {
+  const document = confettiDocument
   const seamRow = 599
   const seamMarked = editor.paintCells(document, [{ row: seamRow, column: 120 }], confettiPaint)
   const seamSource = editor.courseRows(seamMarked)[seamRow]
@@ -204,6 +208,32 @@ test('file replacement stages outputs and restores earlier files after a failed 
     assert.equal(await fs.readFile(first, 'utf8'), 'before one')
     assert.equal(await fs.readFile(second, 'utf8'), 'before two')
     assert.deepEqual((await fs.readdir(directory)).sort(), ['first', 'second'])
+  } finally { await fs.rm(directory, { recursive: true, force: true }) }
+})
+
+test('file replacement retains the original recovery file when rollback rename fails', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'speedroller-editor-'))
+  try {
+    const first = path.join(directory, 'first'), second = path.join(directory, 'second')
+    const recoveryPath = `${first}.recovery-test.tmp`
+    await fs.writeFile(first, 'before one'); await fs.writeFile(second, 'before two')
+    let renames = 0
+    const { replaceFiles } = loadTypeScript('utils/editor/replaceFiles.ts', {
+      'node:crypto': { randomUUID: () => 'recovery-test' },
+      'node:fs/promises': { ...fs, rename: async (...args) => {
+        if (++renames >= 2) throw new Error('Injected rename failure')
+        return fs.rename(...args)
+      } },
+    })
+    await assert.rejects(replaceFiles([{ path: first, content: 'after one' }, { path: second, content: 'after two' }]), error => {
+      assert.match(error.message, /rollback was incomplete/)
+      assert.ok(error.message.includes(recoveryPath))
+      return true
+    })
+    assert.equal(await fs.readFile(first, 'utf8'), 'after one')
+    assert.equal(await fs.readFile(second, 'utf8'), 'before two')
+    assert.equal(await fs.readFile(recoveryPath, 'utf8'), 'before one')
+    assert.deepEqual((await fs.readdir(directory)).sort(), ['first', 'first.recovery-test.tmp', 'second'])
   } finally { await fs.rm(directory, { recursive: true, force: true }) }
 })
 

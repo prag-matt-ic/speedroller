@@ -1,61 +1,35 @@
+/* eslint-disable react-hooks/immutability */
 'use client'
 import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { createCoursePlaneGeometry } from '@/utils/platform/coursePlaneGeometry'
 import { createSurfaceColliders } from '@/utils/platform/surfaceColliders'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
+import { useLocalNodes } from '@react-three/tsl'
 import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { TrimeshCollider, RigidBody } from '@react-three/rapier'
-import { type FC, useCallback, useId, useMemo, useEffect } from 'react'
-import {
-  clamp,
-  float,
-  fwidth,
-  max,
-  mix,
-  mx_noise_float,
-  smoothstep,
-  time,
-  uv,
-  vec2,
-  vec3,
-  vertexStage,
-} from 'three/tsl'
+import { type FC, useCallback, useMemo, useEffect, useLayoutEffect } from 'react'
+import { float, fwidth, max, mix, smoothstep, uniform, uv, vec3, vertexStage } from 'three/tsl'
 import { type Vector3Tuple } from 'three'
-import type { UniformNode } from 'three/webgpu'
+import type { MeshBasicNodeMaterial } from 'three/webgpu'
+import {
+  createGalaxyNodes,
+  createGalaxyUniforms,
+} from '@/components/player/marble/createGalaxyNodes'
+import useGameFrame from '@/hooks/useGameFrame'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { PLAYER_RADIUS } from '@/utils/player'
 import { type ColourTileUserData } from '@/model/schema'
 import { fadeInOut } from '@/resources/tsl/fadeInOut'
-import { getColourFromPalette } from '@/resources/tsl/playerPalette'
 import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import { TILE_JOINT_WIDTH, TILE_BEVEL_WIDTH } from '@/utils/platform/tileSlabGeometry'
 import { COLOUR_TILE_SIZE } from '@/utils/platform/homeSection'
 
-// Carried over from colourTile.frag.
 const COLOUR_TILE_VISIBLE_SIZE = COLOUR_TILE_SIZE - TILE_JOINT_WIDTH - TILE_BEVEL_WIDTH * 2
+const TILE_CLOUD_DENSITY = 4.0
+const TILE_TIME_OFFSET_RANGE = 1000
 const BORDER_THICKNESS = 0.04
 const INNER_EDGE = 0.5 - BORDER_THICKNESS
-const NOISE_SCALE = 0.6
-const WARP_SCALE = 0.4
-const WARP_INTENSITY = 0.4
-const INACTIVE_SPEED = 0.1
-const ACTIVE_SPEED = 0.4
-
-// `useNoise` and `isDistanceFadeEnabled` never animate, so they are graph constants rather than
-// uniforms. Animation time comes from TSL's built-in `time` node.
-type ColourTileUniforms = {
-  uPaletteIndex: UniformNode<'int', number>
-  uIsActive: UniformNode<'float', number>
-}
-
-const createColourTileUniforms =
-  (paletteIndex: number, isActive: boolean) => () => ({
-    uPaletteIndex: paletteIndex,
-    uIsActive: isActive ? 1 : 0,
-  })
-
 export type ColourTileOption = {
   index: number
   position: Vector3Tuple
@@ -70,74 +44,72 @@ type ColourTileProps = {
 const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
   const surface = useCourseSurface()
   const [x, y, z] = option.position
-  const geometry = useMemo(() => createCoursePlaneGeometry(COLOUR_TILE_VISIBLE_SIZE, COLOUR_TILE_VISIBLE_SIZE, x, y, surface, 1), [x, y, surface])
+  const geometry = useMemo(
+    () =>
+      createCoursePlaneGeometry(
+        COLOUR_TILE_VISIBLE_SIZE,
+        COLOUR_TILE_VISIBLE_SIZE,
+        x,
+        y,
+        surface,
+        1,
+      ),
+    [x, y, surface],
+  )
   useEffect(() => () => geometry.dispose(), [geometry])
-  const collision = useMemo(() => createSurfaceColliders(
-    [[x, y, 0]], surface, COLOUR_TILE_SIZE, PLAYER_RADIUS * 4, COLOUR_TILE_SIZE,
-  ), [x, y, surface])
-  const useNoise = usePerformanceStore((s) => s.sceneConfig.colourTile.useNoise)
-  const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
+  const collision = useMemo(
+    () =>
+      createSurfaceColliders(
+        [[x, y, 0]],
+        surface,
+        COLOUR_TILE_SIZE,
+        PLAYER_RADIUS * 4,
+        COLOUR_TILE_SIZE,
+      ),
+    [x, y, surface],
+  )
+  const quality = usePerformanceStore((state) => state.sceneConfig.marble)
+  const useDistanceFade = usePerformanceStore((state) => state.sceneConfig.isDistanceFadeEnabled)
+  const uniforms = useMemo(() => createGalaxyUniforms(option.index), [option.index])
+  useLayoutEffect(() => {
+    uniforms.density.value = TILE_CLOUD_DENSITY
+    uniforms.time.value = Math.random() * TILE_TIME_OFFSET_RANGE
+  }, [uniforms])
+  const active = useMemo(() => uniform(0), [])
+  useLayoutEffect(() => {
+    active.value = Number(isActive)
+  }, [active, isActive])
+  useGameFrame((_, delta) => {
+    uniforms.time.value += delta
+  })
 
-  // Each tile in the picker row owns its own palette index and active state, so the uniforms are
-  // scoped per tile rather than shared across the row.
-  const colourTileUniformScope = `colourTile${useId().replace(/[^a-zA-Z0-9]/g, '')}`
-  useUniforms(createColourTileUniforms(option.index, isActive), colourTileUniformScope)
-
-  // Port of colourTile.vert + colourTile.frag. vUv is recomputed in-graph from the plane's uv, so
-  // no varying is needed for it.
-  const createNodes = useCallback(
-    ({ uniforms: scopedUniforms }: CreatorState) => {
-      const scoped = scopedUniforms.scope<ColourTileUniforms>(colourTileUniformScope)
+  const { colorNode, opacityNode, emissiveNode } = useLocalNodes(
+    ({ uniforms: scopedUniforms }) => {
       const { uPlayerWorldPos } = scopedUniforms.scope(CORE_UNIFORM_SCOPE)
-
-      const tileUv = uv()
-      const centredUv = tileUv.sub(0.5)
+      const galaxy = createGalaxyNodes(uniforms, quality.samples, quality.starCount, 'tile')
+      const centredUv = uv().sub(0.5)
       const edge = max(centredUv.x.abs(), centredUv.y.abs())
       const aa = fwidth(edge)
-
-      const activeMix = clamp(scoped.uIsActive, float(0), float(1))
-      const paletteSeed = scoped.uPaletteIndex.toFloat().mul(4)
-
-      // Domain-warped noise for the marble-like swirl. uUseNoise is a settings toggle, so
-      // the branch is resolved while building the graph rather than with a select.
-      const warpedTime = time.mul(mix(INACTIVE_SPEED, ACTIVE_SPEED, activeMix))
-      const warpCoord = tileUv.mul(WARP_SCALE)
-      const warpOffset = vec2(
-        mx_noise_float(vec3(warpCoord, warpedTime)),
-        mx_noise_float(vec3(warpCoord.add(paletteSeed), warpedTime)),
-      )
-        .mul(2)
-        .sub(1)
-        .mul(WARP_INTENSITY)
-      const warpedUv = tileUv.add(warpOffset).mul(NOISE_SCALE)
-      const noiseSample = mx_noise_float(vec3(warpedUv, warpedTime))
-      const normalizedNoise = noiseSample.mul(0.5).add(0.5)
-
-      // When the noise toggle is off the GLSL left normalizedNoise at its 0.5 default.
-      const paletteT = useNoise ? clamp(normalizedNoise, float(0), float(1)) : float(0.5)
-      const baseColour = getColourFromPalette(scoped.uPaletteIndex, paletteT)
-
-      const borderMask = smoothstep(float(INNER_EDGE).sub(aa), float(INNER_EDGE).add(aa), edge)
-      const borderColour = vec3(float(1).sub(activeMix))
-
+      const border = smoothstep(float(INNER_EDGE).sub(aa), float(INNER_EDGE).add(aa), edge)
       return {
-        colorNode: mix(baseColour, borderColour, borderMask),
-        // The tile's own z, so it ramps in as a whole. The fade toggle is a graph constant; hoist
-        // the fade to the vertex stage when enabled.
+        colorNode: mix(galaxy.colorNode, vec3(active), border),
+        emissiveNode: galaxy.emissiveNode.mul(float(1).sub(border)),
         opacityNode: useDistanceFade ? vertexStage(fadeInOut(uPlayerWorldPos.z)) : float(1),
       }
     },
-    [colourTileUniformScope, useDistanceFade, useNoise],
+    [uniforms, active, quality.samples, quality.starCount, useDistanceFade],
+  )
+  const attachMaterial = useCallback(
+    (material: MeshBasicNodeMaterial | null) => {
+      if (!material) return
+      Object.assign(material, { emissiveNode })
+      material.needsUpdate = true
+    },
+    [emissiveNode],
   )
 
-  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
-
   return (
-    <RigidBody
-      type="fixed"
-      position={[0, 0, z]}
-      colliders={false}
-      userData={option.userData}>
+    <RigidBody type="fixed" position={[0, 0, z]} colliders={false} userData={option.userData}>
       <TrimeshCollider
         args={[collision.vertices, collision.indices]}
         sensor={true}
@@ -147,6 +119,7 @@ const ColourTile: FC<ColourTileProps> = ({ option, isActive }) => {
       <mesh renderOrder={1}>
         <primitive object={geometry} attach="geometry" />
         <meshBasicNodeMaterial
+          ref={attachMaterial}
           colorNode={colorNode}
           opacityNode={opacityNode}
           transparent

@@ -36,9 +36,6 @@ export type SceneConfig = {
   platformTiles: {
     addDetailNoise: boolean
   }
-  colourTile: {
-    useNoise: boolean
-  }
   floatingHeading: {
     shouldRotate: boolean
     useNoiseFade: boolean
@@ -73,7 +70,6 @@ export const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     gem: { particleCount: 160 },
     floatingTiles: { instanceCount: 0 },
     platformTiles: { addDetailNoise: true },
-    colourTile: { useNoise: true },
     floatingHeading: { shouldRotate: true, useNoiseFade: true },
     infoZoneSphere: { segments: 48, enableVeins: true },
     confetti: { particleCount: 160 },
@@ -87,7 +83,6 @@ export const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     gem: { particleCount: 80 },
     floatingTiles: { instanceCount: 0 },
     platformTiles: { addDetailNoise: false },
-    colourTile: { useNoise: true },
     floatingHeading: { shouldRotate: false, useNoiseFade: true },
     infoZoneSphere: { segments: 32, enableVeins: false },
     confetti: { particleCount: 80 },
@@ -101,7 +96,6 @@ export const SCENE_CONFIGS: Record<SceneQuality, SceneConfig> = {
     gem: { particleCount: 40 },
     floatingTiles: { instanceCount: 0 },
     platformTiles: { addDetailNoise: false },
-    colourTile: { useNoise: false },
     floatingHeading: { shouldRotate: false, useNoiseFade: false },
     infoZoneSphere: { segments: 20, enableVeins: false },
     confetti: { particleCount: 48 },
