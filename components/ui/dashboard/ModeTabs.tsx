@@ -59,7 +59,7 @@ export const ModeTabs: FC<ModeTabsProps> = ({ className, activeTab, onTabChange 
             className={twJoin(
               'flex flex-1 flex-col items-start rounded-xl p-4 text-left text-white transition',
               isSelected
-                ? 'bg-teal-300/5 ring ring-teal-600'
+                ? 'bg-amber-300/5 ring ring-amber-600'
                 : 'bg-white/5 opacity-70 hover:opacity-100',
             )}>
             <div className="mb-2 flex items-center gap-2.5">

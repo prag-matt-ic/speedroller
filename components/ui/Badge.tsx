@@ -13,14 +13,14 @@ export type BadgeProps = {
 // const RING_CLASSES: Record<Palette, string> = {
 //   orange: 'ring ring-orange-accent/25',
 //   blue: 'ring ring-blue-accent/25',
-//   teal: 'ring ring-teal-accent/25',
+//   teal: 'ring ring-amber-accent/25',
 //   dynamic: 'ring ring-dynamic-accent/25',
 // }
 
 // const ICON_CLASSES: Record<Palette, string> = {
 //   orange: 'text-orange-accent',
 //   blue: 'text-blue-accent',
-//   teal: 'text-teal-accent',
+//   teal: 'text-amber-accent',
 //   dynamic: 'text-dynamic-accent',
 // }
 
@@ -31,7 +31,7 @@ const Badge: FC<BadgeProps> = ({
   withRing = true,
   size = 'regular',
 }) => {
-  const ringClass = withRing ? 'ring ring-teal-accent/25' : ''
+  const ringClass = withRing ? 'ring ring-amber-accent/25' : ''
 
   const containerSize =
     size === 'large'
@@ -48,7 +48,7 @@ const Badge: FC<BadgeProps> = ({
         withRing && ringClass,
         className,
       )}>
-      <Icon className={twJoin('text-teal-accent')} size={iconSize} strokeWidth={1.75} />
+      <Icon className={twJoin('text-amber-accent')} size={iconSize} strokeWidth={1.75} />
       <span
         className={twJoin(
           'tracking-wide whitespace-nowrap text-white',

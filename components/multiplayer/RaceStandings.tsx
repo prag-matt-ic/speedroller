@@ -34,7 +34,7 @@ export function RaceStandings() {
         <span className="w-4 shrink-0 font-mono tabular-nums">{position ?? '—'}</span>
         <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: entrant.profile.colour }} />
         <span className="min-w-0 flex-1 truncate">{entrant.profile.name}{entrant.id === snapshot.selfId ? ' · You' : ''}</span>
-        <span className="shrink-0 font-mono text-teal-200 tabular-nums">{entrant.status === 'finished' ? `${((entrant.elapsedMs ?? 0) / 1000).toFixed(2)} s` : entrant.status === 'dnf' ? 'DNF' : snapshot.phase === 'countdown' ? 'Grid' : `${Math.round(progress * 100)}%`}</span>
+        <span className="shrink-0 font-mono text-amber-200 tabular-nums">{entrant.status === 'finished' ? `${((entrant.elapsedMs ?? 0) / 1000).toFixed(2)} s` : entrant.status === 'dnf' ? 'DNF' : snapshot.phase === 'countdown' ? 'Grid' : `${Math.round(progress * 100)}%`}</span>
       </li>)}
     </ol>
   </section>

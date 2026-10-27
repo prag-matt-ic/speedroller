@@ -57,7 +57,7 @@ const LandingControls: FC<Props> = ({ isLoaded, isMobile, onStart }) => {
       {isMobile && (
         <span
           className={twJoin(
-            'fixed inset-x-0 top-0 px-6 py-4 text-center text-sm font-medium text-teal-200/50 transition-opacity delay-500 duration-500 ease-out motion-reduce:transition-none',
+            'fixed inset-x-0 top-0 px-6 py-4 text-center text-sm font-medium text-amber-200/50 transition-opacity delay-500 duration-500 ease-out motion-reduce:transition-none',
             isLoaded ? 'opacity-100' : 'opacity-0',
           )}>
           Hide the toolbar for a fullscreen experience!

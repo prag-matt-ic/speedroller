@@ -72,7 +72,7 @@ export const FeedbackPanel: FC = () => {
             <button
               className={twJoin(
                 'relative flex h-full shrink-0 items-center gap-2.5 border-none bg-none px-4 font-medium uppercase outline-none',
-                canSubmit ? 'text-teal-200' : 'cursor-not-allowed opacity-40',
+                canSubmit ? 'text-amber-200' : 'cursor-not-allowed opacity-40',
               )}
               onClick={onSubmit}
               disabled={!canSubmit}>

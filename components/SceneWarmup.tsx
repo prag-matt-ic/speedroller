@@ -5,7 +5,6 @@ import { type FC, type RefObject, useEffect, useRef } from 'react'
 import type { PassNode } from 'three/webgpu'
 
 import { useGameStore } from '@/components/GameProvider'
-import { usePerformanceStore } from '@/components/PerformanceProvider'
 import { useSceneWarmup } from '@/hooks/useSceneWarmup'
 
 type Props = {
@@ -25,7 +24,6 @@ type FrameloopMode = 'always' | 'demand' | 'never'
 const SceneWarmup: FC<Props> = ({ scenePassRef, compilationRef }) => {
   const isPlatformReady = useGameStore((s) => s.isPlatformReady)
   const setIsWarmupComplete = useGameStore((s) => s.setIsWarmupComplete)
-  const sceneQuality = usePerformanceStore((s) => s.sceneQuality)
   const setFrameloop = useThree((s) => s.setFrameloop)
   const invalidate = useThree((s) => s.invalidate)
   const get = useThree((s) => s.get)
@@ -39,7 +37,7 @@ const SceneWarmup: FC<Props> = ({ scenePassRef, compilationRef }) => {
     isSceneReady: isPlatformReady,
     scenePassRef,
     compilationRef,
-    revision: sceneQuality,
+    // Each quality change replaces the scene pass; wait for that target instead of compiling the old one.
     onWarmupStart: () => {
       setIsWarmupComplete(false)
       if (frameloopBeforeWarmupRef.current === null) {

@@ -39,10 +39,20 @@ const findMarker = (
   return { kind, rowIndex: match.rowIndex, position: match.position }
 }
 
+/** Resolves one unique physical marker from generated row data. */
+export function findRaceMarker(
+  rows: readonly RowData[],
+  kind: RaceMarkerKind,
+): RaceMarker | null {
+  const getPosition = (row: RowData) =>
+    kind === 'start' ? row.startLinePosition : row.finishLinePosition
+  return findMarker(rows, getPosition, kind)
+}
+
 /** Resolves the unique physical start and finish markers from generated row data. */
 export function findRaceMarkers(rows: readonly RowData[]): RaceMarkers | null {
-  const start = findMarker(rows, (row) => row.startLinePosition, 'start')
-  const finish = findMarker(rows, (row) => row.finishLinePosition, 'finish')
+  const start = findRaceMarker(rows, 'start')
+  const finish = findRaceMarker(rows, 'finish')
   if (!start || !finish) return null
   return { start, finish }
 }
@@ -63,15 +73,15 @@ export function getStartRowIndex(rows: readonly RowData[]): number | null {
   return findRaceMarkers(rows)?.start.rowIndex ?? null
 }
 
-// The physical line footprint is five rows deep, so a respawn must stay at least three rows
-// before the marker to avoid being placed inside the start sensor.
+// The start line covers one row either side of its marker, so a respawn must stay at least three
+// rows before it to avoid being placed inside the start sensor.
 const LOBBY_RESPAWN_CLEARANCE_ROWS = 3
 
 export function getFinishRowIndex(rows: readonly RowData[]): number | null {
   return findRaceMarkers(rows)?.finish.rowIndex ?? null
 }
 
-/** Lobby recovery rows, kept clear of the five-row start sensor footprint. */
+/** Lobby recovery rows, kept clear of the start sensor footprint. */
 export function getLobbyRowRange(
   rows: readonly RowData[],
 ): { startRow: number; endRow: number } | null {

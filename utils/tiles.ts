@@ -3,6 +3,8 @@ import { Stage } from '@/stores/types'
 // Tile dimensions
 export const TILE_SIZE = 1.0
 export const TILE_THICKNESS = 0.12
+/** Tile rows painted by a start or finish line, centred on the authored marker row. */
+export const RACE_LINE_ROW_SPAN = 3
 export const PLATFORM_BATCH_ROWS = 16
 export const INITIAL_ROW_START_Z = 3.5 * TILE_SIZE
 

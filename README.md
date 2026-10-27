@@ -41,7 +41,7 @@ The current handling is the **Stage 1 manual model**: you hold forward to roll a
 
 The 60 rings are distributed across shared and alternative branches. A complete run does not require collecting all of them; rings announce route choices and reward the technical line. Branch choices with the same forward rows have the same forward distance — their times differ through steering, braking, and boosts.
 
-The HUD carries a **ring count** and a **boost dial** during a live race.
+The HUD carries a live **speed dial** (current speed against the race maximum) and a **ring count** during a race.
 
 ### Falling off 🕳️
 
@@ -186,7 +186,7 @@ Collectibles and colour tiles use a GSAP-driven hold timer. Stay on the tile for
 
 When the player enters an info zone on the developer map, HTML content is animated in using React Transition Group + GSAP.
 
-The start and finish lines share one component but dispatch from an explicit `kind` role rather than the current game mode. Both are nine tiles wide by five tiles deep and are derived from the generated marker rows.
+The start and finish lines share one component but dispatch from an explicit `kind` role rather than the current game mode. Their checkerboards are painted into the floor tiles themselves, three rows deep and across each row's whole solid run, so the paint keeps the tile shading, bevel, specular and trail glow. The component owns only the sensor and the floating label, and its sensor covers exactly the painted tiles.
 
 If the player falls off the platform, they intersect with out-of-bounds and are respawned onto the nearest safe tile (see [Falling off](#falling-off)).
 

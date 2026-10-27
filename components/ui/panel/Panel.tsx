@@ -20,9 +20,9 @@ export type PanelProps = PropsWithChildren<{
 }>
 
 const CONTAINER_STRENGTH_CLASSES: Record<Strength, string> = {
-  1: 'border-white/10 bg-white/5',
-  2: 'border-white/20 bg-white/15',
-  3: 'border-white/40 bg-white/35',
+  1: 'border-amber-200/10 bg-zinc-950/10',
+  2: 'border-amber-200/20 bg-zinc-950/15',
+  3: 'border-amber-200/40 bg-zinc-950/35',
 }
 
 const Panel: FC<PanelProps> = ({
@@ -30,7 +30,7 @@ const Panel: FC<PanelProps> = ({
   className,
   children,
   enableAttractor = true,
-  attractorClassName = 'bg-teal-500/15',
+  attractorClassName = 'bg-amber-400/10',
 }) => {
   const { ref, inViewport } = useInViewport()
   const container = useRef<HTMLDivElement>(null)

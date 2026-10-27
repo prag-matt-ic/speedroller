@@ -60,8 +60,8 @@ const Key: FC<KeyProps> = ({ Icon, isActive }) => {
   return (
     <div
       className={twJoin(
-        'flex h-7 w-10 items-center justify-center rounded-md text-teal-100',
-        isActive ? 'bg-black' : 'bg-black/40',
+        'flex h-7 w-10 items-center bg-black justify-center rounded-md ',
+        isActive ? 'text-amber-200' : 'text-amber-700',
       )}>
       <Icon size={20} strokeWidth={3} />
     </div>
@@ -187,7 +187,7 @@ const Stick: FC = () => {
       onMove={onJoystickMove}>
       <div
         className={twJoin(
-          'flex size-full items-center justify-center text-teal-600',
+          'flex size-full items-center justify-center text-amber-600',
           hasMoved ? 'hidden' : 'animate-pulse',
         )}>
         <Move size={28} strokeWidth={1.5} />

@@ -3,7 +3,7 @@
 import { useTexture } from '@react-three/fiber/webgpu'
 import { useLocalNodes } from '@react-three/tsl'
 import { type FC, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { attribute, normalMap, spritesheetUV, texture, uv, vec2 } from 'three/tsl'
+import { abs, attribute, mix, normalMap, spritesheetUV, step, texture, uv, vec2, vertexStage } from 'three/tsl'
 import {
   type BoxGeometry,
   ClampToEdgeWrapping,
@@ -12,7 +12,7 @@ import {
   LinearFilter,
   LinearMipmapLinearFilter,
   Matrix4,
-  MeshLambertNodeMaterial,
+  MeshPhongNodeMaterial,
   NoColorSpace,
   Quaternion,
   SRGBColorSpace,
@@ -27,12 +27,12 @@ import type { PillarPlacement } from '@/utils/platform/architecture'
 import { surfaceRotation, type CourseSurface } from '@/utils/platform/courseSurface'
 import { blockWorldPosition } from '@/utils/platform/blockWorldPosition'
 import { createStoneBlockGeometry } from '@/utils/platform/stoneBlockGeometry'
+import { industrialSurface } from './industrialSurface'
 
 const BATCH_LENGTH = 32
 const STONE_ATLAS_GRID = 3
 const STONE_UV_INSET = 16.5 / 512
-const STONE_BRIGHTNESS = 0.88
-const STONE_NORMAL_STRENGTH = 0.6
+const STONE_NORMAL_STRENGTH = 0.35
 
 const configureStoneAtlas = (map: Texture) => {
   map.colorSpace = SRGBColorSpace
@@ -45,7 +45,7 @@ const configureStoneAtlas = (map: Texture) => {
 
 type Props = { blocks: readonly PillarPlacement[]; surface: CourseSurface; enabled?: boolean; fadeEnabled?: boolean; onReadyChange?: (ready: boolean) => void }
 
-type BatchProps = { surface: CourseSurface; pillars: PillarPlacement[]; geometry: BoxGeometry; material: MeshLambertNodeMaterial }
+type BatchProps = { surface: CourseSurface; pillars: PillarPlacement[]; geometry: BoxGeometry; material: MeshPhongNodeMaterial }
 
 const PillarBatch: FC<BatchProps> = ({ surface, pillars, geometry, material }) => {
   const meshRef = useRef<InstancedMesh>(null)
@@ -56,6 +56,9 @@ const PillarBatch: FC<BatchProps> = ({ surface, pillars, geometry, material }) =
     ))
     clone.setAttribute('stoneFrame', new InstancedBufferAttribute(
       new Float32Array(pillars.map((_, index) => index % (STONE_ATLAS_GRID * STONE_ATLAS_GRID))), 1,
+    ))
+    clone.setAttribute('blockSize', new InstancedBufferAttribute(
+      new Float32Array(pillars.flatMap((pillar) => pillar.dimensions)), 3,
     ))
     return clone
   }, [geometry, pillars])
@@ -91,21 +94,33 @@ const StoneBlocks: FC<Props> = ({ blocks, surface, enabled = true, fadeEnabled =
     configureStoneAtlas(map)
     map.colorSpace = NoColorSpace
   })
-  const { colorNode, normalNode, pillarWorldZ } = useLocalNodes(() => {
+  const { colorNode, emissiveNode, normalNode, pillarWorldZ } = useLocalNodes(() => {
     const stoneUv = spritesheetUV(
       vec2(STONE_ATLAS_GRID),
       uv().mul(1 - 2 * STONE_UV_INSET).add(STONE_UV_INSET),
       attribute<'float'>('stoneFrame', 'float'),
     )
+    const dimensions = attribute<'vec3'>('blockSize', 'vec3')
+    const faceNormal = abs(attribute<'vec3'>('normal', 'vec3'))
+    const faceSize = vertexStage(vec2(
+      mix(dimensions.x, dimensions.z, step(0.5, faceNormal.x)),
+      mix(dimensions.y, dimensions.z, step(0.5, faceNormal.y)),
+    ))
+    const panel = industrialSurface(texture(stoneAtlas, stoneUv).rgb, uv(), faceSize)
     return {
       pillarWorldZ: attribute<'float'>('pillarWorldZ', 'float'),
-      colorNode: texture(stoneAtlas, stoneUv).rgb.mul(STONE_BRIGHTNESS).mul(attribute<'float'>('stoneShade', 'float')),
+      colorNode: panel.colorNode.mul(attribute<'float'>('stoneShade', 'float')),
+      emissiveNode: panel.emissiveNode,
       normalNode: normalMap(texture(stoneNormals, stoneUv).rgb, vec2(STONE_NORMAL_STRENGTH)),
     }
   }, [stoneAtlas, stoneNormals])
   const opacityNode = useRouteFadeIn(pillarWorldZ, fadeEnabled)
   const geometry = useMemo(() => createStoneBlockGeometry(), [])
-  const material = useMemo(() => new MeshLambertNodeMaterial({ colorNode, normalNode, opacityNode, transparent: true, depthWrite: true, alphaTest: 0.001 }), [colorNode, normalNode, opacityNode])
+  const material = useMemo(() => {
+    const material = new MeshPhongNodeMaterial({ colorNode, normalNode, opacityNode, shininess: 24, specular: '#62584c', transparent: true, depthWrite: true, alphaTest: 0.001 })
+    Object.assign(material, { emissiveNode })
+    return material
+  }, [colorNode, emissiveNode, normalNode, opacityNode])
   useEffect(() => () => geometry.dispose(), [geometry])
   useEffect(() => () => material.dispose(), [material])
   useEffect(() => {

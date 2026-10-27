@@ -41,7 +41,7 @@ export const SpeedRunStartOverlay: FC<Props> = ({ ref, transitionStatus }) => {
   return <PointerProvider isMobile={isMobile}>
     <div ref={ref}>
       <dialog ref={dialog} aria-labelledby="race-mode-heading" onCancel={event => { event.preventDefault(); cancel() }}
-        className="fixed inset-0 m-auto max-h-[90dvh] w-[min(36rem,95vw)] overflow-y-auto rounded-2xl border border-teal-200/20 bg-neutral-950 p-5 text-white shadow-2xl backdrop:bg-black/75 sm:p-8">
+        className="fixed inset-0 m-auto max-h-[90dvh] w-[min(36rem,95vw)] overflow-y-auto rounded-2xl border border-amber-200/20 bg-neutral-950 p-5 text-white shadow-2xl backdrop:bg-black/75 sm:p-8">
         <section className="flex flex-col gap-5">
           <h2 ref={title} tabIndex={-1} id="race-mode-heading" className="font-unbounded text-2xl font-semibold outline-none">{mode ? 'Enter your racer name' : 'Choose your race'}</h2>
           {!mode ? <>

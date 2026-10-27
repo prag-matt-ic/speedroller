@@ -13,8 +13,8 @@ const blocks = createSceneryPreviewBlocks()
 export default function SceneryInspection() {
   return <main className="h-dvh w-full">
     <div className="fixed left-4 top-4 z-10 rounded bg-black/70 p-3 text-sm text-white">
-      Stone structures · drag to orbit, scroll to zoom<br />
-      Shared block mesh · baked shading · gameplay ambient light
+      Industrial structures · drag to orbit, scroll to zoom<br />
+      Shared Phong panels · emissive strips · gameplay ambient light
     </div>
     <WebGPUCanvas camera={{ position: [65, 48, 105], far: 500, fov: 50 }} dpr={1}>
       <color attach="background" args={['#c8c4bd']} />

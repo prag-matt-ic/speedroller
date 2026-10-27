@@ -38,7 +38,7 @@ export default async function Home(props: PageProps) {
           </QueryProvider>
         </SoundProvider>
       </main>
-      {isEditorPreview && <div className="pointer-events-none fixed top-2 left-1/2 z-50 -translate-x-1/2 rounded bg-black/80 px-3 py-1 text-xs text-teal-200">Local course preview · times are not submitted</div>}
+      {isEditorPreview && <div className="pointer-events-none fixed top-2 left-1/2 z-50 -translate-x-1/2 rounded bg-black/80 px-3 py-1 text-xs text-amber-200">Local course preview · times are not submitted</div>}
       <StructuredData />
     </>
   )

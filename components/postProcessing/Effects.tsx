@@ -5,8 +5,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useRenderPipeline, useUniforms } from '@react-three/tsl'
 import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import BloomNode, { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { emissive, mrt, output, vec4 } from 'three/tsl'
-import { NeutralToneMapping, NoToneMapping, type PassNode } from 'three/webgpu'
+import { convertToTexture, emissive, mrt, output, vec4 } from 'three/tsl'
+import { NeutralToneMapping, NoToneMapping, type PassNode, type RTTNode } from 'three/webgpu'
 
 import { usePerformanceStore } from '@/components/PerformanceProvider'
 import SceneWarmup from '@/components/SceneWarmup'
@@ -67,12 +67,15 @@ const PostProcessing = () => {
 
   // BloomNode owns its mip-chain render targets, so a rebuilt graph must dispose the outgoing one.
   const bloomNodeRef = useRef<BloomNode | null>(null)
+  const blurInputRef = useRef<RTTNode | null>(null)
 
   const { renderPipeline, rebuild } = useRenderPipeline(
     ({ renderPipeline: pipeline, passes }) => {
       setScenePassRef({ current: passes.scenePass })
       pipeline.outputColorTransform = true
 
+      blurInputRef.current?.dispose()
+      blurInputRef.current = null
       bloomNodeRef.current?.dispose()
       const bloomNode = bloom(
         passes.scenePass.getTextureNode('emissive'),
@@ -83,16 +86,17 @@ const PostProcessing = () => {
       bloomNodeRef.current = bloomNode
 
       const sceneColor = passes.scenePass.getTextureNode('output')
-      const effects = isEnabled
+      const postBloom = vec4(sceneColor.rgb.add(bloomNode.rgb), sceneColor.a)
+      // Materialize once so every blur tap samples both the scene and its bloom.
+      const blurInput = isEnabled ? convertToTexture(postBloom) : null
+      blurInputRef.current = blurInput
+      pipeline.outputNode = blurInput
         ? speedEffectsNode({
-            sceneColor,
+            sceneColor: blurInput,
             uSpeed,
             stepCount: blurSamplesRef.current,
           })
-        : sceneColor
-
-      // Add the bloom before the output transform so the halo shares the scene's colour space.
-      pipeline.outputNode = vec4(effects.rgb.add(bloomNode.rgb), effects.a)
+        : postBloom
     },
     // Selective bloom: the emissive attachment only receives materials that set an emissive node.
     // Multiply by output alpha because non-output MRT attachments are unblended.
@@ -113,6 +117,8 @@ const PostProcessing = () => {
     if (!renderPipeline) return
 
     return () => {
+      blurInputRef.current?.dispose()
+      blurInputRef.current = null
       bloomNodeRef.current?.dispose()
       bloomNodeRef.current = null
     }

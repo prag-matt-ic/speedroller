@@ -8,14 +8,16 @@ import {
   PLAYER_POINT_LIGHT,
   RING_POINT_LIGHTS,
   TILE_AMBIENT_LIGHT,
+  COURSE_SUN_LIGHT,
+  poseCourseSun,
 } from '@/components/lighting/lightNodes'
 import { getPlayerLightColour } from '@/components/lighting/playerLight'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
+import { useCourseSurface } from '@/hooks/useCourseSurface'
 
 /**
  * Mounts the scene's lighting once at the root: the ambient fill plus the clustered player and ring
- * pools. The world-fixed directional key is intentionally absent until a course-relative key rig is
- * designed; see `docs/clustered-lighting.md`.
+ * pools, plus one shadowless course-relative sunset key.
  *
  * The player light follows the published world position (the same value the tile shader reads) and
  * takes its colour from the selected palette. Ring positions are posed by `Rings`; ring intensity
@@ -23,10 +25,12 @@ import { usePlayerPosition } from '@/hooks/usePlayerPosition'
  */
 const SceneLights: FC = () => {
   const paletteIndex = useGameStore((s) => s.paletteIndex)
+  const surface = useCourseSurface()
 
   const updatePlayerLightPosition = useCallback(([x, y, z]: Vector3Tuple) => {
     PLAYER_POINT_LIGHT.position.set(x, y, z)
-  }, [])
+    poseCourseSun(x, y, z, surface)
+  }, [surface])
   usePlayerPosition(updatePlayerLightPosition)
 
   useLayoutEffect(() => {
@@ -39,6 +43,8 @@ const SceneLights: FC = () => {
   return (
     <>
       <primitive object={TILE_AMBIENT_LIGHT} />
+      <primitive object={COURSE_SUN_LIGHT} />
+      <primitive object={COURSE_SUN_LIGHT.target} />
       <primitive object={PLAYER_POINT_LIGHT} />
       {RING_POINT_LIGHTS.map((light) => (
         <primitive key={light.uuid} object={light} />

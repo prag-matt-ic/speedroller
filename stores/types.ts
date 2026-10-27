@@ -182,7 +182,7 @@ export type PlayerSlice = {
   /** Current forward speed in units per second, published for effects and HUD. */
   playerSpeedUnits: number
   setPlayerSpeedUnits: (speedUnits: number) => void
-  /** Ring-boost allowance above cruise in units per second, published for effects and HUD. */
+  /** Ring-boost allowance above cruise in units per second, published for the debug probe. */
   playerBoostUnits: number
   setPlayerBoostUnits: (boostUnits: number) => void
   /** Monotonic count of rings that granted race boost. The player applies the deltas. */

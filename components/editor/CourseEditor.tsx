@@ -19,7 +19,7 @@ const LAYERS: Layer[] = ['floor', 'ghosts', 'highlights', 'confetti', 'objects']
 const OBJECT_COLOURS: Record<ObjectKind, string> = { ring: '#ff637c', start: '#b6a0ff', finish: '#ffe174', paintShop: '#ffad66' }
 const CONFETTI_COLOUR = '#ff0080'
 const CONFETTI_BAND = 'rgba(255, 0, 128, 0.18)'
-const CONTROL = 'rounded border border-white/20 bg-zinc-900 px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-teal-300'
+const CONTROL = 'rounded border border-white/20 bg-zinc-900 px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-amber-300'
 const LABELS: Record<Layer, string> = { floor: 'Floor', ghosts: 'Ghosts', highlights: 'Highlights', confetti: 'Confetti', objects: 'Objects' }
 
 export default function CourseEditor() {
@@ -239,12 +239,12 @@ export default function CourseEditor() {
 
   return <main className="flex h-dvh flex-col bg-zinc-950 text-zinc-100">
     <header className="flex flex-wrap items-center gap-3 border-b border-white/15 px-5 py-3">
-      <div className="mr-auto"><h1 className="text-lg font-bold">Course editor <span className="text-xs font-normal text-teal-300">LOCAL · {loaded?.version}</span></h1><p className="text-xs text-zinc-400">Unrolled cylinder · travel ↑ · {dirty ? 'Unsaved changes' : 'Saved course'}</p></div>
+      <div className="mr-auto"><h1 className="text-lg font-bold">Course editor <span className="text-xs font-normal text-amber-300">LOCAL · {loaded?.version}</span></h1><p className="text-xs text-zinc-400">Unrolled cylinder · travel ↑ · {dirty ? 'Unsaved changes' : 'Saved course'}</p></div>
       <Button variant="secondary" size="sm" disabled={!history?.past.length || saving || !!working} onClick={() => setHistory(history => history ? undo(history) : history)}>Undo</Button>
       <Button variant="secondary" size="sm" disabled={!history?.future.length || saving || !!working} onClick={() => setHistory(history => history ? redo(history) : history)}>Redo</Button>
       <Button variant="secondary" size="sm" disabled={saving} onClick={() => { if (!dirty || window.confirm('Discard unsaved edits and reload the saved course?')) { localStorage.removeItem(DRAFT_KEY); setDraft(null); void load() } }}>Reload</Button>
       <Button variant="primary" size="sm" disabled={!loaded || saving || !!working || !!draft || issues.length > 0} onClick={() => void save()}>{saving ? 'Building…' : 'Save & Build'}</Button>
-      <Link className={twJoin(CONTROL, 'text-teal-200')} href="/?editor=true" target="speedroller-course-playtest" rel="noopener">Open Game ↗</Link>
+      <Link className={twJoin(CONTROL, 'text-amber-200')} href="/?editor=true" target="speedroller-course-playtest" rel="noopener">Open Game ↗</Link>
     </header>
     {draft && <div className="flex flex-wrap items-center gap-3 bg-amber-950 px-5 py-3 text-sm">
       <p>A browser draft is available.{draft.revision !== loaded?.revision && ' The saved course has changed; restoring will require review before saving.'}</p>
@@ -256,13 +256,13 @@ export default function CourseEditor() {
         <fieldset disabled={saving || !loaded || !!draft} className="space-y-5">
           <div><h2 className="mb-2 font-bold">Layers</h2>{LAYERS.map(value => <div className="mb-1 flex items-center gap-2" key={value}>
             <input type="checkbox" aria-label={`Show ${LABELS[value]}`} checked={visible[value]} onChange={event => setVisible({ ...visible, [value]: event.target.checked })} />
-            <button aria-pressed={layer === value} className={twJoin('flex-1 rounded px-2 py-2 text-left focus-visible:outline-2 focus-visible:outline-teal-300', layer === value ? 'bg-teal-900 text-teal-100' : 'bg-white/5')} onClick={() => { setLayer(value); setVisible({ ...visible, [value]: true }) }}>{LABELS[value]}</button>
+            <button aria-pressed={layer === value} className={twJoin('flex-1 rounded px-2 py-2 text-left focus-visible:outline-2 focus-visible:outline-amber-300', layer === value ? 'bg-amber-900 text-amber-100' : 'bg-white/5')} onClick={() => { setLayer(value); setVisible({ ...visible, [value]: true }) }}>{LABELS[value]}</button>
           </div>)}<p className="mt-2 text-xs text-zinc-400">Ghosts mask out floor collision. Hiding a layer only changes this view.</p></div>
           <label className="block">Tool<select className={twJoin(CONTROL, 'mt-1 w-full')} value={tool} onChange={event => setTool(event.target.value as Tool)}>{(['paint', 'erase', 'rectangle', 'pan'] as const).map(tool => <option key={tool}>{tool}</option>)}</select></label>
           {layer === 'objects' ? <label className="block">Object<select className={twJoin(CONTROL, 'mt-1 w-full')} value={object} onChange={event => setObject(event.target.value as ObjectKind)}>{OBJECT_TYPES.map(kind => <option key={kind}>{kind}</option>)}</select></label> : <label className="block">Brush size<select className={twJoin(CONTROL, 'mt-1 w-full')} value={size} onChange={event => setSize(Number(event.target.value))}>{[1, 3, 5].map(size => <option value={size} key={size}>{size} × {size}</option>)}</select></label>}
           {layer === 'confetti' && <p className="text-xs leading-relaxed text-zinc-400">{confettiRowCount} marked row{confettiRowCount === 1 ? '' : 's'} · two emitters each. One marker per row; the burst spans the solid floor. Rows wider than {MAX_CONFETTI_ROW_WIDTH} tiles are skipped.</p>}
           <label className="block">Section<select className={twJoin(CONTROL, 'mt-1 w-full')} defaultValue="" onChange={event => jumpTo(Number(event.target.value))}><option value="" disabled>Jump to section</option>{sections.map(section => <option key={section.id} value={section.start}>{section.id.replace('race-', '')}</option>)}</select></label>
-          <label className="block">Zoom · {zoom}px / tile<input aria-label="Zoom" className="mt-2 w-full accent-teal-300" type="range" min="1" max="24" step="1" value={zoom} onChange={event => changeZoom(Number(event.target.value))} /></label>
+          <label className="block">Zoom · {zoom}px / tile<input aria-label="Zoom" className="mt-2 w-full accent-amber-300" type="range" min="1" max="24" step="1" value={zoom} onChange={event => changeZoom(Number(event.target.value))} /></label>
         </fieldset>
         <p className="mt-6 text-xs leading-relaxed text-zinc-400">Drag to paint. Middle-drag or Pan to move. Focus the map: arrows move a cell; Space paints; Delete erases; Cmd/Ctrl Z undoes, Shift Z redoes.</p>
         <p className="mt-2 text-xs leading-relaxed text-zinc-400">Confetti paints whole rows; erasing anywhere in a row removes its burst.</p>
@@ -271,7 +271,7 @@ export default function CourseEditor() {
       </aside>
       <div ref={viewportRef} onScroll={updateViewport} className="relative min-w-0 flex-1 overflow-auto" style={{ touchAction: 'none' }}>
         <div style={{ width: Math.max(COURSE_COLUMNS * zoom, viewport.width), height: Math.max(rows.length * zoom, viewport.height) }}>
-          <canvas ref={canvasRef} tabIndex={0} role="application" aria-label="Course paint grid. Use arrows to select a cell, Space to paint, Delete to erase." className="sticky left-0 top-0 block focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-300" style={{ width: viewport.width, height: viewport.height, cursor: tool === 'pan' ? 'grab' : 'crosshair' }}
+          <canvas ref={canvasRef} tabIndex={0} role="application" aria-label="Course paint grid. Use arrows to select a cell, Space to paint, Delete to erase." className="sticky left-0 top-0 block focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber-300" style={{ width: viewport.width, height: viewport.height, cursor: tool === 'pan' ? 'grab' : 'crosshair' }}
             onContextMenu={event => event.preventDefault()}
             onPointerDown={event => {
               if (!history || saving || draft) return
@@ -316,6 +316,6 @@ export default function CourseEditor() {
         </div>
       </div>
     </div>
-    <footer role="status" className="max-h-28 overflow-auto whitespace-pre-wrap border-t border-white/15 px-5 py-2 text-xs text-teal-100">{message}</footer>
+    <footer role="status" className="max-h-28 overflow-auto whitespace-pre-wrap border-t border-white/15 px-5 py-2 text-xs text-amber-100">{message}</footer>
   </main>
 }

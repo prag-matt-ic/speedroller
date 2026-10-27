@@ -33,6 +33,7 @@ import {
   type ConfettiPlacement,
   type IndexedPlacement,
   ON_TILE_Y,
+  RACE_LINE_ROW_SPAN,
   type RowData,
   TILE_SIZE,
   colToX as columnToX,
@@ -1004,23 +1005,19 @@ function assertLineFootprintSupport(
   position: readonly [number, number, number],
   rowIndex: number,
 ) {
-  const columnIndex = worldXToColumn(position[0])
-  for (let rowOffset = -2; rowOffset <= 2; rowOffset++) {
+  const columnIndex = resolveColumn(worldXToColumn(position[0]))
+  const halfSpan = Math.floor(RACE_LINE_ROW_SPAN / 2)
+  for (let rowOffset = -halfSpan; rowOffset <= halfSpan; rowOffset++) {
     const footprintRow = rows[rowIndex + rowOffset]
     if (!footprintRow) {
       throw new Error(`${label} line extends past the course at row ${rowIndex + rowOffset}`)
     }
-    for (let columnOffset = -4; columnOffset <= 4; columnOffset++) {
-      const footprintColumn = resolveColumn(columnIndex + columnOffset)
-      if (footprintColumn < 0 || footprintColumn >= COLUMNS) {
-        throw new Error(`${label} line extends outside the bitmap columns`)
-      }
-      if (footprintRow.isRaised[footprintColumn] !== 1) {
-        throw new Error(
-          `${label} line lacks floor support at row ${rowIndex + rowOffset}, ` +
-            `column ${footprintColumn}`,
-        )
-      }
+    // The line is painted across each row's whole solid run, so only the marker's own column has to
+    // be floor in every band row; every other painted tile follows from the floor.
+    if (footprintRow.isRaised[columnIndex] !== 1) {
+      throw new Error(
+        `${label} line lacks floor support at row ${rowIndex + rowOffset}, column ${columnIndex}`,
+      )
     }
   }
 }

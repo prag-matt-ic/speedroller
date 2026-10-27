@@ -33,5 +33,5 @@ export function MultiplayerGlobalRank() {
     else if (isPending) label = 'Time saved · loading global rank…'
     else label = `Global rank #${data.position} · ${result.inputType === 'keyboard' ? 'Keyboard' : 'Joystick'}`
   }
-  return <p role="status" className="text-sm text-teal-200">{label}</p>
+  return <p role="status" className="text-sm text-amber-200">{label}</p>
 }

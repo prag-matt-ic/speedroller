@@ -15,7 +15,6 @@ import {
   screenCoordinate,
   screenSize,
   screenUV,
-  select,
   sin,
   smoothstep,
   time,
@@ -37,14 +36,14 @@ const BLUR_INTENSITY_EPSILON = 0.001
 const EDGE_BLUR_THRESHOLD = 0.04
 const VIGNETTE_DARKNESS = 0.6
 const NOISE_JITTER_SCALE = 0.006
-const BLUR_BASE_MIX = 0.6
+const BLUR_BASE_MIX = 0.4
 const BLUR_STEP_FALLOFF = 0.6
 const VIGNETTE_START = 0.4
 const VIGNETTE_SPEED_SHIFT = 0.15
 const VIGNETTE_END = 0.8
 const SAMPLE_UV_MIN = 0.001
 const SAMPLE_UV_MAX = 0.999
-const NOISE_LIGHTEN_AMOUNT = 0.3
+const NOISE_DARKEN_AMOUNT = 0.3
 const BLUR_FOCUS = /*#__PURE__*/ vec2(0.5, 0.45).toConst()
 const BLUR_DIRECTION_EPSILON = 1e-5
 
@@ -105,9 +104,7 @@ export type RadialBlurOptions = {
  * Radial blur: samples toward a focus point, weighted toward the centre and jittered per pixel with
  * interleaved gradient noise so banding does not read as heavy noise.
  *
- * The GLSL early-returned when the intensity was negligible, the edge mask was below threshold, or
- * the step count was zero. The tap loop is gated behind a uniform `If(speed > eps)` so it is skipped
- * at rest, and a final `select` still discards the result when the per-pixel intensity is negligible.
+ * Skip the tap loop at rest and wherever the existing intensity/edge cutoffs keep the image clear.
  */
 export const radialBlurNode = ({
   sceneColor,
@@ -119,46 +116,47 @@ export const radialBlurNode = ({
   const { signedSpeed, speed, edgeMask, intensity } = terms
 
   return Fn(() => {
-    const directionSign = signedSpeed.greaterThanEqual(0).select(float(1), float(-1))
-    const blurOffset = BLUR_FOCUS.sub(screenUV).mul(directionSign)
-    const radialDirection = normalize(blurOffset.add(BLUR_DIRECTION_EPSILON))
-    const jitterDirection = vec2(radialDirection.y.negate(), radialDirection.x)
-    const inverseSteps = float(1 / taps)
+    const blurred = base.rgb.toVar()
 
-    // Both offsets are tap-invariant, so they are computed once outside the loop. Each tap then only
-    // scales the blur offset by its step and adds the shared jitter.
-    const jitter = interleavedGradientNoise(screenCoordinate.xy.add(time))
-      .sub(0.5)
-      .mul(NOISE_JITTER_SCALE)
-    const jitteredUv = screenUV.add(jitterDirection.mul(jitter)).toVar()
-    const stepOffset = blurOffset.mul(intensity).mul(BLUR_BASE_MIX).toVar()
+    If(
+      speed
+        .greaterThan(BLUR_INTENSITY_EPSILON)
+        .and(intensity.greaterThan(BLUR_INTENSITY_EPSILON))
+        .and(edgeMask.greaterThan(EDGE_BLUR_THRESHOLD)),
+      () => {
+        const directionSign = signedSpeed.greaterThanEqual(0).select(float(1), float(-1))
+        const blurOffset = BLUR_FOCUS.sub(screenUV).mul(directionSign)
+        const radialDirection = normalize(blurOffset.add(BLUR_DIRECTION_EPSILON))
+        const jitterDirection = vec2(radialDirection.y.negate(), radialDirection.x)
+        const inverseSteps = float(1 / taps)
 
-    const accumulated = base.rgb.toVar()
-    const weightSum = float(1).toVar()
+        // Both offsets are tap-invariant, so they are computed once outside the loop. Each tap then only
+        // scales the blur offset by its step and adds the shared jitter.
+        const jitter = interleavedGradientNoise(screenCoordinate.xy.add(time))
+          .sub(0.5)
+          .mul(NOISE_JITTER_SCALE)
+        const jitteredUv = screenUV.add(jitterDirection.mul(jitter)).toVar()
+        const stepOffset = blurOffset.mul(intensity).mul(BLUR_BASE_MIX).toVar()
 
-    // `speed` is a uniform, so this branch has no per-fragment divergence: at rest the tap loop is
-    // skipped entirely instead of fetching ~`taps` texels whose weights `intensity` (≈0) discards.
-    If(speed.greaterThan(BLUR_INTENSITY_EPSILON), () => {
-      Loop(taps, ({ i: stepIndex }) => {
-        // The GLSL indexed taps from 1, so a zero counter must give a step of 1/taps.
-        const stepT = stepIndex.add(1).toFloat().mul(inverseSteps)
-        const sampleUv = jitteredUv
-          .add(stepOffset.mul(stepT))
-          .clamp(SAMPLE_UV_MIN, SAMPLE_UV_MAX)
+        const accumulated = base.rgb.toVar()
+        const weightSum = float(1).toVar()
 
-        const weight = float(1).sub(stepT.mul(BLUR_STEP_FALLOFF)).mul(intensity)
-        accumulated.addAssign(sceneColor.sample(sampleUv).rgb.mul(weight))
-        weightSum.addAssign(weight)
-      })
-    })
+        Loop(taps, ({ i: stepIndex }) => {
+          // The GLSL indexed taps from 1, so a zero counter must give a step of 1/taps.
+          const stepT = stepIndex.add(1).toFloat().mul(inverseSteps)
+          const sampleUv = jitteredUv
+            .add(stepOffset.mul(stepT))
+            .clamp(SAMPLE_UV_MIN, SAMPLE_UV_MAX)
 
-    const blurred = mix(base.rgb, accumulated.div(weightSum), intensity)
+          const weight = float(1).sub(stepT.mul(BLUR_STEP_FALLOFF)).mul(intensity)
+          accumulated.addAssign(sceneColor.sample(sampleUv).rgb.mul(weight))
+          weightSum.addAssign(weight)
+        })
+        blurred.assign(mix(base.rgb, accumulated.div(weightSum), intensity))
+      },
+    )
 
-    const skipBlur = intensity
-      .lessThanEqual(BLUR_INTENSITY_EPSILON)
-      .or(edgeMask.lessThanEqual(EDGE_BLUR_THRESHOLD))
-
-    return select(skipBlur, base.rgb, blurred)
+    return blurred
   })()
 }
 
@@ -186,7 +184,7 @@ export type EdgeNoiseOptions = {
 }
 
 /**
- * White-noise grain that lightens the edges, weighted by the same edge mask and speed that drive
+ * White-noise grain that darkens the edges, weighted by the same edge mask and speed that drive
  * the radial blur, so it peaks where the blur streaks and is gone at rest and at the centre.
  *
  * This replaces the baked noise texture: the hash costs a few ALU ops instead of a texture fetch,
@@ -196,7 +194,7 @@ export const edgeNoiseNode = ({ baseColor, terms }: EdgeNoiseOptions): Node<'vec
   const amount = whiteNoise(screenUV).mul(terms.intensity)
 
   // mix(base, base + k, amount) is base + k * amount: one mad instead of a mix.
-  return baseColor.add(vec3(NOISE_LIGHTEN_AMOUNT).mul(amount))
+  return baseColor.sub(vec3(NOISE_DARKEN_AMOUNT).mul(amount))
 }
 
 export type SpeedEffectsOptions = {

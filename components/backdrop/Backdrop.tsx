@@ -15,7 +15,7 @@ import {
 
 import HeightFog from '@/components/backdrop/HeightFog'
 
-import backdrop from '@/assets/textures/backdrop/environment-sky-soft-1024.webp'
+import backdrop from '@/assets/textures/backdrop/environment-sky-1024.webp'
 import { bakeEnvironmentMap } from '@/components/backdrop/environmentBlur'
 
 const Backdrop: FC = () => {

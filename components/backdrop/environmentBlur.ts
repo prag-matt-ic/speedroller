@@ -1,4 +1,4 @@
-import { float, texture, uv, vec2, vec4 } from 'three/tsl'
+import { color, float, min, mix, smoothstep, texture, uv, vec2, vec3, vec4 } from 'three/tsl'
 import {
   ClampToEdgeWrapping,
   EquirectangularReflectionMapping,
@@ -13,10 +13,23 @@ import {
   RendererUtils,
   RepeatWrapping,
   type Texture,
+  type Node,
   type WebGPURenderer,
 } from 'three/webgpu'
 
 export const ENVIRONMENT_BLUR = { sigma: 1.5, referenceWidth: 1024 } as const
+
+// Baked into the existing blur pass; background, fog and reflections share the same sunset.
+export const sunsetEnvironment = (source: Node<'vec3'>, coordinate: Node<'vec2'>) => {
+  const cloudBrightness = source.dot(vec3(0.2126, 0.7152, 0.0722))
+  const sky = mix(color('#a84c22'), color('#ffdb9f'), smoothstep(0.08, 0.72, cloudBrightness))
+  const longitude = coordinate.x.sub(0.25).abs()
+  const sunOffset = vec2(min(longitude, longitude.oneMinus()).mul(2), coordinate.y.sub(0.49))
+  const sunDistance = sunOffset.dot(sunOffset)
+  const halo = sunDistance.mul(-90).exp().mul(0.8)
+  const sun = float(1).sub(smoothstep(0.000025, 0.00009, sunDistance)).mul(3)
+  return sky.add(color('#ffb957').mul(halo)).add(color('#fff3ce').mul(sun))
+}
 
 /** One source generation, two passes. The caller owns the returned target. */
 export const bakeEnvironmentMap = (renderer: WebGPURenderer, source: Texture) => {
@@ -62,9 +75,10 @@ export const bakeEnvironmentMap = (renderer: WebGPURenderer, source: Texture) =>
       const coordinate = uv().add(
         vec2(axis === 0 ? offset / width : 0, axis === 1 ? offset / height : 0),
       )
-      return texture(map, coordinate)
+      const sample = texture(map, axis === 0 ? coordinate.add(vec2(0.4, 0)) : coordinate)
         .level(float(0))
-        .rgb.mul(weight / total)
+        .rgb
+      return (axis === 0 ? sunsetEnvironment(sample, coordinate) : sample).mul(weight / total)
     })
     material.fragmentNode = vec4(
       samples.reduce((sum, sample) => sum.add(sample)),

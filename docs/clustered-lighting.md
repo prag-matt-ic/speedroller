@@ -1,12 +1,11 @@
 # Clustered scene lighting
 
-The race floor is lit by one clustered scene-lighting node: a white ambient fill, a player light
+The race floor is lit by one clustered scene-lighting node: a white ambient fill, a course-relative sunset key, a player light
 that follows the marble, and one point light co-located with every ring. The setup mirrors the
 Threenix landing flight, adapted to the cylinder course and its 60 authored rings.
 
-A world-fixed directional key has been removed for now. The track wraps around the cylinder, so a
-key fixed in world space loses the floor for long stretches of the course; a course-relative key rig
-is the next decision. The ambient value below is the baseline that rig will be balanced against.
+The sunset key follows the player's radial surface frame. This keeps its grazing angle consistent
+on the floor, walls and ceiling, with no shadow maps or per-frame allocations.
 
 Before this pass the tiles owned a private light list (`lights([ambient, key])`) and the scene had
 no lights. The new point lights are what makes clustered lighting necessary: the default Three
@@ -17,7 +16,7 @@ lighting node would unroll every one of the 61 point lights into every tile frag
 | File | Owns |
 | --- | --- |
 | `components/lighting/lightNodes.ts` | light objects, pool capacity, `ClusteredLighting`, renderer factory |
-| `components/lighting/SceneLights.tsx` | mounts the ambient, player and ring lights at the scene root, syncs player position and palette colour |
+| `components/lighting/SceneLights.tsx` | mounts ambient, sunset, player and ring lights; syncs player position and palette colour |
 | `components/lighting/playerLight.ts` | clamps a palette sample into a usable light colour |
 | `components/lighting/ringLights.ts` | ring course/world poses, pool posing, ring intensity policy |
 | `components/platform/rings/ringConfig.ts` | ring radius, centre height and colours shared by mesh and light |
@@ -64,11 +63,12 @@ Zero-intensity lights still occupy the pool. All 60 slots stay mounted in every 
 
 `SceneLights` mounts:
 
-- `TILE_AMBIENT_LIGHT` — white, intensity 1.0.
+- `TILE_AMBIENT_LIGHT` — white, intensity π × 0.5.
+- `COURSE_SUN_LIGHT` — warm white, intensity π × 0.7, shadowless; 18 units above, 12 left and 40 ahead in the player's surface frame.
 - `PLAYER_POINT_LIGHT` — shadowless, reach 6, decay 1.2.
 - `RING_POINT_LIGHTS` — 60 shadowless slots, reach 5, decay 1.2, gold `#ffd43b`.
 
-The ambient light is not clustered; `ClusteredLightsNode.setLights` keeps it in `materialLights` and
+The ambient and directional lights are not clustered; `ClusteredLightsNode.setLights` keeps them in `materialLights` and
 sends only the shadowless point lights to `clusteredLights`.
 
 `Tiles.tsx` no longer passes a material `lightsNode`. `NodeMaterial.setupLighting` resolves
@@ -76,7 +76,7 @@ sends only the shadowless point lights to `clusteredLights`.
 node. The marble, gem, rings and other hand-lit surfaces remain `MeshBasicNodeMaterial` and are
 unaffected.
 
-### Directional key (removed)
+### Directional key
 
 The former key was a `DirectionalLight('#fff2df', 2.2)` fixed at world `(-3, 6, 4)` and aimed at the
 origin. The cylinder's floor normal rotates with course position, so the key's `NdotL` fell from
@@ -85,8 +85,28 @@ the 0.6 used during that test, those stretches were about 74% darker than the st
 not fill the gaps: their
 5-unit reach left long ambient-only runs between rings.
 
-Do not restore the same fixed light. Revisit this with a rig that follows the surface frame (or a
-course-space key in the tile shader), and re-balance the ambient fill against it.
+`poseCourseSun` now rotates the key's lateral and height offsets around the cylinder, using the
+same position subscription as the player light. Tests cover the floor, both walls, ceiling and seam.
+
+### Graphite tiles and amber environment
+
+The existing nine-cell stone atlas supplies charcoal surface variation and relief. All terrain
+batches share the same Phong material settings on every tier, with no sky reflections.
+High's detail noise is centred around the maps' measured mean to preserve overall brightness.
+Medium omits the detail-noise sample; Low also
+omits the normal-map sample and contact shadow. Geometry, physics and tile draw counts are unchanged.
+
+The 1024×512 sky is graded to amber with a soft sun during the existing two-pass startup bake.
+The resulting HDR map is shared by the background and height fog. There
+are no animated clouds, volumetric raymarches or additional per-frame post-processing passes.
+The directional light and Phong highlights run on every tier. These are workload descriptions,
+not device benchmarks.
+
+The shared scenery block renderer uses charcoal Phong panels with bronze edge wear, recessed seams,
+fasteners and orange emissive strips. Fittings are sized in world units and rotate on wide bridge
+faces. All tiers use the same material, normal detail and emission; strips feed the existing bloom.
+The atlas, instance batches and geometry are reused. Panel-local orange spill adds no point lights,
+shadow maps or draw calls, and does not illuminate neighbouring objects.
 
 ## Player light
 

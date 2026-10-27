@@ -51,11 +51,11 @@ test('the clustered node separates scene fills from the point-light pool', () =>
     ...lightNodes.RING_POINT_LIGHTS,
   ]
   const lighting = lightNodes.createSceneLighting()
-  const node = lighting.createNode([lightNodes.TILE_AMBIENT_LIGHT, ...pointLights])
+  const node = lighting.createNode([lightNodes.TILE_AMBIENT_LIGHT, lightNodes.COURSE_SUN_LIGHT, ...pointLights])
 
   assert.equal(node.maxLights, lightNodes.SCENE_POINT_LIGHT_COUNT)
   assert.equal(node.maxLightsPerCluster, lightNodes.SCENE_POINT_LIGHT_COUNT)
-  assert.deepEqual(node.materialLights, [lightNodes.TILE_AMBIENT_LIGHT])
+  assert.deepEqual(node.materialLights, [lightNodes.TILE_AMBIENT_LIGHT, lightNodes.COURSE_SUN_LIGHT])
   assert.equal(node.clusteredLights.length, pointLights.length)
   pointLights.forEach((light, index) => assert.equal(node.clusteredLights[index], light))
 
@@ -75,6 +75,26 @@ test('the clustered node separates scene fills from the point-light pool', () =>
   assert.equal(node._lightsCount.value, lightNodes.SCENE_POINT_LIGHT_COUNT)
   assert.ok(Number.isFinite(Number(node._lightsTexture.image.data[0])))
   scene.clear()
+})
+
+test('sun keeps the same grazing angle on the floor, walls and ceiling without shadows', () => {
+  const { CYLINDER_SURFACE, FLAT_SURFACE, surfaceFrame } = loadTypeScript('utils/platform/courseSurface.ts')
+  const position = { x: 0, y: 0, z: 0 }
+  const up = { x: 0, y: 0, z: 0 }, right = { x: 0, y: 0, z: 0 }
+  for (const surface of [FLAT_SURFACE, CYLINDER_SURFACE]) {
+    for (const x of [0, 33, 66, 99, 132]) {
+      courseToWorld(x, 0.5, -70, surface, position)
+      surfaceFrame(x, surface, up, right)
+      lightNodes.poseCourseSun(position.x, position.y, position.z, surface)
+      const sun = lightNodes.COURSE_SUN_LIGHT
+      const dx = sun.position.x - position.x, dy = sun.position.y - position.y
+      assert.ok(Math.abs(dx * up.x + dy * up.y - 18) < 1e-9)
+      assert.ok(Math.abs(dx * right.x + dy * right.y + 12) < 1e-9)
+      assert.equal(sun.position.z - position.z, -40)
+      assert.deepEqual(sun.target.position.toArray(), [position.x, position.y, position.z])
+      assert.equal(sun.castShadow, false)
+    }
+  }
 })
 
 test('each ring light is co-located with the ring it belongs to', () => {

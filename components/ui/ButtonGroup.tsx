@@ -34,7 +34,7 @@ export const ButtonGroup = <T extends string | number>({
   return (
     <div
       className={twJoin(
-        'relative flex items-center gap-1 rounded-xl border border-teal-200/10 p-1 text-white',
+        'relative flex items-center gap-1 rounded-xl border border-amber-200/10 p-1 text-white',
         disabled && 'pointer-events-none opacity-30',
       )}>
       {items.map((item) => {
@@ -53,8 +53,8 @@ export const ButtonGroup = <T extends string | number>({
               'group pointer-events-auto flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium normal-case transition-colors',
               'hover:text-white',
               isActive
-                ? 'bg-teal-200/10 text-white ring-teal-200/20'
-                : 'text-white/60 hover:bg-teal-200/10',
+                ? 'bg-amber-200/10 text-white ring-amber-200/20'
+                : 'text-white/60 hover:bg-amber-200/10',
             )}>
             {!!Icon && (
               <Icon

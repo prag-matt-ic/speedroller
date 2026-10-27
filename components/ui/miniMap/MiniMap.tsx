@@ -224,11 +224,11 @@ type ProgressBarProps = {
 
 const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(({ height }, forwardedRef) => (
   <div
-    className="pointer-events-none absolute inset-x-4 bottom-4 z-10 h-1.5! overflow-hidden rounded-full bg-teal-800"
+    className="pointer-events-none absolute inset-x-4 bottom-4 z-10 h-1.5! overflow-hidden rounded-full bg-amber-800"
     style={{ height }}>
     <div
       ref={forwardedRef}
-      className="relative h-1.5 w-full rounded-full bg-teal-300 will-change-transform"
+      className="relative h-1.5 w-full rounded-full bg-amber-300 will-change-transform"
       style={{
         transform: 'translate3d(-100%,0,0)',
       }}

@@ -92,3 +92,46 @@ test('blur rejects missing or empty image dimensions before rendering', () => {
   }
   assert.equal(passes.length, 0)
 })
+
+// Evaluate the sunset graph numerically, including its equirectangular seam and HDR sun.
+test('sunset stays amber, keeps cloud contrast and wraps without a sky seam', async () => {
+  const { loadTypeScript } = await import('./loadTypeScript.mjs')
+  const values = value => typeof value === 'number' ? [value] : value.values
+  const node = (...input) => {
+    const components = input.flatMap(values)
+    const combine = (other, operation) => node(...components.map((value, index) => operation(value, values(other)[index % values(other).length])))
+    return {
+      values: components,
+      get x() { return node(components[0]) }, get y() { return node(components[1]) },
+      add: other => combine(other, (a, b) => a + b),
+      sub: other => combine(other, (a, b) => a - b),
+      mul: other => combine(other, (a, b) => a * b),
+      dot: other => node(components.reduce((sum, value, index) => sum + value * values(other)[index], 0)),
+      abs: () => node(...components.map(Math.abs)),
+      exp: () => node(...components.map(Math.exp)),
+      oneMinus: () => node(...components.map(value => 1 - value)),
+    }
+  }
+  const { sunsetEnvironment } = loadTypeScript('components/backdrop/environmentBlur.ts', {
+    'three/tsl': {
+      color: hex => node(...new three.Color(hex).toArray()), float: node, vec2: node, vec3: node,
+      min: (a, b) => node(Math.min(values(a)[0], values(b)[0])),
+      mix: (a, b, t) => a.add(b.sub(a).mul(t)),
+      smoothstep: (low, high, input) => {
+        const t = Math.max(0, Math.min(1, (values(input)[0] - low) / (high - low)))
+        return node(t * t * (3 - 2 * t))
+      },
+    },
+  })
+  const cloud = node(0.4, 0.4, 0.4)
+  const shade = (u, v, source = cloud) => sunsetEnvironment(source, node(u, v)).values
+  assert.deepEqual(shade(0, 0.5), shade(1, 0.5))
+  const dark = shade(0.75, 0.5, node(0.1, 0.1, 0.1))
+  const bright = shade(0.75, 0.5, node(0.7, 0.7, 0.7))
+  assert.ok(dark[0] > dark[1] && dark[1] > dark[2])
+  assert.ok(bright.every((channel, index) => channel > dark[index]))
+  assert.ok(shade(0.25, 0.49).every(channel => channel > 1), 'sun retains HDR energy')
+  for (const u of [0, 0.25, 0.5, 0.75, 1]) for (const v of [0, 0.49, 1]) {
+    assert.ok(shade(u, v).every(channel => Number.isFinite(channel) && channel >= 0 && channel < 5))
+  }
+})

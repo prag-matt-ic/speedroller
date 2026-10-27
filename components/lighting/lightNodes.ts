@@ -2,6 +2,7 @@ import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js'
 import ClusteredLightsNode from 'three/addons/tsl/lighting/ClusteredLightsNode.js'
 import {
   AmbientLight,
+  DirectionalLight,
   PointLight,
   WebGPURenderer,
   type WebGPURendererParameters,
@@ -9,6 +10,8 @@ import {
 
 import { RING_EMISSIVE } from '@/components/platform/rings/ringConfig'
 import { PLATFORM_DATA } from '@/resources/rowsData'
+import { surfaceRadius, type CourseSurface } from '@/utils/platform/courseSurface'
+import { TILE_SURFACE_Y } from '@/utils/tiles'
 
 /**
  * Light objects are created once at module scope and mounted by `SceneLights`, matching the
@@ -16,12 +19,29 @@ import { PLATFORM_DATA } from '@/resources/rowsData'
  * constructs a light or a temporary vector.
  */
 
-// The world-fixed directional key was removed: the track wraps around the cylinder, so the key's
-// contribution fell to zero over long stretches of the course. This ambient value is the baseline a
-// course-relative key will be re-balanced against when that work is picked up again.
 const TILE_AMBIENT_INTENSITY = Math.PI * 0.5
 
 export const TILE_AMBIENT_LIGHT = new AmbientLight('#ffffff', TILE_AMBIENT_INTENSITY)
+
+export const COURSE_SUN_LIGHT = new DirectionalLight('#fff0db', Math.PI * 0.7)
+const SUN_HEIGHT = 18
+const SUN_SIDE = -12
+const SUN_AHEAD = 40
+
+/** Keep the grazing key above the road through a full cylinder roll, without a shadow pass. */
+export const poseCourseSun = (x: number, y: number, z: number, surface: CourseSurface) => {
+  const angle = surface.topology === 'cylinder'
+    ? Math.atan2(x, surfaceRadius(surface) + TILE_SURFACE_Y - y)
+    : 0
+  const sin = Math.sin(angle)
+  const cos = Math.cos(angle)
+  COURSE_SUN_LIGHT.target.position.set(x, y, z)
+  COURSE_SUN_LIGHT.position.set(
+    x - sin * SUN_HEIGHT + cos * SUN_SIDE,
+    y + cos * SUN_HEIGHT + sin * SUN_SIDE,
+    z - SUN_AHEAD,
+  )
+}
 
 /**
  * The character light. Its colour follows the selected marble palette in `SceneLights`; the values

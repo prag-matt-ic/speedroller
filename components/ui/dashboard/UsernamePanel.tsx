@@ -21,7 +21,7 @@ export const UsernamePanel: FC<Props> = ({ className }) => {
 
   return (
     <Panel className={twMerge('flex h-full items-center gap-4', className)} strength={2}>
-      <UserIcon className="size-6 text-teal-200/50" />
+      <UserIcon className="size-6 text-amber-200/50" />
       <Input
         {...inputProps}
         disabled={isLocked}
@@ -30,9 +30,9 @@ export const UsernamePanel: FC<Props> = ({ className }) => {
         endAdornment={
           <div className="flex h-full items-center justify-center px-4">
             {inputProps.isValid ? (
-              <CheckCircle className="size-6 text-teal-400" strokeWidth={1.5} />
+              <CheckCircle className="size-6 text-amber-400" strokeWidth={1.5} />
             ) : (
-              <AlertTriangle className="size-6 text-teal-200 opacity-50" strokeWidth={1.5} />
+              <AlertTriangle className="size-6 text-amber-200 opacity-50" strokeWidth={1.5} />
             )}
           </div>
         }

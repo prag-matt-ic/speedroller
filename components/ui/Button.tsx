@@ -42,7 +42,7 @@ const ICON_PROPS: Partial<LucideProps> = {
 
 const VARIANT_CLASSES: Record<ButtonProps['variant'], string> = {
   primary:
-    'border border-teal-100/20 bg-linear-0 hover:text-teal-200 from-teal-400/5 to-teal-400/10 text-white hover:border-teal-300/40 hover:from-teal-400/10 hover:to-teal-400/15',
+    'border border-amber-100/20 bg-linear-0 hover:text-amber-200 from-amber-400/5 to-amber-400/10 text-white hover:border-amber-300/40 hover:from-amber-400/10 hover:to-amber-400/15',
   secondary:
     'border border-white/5 bg-radial from-white/3 to-white/6 text-white/70 hover:from-white/6 hover:to-white/12 hover:text-white',
 }
@@ -50,7 +50,7 @@ const VARIANT_CLASSES: Record<ButtonProps['variant'], string> = {
 const ATTRACTOR_CONTAINER_CLASSES =
   'pointer-events-none absolute inset-0 -z-10 flex items-center justify-center'
 
-const ATTRACTOR_GLOW_CLASSES = 'size-20 rounded-full bg-teal-600/40 blur-2xl opacity-0'
+const ATTRACTOR_GLOW_CLASSES = 'size-20 rounded-full bg-amber-600/40 blur-2xl opacity-0'
 
 //     animation: spin 3s
 // linear infinite;

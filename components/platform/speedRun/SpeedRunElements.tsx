@@ -1,6 +1,8 @@
-import { type FC, useEffect } from 'react'
+import { type FC, useEffect, useMemo } from 'react'
+import type { Vector3Tuple } from 'three'
 
-import { type RowData, rowToWorldZ, TILE_SIZE } from '@/utils/tiles'
+import { findRaceLineBands, type RaceLineBand, type RaceLineKind } from '@/utils/platform/raceLine'
+import { colToX, ON_TILE_Y, type RowData, rowToWorldZ } from '@/utils/tiles'
 
 import SpeedRunLine from './SpeedRunLine'
 
@@ -10,43 +12,46 @@ type Props = {
 }
 
 type RaceLine = {
-  kind: 'start' | 'finish'
-  key: string
-  position: [number, number, number]
+  kind: RaceLineKind
+  /** Group anchor: the band's centre column, its anchor row and the tile surface. */
+  position: Vector3Tuple
+  /** Tile centres the painted band and the sensor both cover, relative to the group. */
+  cells: readonly Vector3Tuple[]
 }
 
-const LINE_WIDTH = 9 * TILE_SIZE
-const LINE_HEIGHT = 5 * TILE_SIZE
+const createRaceLine = (band: RaceLineBand, columns: number): RaceLine => {
+  const anchorZ = rowToWorldZ(band.anchorRowIndex)
+  return {
+    kind: band.kind,
+    position: [colToX(band.centreColumn, columns), ON_TILE_Y, anchorZ],
+    cells: band.cells.map(({ rowIndex, column }) => [
+      colToX(column, columns),
+      ON_TILE_Y,
+      rowToWorldZ(rowIndex) - anchorZ,
+    ]),
+  }
+}
 
 const collectRaceLines = (rows: readonly RowData[]): RaceLine[] => {
-  const lines: RaceLine[] = []
-  rows.forEach((row, rowIndex) => {
-    const rowZ = rowToWorldZ(rowIndex)
-    if (row.startLinePosition) {
-      const [x, y, relativeZ] = row.startLinePosition
-      lines.push({ kind: 'start', key: 'start', position: [x, y, rowZ + relativeZ] })
-    }
-    if (row.finishLinePosition) {
-      const [x, y, relativeZ] = row.finishLinePosition
-      lines.push({ kind: 'finish', key: 'finish', position: [x, y, rowZ + relativeZ] })
-    }
-  })
-  return lines
+  const columns = rows[0]?.isRaised.length ?? 0
+  if (columns === 0) return []
+  return findRaceLineBands(rows).map((band) => createRaceLine(band, columns))
 }
 
 const SpeedRunElements: FC<Props> = ({ rows, onReadyChange }) => {
+  const raceLines = useMemo(() => collectRaceLines(rows), [rows])
+
   useEffect(() => {
     onReadyChange(true)
     return () => onReadyChange(false)
   }, [onReadyChange])
 
-  return collectRaceLines(rows).map((line) => (
+  return raceLines.map((line) => (
     <SpeedRunLine
-      key={line.key}
+      key={line.kind}
       kind={line.kind}
       position={line.position}
-      width={LINE_WIDTH}
-      height={LINE_HEIGHT}
+      cells={line.cells}
     />
   ))
 }

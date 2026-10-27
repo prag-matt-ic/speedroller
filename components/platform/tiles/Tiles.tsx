@@ -3,11 +3,10 @@ import { courseToWorld } from '@/utils/platform/courseSurface'
 import { createSurfaceColliders } from '@/utils/platform/surfaceColliders'
 import { coursePositionNode, courseNormalNode, worldCourseNode } from '@/resources/tsl/courseSurface'
 import { useTexture } from '@react-three/fiber'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
+import { type CreatorState, useLocalNodes } from '@react-three/tsl'
 import { CuboidCollider, TrimeshCollider, RigidBody } from '@react-three/rapier'
 import {
   type FC,
-  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -60,7 +59,7 @@ import {
   Vector3,
   Box3,
 } from 'three'
-import type { MeshLambertNodeMaterial, Node, UniformNode } from 'three/webgpu'
+import type { Material, Node } from 'three/webgpu'
 
 import ivoryStoneNormals from '@/assets/textures/platform/ivory-stone-normal.png'
 import { createTileSlabGeometry, TILE_SLAB_RADIUS } from '@/utils/platform/tileSlabGeometry'
@@ -72,7 +71,8 @@ import tileDetailNoise1 from '@/assets/textures/platform/tile-noise.webp'
 import { SceneQuality, usePerformanceStore } from '@/components/PerformanceProvider'
 import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { createTileTrail, useTileTrail } from '@/components/platform/tiles/useTileTrail'
-import { createTileBatches, type TileBatch } from '@/utils/platform/terrainBatches'
+import { createTileMaterial } from '@/components/platform/tiles/tileMaterial'
+import { createTileBatches, packTileState, type TileBatch } from '@/utils/platform/terrainBatches'
 import { GHOST_DROP_DEPTH } from '@/utils/platform/ghostTiles'
 import { ghostTileMotion } from '@/resources/tsl/ghostTileMotion'
 import { samplePlayerPalette, PLAYER_LIGHT_PALETTE_T } from '@/resources/tsl/playerPalette'
@@ -83,8 +83,6 @@ import {
   TILE_THICKNESS,
   TRAIL_FADE_SECONDS,
 } from '@/utils/tiles'
-
-const TILE_UNIFORM_SCOPE = 'platformTiles'
 
 const AXIS_EPSILON = 0.001
 const HIGHLIGHTED_MIX_MIN = 0.04
@@ -100,6 +98,8 @@ const SHADOW_FADE_RANGE_INV = 1.0 / (SHADOW_FADE_START_Y - SHADOW_FADE_END_Y)
 const SHADOW_MIN_PLAYER_Y = -0.5
 
 const DETAIL_NOISE_STRENGTH = 0.3
+// Mean red channel of the three detail maps; detail should not change the tier's overall brightness.
+const DETAIL_NOISE_MEAN = 0.862
 const STONE_ATLAS_GRID = 3
 const STONE_CELL_PIXELS = 512
 const STONE_CELL_PADDING = 16
@@ -118,36 +118,17 @@ const configureStoneAtlas = (map: Texture) => {
 // Touched-tile afterglow: a small additive palette lift plus a fainter emissive halo. It has to sit
 // under the player point light, not replace it, so both values stay low; the timestamp attribute
 // refreshes while the ball stays on a tile and fades once it leaves.
-const TRAIL_GLOW_STRENGTH = 0.1
-const TRAIL_EMISSIVE_STRENGTH = 2
+const TRAIL_GLOW_STRENGTH = 0.05
+const TRAIL_EMISSIVE_STRENGTH = 0.1
 
-// tile.frag's early `if (vAlpha <= 0.001) discard;`. A discard needs a statement stack, which a
-// material graph built at React render time does not have, so the material's own alpha test does it.
-const ALPHA_TEST = 0.001
-
-// One registration owns settings shared by every terrain batch.
-type TileShaderUniforms = {
-  uAddDetailNoise: UniformNode<'float', number>
-  uShadowEnabled: UniformNode<'float', number>
-}
-
-type TileConfig = {
-  addDetailNoise: boolean
-  isLowQuality: boolean
-}
-
-const createTileUniforms = ({ addDetailNoise, isLowQuality }: TileConfig) => () => ({
-  uAddDetailNoise: Number(addDetailNoise),
-  uShadowEnabled: isLowQuality ? 0 : 1,
-})
-
-type TileNodes = {
-  colorNode: Node<'vec3'>
-  opacityNode: Node<'float'>
-  positionNode: Node<'vec3'>
-  emissiveNode: Node<'vec3'>
-  normalNode: Node<'vec3'>
-}
+// Race lines are painted onto the floor tiles themselves, so the checks keep the stone's normals,
+// bevels, specular and per-tile lighting. The paint is mixed over the stone rather than replacing
+// it, so the grain still shows through and the line does not read as a flat decal.
+const RACE_LINE_PAINT_WHITE = '#f4f0e8'
+const RACE_LINE_PAINT_BLACK = '#0d0f13'
+const RACE_LINE_EDGE = '#b41f1f'
+const RACE_LINE_PAINT_BLEND = 0.8
+const RACE_LINE_EDGE_DEPTH = 0.25
 
 type PlatformTilesProps = {
   rows: readonly RowData[]
@@ -157,20 +138,15 @@ type PlatformTilesProps = {
 type TerrainBatchProps = {
   batch: TileBatch
   trailAttribute: InstancedBufferAttribute
-  nodes: TileNodes
+  material: Material
 }
 
-const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) => {
+const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, material }) => {
   const surface = useCourseSurface()
   const collision = useMemo(() => surface.topology === 'cylinder' && batch.solidPositions.length > 0 ? createSurfaceColliders(batch.solidPositions, surface) : null, [batch, surface])
+  const tileState = useMemo(() => packTileState(batch), [batch])
   const meshRef = useRef<InstancedMesh>(null)
 
-  // Installed Three types omit emissiveNode; the lighting graph supports it.
-  const attachMaterial = useCallback((material: MeshLambertNodeMaterial | null) => {
-    if (!material) return
-    Object.assign(material, { emissiveNode: nodes.emissiveNode })
-    material.needsUpdate = true
-  }, [nodes.emissiveNode])
   const geometry = useMemo(() => createTileSlabGeometry(), [])
   useEffect(() => () => geometry.dispose(), [geometry])
 
@@ -218,24 +194,15 @@ const TerrainBatch: FC<TerrainBatchProps> = ({ batch, trailAttribute, nodes }) =
       )}
       <instancedMesh
         ref={meshRef}
+        material={material}
         args={[undefined, undefined, batch.positions.length]}
         count={batch.positions.length}
         frustumCulled>
         <primitive object={geometry} attach="geometry">
-          <instancedBufferAttribute attach="attributes-isGhost" args={[batch.ghosts, 1]} />
+          <instancedBufferAttribute attach="attributes-tileState" args={[tileState, 4]} />
           <instancedBufferAttribute attach="attributes-seed" args={[batch.seeds, 1]} />
-          <instancedBufferAttribute attach="attributes-isHighlighted" args={[batch.highlights, 1]} />
           <primitive object={trailAttribute} attach="attributes-trailTouchedAt" />
         </primitive>
-        <meshLambertNodeMaterial
-          ref={attachMaterial}
-          normalNode={nodes.normalNode}
-          colorNode={nodes.colorNode}
-          opacityNode={nodes.opacityNode}
-          positionNode={nodes.positionNode}
-          transparent={true}
-          alphaTest={ALPHA_TEST}
-        />
       </instancedMesh>
     </group>
   )
@@ -260,28 +227,24 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
 
   useTileTrail(trail, rows.length)
 
-  useUniforms(
-    createTileUniforms({
-      addDetailNoise,
-      isLowQuality: sceneQuality === SceneQuality.LOW,
-    }),
-    TILE_UNIFORM_SCOPE,
-  )
-
   // Port of tile.vert + tile.frag.
   //
   // Every varying is recomputed in-graph: per-instance attributes are read directly, the sphere-side
   // values are not needed, and world position comes from positionWorld, which already folds in the
   // instance matrix for an instanced mesh.
-  const { colorNode, opacityNode, positionNode, emissiveNode, normalNode } = useLocalNodes(
+  const nodes = useLocalNodes(
     ({ uniforms: scopedUniforms }: CreatorState) => {
-      const scoped = scopedUniforms.scope<TileShaderUniforms>(TILE_UNIFORM_SCOPE)
       const { uPlayerWorldPos, uTime, uPlayerPaletteIndex } =
         scopedUniforms.scope(CORE_UNIFORM_SCOPE)
 
       const tileSeed = attribute<'float'>('seed')
-      const tileIsHighlighted = attribute<'float'>('isHighlighted')
+      // Ghost, highlight and race-line state share one vec4: the device's eight-vertex-buffer limit
+      // counts a buffer per attribute, and the slab's own faces already spend four.
+      const tileState = attribute<'vec4'>('tileState')
       const trailTouchedAt = attribute<'float'>('trailTouchedAt')
+      const isHighlighted = tileState.y
+      const raceLinePaint = tileState.z
+      const raceLineEdge = tileState.w
 
       const hashFloat = (n: Node<'float'>) => fract(sin(n).mul(43758.5453))
 
@@ -292,11 +255,10 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
       const playerOffset = vec2(offsetX, fragmentCourse.z.sub(playerCourse.z))
       const distanceSquared = dot(playerOffset, playerOffset)
 
-      const isGhost = attribute<'float'>('isGhost')
+      const isGhost = tileState.x
       const instanceCenter = positionLocal.sub(positionGeometry)
       const tileWorldZ = modelWorldMatrix.mul(vec4(instanceCenter, 1)).z
       const ahead = uPlayerWorldPos.z.sub(tileWorldZ)
-      const isHighlighted = step(float(0.5), tileIsHighlighted)
       const axisSeeds = vec2(hashFloat(tileSeed.mul(3.17)), hashFloat(tileSeed.mul(7.92)))
       const rawAxis = vec3(axisSeeds.x.sub(0.5), float(0), axisSeeds.y.sub(0.5))
       const tiltAxis = rawAxis.div(max(rawAxis.length(), AXIS_EPSILON))
@@ -362,9 +324,11 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         uv().mul(1 - 2 * STONE_UV_INSET).add(STONE_UV_INSET),
         stoneFrame,
       )
-      const stoneColour = texture(stoneAtlasTexture, stoneUv).rgb
+      const stoneSample = texture(stoneAtlasTexture, stoneUv).rgb
+      const stoneLuminance = stoneSample.dot(vec3(0.2126, 0.7152, 0.0722))
+      const stoneColour = mix(color('#1b2029'), color('#454b57'), smoothstep(0.3, 0.82, stoneLuminance))
       const slabSurface = attribute<'float'>('slabSurface')
-      const isIvory = step(0.5, slabSurface)
+      const isSlab = step(0.5, slabSurface)
       const isTop = step(1.5, slabSurface)
       const geometryNormal = attribute<'vec3'>('normal')
       const sampledNormal = sceneQuality === SceneQuality.LOW ? geometryNormal : (() => {
@@ -381,10 +345,25 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         mix(REGULAR_MIX, mix(HIGHLIGHTED_MIX_MIN, HIGHLIGHTED_MIX_MAX, tileSeed), isHighlighted),
       )
       const darkening = clamp(backgroundNoise, 0, 1)
-        .add(detailNoise.mul(scoped.uAddDetailNoise).mul(DETAIL_NOISE_STRENGTH))
+        .add(addDetailNoise ? detailNoise.sub(DETAIL_NOISE_MEAN).mul(DETAIL_NOISE_STRENGTH) : float(0))
         .mul(mixAmount)
       const brightness = clamp(float(1).sub(darkening), STONE_MIN_BRIGHTNESS, 1)
       const background = stoneColour.mul(brightness)
+
+      // Race-line paint. A white square is 80% white over the stone; the finish's black square is
+      // 80% black over the stone and its other squares are 80% white, so the flag reads clearly
+      // without losing the tile's normal map, bevel, specular or lighting.
+      const paintBlend = step(float(0.5), raceLinePaint).mul(float(RACE_LINE_PAINT_BLEND))
+      const paintColour = mix(
+        color(RACE_LINE_PAINT_WHITE),
+        color(RACE_LINE_PAINT_BLACK),
+        step(float(1.5), raceLinePaint),
+      )
+      const painted = mix(background, paintColour, paintBlend)
+      // The finish's red stripe is a slice of the leading row along the edge the player reaches
+      // first (tile UV v = 0), which keeps it on the tiles instead of needing its own geometry.
+      const edgeStripe = float(1).sub(step(float(RACE_LINE_EDGE_DEPTH), detailUv.y))
+      const paintedWithEdge = mix(painted, color(RACE_LINE_EDGE), raceLineEdge.mul(edgeStripe))
 
       // Touched-tile afterglow. The fade is constant across a tile's fragments, so the palette
       // colour is multiplied in the vertex stage; the fragment stage only adds the varying.
@@ -418,22 +397,25 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
         .mul(rawShadow)
         .mul(sqrt(rawShadow))
         .mul(shadowHeightFade)
-        .mul(scoped.uShadowEnabled)
 
-      const shadowed = background.mul(float(1).sub(shadow.mul(SHADOW_STRENGTH)))
+      const shadowed = sceneQuality === SceneQuality.LOW
+        ? paintedWithEdge
+        : paintedWithEdge.mul(float(1).sub(shadow.mul(SHADOW_STRENGTH)))
       // Add the afterglow after the contact shadow so the fake shadow cannot eat the glow.
       const shadowedWithTrail = shadowed.add(trailEnergy.mul(TRAIL_GLOW_STRENGTH))
 
       return {
         positionNode: coursePositionNode(tiltedGeometry, surface),
-        colorNode: mix(color('#3D3935'), shadowedWithTrail, isIvory),
+        colorNode: mix(color('#17191d'), shadowedWithTrail, isSlab),
         normalNode,
         opacityNode: alpha as Node<'float'>,
         emissiveNode: trailEnergy.mul(TRAIL_EMISSIVE_STRENGTH).mul(isTop),
       }
     },
-    [detailNoiseTextures, stoneAtlasTexture, stoneNormalTexture, sceneQuality, surface],
+    [detailNoiseTextures, stoneAtlasTexture, stoneNormalTexture, sceneQuality, surface, addDetailNoise],
   )
+  const material = useMemo(() => createTileMaterial(nodes), [nodes])
+  useEffect(() => () => material.dispose(), [material])
 
   useEffect(() => {
     onReadyChange(true)
@@ -449,7 +431,7 @@ export const PlatformTiles: FC<PlatformTilesProps> = ({ rows, onReadyChange }) =
           key={batch.startRow}
           batch={batch}
           trailAttribute={attribute}
-          nodes={{ colorNode, opacityNode, positionNode, emissiveNode, normalNode }}
+          material={material}
         />
       ))}
     </group>

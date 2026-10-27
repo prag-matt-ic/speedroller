@@ -139,7 +139,7 @@ const LocalPlayer: FC = () => {
     addRingBoost(raceSpeed.current, collectedRingCount)
   }
 
-  /** Publishes the speed and boost readouts the effects and HUD subscribe to. */
+  /** Publishes the speed and boost readouts consumed by the effects, HUD, and debug probe. */
   function publishSpeedMirror(isHeld: boolean): void {
     const speedUnits = isHeld
       ? 0

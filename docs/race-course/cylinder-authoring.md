@@ -32,7 +32,7 @@ Use a pixel editor with antialiasing disabled and save lossless PNGs. Black (`#0
 | `#0000FF` | Collectible |
 | `#FF0080` | Confetti |
 
-Keep one start and one finish, with the complete line footprint supported by floor. The builder validates floor connectivity, marker support and decoration separation, including across the horizontal seam. Disconnected floor islands are rejected. Black holes stay physical gaps.
+Keep one start and one finish. Each line is painted into the three rows around its marker and spans each row's whole solid run, so the marker's own column must be floor in all three rows. The builder validates floor connectivity, marker support and decoration separation, including across the horizontal seam. Disconnected floor islands are rejected. Black holes stay physical gaps.
 
 The matching files under `decoration/` are noncolliding scenery masks. They must match the corresponding track image dimensions. Keep them separate from playable floor.
 

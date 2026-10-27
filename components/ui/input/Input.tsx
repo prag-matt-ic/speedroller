@@ -18,8 +18,8 @@ export const Input = forwardRef(function Input(
     <div className="relative w-full">
       <div
         className={twJoin(
-          'relative flex h-fit items-center overflow-hidden rounded-xl bg-black/80 ring ring-teal-200/30 transition-colors focus-within:ring-2',
-          isValid ? 'focus-within:ring-teal-500' : 'focus-within:ring-amber-500',
+          'relative flex h-fit items-center overflow-hidden rounded-xl bg-black/80 ring ring-amber-200/30 transition-colors focus-within:ring-2',
+          isValid ? 'focus-within:ring-amber-500' : 'focus-within:ring-amber-500',
         )}>
         <input
           ref={ref}

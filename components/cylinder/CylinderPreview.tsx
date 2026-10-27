@@ -176,7 +176,7 @@ export default function CylinderPreview() {
       </WebGPUCanvas>
       <header className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-4 bg-linear-to-b from-slate-950/90 to-transparent p-5 sm:p-8">
         <div>
-          <p className="text-xs tracking-[0.25em] text-teal-300 uppercase">Speedroller / Experiment 01</p>
+          <p className="text-xs tracking-[0.25em] text-amber-300 uppercase">Speedroller / Experiment 01</p>
           <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">Inside the cylinder</h1>
           <p className="mt-2 max-w-sm text-sm text-slate-300">Hold W or ↑ to follow the full loop. A/D or ←/→ steer across the winding path. Joystick works too; falling returns you to the start.</p>
         </div>
@@ -186,7 +186,7 @@ export default function CylinderPreview() {
         </div>
       </header>
       <Joystick x="56px" y="56px" radius={44} joystickRadius={26} maxRange={50} onMove={onJoystickMove} />
-      <p className="pointer-events-none absolute bottom-6 left-5 rounded bg-slate-950/80 px-3 py-2 text-xs tracking-widest text-teal-200 uppercase">360° winding course / Surface gravity</p>
+      <p className="pointer-events-none absolute bottom-6 left-5 rounded bg-slate-950/80 px-3 py-2 text-xs tracking-widest text-amber-200 uppercase">360° winding course / Surface gravity</p>
     </main>
   )
 }
