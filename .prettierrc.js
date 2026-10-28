@@ -11,7 +11,10 @@ const config = {
   trailingComma: 'all',
   printWidth: 96,
   tabWidth: 2,
-  plugins: ['prettier-plugin-tailwindcss'],
+  plugins: ['@trivago/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
+  importOrder: ['^@/(.*)$', '^[./]'],
+  importOrderSeparation: true,
+  importOrderSortSpecifiers: true,
 }
 
 export default config

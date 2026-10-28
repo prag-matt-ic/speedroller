@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CanvasTexture, ClampToEdgeWrapping, DataTexture, LinearFilter, Texture } from 'three'
 
 export type CanvasState = {
@@ -16,6 +16,7 @@ export type TextCanvasOptions = {
   fontSize?: number // in pixels (e.g. 24)
   scaleStep?: number // e.g. 0.9 (reduce by 10%)
   minScale?: number // e.g. 0.5 (50%)
+  lineHeightMultiplier?: number
   paddingXFrac?: number // each side fraction (e.g. 0.08)
   paddingYFrac?: number // top/bottom fraction (e.g. 0.12)
   textAlign?: CanvasTextAlign
@@ -26,10 +27,11 @@ export const TEXT_CANVAS_SCALE = 64
 
 const DEFAULTS: Required<Omit<TextCanvasOptions, 'width' | 'height'>> = {
   color: '#ffffff',
-  fontFamily: '"Nunito Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
+  fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
   fontWeight: 600,
   fontSize: 32,
   scaleStep: 0.95,
+  lineHeightMultiplier: 1.5,
   minScale: 0.4,
   paddingXFrac: 0.1,
   paddingYFrac: 0.1,
@@ -91,7 +93,7 @@ export function writeTextToCanvas(
   opts: TextCanvasOptions,
 ): void {
   const options = { ...DEFAULTS, ...opts }
-  const { width, height } = options
+  const { width, height, lineHeightMultiplier } = options
 
   // Clear + transparent background
   context.clearRect(0, 0, width, height)
@@ -111,11 +113,9 @@ export function writeTextToCanvas(
   }
   setFont()
 
-  const LINE_HEIGHT_MULTIPLIER = 1.5
-
   // Get wrapped lines and calculate total height
   let lines = getLines(context, text, maxTextWidth)
-  const lineHeight = fontSize * LINE_HEIGHT_MULTIPLIER
+  const lineHeight = fontSize * lineHeightMultiplier
   let totalTextHeight = lines.length * lineHeight
 
   // Scale down only if total height exceeds available height
@@ -128,7 +128,7 @@ export function writeTextToCanvas(
 
     // Recalculate lines and height with new font size
     lines = getLines(context, text, maxTextWidth)
-    const newLineHeight = fontSize * LINE_HEIGHT_MULTIPLIER
+    const newLineHeight = fontSize * lineHeightMultiplier
     totalTextHeight = lines.length * newLineHeight
   }
 
@@ -137,7 +137,7 @@ export function writeTextToCanvas(
   context.textBaseline = 'middle'
   context.fillStyle = options.color
 
-  const actualLineHeight = fontSize * LINE_HEIGHT_MULTIPLIER
+  const actualLineHeight = fontSize * lineHeightMultiplier
   const startY = (height - totalTextHeight) / 2 + actualLineHeight / 2
 
   for (let i = 0; i < lines.length; i++) {
@@ -148,20 +148,31 @@ export function writeTextToCanvas(
 
 export function useTextCanvas(text: string, options: TextCanvasOptions): CanvasState | null {
   const [state, setState] = useState<CanvasState | null>(null)
+  const textureRef = useRef<CanvasTexture | null>(null)
 
   useEffect(() => {
     const cs = setupCanvasTexture(options.width, options.height)
-    setState(cs)
+    textureRef.current = cs.texture
+    let disposed = false
+    const frameId = requestAnimationFrame(() => {
+      if (!disposed) {
+        setState(cs)
+      }
+    })
     return () => {
-      cs.texture.dispose()
+      disposed = true
+      cancelAnimationFrame(frameId)
+      textureRef.current?.dispose()
+      textureRef.current = null
     }
   }, [options.height, options.width])
 
   useEffect(() => {
     if (!state) return
     writeTextToCanvas(state.context, text, options)
-    // eslint-disable-next-line react-hooks/immutability
-    state.texture.needsUpdate = true
+    if (textureRef.current) {
+      textureRef.current.needsUpdate = true
+    }
   }, [state, text, options])
 
   return state

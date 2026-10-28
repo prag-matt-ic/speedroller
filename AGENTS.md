@@ -1,7 +1,5 @@
 # AGENTS
 
-This repository is used with an agentic coding workflow. The rules in this file apply to the entire repo.
-
 ## Project overview
 
 This is an educational 3D runner game built with Next.js, React Three Fiber, and Rapier physics.
@@ -71,13 +69,9 @@ Avoid derived state in the store – compute derived values (like isRunning) in 
 
 ## Architecture & Core Systems
 
-### State Management
-
-The game uses Zustand wrapped in a React context (stores/GameProvider.tsx) to hold global game state. Keyboard input is handled separately in stores/useInputStore.ts. Time is managed by the useTimeSubscription hook, which synchronises GSAP animations with the game state. GSAP handles time scaling and visual effects; avoid storing animation state in React.
-
 ### Physics & collision
 
-Physics are powered by Rapier.
+Physics are powered by Rapier (React version)
 
 ### Performance patterns
 
@@ -102,3 +96,14 @@ There is no server state. All game logic runs client‑side.
 When writing new TypeScript, favour type aliases to describe shapes and prefer generics where appropriate.
 
 By following these guidelines and patterns, you can generate code that fits naturally into the repository and remains easy for developers to understand and maintain.
+
+<!-- CODEGRAPH_START -->
+## CodeGraph
+
+In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
+
+- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
+- **Shell**: `npm run codegraph -- explore "<symbol names or question>"` uses the project-local CLI and prints the same output.
+
+If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+<!-- CODEGRAPH_END -->

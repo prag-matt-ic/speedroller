@@ -1,45 +1,70 @@
 'use client'
 import {
-  createContext,
   type FC,
   type PropsWithChildren,
+  createContext,
   useContext,
   useEffect,
   useState,
 } from 'react'
-import { createStore, type StoreApi, useStore } from 'zustand'
+import { type StoreApi, createStore, useStore } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export enum SoundFX {
+  COUNTDOWN = 'COUNTDOWN',
   BACKGROUND = 'BACKGROUND',
-  CORRECT_ANSWER = 'CORRECT_ANSWER',
-  INCORRECT_ANSWER = 'INCORRECT_ANSWER',
+  BACKGROUND_SPEEDRUN = 'BACKGROUND_SPEEDRUN',
   OUT_OF_BOUNDS = 'OUT_OF_BOUNDS',
   OPEN_INFO = 'OPEN_INFO',
   CHANGE_COLOUR = 'CHANGE_COLOUR',
+  RING_COLLECTED = 'RING_COLLECTED',
+  CONFETTI_BURST = 'CONFETTI_BURST',
 }
 
 const SOUND_FILES: Record<SoundFX, string> = {
-  [SoundFX.BACKGROUND]: '/audio/background.aac',
-  [SoundFX.CORRECT_ANSWER]: '/audio/correct.aac',
-  [SoundFX.INCORRECT_ANSWER]: '/audio/incorrect.aac',
+  [SoundFX.COUNTDOWN]: '/audio/grenade-countdown.aac',
+  [SoundFX.BACKGROUND]: '/audio/music/on-my-way.mp3',
+  [SoundFX.BACKGROUND_SPEEDRUN]: '/audio/music/alluminium.mp3',
   [SoundFX.OPEN_INFO]: '/audio/reveal.aac',
+  // TODO: Add Collectible unlocking sound effect
   [SoundFX.CHANGE_COLOUR]: '/audio/transform.aac',
   [SoundFX.OUT_OF_BOUNDS]: '/audio/outofbounds.aac',
+  [SoundFX.RING_COLLECTED]: '/audio/ring.aac',
+  [SoundFX.CONFETTI_BURST]: '/audio/confetti.aac',
+}
+
+export type BackgroundTrackPhase = 'lobby' | 'race'
+
+const BACKGROUND_TRACKS: Record<
+  BackgroundTrackPhase,
+  SoundFX.BACKGROUND | SoundFX.BACKGROUND_SPEEDRUN
+> = {
+  lobby: SoundFX.BACKGROUND,
+  race: SoundFX.BACKGROUND_SPEEDRUN,
+}
+
+const BACKGROUND_TRACK_VOLUMES: Record<BackgroundTrackPhase, number> = {
+  lobby: 0.35,
+  race: 0.6,
 }
 
 type Buffers = Partial<Record<SoundFX, AudioBuffer>>
+export type PlaySoundFX = (fx: SoundFX, loop?: boolean, volume?: number) => void
 
-export type PlaySoundFX = (fx: SoundFX, loop?: boolean) => void
-
-type SoundState = {
+export type SoundState = {
   isLoading: boolean
   isMuted: boolean
+  backgroundTrack: SoundFX | null
+  backgroundTrackPhase: BackgroundTrackPhase
   setIsMuted: (isMuted: boolean) => void
   initialise: () => Promise<void>
   playSoundFX: PlaySoundFX
   stopSoundFX: (fx: SoundFX) => void
   stopAllSounds: () => void
+  switchBackgroundTrack: (phase: BackgroundTrackPhase) => void
 }
+
+type PersistedSoundState = Pick<SoundState, 'isMuted'>
 
 type SoundStore = StoreApi<SoundState>
 const SoundContext = createContext<SoundStore>(undefined!)
@@ -54,7 +79,6 @@ const createSoundStore = () => {
   const gainNodesBySource = new Map<AudioBufferSourceNode, GainNode>()
 
   const DEFAULT_MASTER_GAIN = 0.5
-  const DEFAULT_SOURCE_GAIN = 1
   const STOP_FX_FADE_SECONDS = 0.3
 
   const safelyDisconnect = (node: AudioNode | null | undefined) => {
@@ -110,9 +134,10 @@ const createSoundStore = () => {
 
   async function ensureContext() {
     if (!audioContext) {
-      audioContext = new (window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext)()
+      audioContext = new (
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      )()
       masterGain = audioContext.createGain()
       masterGain.connect(audioContext.destination)
       masterGain.gain.value = DEFAULT_MASTER_GAIN
@@ -146,83 +171,119 @@ const createSoundStore = () => {
     audioBuffers = Object.fromEntries(loadedBuffers)
   }
 
-  return createStore<SoundState>()((set, get) => ({
-    isLoading: true,
-    isMuted: true,
+  return createStore<SoundState>()(
+    persist<SoundState, [], [], PersistedSoundState>(
+      (set, get) => ({
+        isLoading: true,
+        isMuted: true,
+        backgroundTrack: null,
+        backgroundTrackPhase: 'lobby',
 
-    initialise: async () => {
-      if (!initialisationPromise) {
-        initialisationPromise = loadAllSounds().finally(() => set({ isLoading: false }))
-      }
-      await initialisationPromise
-    },
+        initialise: async () => {
+          if (!initialisationPromise) {
+            initialisationPromise = loadAllSounds().finally(() => set({ isLoading: false }))
+          }
+          await initialisationPromise
+        },
 
-    setIsMuted: (isMuted: boolean) => {
-      const { playSoundFX, stopAllSounds } = get()
-      set({ isMuted })
-      if (!isMuted) {
-        playSoundFX(SoundFX.BACKGROUND, true)
-      } else {
-        stopAllSounds()
-      }
-    },
+        setIsMuted: (isMuted: boolean) => {
+          const { backgroundTrackPhase, playSoundFX, stopAllSounds } = get()
 
-    stopAllSounds: () => {
-      const sources = Array.from(activeSources)
-      sources.forEach((source) => {
-        const gainNode = gainNodesBySource.get(source)
-        if (gainNode && audioContext) {
-          const now = audioContext.currentTime
-          gainNode.gain.cancelScheduledValues(now)
-        }
-        stopSourceImmediately(source)
-      })
-      gainNodesBySource.clear()
-      activeSources.clear()
-    },
+          if (!isMuted) {
+            const backgroundTrack = BACKGROUND_TRACKS[backgroundTrackPhase]
+            const volume = BACKGROUND_TRACK_VOLUMES[backgroundTrackPhase]
+            set({ backgroundTrack, isMuted: false })
+            playSoundFX(backgroundTrack, true, volume)
+            return
+          }
+          stopAllSounds()
+          set({ backgroundTrack: null, isMuted: true })
+        },
 
-    playSoundFX: async (fx: SoundFX, loop: boolean = false) => {
-      const { isMuted } = get()
+        stopAllSounds: () => {
+          const sources = Array.from(activeSources)
+          sources.forEach((source) => {
+            const gainNode = gainNodesBySource.get(source)
+            if (gainNode && audioContext) {
+              const now = audioContext.currentTime
+              gainNode.gain.cancelScheduledValues(now)
+            }
+            stopSourceImmediately(source)
+          })
+          gainNodesBySource.clear()
+          activeSources.clear()
+        },
 
-      const startPlayback = async () => {
-        await ensureContext()
-        if (!audioBuffers[fx]) {
-          await get().initialise()
-        }
-        const audioBuffer = audioBuffers[fx]
-        if (!audioBuffer) {
-          console.error(`[SoundProvider] Missing buffer for ${fx} after init`)
-          return
-        }
-        const bufferSource = audioContext!.createBufferSource()
-        bufferSource.buffer = audioBuffer
-        bufferSource.loop = loop
-        const gainNode = audioContext!.createGain()
-        gainNode.gain.value = DEFAULT_SOURCE_GAIN
-        bufferSource.connect(gainNode)
-        gainNode.connect(masterGain!)
-        registerSource(bufferSource, gainNode)
-        bufferSource.start(0)
-      }
+        switchBackgroundTrack: (phase: BackgroundTrackPhase) => {
+          set({ backgroundTrackPhase: phase })
 
-      if (isMuted) return
+          const { backgroundTrack, isMuted, stopSoundFX, playSoundFX } = get()
+          if (isMuted) return
 
-      try {
-        await startPlayback()
-      } catch (err) {
-        console.warn(`[SoundProvider] Failed to play ${fx}`, err)
-      }
-    },
+          const newBackgroundTrack = BACKGROUND_TRACKS[phase]
+          if (backgroundTrack === newBackgroundTrack) return
 
-    stopSoundFX: (fx: SoundFX) => {
-      if (!audioContext) return
-      activeSources.forEach((source) => {
-        if (!source.buffer) return
-        if (audioBuffers[fx] !== source.buffer) return
-        fadeOutSource(source, STOP_FX_FADE_SECONDS)
-      })
-    },
-  }))
+          if (backgroundTrack === SoundFX.BACKGROUND) {
+            stopSoundFX(SoundFX.BACKGROUND)
+          } else if (backgroundTrack === SoundFX.BACKGROUND_SPEEDRUN) {
+            stopSoundFX(SoundFX.BACKGROUND_SPEEDRUN)
+          }
+
+          // small buffer to ensure clean transition
+          setTimeout(() => {
+            if (get().isMuted) return // Don't play if muted during the delay
+            playSoundFX(newBackgroundTrack, true, BACKGROUND_TRACK_VOLUMES[phase])
+          }, STOP_FX_FADE_SECONDS * 1000)
+
+          set({ backgroundTrack: newBackgroundTrack })
+        },
+
+        playSoundFX: async (fx: SoundFX, loop: boolean = false, volume: number = 1) => {
+          if (get().isMuted) return
+
+          const startPlayback = async () => {
+            await ensureContext()
+            if (!audioBuffers[fx]) {
+              await get().initialise()
+            }
+            const audioBuffer = audioBuffers[fx]
+            if (!audioBuffer) {
+              console.error(`[SoundProvider] Missing buffer for ${fx} after init`)
+              return
+            }
+            const bufferSource = audioContext!.createBufferSource()
+            bufferSource.buffer = audioBuffer
+            bufferSource.loop = loop
+            const gainNode = audioContext!.createGain()
+            gainNode.gain.value = volume
+            bufferSource.connect(gainNode)
+            gainNode.connect(masterGain!)
+            registerSource(bufferSource, gainNode)
+            bufferSource.start(0)
+          }
+
+          try {
+            await startPlayback()
+          } catch (err) {
+            console.error(`[SoundProvider] Failed to play ${fx}`, err)
+          }
+        },
+
+        stopSoundFX: (fx: SoundFX) => {
+          if (!audioContext) return
+          activeSources.forEach((source) => {
+            if (!source.buffer) return
+            if (audioBuffers[fx] !== source.buffer) return
+            fadeOutSource(source, STOP_FX_FADE_SECONDS)
+          })
+        },
+      }),
+      {
+        name: 'speedroller-sound',
+        partialize: (state) => ({ isMuted: state.isMuted }),
+      },
+    ),
+  )
 }
 
 export const SoundProvider: FC<PropsWithChildren> = ({ children }) => {

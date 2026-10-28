@@ -1,0 +1,72 @@
+{
+  "status": "Artwork approved 2026-10-24; integrated into assets/platform/1.2.0 on 2026-10-24",
+  "copiedFrom": "assets/platform/1.1.1",
+  "width": 33,
+  "startGlobalRow": 32,
+  "finishGlobalRow": 1232,
+  "chunks": [
+    {
+      "file": "1.2.0/race-lobby.png",
+      "decoration": "decoration/race-lobby.png",
+      "start": -32,
+      "end": -1,
+      "height": 32,
+      "globalStart": 0
+    },
+    {
+      "file": "1.2.0/race-launch.png",
+      "decoration": "decoration/race-launch.png",
+      "start": 0,
+      "end": 179,
+      "height": 180,
+      "globalStart": 32
+    },
+    {
+      "file": "1.2.0/race-sweeps.png",
+      "decoration": "decoration/race-sweeps.png",
+      "start": 180,
+      "end": 379,
+      "height": 200,
+      "globalStart": 212
+    },
+    {
+      "file": "1.2.0/race-slalom.png",
+      "decoration": "decoration/race-slalom.png",
+      "start": 380,
+      "end": 599,
+      "height": 220,
+      "globalStart": 412
+    },
+    {
+      "file": "1.2.0/race-recovery.png",
+      "decoration": "decoration/race-recovery.png",
+      "start": 600,
+      "end": 759,
+      "height": 160,
+      "globalStart": 632
+    },
+    {
+      "file": "1.2.0/race-finale.png",
+      "decoration": "decoration/race-finale.png",
+      "start": 760,
+      "end": 1019,
+      "height": 260,
+      "globalStart": 792
+    },
+    {
+      "file": "1.2.0/race-sprint.png",
+      "decoration": "decoration/race-sprint.png",
+      "start": 1020,
+      "end": 1214,
+      "height": 195,
+      "globalStart": 1052
+    }
+  ],
+  "counts": {
+    "floor": 17683,
+    "rings": 60,
+    "highlights": 2581,
+    "decorations": 682
+  },
+  "integratedTo": "assets/platform/1.2.0"
+}

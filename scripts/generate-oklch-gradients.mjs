@@ -1,4 +1,4 @@
-import { css, CSS_LEVEL4, oklch, rgb as toLinearRgb, srgb } from '@thi.ng/color'
+import { CSS_LEVEL4, css, oklch, srgb, rgb as toLinearRgb } from '@thi.ng/color'
 
 const TAU = Math.PI * 2
 

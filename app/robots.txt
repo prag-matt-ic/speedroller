@@ -6,4 +6,4 @@ Disallow: /dev
 User-agent: *
 Allow: /
 
-Sitemap: https://quizroller.vercel.app/sitemap.xml
+Sitemap: https://speedroller.vercel.app/sitemap.xml

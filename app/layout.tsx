@@ -1,13 +1,8 @@
-import './globals.css'
-
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Cinzel, Nunito_Sans } from 'next/font/google'
+import { Nunito_Sans, Unbounded } from 'next/font/google'
 
-const cinzel = Cinzel({
-  variable: '--font-cinzel',
-  subsets: ['latin'],
-})
+import './globals.css'
 
 const nunitoSans = Nunito_Sans({
   variable: '--font-nunito-sans',
@@ -16,16 +11,23 @@ const nunitoSans = Nunito_Sans({
   display: 'swap',
 })
 
+const unbounded = Unbounded({
+  variable: '--font-unbounded',
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: {
-    template: '%s | Quizroller',
-    default: 'Quizroller | 3D Quiz Game',
+    template: '%s | Speedroller',
+    default: 'Speedroller | 3D Game',
   },
   description:
-    'A 3D quiz game built using React Three Fiber and Rapier physics. How far can you roll?',
+    'A 3D web game built using React Three Fiber, WebGPU and Rapier physics. How fast can you roll?',
   appleWebApp: {
-    title: 'Quizroller',
-    statusBarStyle: 'black-translucent',
+    title: 'Speedroller',
+    statusBarStyle: 'black',
     capable: true,
   },
 }
@@ -37,7 +39,7 @@ export const viewport: Viewport = {
   minimumScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
-  themeColor: '#030b2a',
+  themeColor: '#000000',
   colorScheme: 'dark',
 }
 
@@ -48,7 +50,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cinzel.variable} ${nunitoSans.variable} overflow-hidden antialiased`}>
+      <body
+        className={`${nunitoSans.variable} ${unbounded.variable} overflow-hidden antialiased`}>
         {children}
         <Analytics />
       </body>

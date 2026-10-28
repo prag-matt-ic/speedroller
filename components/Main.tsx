@@ -1,12 +1,14 @@
 'use client'
-
 import { type FC } from 'react'
 
-import PerformanceDebug from './debug/PerformanceDebug'
-import Game from './Game'
-import { PerformanceProvider } from './PerformanceProvider'
-import UI from './ui/UI'
-import { BackgroundProvider } from './BackgroundProvider'
+import Game from '@/components/Game'
+import { PerformanceProvider } from '@/components/PerformanceProvider'
+import RaceAudio from '@/components/RaceAudio'
+import Timer from '@/components/Timer'
+import DebugControls from '@/components/debug/DebugControls'
+import SpeedProbe from '@/components/debug/SpeedProbe'
+import HtmlPortal from '@/components/ui/HtmlPortal'
+import UI from '@/components/ui/UI'
 
 type Props = {
   isMobile: boolean
@@ -16,11 +18,13 @@ type Props = {
 const Main: FC<Props> = ({ isMobile, isDebug }) => {
   return (
     <PerformanceProvider isMobile={isMobile}>
-      <BackgroundProvider>
-        <Game isDebug={isDebug} isMobile={isMobile} />
-        <UI isMobile={isMobile} />
-        {isDebug && <PerformanceDebug />}
-      </BackgroundProvider>
+      <Game isDebug={isDebug} isMobile={isMobile} />
+      <UI isMobile={isMobile} />
+      <HtmlPortal />
+      <Timer />
+      <RaceAudio />
+      {isDebug && <DebugControls />}
+      {isDebug && <SpeedProbe />}
     </PerformanceProvider>
   )
 }

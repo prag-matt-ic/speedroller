@@ -1,42 +1,52 @@
-// Tile dimensions
-export const TILE_SIZE = 1
-export const TILE_THICKNESS = 0.16
+import { Stage } from '@/stores/types'
 
-export const ANSWER_TILE_COLS = 7
-export const ANSWER_TILE_ROWS = 4
-export const ANSWER_TILE_WIDTH = ANSWER_TILE_COLS * TILE_SIZE
-export const ANSWER_TILE_HEIGHT = ANSWER_TILE_ROWS * TILE_SIZE
+// Tile dimensions
+export const TILE_SIZE = 1.0
+export const TILE_THICKNESS = 0.12
+/** Tile rows painted by a start or finish line, centred on the authored marker row. */
+export const RACE_LINE_ROW_SPAN = 3
+export const PLATFORM_BATCH_ROWS = 16
+export const INITIAL_ROW_START_Z = 3.5 * TILE_SIZE
+
+/** Row coordinates are permanent; forward travel decreases world Z. */
+export const rowToWorldZ = (rowIndex: number): number =>
+  INITIAL_ROW_START_Z - rowIndex * TILE_SIZE
+
+/** Nearest course row, including when the player falls beyond either end. */
+export const worldZToRowIndex = (worldZ: number, rowCount: number): number => {
+  if (rowCount === 0) return -1
+  return Math.max(0, Math.min(rowCount - 1, Math.round((INITIAL_ROW_START_Z - worldZ) / TILE_SIZE)))
+}
+// Tile trail: how long a touched tile stays lit, and the radius of tiles the ball stamps.
+export const TRAIL_FADE_SECONDS = 0.16
+export const TRAIL_BRUSH_RADIUS = TILE_SIZE * 0.6
+export const TRAIL_MAX_PLAYER_HEIGHT = 1.2
+
+export const EPSILON = {
+  SMALL: 1e-6,
+  TINY: 1e-4,
+} as const
 
 // Grid configuration
-export const COLUMNS = 16
-export const ROWS_RENDERED = 28
+export const COLUMNS = 33 // odd number so that there is a center column
 
 // Heights
-export const SAFE_HEIGHT = -TILE_SIZE / 2 // top of tile at y=0
-export const UNSAFE_HEIGHT = -40 // sunken obstacles (out of sight)
+export const RAISED_Y = -TILE_SIZE / 2
 
-export const HIDE_POSITION_Y = -40 as const
-export const HIDE_POSITION_Z = 40 as const
+export const CONFETTI_ROW_DEPTH = TILE_SIZE
+
+// Y value of the tile's top surface
+export const TILE_SURFACE_Y = RAISED_Y + TILE_THICKNESS * 0.5
 
 // Y value for elements placed directly on top of tiles
-export const ON_TILE_Y = SAFE_HEIGHT + TILE_THICKNESS * 0.5 + 0.005
-
-// Entry lift animation config (rows -> world units via TILE_SIZE)
-export const INITIAL_ROWS_Z_OFFSET = TILE_SIZE * 8
-export const ENTRY_Y_OFFSET = TILE_THICKNESS * 10 // How far down to start when entering (world units)
-export const ENTRY_RAISE_DURATION_ROWS = 4
-export const EXIT_LOWER_DURATION_ROWS = 4
-export const MAX_Z = TILE_SIZE * 12
-
-// Fixed entry window values for row raising animation
-export const ENTRY_END_Z = MAX_Z - 16 * TILE_SIZE - EXIT_LOWER_DURATION_ROWS
-export const ENTRY_START_Z = ENTRY_END_Z - ENTRY_RAISE_DURATION_ROWS * TILE_SIZE
-// Exit window values for row lowering (pre-wrap)
-export const EXIT_END_Z = MAX_Z
-export const EXIT_START_Z = EXIT_END_Z - EXIT_LOWER_DURATION_ROWS * TILE_SIZE
+export const ON_TILE_Y = TILE_SURFACE_Y + 0.005
 
 // Convert a grid column index (can be fractional for centers) to world X.
-export const colToX = (col: number): number => (col - COLUMNS / 2 + 0.5) * TILE_SIZE
+export const colToX = (col: number, columns = COLUMNS): number => (col - columns / 2 + 0.5) * TILE_SIZE
+
+/** Nearest grid column for a world X, the inverse of `colToX`. */
+export const worldXToColumn = (worldX: number, columns = COLUMNS): number =>
+  Math.round(worldX / TILE_SIZE + columns / 2 - 0.5)
 
 export function clamp(x: number, a: number, b: number): number {
   return Math.max(a, Math.min(b, x))
@@ -46,23 +56,32 @@ export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t
 }
 
-export type SectionType = 'home' | 'question' | 'obstacles'
+// Row index to columns with rings
+export type RingLayout = Record<number, number[]>
+
+export type IndexedPlacement = readonly [number, number, number, number]
+
+export type ConfettiPlacement = {
+  position: [number, number, number]
+  width: number
+  depth: number
+  contentIndex: number
+}
 
 export type RowData = {
-  heights: number[]
-  type: SectionType
+  isRaised: (0 | 1)[]
+  stage: Stage
   isSectionStart: boolean
   isSectionEnd: boolean
-  questionTextPosition?: [number, number, number] // If true, when this row is visible, position Q text here
-  // Optional per-index answer tile placements for this trigger row.
-  // Use null for indices that should not be placed on this trigger.
-  // Example: for a 4-tile layout, top trigger provides [pos, pos, null, null],
-  // bottom trigger provides [null, null, pos, pos].
-  answerTilePositions?: ([number, number, number] | null)[]
-  answerNumber?: number[] // Per-column answer number: 0=not under answer, 1=under answer 1, 2=under answer 2, etc.
-  logoPosition?: [number, number, number]
-  colourPickerPosition?: [number, number, number]
-  // Optional per-index info zone placements for this trigger row.
-  // Use null to skip moving a specific info zone on this trigger.
-  infoZonePositions?: ([number, number, number] | null)[]
+  rowIndex?: number
+  rings?: (0 | 1)[]
+  isHighlighted?: number[] // 0 = not highlighted, 1 = highlighted
+  infoZonePlacements?: IndexedPlacement[] // Info zones rendered on the platform
+  collectiblePlacements?: IndexedPlacement[] // Collectibles rendered on the platform
+  floatingHeadingPlacements?: IndexedPlacement[] // Floating heading above the platform but still aligned to the row
+  startLinePosition?: [number, number, number] // Start grid and sensor centre
+  finishLinePosition?: [number, number, number] // Finish line position
+  confettiPlacements?: ConfettiPlacement[] // Confetti platforms rendered on the platform
+  colourPickerPlacement?: IndexedPlacement // Colour picker placement (single instance)
+  decorationColumns?: number[] // Non-collidable ghost overlay; excluded from playable floor
 }

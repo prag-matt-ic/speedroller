@@ -1,0 +1,278 @@
+import { type LucideIcon } from 'lucide-react'
+import { type ReactNode } from 'react'
+import { type Vector3Tuple } from 'three'
+import { type StateCreator } from 'zustand'
+
+import { type SoundState } from '@/components/SoundProvider'
+import {
+  CollectibleID,
+  InsertSpeedRunResponse,
+  ServerSpeedRunSubmission,
+  SpeedRunDatabase,
+} from '@/model/schema'
+import type { TotalCounts } from '@/stores/totalCounts'
+import type { RowData } from '@/utils/tiles'
+import type { CourseSurface } from '@/utils/platform/courseSurface'
+
+export enum Stage {
+  HOME = 1,
+  INFO = 2,
+  OBSTACLES = 3,
+  CTA = 4,
+  SPEED_RUN_FINISH = 5,
+}
+
+export type PlayerInput = {
+  up: number
+  down: number
+  left: number
+  right: number
+}
+
+export type PlayerStatus = 'idle' | 'safe' | 'out-of-bounds' | 'respawning'
+
+export type HudIndicatorConfig = {
+  id: string
+  label: ReactNode
+  Icon?: LucideIcon
+  autoDismissS?: number
+}
+
+export type RingIndex = [row: number, column: number]
+export type RingCollection = Record<string, true>
+
+export enum SpeedRunStage {
+  LOBBY = 'lobby',
+  START = 'start',
+  COUNTDOWN = 'countdown',
+  RUNNING = 'running',
+  SUBMITTING = 'submitting',
+  END = 'end',
+}
+
+export enum GameMode {
+  SPEEDRUN = 'speedrun',
+  DEV = 'dev',
+}
+
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed'
+
+/** Immutable snapshot of the finished attempt, independent of saved history. */
+export type RaceResult = {
+  attemptId: number
+  username: string
+  date: string
+  timeSeconds: number
+  inputType: InputType
+  platformVersion: string
+  raceFalls: number
+  rings: number
+}
+
+export type TimeSlice = {
+  totalTimeS: number // total time spent in the experience in seconds (persisted)
+  setTotalTimeS: (seconds: number) => void
+
+  speedRunStage: SpeedRunStage
+
+  /** Ephemeral identity that invalidates delayed countdown/collection/submission callbacks. */
+  attemptId: number
+  attemptStartedAtMs: number | null
+  attemptInputType: InputType | null
+  attemptResult: RaceResult | null
+  savedRunId: number | null
+  saveStatus: SaveStatus
+
+  enterStartLine: () => void
+  prepareMultiplayer: () => void
+  isSpectating: boolean
+  multiplayerRaceId: string | null
+  multiplayerStartAtMs: number | null
+  multiplayerFinish: { raceId: string; attemptId: number; elapsedMs: number } | null
+  scheduleMultiplayerRace: (raceId: string, startAtMs: number) => void
+  startMultiplayerRace: (raceId: string, nowMs: number) => void
+  confirmMultiplayerFinish: (raceId: string, elapsedMs: number) => void
+  stopMultiplayerRace: (raceId: string) => void
+  startCountdown: () => void
+  cancelStartLine: () => void
+  onCountdownComplete: (attemptId: number) => void
+  finishSpeedRun: (attemptId?: number) => void
+  retryRace: () => void
+  returnToLobby: () => void
+
+  speedRunTimeCS: number // current speed run duration in 10 milliseconds (centi-seconds)
+  setSpeedRunTimeCS: (centiSeconds: number) => void
+
+  completedSpeedRuns: Record<string, SpeedRunDatabase[]>
+  platformVersion: string
+}
+
+export enum InputType {
+  KEYS = 'keyboard',
+  JOYSTICK = 'joystick',
+}
+
+export type InputSlice = {
+  isMobile: boolean
+  inputType: InputType
+  setInputType: (type: InputType) => void
+  joystickPosition: 'left' | 'right'
+  setJoystickPosition: (position: 'left' | 'right') => void
+  playerInputIntent: PlayerInput
+  setPlayerInputIntent: (input: PlayerInput) => void
+  playerInput: PlayerInput
+  setPlayerInput: (input: PlayerInput) => void
+
+  // MF: unsure if we need this as global state or it can just be set locally, defaulted to input type.
+  leaderboardFilter: InputType
+  setLeaderboardFilter: (filter: InputType) => void
+}
+
+export enum Overlay {
+  NONE = 'none',
+  LANDING = 'landing',
+  DASHBOARD = 'dashboard',
+  SUBSCRIBE = 'subscribe',
+  SPEEDRUN_START = 'speedrun-start',
+  MULTIPLAYER = 'multiplayer',
+  SPECTATING = 'spectating',
+  MULTIPLAYER_COUNTDOWN = 'multiplayer-countdown',
+  SPEEDRUN_COUNTDOWN = 'speedrun-countdown',
+  SPEEDRUN_END = 'speedrun-end',
+}
+
+export const getOverlayForSpeedRunStage = (speedRunStage: SpeedRunStage): Overlay => {
+  switch (speedRunStage) {
+    case SpeedRunStage.LOBBY:
+      return Overlay.NONE
+    case SpeedRunStage.START:
+      return Overlay.SPEEDRUN_START
+    case SpeedRunStage.COUNTDOWN:
+      return Overlay.SPEEDRUN_COUNTDOWN
+    case SpeedRunStage.RUNNING:
+      return Overlay.NONE
+    case SpeedRunStage.SUBMITTING:
+      return Overlay.SPEEDRUN_END
+    case SpeedRunStage.END:
+      return Overlay.SPEEDRUN_END
+    default:
+      return Overlay.NONE
+  }
+}
+
+export type OverlaysSlice = {
+  overlay: Overlay
+  setOverlay: (overlay: Overlay) => void
+}
+
+export type OutOfBoundsEvent = {
+  hudId: string | null
+  timestamp: number
+}
+
+export type PlayerSlice = {
+  username: null | string
+  setUsername: (username: string) => void
+  isSubscribed: boolean
+  setIsSubscribed: (isSubscribed: boolean) => void
+
+  playerPosition: Vector3Tuple
+  setPlayerPosition: (pos: { x: number; y: number; z: number }) => void
+
+  /** Current forward speed in units per second, published for effects and HUD. */
+  playerSpeedUnits: number
+  setPlayerSpeedUnits: (speedUnits: number) => void
+  /** Ring-boost allowance above cruise in units per second, published for the debug probe. */
+  playerBoostUnits: number
+  setPlayerBoostUnits: (boostUnits: number) => void
+  /** Monotonic count of rings that granted race boost. The player applies the deltas. */
+  ringBoostTick: number
+
+  spawnPosition: Vector3Tuple | null
+  playerRespawnTick: number
+  playerStatus: PlayerStatus
+  outOfBoundsEvents: OutOfBoundsEvent[]
+
+  paletteIndex: number
+  confirmingPaletteIndex: number | null
+  setPaletteIndex: (paletteIndex: number) => void
+  setConfirmingPaletteIndex: (paletteIndex: number | null) => void
+
+  respawnPlayer: (position: Vector3Tuple, hud?: HudIndicatorConfig) => void
+  onRespawnComplete: () => void
+
+  confirmingCollectible: CollectibleID | null
+  setConfirmingCollectible: (collectibleType: CollectibleID | null) => void
+  confirmationProgress: number
+
+  collectedCollectibles: CollectibleID[]
+  seenCollectibles: Partial<Record<CollectibleID, boolean>>
+
+  collectedRings: RingCollection
+  hasCollectedAllRings: boolean
+  onRingCollected: (indexes: RingIndex) => void
+
+  markCollectibleSeen: (collectibleType: CollectibleID) => void
+  stopConfirmation: () => void
+  resetPlayerSpeedState: () => void
+  onOutOfBounds: () => void
+}
+
+export type GameSlice = {
+  courseSurface: CourseSurface
+  stage: Stage
+  goToStage: (stage: Stage) => void
+
+  hudIndicator: HudIndicatorConfig | null
+  setHudIndicator: (indicator: HudIndicatorConfig | null) => void
+
+  rowsData: RowData[]
+  totalCounts: TotalCounts
+  setRowsData: (rows: RowData[], totalCounts: TotalCounts) => void
+
+  currentRow: number
+  setCurrentRow: (row: number) => void
+
+  mode: GameMode
+  /** Developer layout reset only; attempt retries must not replace terrain. */
+  resetGame: (params: { mode: GameMode }) => void
+
+  cameraLookAtPosition: Vector3Tuple | null
+  setCameraLookAtPosition: (pos: Vector3Tuple | null) => void
+
+  resetPlatformTick: number
+
+  isPlatformReady: boolean
+  setIsPlatformReady: (isReady: boolean) => void
+
+  isWarmupComplete: boolean
+  setIsWarmupComplete: (isComplete: boolean) => void
+
+  htmlPortal: undefined | React.RefObject<HTMLDivElement>
+  setHtmlPortal: (ref: undefined | React.RefObject<HTMLDivElement>) => void
+
+  _isHydrated: boolean
+  setHydrated: () => void
+}
+
+export type GameStore = TimeSlice & PlayerSlice & GameSlice & InputSlice & OverlaysSlice
+
+export type CreateGameStoreParams = {
+  isMobile: boolean
+  insertSpeedRun: (data: ServerSpeedRunSubmission) => InsertSpeedRunResponse
+} & Pick<SoundState, 'playSoundFX' | 'stopSoundFX'>
+
+export type GameSliceCreator<T> = StateCreator<GameStore, [['zustand/persist', unknown]], [], T>
+
+export const isAttemptLocked = (speedRunStage: SpeedRunStage): boolean =>
+  speedRunStage === SpeedRunStage.COUNTDOWN ||
+  speedRunStage === SpeedRunStage.RUNNING ||
+  speedRunStage === SpeedRunStage.SUBMITTING
+
+/** Stages that accept steer/brake input, whether the movement itself is manual or automatic. */
+export const isMovementInputStage = (speedRunStage: SpeedRunStage): boolean =>
+  speedRunStage === SpeedRunStage.LOBBY || speedRunStage === SpeedRunStage.RUNNING
+
+/** The live race is the only stage with automatic forward propulsion. */
+export const isAutomaticMovementStage = (speedRunStage: SpeedRunStage): boolean =>
+  speedRunStage === SpeedRunStage.RUNNING

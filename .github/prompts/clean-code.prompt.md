@@ -31,4 +31,16 @@ Begin first by identifying any violations of the checklist items. Then, refactor
 
 - [ ] Review imports and ensure that types/interfaces are imported as types (e.g import { type MyType } from '...' ). Classes should not be marked as types. Remove any unused imports.
 
+- [ ] React function components should be declared as type FC from 'react'.
+
+- [ ] In React 19+ ref can be passed as a prop. So remove forwardRef and define the ref as a normal prop. e.g:
+
+```tsx
+type Props = {
+  ref?: React.RefObject<HTMLElement | null>;
+}
+
+- [ ] Prefer 'type' over 'interface' for defining object shapes (and props) unless you need declaration merging.
+
 - [ ] For event handlers, use the onSubjectAction naming convention (e.g. 'onGameOverClick' or 'onEnquiryFormSubmit') rather than handleSubjectAction.
+```

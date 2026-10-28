@@ -42,3 +42,10 @@ yarn-error.log*
 next-env.d.ts
 
 .mcp.json
+
+.tmp/
+
+.idea/
+
+# local CodeGraph index
+/.codegraph/

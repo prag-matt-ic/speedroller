@@ -1,29 +1,24 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #0f0d0f;
+  --background: #000;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: #fff;
   --font-sans: var(--font-nunito-sans);
-  --font-serif: var(--font-cinzel);
+  --font-unbounded: var(--font-unbounded);
 }
 
 @theme {
-  --color-black: #0f0d0f;
 }
 
 body {
   background: var(--background);
   color: #fff;
   font-family: var(--font-nunito-sans), sans-serif;
-}
-
-button,
-a {
-  cursor: pointer;
+  overscroll-behavior-y: none;
 }
 
 h1,
@@ -32,11 +27,16 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-cinzel), serif;
+  font-family: var(--font-unbounded), sans-serif;
   user-select: none;
 }
 
 @layer utilities {
+  button:not(:disabled),
+  a:not([aria-disabled='true']) {
+    @apply cursor-pointer;
+  }
+
   .heading-xl {
     @apply text-4xl leading-tight! font-medium tracking-tight sm:text-6xl md:text-8xl;
   }
@@ -62,4 +62,108 @@ h6 {
   .paragraph-xs {
     @apply text-xs lg:text-sm;
   }
+  .info-header {
+    @apply text-xl font-bold text-black lg:text-2xl;
+  }
+
+  /* Discreet scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-white/15;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/30;
+  }
+
+  @keyframes reveal-logo {
+    from {
+      mask-position: 100% 0;
+      -webkit-mask-position: 100% 0;
+    }
+    to {
+      mask-position: 0% 0;
+      -webkit-mask-position: 0% 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-reveal-logo {
+    mask-image: linear-gradient(
+      to right,
+      black 0%,
+      black 45%,
+      transparent 65%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black 0%,
+      black 45%,
+      transparent 65%,
+      transparent 100%
+    );
+    mask-size: 300% 100%;
+    -webkit-mask-size: 300% 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: 100% 0;
+    -webkit-mask-position: 100% 0;
+    animation: reveal-logo 4.5s cubic-bezier(0.33, 1, 0.68, 1) 300ms forwards;
+  }
+
+  .mini-map-fade-mask {
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, black 25%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, black 25%, black 100%);
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+  }
 }
+
+.speech-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-top-color: #000;
+  border-bottom: 0;
+  margin-left: -8px;
+  margin-bottom: -8px;
+}
+
+@media (min-width: 1440px) {
+  .speech-bubble:after {
+    /* Only update the width, preserving the color and style */
+    border-width: 16px;
+    /* Re-apply the removal of the bottom border */
+    border-bottom-width: 0;
+    margin-left: -16px;
+    margin-bottom: -16px;
+  }
+}
+/* .safe-ui {
+  width: 100vw;
+  padding-left: env(safe-area-inset-left, 12px) !important;
+  padding-right: env(safe-area-inset-right, 12px) !important;
+} */

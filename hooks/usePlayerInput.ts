@@ -7,11 +7,13 @@ export function usePlayerInput(onInputChange?: (input: PlayerInput) => void) {
   const input = useRef(gameStoreAPI.getState().playerInput)
 
   useEffect(() => {
-    const unsubscribe = gameStoreAPI.subscribe((state, prevState) => {
-      if (state.playerInput === prevState.playerInput) return
-      input.current = state.playerInput
-      onInputChange?.(input.current)
-    })
+    const unsubscribe = gameStoreAPI.subscribe(
+      (s) => s.playerInput,
+      (newInput) => {
+        input.current = newInput
+        onInputChange?.(newInput)
+      },
+    )
 
     return unsubscribe
   }, [gameStoreAPI, onInputChange])
@@ -24,4 +26,26 @@ export function usePlayerInput(onInputChange?: (input: PlayerInput) => void) {
   return { input }
 }
 
-export default usePlayerInput
+export function usePlayerInputIntent(onChange?: (input: PlayerInput) => void) {
+  const gameStoreAPI = useGameStoreAPI()
+  const inputIntent = useRef(gameStoreAPI.getState().playerInputIntent)
+
+  useEffect(() => {
+    const unsubscribe = gameStoreAPI.subscribe(
+      (s) => s.playerInputIntent,
+      (newInput) => {
+        inputIntent.current = newInput
+        onChange?.(newInput)
+      },
+    )
+
+    return unsubscribe
+  }, [gameStoreAPI, onChange])
+
+  useEffect(() => {
+    onChange?.(inputIntent.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return { inputIntent }
+}

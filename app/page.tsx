@@ -1,10 +1,15 @@
 import dynamic from 'next/dynamic'
 import { type FC } from 'react'
+import { twJoin } from 'tailwind-merge'
 
-import LoadingOverlay from '@/components/loading/LoadingOverlay'
-import isMobileServer from '@/utils/isMobileServer'
-import { SoundProvider } from '@/components/SoundProvider'
+import { insertSpeedRun, skipEditorSpeedRun } from '@/app/actions'
+import { MultiplayerProvider } from '@/components/multiplayer/MultiplayerProvider'
 import { GameProvider } from '@/components/GameProvider'
+import { QueryProvider } from '@/components/QueryProvider'
+import { SoundProvider } from '@/components/SoundProvider'
+// import PWAInstall from '@/components/ui/PWAInstall'
+import LandingOverlay from '@/components/ui/landing/LandingOverlay'
+import isMobileServer from '@/utils/isMobileServer'
 
 const Main = dynamic(() => import('@/components/Main'))
 
@@ -16,17 +21,24 @@ export default async function Home(props: PageProps) {
   const isMobile = await isMobileServer()
   const searchParams = await props.searchParams
   const isDebug = searchParams?.debug === 'true'
+  const isEditorPreview = process.env.NODE_ENV === 'development' && searchParams?.editor === 'true'
 
   return (
     <>
-      <main className="h-lvh w-full overflow-hidden">
+      <main
+        className={twJoin('w-full overflow-hidden select-none', isMobile ? 'h-dvh' : 'h-vh')}>
         <SoundProvider>
-          <GameProvider>
-            <LoadingOverlay />
-            <Main isMobile={isMobile} isDebug={isDebug} />
-          </GameProvider>
+          <QueryProvider>
+            <GameProvider isMobile={isMobile} insertSpeedRun={isEditorPreview ? skipEditorSpeedRun : insertSpeedRun}>
+              <MultiplayerProvider>
+                <LandingOverlay isMobile={isMobile} />
+                <Main isMobile={isMobile} isDebug={isDebug} />
+              </MultiplayerProvider>
+            </GameProvider>
+          </QueryProvider>
         </SoundProvider>
       </main>
+      {isEditorPreview && <div className="pointer-events-none fixed top-2 left-1/2 z-50 -translate-x-1/2 rounded bg-black/80 px-3 py-1 text-xs text-amber-200">Local course preview · times are not submitted</div>}
       <StructuredData />
     </>
   )
@@ -34,25 +46,26 @@ export default async function Home(props: PageProps) {
 
 const FAQS: { question: string; answer: string }[] = [
   {
-    question: 'What is Quizroller?',
-    answer: 'A free 3D endless runner quiz game you play in the browser.',
+    question: 'What is Speedroller?',
+    answer: 'A 3D racing game you play in the browser.',
   },
   {
     question: 'How do I move my player?',
     answer: 'On desktop use WASD or the arrow keys. On mobile, use the virtual joystick.',
   },
   {
-    question: 'Is Quizroller free to play?',
+    question: 'Is Speedroller free to play?',
     answer: 'Yes. It is free and runs entirely in your web browser.',
   },
   {
     question: 'Which devices and browsers are supported?',
-    answer: 'Any modern desktop or mobile browser that supports WebGL 2 and JavaScript.',
+    answer:
+      'Any modern desktop or mobile browser that supports WebGPU and JavaScript. Chrome is the recommended browser.',
   },
   {
     question: 'What is the goal of the game?',
     answer:
-      'Navigate your marble across the terrain and answer multiple choice questions to see how far you can roll.',
+      'Navigate your marble across the terrain, collect rings, and complete speedruns as fast as possible.',
   },
   {
     question: 'Can I change my marble colour?',
@@ -66,15 +79,11 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'What technologies power the 3D web game?',
     answer:
-      'Next.js, React Three Fiber, Rapier physics, custom WebGL/GLSL materials, Zustand for state, GSAP for animation, and Tailwind for UI.',
+      'Next.js, React Three Fiber, Rapier physics, custom WebGPU shader materials, Zustand for state, GSAP for animation, and Tailwind for UI.',
   },
   {
-    question: 'Does the game require a server or store data there?',
-    answer: 'No. There is no server state - all game logic runs client side.',
-  },
-  {
-    question: 'Who created Quizroller?',
-    answer: 'Matthew Frawley of Pragmattic Ltd.',
+    question: 'Who designed Speedroller?',
+    answer: 'Threenix developers. Learn more about them here at https://threenix.io',
   },
 ]
 
@@ -85,11 +94,11 @@ const StructuredData: FC = () => {
     acceptedAnswer: { '@type': 'Answer', text: answer },
   }))
 
-  const BASE_URL = 'https://quizroller.vercel.app'
+  const BASE_URL = 'https://speedroller.vercel.app'
 
   return (
     <>
-      {/* Organization (minimal) for the Quizroller site */}
+      {/* Organization (minimal) for the Speedroller site */}
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -106,8 +115,7 @@ const StructuredData: FC = () => {
           }),
         }}
       />
-
-      {/* Software Application details for the Quizroller game */}
+      {/* Software Application details for the Speedroller game */}
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -116,13 +124,13 @@ const StructuredData: FC = () => {
             '@context': 'https://schema.org',
             '@type': ['SoftwareApplication', 'WebApplication', 'VideoGame'],
             '@id': `${BASE_URL}/#software-application`,
-            name: 'Quizroller',
+            name: 'Speedroller',
             url: BASE_URL,
             applicationCategory: 'GameApplication',
             operatingSystem: 'WEB',
-            browserRequirements: 'Requires WebGL 2.0 and JavaScript enabled',
+            browserRequirements: 'Requires WebGPU and JavaScript enabled',
             description:
-              'A free 3D endless runner quiz game for the web. Navigate a marble over terrain, answering multiple-choice questions as you go.',
+              'A free 3D speedrolling game for the web. Navigate a marble over challenging terrain, collect rings, and race the clock to the finish line.',
             image: [`${BASE_URL}/screenshots/home.jpg`],
             genre: ['Arcade', 'Trivia', 'Educational'],
             inLanguage: 'en-GB',
@@ -143,7 +151,7 @@ const StructuredData: FC = () => {
             '@type': 'WebSite',
             '@id': `${BASE_URL}/#website`,
             url: BASE_URL,
-            name: 'Quizroller',
+            name: 'Speedroller',
             inLanguage: 'en-GB',
             publisher: { '@id': `${BASE_URL}/#organization` },
           }),

@@ -1,30 +1,36 @@
 import type { NextConfig } from 'next'
+import path from 'path'
+
+const envOrigins =
+  process.env.NEXT_DEV_ALLOWED_ORIGINS?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean) ?? []
+
+const localNetworkOrigins = ['192.168.1.118']
+
+const allowedDevOrigins = Array.from(new Set([...localNetworkOrigins, ...envOrigins]))
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   reactCompiler: true,
+  allowedDevOrigins,
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'speedroller.vercel.app' }],
+        destination: 'https://speedroller.threenix.io/:path*',
+        permanent: true,
+      },
+    ]
+  },
   experimental: {
     cssChunking: true,
+    turbopackFileSystemCacheForDev: false,
   },
-  // Configure Turbopack to recognize and transform GLSL shader files
-  // when running `next dev --turbopack` or `next build --turbopack`.
-  // This mirrors the webpack rule below but uses Turbopack's loader API.
   turbopack: {
-    rules: {
-      '*.glsl': { loaders: ['raw-loader', 'glslify-loader'], as: '*.js' },
-      '*.vert': { loaders: ['raw-loader', 'glslify-loader'], as: '*.js' },
-      '*.frag': { loaders: ['raw-loader', 'glslify-loader'], as: '*.js' },
-      '*.vs': { loaders: ['raw-loader', 'glslify-loader'], as: '*.js' },
-      '*.fs': { loaders: ['raw-loader', 'glslify-loader'], as: '*.js' },
-    },
-  },
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.(glsl|vs|fs|vert|frag)$/,
-      use: ['raw-loader', 'glslify', 'glslify-loader'],
-    })
-    return config
+    root: path.join(__dirname),
   },
 }
 

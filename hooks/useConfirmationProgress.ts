@@ -13,12 +13,14 @@ export function useConfirmationProgress(
   const confirmationProgress = useRef(gameStoreAPI.getState().confirmationProgress)
 
   useEffect(() => {
-    // Subscribe to store updates and update ref only when confirmationProgress changes
-    const unsubscribe = gameStoreAPI.subscribe((state, prevState) => {
-      if (state.confirmationProgress === prevState.confirmationProgress) return
-      confirmationProgress.current = state.confirmationProgress
-      onConfirmationProgressChange?.(confirmationProgress.current)
-    })
+    // Subscribe to store updates and update ref when confirmationProgress changes
+    const unsubscribe = gameStoreAPI.subscribe(
+      (s) => s.confirmationProgress,
+      (progress) => {
+        confirmationProgress.current = progress
+        onConfirmationProgressChange?.(progress)
+      },
+    )
     return unsubscribe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStoreAPI])

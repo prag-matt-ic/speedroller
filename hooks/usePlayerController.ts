@@ -4,13 +4,11 @@ import { KinematicCharacterController } from '@dimforge/rapier3d-compat'
 import { useRapier } from '@react-three/rapier'
 import { useLayoutEffect, useRef } from 'react'
 
-import { PLAYER_RADIUS } from '@/components/player/PlayerHUD'
-import usePlayerInput from './usePlayerInput'
+import { PLAYER_RADIUS } from '@/utils/player'
 
 function usePlayerController() {
   const { world } = useRapier()
   const controllerRef = useRef<KinematicCharacterController | null>(null)
-  const { input } = usePlayerInput()
 
   useLayoutEffect(() => {
     if (!world) return
@@ -48,7 +46,7 @@ function usePlayerController() {
     }
   }, [world])
 
-  return { controllerRef, input }
+  return { controllerRef }
 }
 
 export default usePlayerController

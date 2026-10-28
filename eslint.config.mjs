@@ -28,6 +28,9 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Generated build output and design-reference authoring scripts:
+    '.tmp/**',
+    'docs/race-course/*.cjs',
   ]),
 ])
 
