@@ -1,47 +1,33 @@
 'use client'
 
-import { useTexture } from '@react-three/fiber/webgpu'
 import { useLocalNodes } from '@react-three/tsl'
 import { type FC, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { abs, attribute, mix, normalMap, spritesheetUV, step, texture, uv, vec2, vertexStage } from 'three/tsl'
+import { abs, attribute, mix, step, uv, vec2, vertexStage } from 'three/tsl'
 import {
   type BoxGeometry,
-  ClampToEdgeWrapping,
   InstancedBufferAttribute,
   InstancedMesh,
-  LinearFilter,
-  LinearMipmapLinearFilter,
   Matrix4,
   MeshPhongNodeMaterial,
-  NoColorSpace,
   Quaternion,
-  SRGBColorSpace,
-  type Texture,
   Vector3,
 } from 'three/webgpu'
 
-import ivoryStoneAtlas from '@/assets/textures/platform/ivory-stone-atlas.webp'
-import ivoryStoneNormals from '@/assets/textures/platform/ivory-stone-normal.png'
 import { useRouteFadeIn } from '@/hooks/useRouteFadeIn'
 import type { PillarPlacement } from '@/utils/platform/architecture'
 import { surfaceRotation, type CourseSurface } from '@/utils/platform/courseSurface'
 import { blockWorldPosition } from '@/utils/platform/blockWorldPosition'
 import { createStoneBlockGeometry } from '@/utils/platform/stoneBlockGeometry'
-import { industrialSurface } from './industrialSurface'
+import {
+  STONE_ATLAS_GRID,
+  STONE_SHININESS,
+  STONE_SPECULAR,
+  stoneAtlasUv,
+  stoneSurface,
+  useStoneTextures,
+} from './stoneSurface'
 
 const BATCH_LENGTH = 32
-const STONE_ATLAS_GRID = 3
-const STONE_UV_INSET = 16.5 / 512
-const STONE_NORMAL_STRENGTH = 0.35
-
-const configureStoneAtlas = (map: Texture) => {
-  map.colorSpace = SRGBColorSpace
-  map.wrapS = map.wrapT = ClampToEdgeWrapping
-  map.magFilter = LinearFilter
-  map.minFilter = LinearMipmapLinearFilter
-  map.generateMipmaps = true
-  map.needsUpdate = true
-}
 
 type Props = { blocks: readonly PillarPlacement[]; surface: CourseSurface; enabled?: boolean; fadeEnabled?: boolean; onReadyChange?: (ready: boolean) => void }
 
@@ -89,35 +75,27 @@ const PillarBatch: FC<BatchProps> = ({ surface, pillars, geometry, material }) =
 
 const StoneBlocks: FC<Props> = ({ blocks, surface, enabled = true, fadeEnabled = true, onReadyChange }) => {
   const batches = useMemo(() => Object.values(Object.groupBy(blocks, (block) => Math.floor(block.distance / BATCH_LENGTH))), [blocks])
-  const stoneAtlas = useTexture(ivoryStoneAtlas.src, configureStoneAtlas)
-  const stoneNormals = useTexture(ivoryStoneNormals.src, (map) => {
-    configureStoneAtlas(map)
-    map.colorSpace = NoColorSpace
-  })
+  const { atlas: stoneAtlas, normals: stoneNormals } = useStoneTextures()
   const { colorNode, emissiveNode, normalNode, pillarWorldZ } = useLocalNodes(() => {
-    const stoneUv = spritesheetUV(
-      vec2(STONE_ATLAS_GRID),
-      uv().mul(1 - 2 * STONE_UV_INSET).add(STONE_UV_INSET),
-      attribute<'float'>('stoneFrame', 'float'),
-    )
+    const stoneUv = stoneAtlasUv(uv(), attribute<'float'>('stoneFrame', 'float'))
     const dimensions = attribute<'vec3'>('blockSize', 'vec3')
     const faceNormal = abs(attribute<'vec3'>('normal', 'vec3'))
     const faceSize = vertexStage(vec2(
       mix(dimensions.x, dimensions.z, step(0.5, faceNormal.x)),
       mix(dimensions.y, dimensions.z, step(0.5, faceNormal.y)),
     ))
-    const panel = industrialSurface(texture(stoneAtlas, stoneUv).rgb, uv(), faceSize)
+    const panel = stoneSurface({ atlas: stoneAtlas, normals: stoneNormals }, stoneUv, uv(), faceSize)
     return {
       pillarWorldZ: attribute<'float'>('pillarWorldZ', 'float'),
       colorNode: panel.colorNode.mul(attribute<'float'>('stoneShade', 'float')),
       emissiveNode: panel.emissiveNode,
-      normalNode: normalMap(texture(stoneNormals, stoneUv).rgb, vec2(STONE_NORMAL_STRENGTH)),
+      normalNode: panel.normalNode,
     }
   }, [stoneAtlas, stoneNormals])
   const opacityNode = useRouteFadeIn(pillarWorldZ, fadeEnabled)
   const geometry = useMemo(() => createStoneBlockGeometry(), [])
   const material = useMemo(() => {
-    const material = new MeshPhongNodeMaterial({ colorNode, normalNode, opacityNode, shininess: 24, specular: '#62584c', transparent: true, depthWrite: true, alphaTest: 0.001 })
+    const material = new MeshPhongNodeMaterial({ colorNode, normalNode, opacityNode, shininess: STONE_SHININESS, specular: STONE_SPECULAR, transparent: true, depthWrite: true, alphaTest: 0.001 })
     Object.assign(material, { emissiveNode })
     return material
   }, [colorNode, emissiveNode, normalNode, opacityNode])

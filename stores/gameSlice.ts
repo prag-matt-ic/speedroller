@@ -1,3 +1,4 @@
+import type { CameraPoseOverride } from '@/utils/camera/cameraPose'
 import { PLATFORM_DATA } from '@/resources/rowsData'
 import type { RowData } from '@/utils/tiles'
 import { type CourseSurface, FLAT_SURFACE } from '@/utils/platform/courseSurface'
@@ -40,6 +41,7 @@ export const RESET_GAME_STATE = {
   totalCounts: DEFAULT_PLATFORM_DATA.totalCounts,
   currentRow: 0,
   cameraLookAtPosition: null,
+  cameraPoseOverrides: [] as CameraPoseOverride[],
   isPlatformReady: false,
   isWarmupComplete: false,
   rowsData: DEFAULT_PLATFORM_DATA.rowsData,
@@ -70,6 +72,14 @@ export const createGameSlice = (): GameSliceCreator<GameSlice> => (set, get) => 
   setCurrentRow: (currentRow) => {
     set({ currentRow })
   },
+  setCameraPoseOverride: (id, pose) => {
+    set((state) => {
+      const existing = state.cameraPoseOverrides.find(entry => entry.id === id)
+      if (existing?.pose === pose || (!existing && pose === null)) return state
+      const others = state.cameraPoseOverrides.filter(entry => entry.id !== id)
+      return { cameraPoseOverrides: pose ? [...others, { id, pose }] : others }
+    })
+  },
   setCameraLookAtPosition: (cameraLookAtPosition) => {
     set({ cameraLookAtPosition })
   },
@@ -88,6 +98,7 @@ export const createGameSlice = (): GameSliceCreator<GameSlice> => (set, get) => 
       isPlatformReady: false,
       isWarmupComplete: false,
       cameraLookAtPosition: null,
+      cameraPoseOverrides: [] as CameraPoseOverride[],
       hudIndicator: null,
     }))
   },
@@ -117,6 +128,7 @@ export const createGameSlice = (): GameSliceCreator<GameSlice> => (set, get) => 
       hudIndicator: null,
       attemptId: previous.attemptId + 1,
       attemptInputType: null,
+      attemptPaletteIndex: null,
       outOfBoundsEvents: [],
       playerStatus: 'respawning',
       spawnPosition: [...PLAYER_INITIAL_POSITION],

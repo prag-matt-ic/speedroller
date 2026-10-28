@@ -250,6 +250,7 @@ export const createPlayerSlice =
           playerRespawnTick: s.playerRespawnTick + 1,
           spawnPosition: position,
           cameraLookAtPosition: null,
+          cameraPoseOverrides: [],
           hudIndicator: hud ?? s.hudIndicator,
         }))
       },
@@ -281,6 +282,7 @@ export const createPlayerSlice =
           playerStatus: 'out-of-bounds',
           spawnPosition: null, // Calculated in usePlayerRespawn hook
           cameraLookAtPosition: null,
+          cameraPoseOverrides: [],
           hudIndicator: outOfBoundsMessage,
           outOfBoundsEvents: [
             ...s.outOfBoundsEvents,

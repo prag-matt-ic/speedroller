@@ -3,20 +3,10 @@
 
 import { useCourseSurface } from '@/hooks/useCourseSurface'
 import { courseToWorld } from '@/utils/platform/courseSurface'
-import { createLocalCoursePanelGeometry } from '@/utils/platform/coursePlaneGeometry'
-import { useCoursePlacement } from '@/hooks/useCoursePlacement'
 
-import { ActiveCollisionTypes } from '@dimforge/rapier3d-compat'
 import { useGSAP } from '@gsap/react'
 import { Html } from '@react-three/drei'
 import { type HtmlProps } from '@react-three/drei/webgpu'
-import { type CreatorState, useLocalNodes, useUniforms } from '@react-three/tsl'
-import {
-  CuboidCollider,
-  type IntersectionEnterHandler,
-  type IntersectionExitHandler,
-  RigidBody,
-} from '@react-three/rapier'
 import gsap from 'gsap'
 import EasePack from 'gsap/dist/EasePack'
 import {
@@ -32,49 +22,25 @@ import {
 } from 'react'
 import { Transition } from 'react-transition-group'
 import { twMerge } from 'tailwind-merge'
-import { float, mix, uv, vec2, vec3, vertexStage } from 'three/tsl'
 import { type Vector3Tuple } from 'three'
-import type { Node, UniformNode } from 'three/webgpu'
 
 import { useGameStore, useGameStoreAPI } from '@/components/GameProvider'
-import { usePerformanceStore } from '@/components/PerformanceProvider'
-import { CORE_UNIFORM_SCOPE } from '@/components/coreUniforms'
 import { SoundFX, useSoundStore } from '@/components/SoundProvider'
 import { PLAYER_RADIUS } from '@/utils/player'
 import { PointerProvider } from '@/components/ui/PointerProvider'
-import { InfoZoneUserData, type RigidBodyUserData } from '@/model/schema'
-import { fadeInOut, objectWorldZ } from '@/resources/tsl/fadeInOut'
-import { paintCorners } from '@/resources/tsl/paintCorners'
-import { COLLISION_GROUPS } from '@/utils/collisionGroups'
 import {
-  INFO_ZONE_COLS,
   INFO_ZONE_HEIGHT,
-  INFO_ZONE_ROWS,
   INFO_ZONE_WIDTH,
 } from '@/utils/platform/infoZoneDimensions'
+
+import { CameraPoseSensor } from '@/components/CameraPoseSensor'
 
 import IconSphere from './iconSphere/IconSphere'
 
 gsap.registerPlugin(EasePack)
 
-// Corner bracket tuning, carried over from infoZone.frag.
-const BORDER_THICKNESS_TILES = 0.25
-const CORNER_LENGTH_TILES = 0.5
 const DEFAULT_INFO_POSITION_OFFSET: Vector3Tuple = [0, 0, 3.5]
-
-type InfoZoneUniforms = {
-  uAspect: UniformNode<'float', number>
-  uTilesX: UniformNode<'float', number>
-  uTilesY: UniformNode<'float', number>
-  uShowProgress: UniformNode<'float', number>
-}
-
-const createInfoZoneUniforms = (aspect: number, tilesX: number, tilesY: number) => () => ({
-  uAspect: aspect,
-  uTilesX: tilesX,
-  uTilesY: tilesY,
-  uShowProgress: 0,
-})
+const SENSOR_HALF_EXTENTS: Vector3Tuple = [INFO_ZONE_WIDTH / 2, PLAYER_RADIUS * 2, INFO_ZONE_HEIGHT / 2]
 
 export type InfoZoneProps = PropsWithChildren<{
   position: Vector3Tuple
@@ -86,10 +52,6 @@ export type InfoZoneProps = PropsWithChildren<{
   infoContentHtmlProps?: HtmlProps
   iconSrc: string
 }>
-
-const userData: InfoZoneUserData = {
-  type: 'info-zone',
-}
 
 // Shows HTML content when the player enters the zone
 export const InfoZone: FC<InfoZoneProps> = ({
@@ -103,16 +65,11 @@ export const InfoZone: FC<InfoZoneProps> = ({
   iconSrc,
 }) => {
   const surface = useCourseSurface()
-  const placement = useCoursePlacement(position, -Math.PI / 2)
-  const [courseX, courseY] = position
-  const panelGeometry = useMemo(() => createLocalCoursePanelGeometry(INFO_ZONE_WIDTH, INFO_ZONE_HEIGHT, courseX, courseY, surface), [courseX, courseY, surface])
-  useEffect(() => () => panelGeometry.dispose(), [panelGeometry])
   const gameStore = useGameStoreAPI()
   const isMobile = useGameStore((s) => s.isMobile)
   const htmlPortal = useGameStore((s) => s.htmlPortal)
   const setCameraLookAtPosition = useGameStore((s) => s.setCameraLookAtPosition)
   const playSoundFX = useSoundStore((s) => s.playSoundFX)
-  const useDistanceFade = usePerformanceStore((s) => s.sceneConfig.isDistanceFadeEnabled)
 
   const [showInfo, setShowInfo] = useState(alwaysShowInfo)
   const infoContainer = useRef<HTMLDivElement>(null)
@@ -124,58 +81,6 @@ export const InfoZone: FC<InfoZoneProps> = ({
   const onFramed = useCallback((inView: boolean) => {
     setIsInView(inView)
   }, [])
-
-  // Registers the zone's uniforms. The graph reads them back off the same scope; uShowProgress is
-  // also held here because the enter/exit tweens animate it directly.
-  // Corner brackets are drawn per grid cell, so the tile metrics come from the zone dimensions
-  // rather than a shared 1×1 default (which made brackets ~5× too large on the 5×5 zone).
-  const tileAspect = INFO_ZONE_WIDTH / INFO_ZONE_HEIGHT
-  const tilesX = INFO_ZONE_COLS
-  const tilesY = INFO_ZONE_ROWS
-
-  const { uShowProgress } = useUniforms(createInfoZoneUniforms(tileAspect, tilesX, tilesY), zoneKey)
-
-  // Port of infoZone.vert + infoZone.frag. Height-space UV and the distance fade are recomputed
-  // per stage rather than carried across as varyings.
-  const createNodes = useCallback(
-    ({ uniforms }: CreatorState) => {
-      const scoped = uniforms.scope<InfoZoneUniforms>(zoneKey)
-      const { uPlayerWorldPos } = uniforms.scope(CORE_UNIFORM_SCOPE)
-      // Height-space UV: centred, with the aspect ratio applied to x.
-      const centeredUvSource = uv().sub(0.5)
-      const centeredUv: Node<'vec2'> = vec2(
-        centeredUvSource.x.mul(scoped.uAspect),
-        centeredUvSource.y,
-      )
-
-      const animatedCornerLength = mix(
-        float(CORNER_LENGTH_TILES),
-        float(CORNER_LENGTH_TILES * 6),
-        scoped.uShowProgress,
-      )
-
-      const bracketMask = paintCorners(
-        centeredUv,
-        scoped.uAspect,
-        vec2(scoped.uTilesX, scoped.uTilesY),
-        float(BORDER_THICKNESS_TILES),
-        animatedCornerLength,
-      )
-
-      // uOpacity was declared in the GLSL but never set from JS, so it stayed at its initial 1.
-      // The fade reads the zone's own z, so the whole 5-tile panel ramps as one rather than wiping
-      // in across its depth.
-      const opacityNode: Node<'float'> = useDistanceFade
-        ? bracketMask.mul(
-            vertexStage(fadeInOut(uPlayerWorldPos.z, objectWorldZ(), { fadeOut: true })),
-          )
-        : bracketMask
-      return { colorNode: vec3(1), opacityNode }
-    },
-    [useDistanceFade, zoneKey],
-  )
-
-  const { colorNode, opacityNode } = useLocalNodes(createNodes, [createNodes])
 
   const cameraTarget = useMemo<Vector3Tuple>(() => {
     const target = courseToWorld(position[0] - infoPositionOffset[0], position[1] - infoPositionOffset[1], position[2] - infoPositionOffset[2], surface, { x: 0, y: 0, z: 0 })
@@ -191,19 +96,13 @@ export const InfoZone: FC<InfoZoneProps> = ({
 
   useEffect(() => clearCameraTarget, [clearCameraTarget])
 
-  const onIntersectionEnter: IntersectionEnterHandler = (event) => {
-    const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
-    if (!otherUserData) return
-    if (otherUserData.type !== 'player') return
+  const onEnter = () => {
     setCameraLookAtPosition(cameraTarget)
     if (alwaysShowInfo) return
     setShowInfo(true)
   }
 
-  const onIntersectionExit: IntersectionExitHandler = (event) => {
-    const otherUserData = event.other.rigidBodyObject?.userData as RigidBodyUserData
-    if (!otherUserData) return
-    if (otherUserData.type !== 'player') return
+  const onExit = () => {
     clearCameraTarget()
     if (alwaysShowInfo) return
     setShowInfo(false)
@@ -225,11 +124,6 @@ export const InfoZone: FC<InfoZoneProps> = ({
         ease: 'expoScale(0.8,1.0,power1.out)',
       },
     )
-    gsap.to(uShowProgress, {
-      duration: 0.5,
-      value: 1,
-      ease: 'power2.out',
-    })
   })
 
   const onInfoExit = contextSafe(() => {
@@ -239,41 +133,12 @@ export const InfoZone: FC<InfoZoneProps> = ({
       duration: 0.24,
       ease: 'expoScale(0.8,1.0,power1.out)',
     })
-    gsap.to(uShowProgress, {
-      duration: 0.3,
-      value: 0,
-      ease: 'power2.in',
-    })
   })
 
-
   return (
-    <RigidBody
-      type="fixed"
-      {...placement}
-      colliders={false}
-      userData={userData}>
-      <CuboidCollider
-        args={[INFO_ZONE_WIDTH / 2, INFO_ZONE_HEIGHT / 2, PLAYER_RADIUS * 2]}
-        sensor={true}
-        activeCollisionTypes={ActiveCollisionTypes.DEFAULT | ActiveCollisionTypes.KINEMATIC_FIXED}
-        mass={0}
-        friction={0}
-        onIntersectionEnter={onIntersectionEnter}
-        onIntersectionExit={onIntersectionExit}
-        collisionGroups={COLLISION_GROUPS.infoZoneSensor}
-      />
+    <CameraPoseSensor position={position} halfExtents={SENSOR_HALF_EXTENTS}
+      onEnter={onEnter} onExit={onExit} onFramed={onFramed}>
       <group>
-        {/* Floor tile */}
-        <mesh position={[0, 0, 0.01]} renderOrder={2} onFramed={onFramed}>
-          <primitive object={panelGeometry} attach="geometry" />
-          <meshBasicNodeMaterial
-            colorNode={colorNode}
-            opacityNode={opacityNode}
-            transparent
-          />
-        </mesh>
-
         {/* Floating Icon Sphere */}
         <Suspense fallback={null}>
           <IconSphere
@@ -284,12 +149,6 @@ export const InfoZone: FC<InfoZoneProps> = ({
           />
         </Suspense>
       </group>
-      {/* Mesh to show where info content is placed. */}
-      {/* <mesh position={infoPositionOffset}>
-          <sphereGeometry args={[0.5, 16, 16]} />
-          <meshBasicMaterial color="white" />
-        </mesh> */}
-
       {/* Info Content */}
       {isInView && (
         <Html
@@ -319,7 +178,7 @@ export const InfoZone: FC<InfoZoneProps> = ({
           </Transition>
         </Html>
       )}
-    </RigidBody>
+    </CameraPoseSensor>
   )
 }
 

@@ -85,12 +85,12 @@ test('empty bitmap cells remain gaps: leaving a narrow track falls outward', () 
 test('surface placements keep floor panels and their local normal aligned around the cylinder', async () => {
   const { Vector3, Matrix4, Quaternion } = await import('three')
   const { createLocalCoursePanelGeometry } = loadTypeScript('utils/platform/coursePlaneGeometry.ts')
-  const { useCoursePlacement } = loadTypeScript('hooks/useCoursePlacement.ts', {
+  const { useCoursePlacement: placeOnCourse } = loadTypeScript('hooks/useCoursePlacement.ts', {
     react: { useMemo: compute => compute() },
     './useCourseSurface': { useCourseSurface: () => surface },
   })
   for (const x of [0, 33, 66, -33]) {
-    const placement = useCoursePlacement([x, TILE_SURFACE_Y, -90], -Math.PI / 2)
+    const placement = placeOnCourse([x, TILE_SURFACE_Y, -90], -Math.PI / 2)
     const matrix = new Matrix4().compose(placement.position, new Quaternion().setFromEuler(placement.rotation), new Vector3(1, 1, 1))
     const geometry = createLocalCoursePanelGeometry(5, 5, x, TILE_SURFACE_Y, surface)
     const vertices = geometry.getAttribute('position')
@@ -183,4 +183,24 @@ test('the authored race admits a full loop at race speed and requires manual ste
   assert.ok(driven.y > -1, `driver fell at ${JSON.stringify(driven)}`)
   assert.ok(driven.z <= rowToWorldZ(finish), `driver stopped before finish: ${JSON.stringify(driven)}`)
   world.free()
+})
+
+test('the authored lobby loop supports a complete lap in either direction', () => {
+  const { PLATFORM_DATA } = loadTypeScript('resources/rowsData.ts')
+  const { LOBBY_LOOP_START_ROW, LOBBY_LOOP_END_ROW } = loadTypeScript('utils/platform/lobbyLayout.ts')
+  const row = PLATFORM_DATA.modes.speedrun.rows[Math.floor((LOBBY_LOOP_START_ROW + LOBBY_LOOP_END_ROW) / 2)]
+  const columns = row.isRaised.flatMap((solid, column) => solid ? [column] : [])
+  for (const direction of [-1, 1]) {
+    const world = createWorld(columns)
+    const player = playerAt(world, 0)
+    let previousX = 0, travelled = 0
+    for (let frame = 0; frame < 1100; frame++) {
+      const position = player.step(direction * 8)
+      travelled += surfaceDeltaX(previousX, position.x, surface)
+      previousX = position.x
+      assert.ok(position.y > TILE_SURFACE_Y, 'the ball must stay supported through walls, ceiling and seam')
+    }
+    assert.ok(travelled * direction > 132, 'must complete the full circumference')
+    world.free()
+  }
 })

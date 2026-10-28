@@ -102,6 +102,7 @@ function createRaceStore({ username = 'racer123', insertSpeedRun } = {}) {
     isPlatformReady: true,
     isWarmupComplete: true,
     username,
+    paletteIndex: 3,
     playerStatus: 'safe',
     playerRespawnTick: 0,
     playerPosition: [0, 4, 0],
@@ -116,6 +117,7 @@ function createRaceStore({ username = 'racer123', insertSpeedRun } = {}) {
     confirmationProgress: 0,
     hudIndicator: null,
     cameraLookAtPosition: null,
+    cameraPoseOverrides: [],
     stopConfirmation: () => {
       playerResetCalls.confirmation += 1
     },
@@ -179,7 +181,9 @@ test('race lifecycle: saved name sees mode choice, solo selection starts countdo
   const race = createRaceStore({ insertSpeedRun: () => submission.promise })
   const { store, markers, SpeedRunStage, Overlay, PLAYER_RESTING_Y } = race
 
+  store.setState({ cameraPoseOverrides: [{ id: 'podium', pose: {} }] })
   store.getState().enterStartLine()
+  assert.deepEqual(store.getState().cameraPoseOverrides, [])
   assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
   assert.equal(store.getState().overlay, Overlay.SPEEDRUN_START)
   store.getState().startCountdown()
@@ -212,6 +216,7 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   store.getState().enterStartLine()
   store.getState().startCountdown()
   store.getState().onCountdownComplete(1)
+  store.setState({ paletteIndex: 7 }) // The submitted colour belongs to the start of the attempt.
   await new Promise((resolve) => setTimeout(resolve, 20))
 
   store.getState().finishSpeedRun(999) // Wrong attempt: ignored.
@@ -226,6 +231,7 @@ test('race lifecycle: finish snapshots the result once, saves it, and reaches EN
   assert.equal(state.attemptResult.username, 'racer123')
   assert.equal(submissionCalls.length, 1)
   assert.equal(submissionCalls[0].level_id, PLATFORM_VERSION)
+  assert.equal(submissionCalls[0].palette_index, 3)
 
   // Repeated finish contacts cannot submit twice.
   store.getState().finishSpeedRun(1)
@@ -459,6 +465,7 @@ test('spectator bridge bootstraps late poses without racing, follows switches an
     publishPose: () => published++, finish: () => published++ }
   const bridge = bindMultiplayerRace(store, session, { now: () => 1000, automaticTick: false })
   assert.equal(store.getState().isSpectating, true)
+  assert.deepEqual(store.getState().cameraPoseOverrides, [])
   assert.equal(store.getState().overlay, Overlay.SPECTATING)
   assert.equal(store.getState().speedRunStage, SpeedRunStage.START)
   assert.deepEqual(store.getState().playerPosition, [4, 1, -200])
@@ -486,7 +493,7 @@ test('spectator bridge bootstraps late poses without racing, follows switches an
 test('spectator asset loading uses the newest snapshot, never the race seen before a rematch', () => {
   const { bindMultiplayerRace } = loadTypeScript('utils/multiplayer/raceBridge.ts')
   const { store, Overlay } = createRaceStore()
-  store.setState({ _isHydrated: true, isWarmupComplete: false })
+  store.setState({ _isHydrated: true, isWarmupComplete: false, cameraPoseOverrides: [{ id: 'podium', pose: {} }] })
   const snapshot = { selfId: 'watcher', members: [{ id: 'watcher', role: 'spectator' }], raceId: 'old', phase: 'racing' }
   const room = createStore(() => ({ status: 'joined', clockOffset: 0, followId: 'old-racer', snapshot }))
   const bridge = bindMultiplayerRace(store, { store: room, getPoseBuffer: () => undefined }, { automaticTick: false })
@@ -494,6 +501,7 @@ test('spectator asset loading uses the newest snapshot, never the race seen befo
   room.setState({ followId: null, snapshot: { ...snapshot, phase: 'waiting', raceId: null } })
   store.setState({ isWarmupComplete: true }); bridge.tick()
   assert.equal(store.getState().isSpectating, true)
+  assert.deepEqual(store.getState().cameraPoseOverrides, [])
   assert.equal(store.getState().overlay, Overlay.SPECTATING)
   assert.equal(store.getState().multiplayerRaceId, null)
   assert.equal(store.getState().attemptStartedAtMs, null)
@@ -516,7 +524,7 @@ test('confirmed multiplayer finish saves frozen metadata and accepted time exact
   store.getState().finishSpeedRun()
   const captured = store.getState().attemptResult
   assert.equal(submissionCalls.length, 0)
-  store.setState({ username: 'changed123', collectedRings: {}, outOfBoundsEvents: [] })
+  store.setState({ username: 'changed123', paletteIndex: 7, collectedRings: {}, outOfBoundsEvents: [] })
   store.getState().confirmMultiplayerFinish('old-race', 12000)
   assert.equal(submissionCalls.length, 0)
   store.getState().confirmMultiplayerFinish('ranked-race', 12345)
@@ -524,7 +532,7 @@ test('confirmed multiplayer finish saves frozen metadata and accepted time exact
   store.getState().finishSpeedRun()
   assert.equal(submissionCalls.length, 1)
   assert.deepEqual(submissionCalls[0], { username: captured.username, date: captured.date, time: 12.35,
-    input_type: 'keyboard', level_id: PLATFORM_VERSION, accidents: 1, rings: 2 })
+    input_type: 'keyboard', level_id: PLATFORM_VERSION, accidents: 1, rings: 2, palette_index: 3 })
   assert.equal(store.getState().overlay, Overlay.MULTIPLAYER)
   submission.resolve(createSavedRun({ id: 123, time: 12.35 }))
   await flushAsync()

@@ -3,6 +3,7 @@
 import { type FC, useCallback } from 'react'
 
 import { Stage, useGameStore, useGameStoreAPI } from '@/components/GameProvider'
+import { Lobby } from '@/components/platform/lobby/Lobby'
 import FloatingTiles from '@/components/floatingTiles/FloatingTiles'
 import Collectibles from '@/components/platform/collectibles/Collectibles'
 import ColourPickerRow from '@/components/platform/colourPicker/ColourPickerRow'
@@ -64,6 +65,7 @@ const Course: FC = () => {
       <Collectibles rows={rows} onReadyChange={readyChangeHandlers.collectibles} />
       <ColourPickerRow rows={rows} onReadyChange={readyChangeHandlers.colourPicker} />
       <Rings rows={rows} onReadyChange={readyChangeHandlers.rings} />
+      {mode === GameMode.SPEEDRUN && surface.topology === 'cylinder' && <Lobby />}
       <SpeedRunElements rows={rows} onReadyChange={readyChangeHandlers.speedRun} />
     </group>
   )

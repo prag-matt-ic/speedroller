@@ -24,6 +24,8 @@ type ZoomCamera = {
 type CameraState = {
   currentPosition: Vector3
   goalPosition: Vector3
+  currentUp: Vector3
+  goalUp: Vector3
   currentTarget: Vector3
   goalTarget: Vector3
   pointerOffset: Vector3
@@ -67,6 +69,8 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
     cameraStateRef.current = {
       currentPosition: camera.position.clone(),
       goalPosition: camera.position.clone(),
+      currentUp: camera.up.clone(),
+      goalUp: camera.up.clone(),
       currentTarget: new Vector3(),
       goalTarget: new Vector3(),
       pointerOffset: new Vector3(),
@@ -103,6 +107,10 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
     },
     [],
   )
+
+  const setUp = useCallback((x: number, y: number, z: number) => {
+    cameraStateRef.current!.goalUp.set(x, y, z)
+  }, [])
 
   const setZoom = useCallback((zoom: number, transition = false) => {
     const cameraState = cameraStateRef.current!
@@ -176,6 +184,8 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
     camera.position.copy(cameraState.currentPosition)
     cameraState.composedTarget.copy(cameraState.currentTarget).add(cameraState.pointerOffset)
 
+    cameraState.currentUp.lerp(cameraState.goalUp, transitionAlpha).normalize()
+    camera.up.copy(cameraState.currentUp)
     camera.lookAt(cameraState.composedTarget)
 
     if (!supportsZoom(camera)) return
@@ -195,7 +205,7 @@ const useCameraControls = ({ pointerLookAt }: Props = {}) => {
     // so keep it ahead of the game's useFrame jobs.
   }, { priority: 1 })
 
-  return { setLookAt, setZoom, setIsPointerEnabled, getDistanceToTarget, getZoom }
+  return { setLookAt, setUp, setZoom, setIsPointerEnabled, getDistanceToTarget, getZoom }
 }
 
 export default useCameraControls

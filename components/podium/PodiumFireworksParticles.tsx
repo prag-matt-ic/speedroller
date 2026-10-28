@@ -91,26 +91,29 @@ type TslArrayNode<T extends string> = Omit<ReturnType<typeof array>, 'element'> 
 }
 
 type Props = {
+  active?: boolean
   particleCount?: number
   updateStride?: number
 }
 
 const PodiumFireworksParticles: FC<Props> = ({
+  active = true,
   particleCount = DEFAULT_PARTICLE_COUNT,
   updateStride = DEFAULT_UPDATE_STRIDE,
 }) => {
   if (particleCount <= 0) return null
   return (
-    <PodiumFireworksParticlesInner particleCount={particleCount} updateStride={updateStride} />
+    <PodiumFireworksParticlesInner active={active} particleCount={particleCount} updateStride={updateStride} />
   )
 }
 
 type InnerProps = {
+  active: boolean
   particleCount: number
   updateStride: number
 }
 
-const PodiumFireworksParticlesInner: FC<InnerProps> = ({ particleCount, updateStride }) => {
+const PodiumFireworksParticlesInner: FC<InnerProps> = ({ active, particleCount, updateStride }) => {
   const particleSeed = useId()
   const renderer = useThree((s) => s.renderer) as unknown as WebGPURenderer
   const frameloop = useThree((s) => s.frameloop)
@@ -379,7 +382,8 @@ const PodiumFireworksParticlesInner: FC<InnerProps> = ({ particleCount, updateSt
   }, [renderer, particleCount, resetParticles, computeNodes, storageAttributes])
 
   useLayoutEffect(() => {
-    if (!renderer || !isInitialized.current || frameloop === 'never') return
+    if (!active || !renderer || !isInitialized.current || frameloop === 'never') return
+    renderer.compute(resetParticles)
     const activeUniforms = uniformsRef.current
     let isActive = true
 
@@ -408,11 +412,11 @@ const PodiumFireworksParticlesInner: FC<InnerProps> = ({ particleCount, updateSt
       if (burstTimer.current !== null) clearTimeout(burstTimer.current)
       burstTimer.current = null
     }
-  }, [renderer, frameloop, spawnBatch, uniforms])
+  }, [active, renderer, frameloop, resetParticles, spawnBatch, uniforms])
 
   // Per-frame simulation update, respecting the update stride.
   useFrame(() => {
-    if (!renderer || !isInitialized.current || particleCount <= 0 || frameloop === 'never')
+    if (!active || !renderer || !isInitialized.current || particleCount <= 0 || frameloop === 'never')
       return
     updateFrameModuloRef.current++
     if (updateFrameModuloRef.current < safeUpdateStride) return
@@ -422,6 +426,7 @@ const PodiumFireworksParticlesInner: FC<InnerProps> = ({ particleCount, updateSt
 
   return (
     <instancedMesh
+      visible={active}
       args={[undefined, undefined, instanceCapacity]}
       count={particleCount}
       frustumCulled={false}>

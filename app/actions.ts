@@ -10,6 +10,9 @@ import {
   type ServerSpeedRunSubmission,
   type SpeedRunDatabase,
   type SpeedRunDatabaseInsert,
+  podiumEntrySchema,
+  type PodiumEntry,
+  paletteIndexSchema,
   feedbackDatabaseSchema,
   feedbackSubmissionSchema,
   speedrunDatabaseInsertSchema,
@@ -31,7 +34,7 @@ export async function getSpeedrunData(
       : sql`WHERE level_id = ${levelId}`
 
     const speedrun = await sql`
-      SELECT id, username, time, date, ip, country, flag, attempt, input_type, level_id, accidents, rings
+      SELECT id, username, time, date, ip, country, flag, attempt, input_type, level_id, accidents, rings, palette_index
       FROM "speedroller" 
       ${wherePlayerInput}
       ORDER BY time ASC
@@ -76,11 +79,12 @@ export async function getSpeedrunPosition(
           level_id,
           accidents,
           rings,
+          palette_index,
           ROW_NUMBER() OVER (ORDER BY time ASC) as position
         FROM "speedroller"
         ${wherePlayerInput}
       )
-      SELECT id, username, time, date, ip, country, flag, attempt, position, input_type, level_id, accidents, rings
+      SELECT id, username, time, date, ip, country, flag, attempt, position, input_type, level_id, accidents, rings, palette_index
       FROM ranked_runs
       WHERE id = ${id}
     `
@@ -103,10 +107,12 @@ export async function insertSpeedRun({
   time,
   input_type,
   level_id = LEVEL_ID,
+  palette_index = null,
   accidents,
   rings,
 }: ServerSpeedRunSubmission): InsertSpeedRunResponse {
   try {
+    paletteIndexSchema.nullable().parse(palette_index)
     const headersList = await headers()
 
     // TODO: This doesnt work on windows
@@ -146,15 +152,16 @@ export async function insertSpeedRun({
       level_id,
       accidents,
       rings,
+      palette_index,
     }
 
     const validatedInsert = speedrunDatabaseInsertSchema.parse(insert)
 
     // TODO: Rename this table.
     const insertResult = await sql`
-      INSERT INTO "speedroller" (username, time, date, ip, country, flag, attempt, input_type, level_id, accidents, rings) 
-      VALUES (${validatedInsert.username}, ${validatedInsert.time}, ${validatedInsert.date}, ${validatedInsert.ip}, ${validatedInsert.country}, ${validatedInsert.flag}, ${validatedInsert.attempt}, ${validatedInsert.input_type}, ${validatedInsert.level_id}, ${validatedInsert.accidents}, ${validatedInsert.rings})
-      RETURNING id, username, time, date, ip, country, flag, attempt, input_type, level_id, accidents, rings
+      INSERT INTO "speedroller" (username, time, date, ip, country, flag, attempt, input_type, level_id, accidents, rings, palette_index)
+      VALUES (${validatedInsert.username}, ${validatedInsert.time}, ${validatedInsert.date}, ${validatedInsert.ip}, ${validatedInsert.country}, ${validatedInsert.flag}, ${validatedInsert.attempt}, ${validatedInsert.input_type}, ${validatedInsert.level_id}, ${validatedInsert.accidents}, ${validatedInsert.rings}, ${validatedInsert.palette_index ?? null})
+      RETURNING id, username, time, date, ip, country, flag, attempt, input_type, level_id, accidents, rings, palette_index
     `
     if (!insertResult || insertResult.length === 0)
       throw new Error('No data returned from insert')
@@ -217,4 +224,22 @@ export async function submitFeedback(data: FeedbackSubmission): InsertFeedbackRe
 /** Editor playtests deliberately do not create leaderboard or personal-best records. */
 export async function skipEditorSpeedRun(): InsertSpeedRunResponse {
   return null
+}
+
+export async function getPodiumData(inputType: InputType, levelId: string = PLATFORM_VERSION): Promise<PodiumEntry[]> {
+  z.nativeEnum(InputType).parse(inputType)
+  z.string().min(1).parse(levelId)
+  const sql = neon(process.env.DATABASE_URL!)
+  const entries = await sql`
+    SELECT id, username, time, palette_index
+    FROM (
+      SELECT DISTINCT ON (username) id, username, time, palette_index
+      FROM "speedroller"
+      WHERE level_id = ${levelId} AND input_type = ${inputType}
+      ORDER BY username, time ASC, id ASC
+    ) AS best_runs
+    ORDER BY time ASC, id ASC
+    LIMIT 3
+  `
+  return podiumEntrySchema.array().parse(entries)
 }

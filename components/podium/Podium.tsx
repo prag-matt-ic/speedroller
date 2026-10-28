@@ -5,12 +5,12 @@ import { type FC, type RefObject, useCallback, useMemo, useRef } from 'react'
 import {
   billboarding,
   color,
-  mix,
+  float,
   normalLocal,
-  smoothstep,
   step,
   texture,
   uv,
+  vec2,
   vertexStage,
 } from 'three/tsl'
 import type { Mesh, MeshLambertNodeMaterial, Node } from 'three/webgpu'
@@ -23,6 +23,13 @@ import { GalaxyMarble } from '@/components/player/marble/GalaxyMarble'
 import { GALAXY_DEFAULTS } from '@/components/player/marble/galaxySettings'
 import type { PodiumPlace, PodiumWinner, PodiumWinners } from '@/components/podium/model'
 import { useTextTexture } from '@/components/podium/useTextTexture'
+import {
+  STONE_SHININESS,
+  STONE_SPECULAR,
+  stoneAtlasUv,
+  stoneSurface,
+  useStoneTextures,
+} from '@/components/platform/scenery/stoneSurface'
 
 const PILLAR_HEIGHT_DIFF = 0.75
 const PILLAR_1_HEIGHT = 8
@@ -34,6 +41,13 @@ const PILLAR_SPACING = PILLAR_RADIUS * 2 + PILLAR_X_GAP
 const PILLAR_BASELINE_Y = PILLAR_HEIGHT_DIFF - PILLAR_1_HEIGHT
 const PILLAR_TOP_HEIGHT = 0.12
 const PILLAR_SEGMENTS = 64
+
+/** Stone panels around the shaft and stacked down it, sized in world units like the scenery. */
+const PILLAR_PANELS_AROUND = 4
+const PILLAR_PANEL_HEIGHT = 3
+const PILLAR_PANEL_OFFSET = 0.5
+const PILLAR_CIRCUMFERENCE = 2 * Math.PI * PILLAR_RADIUS
+const PILLAR_STONE_FRAME = 4
 
 const PODIUM_Y_OFFSET = -0.5
 
@@ -47,13 +61,14 @@ const MARBLE_HOVER_SPEED = 0.9
 const MARBLE_SPIN_SPEED = 0.35
 const MARBLE_PHASE_STEP = 1.7
 
-const USERNAME_HEIGHT = 0.36
-const USERNAME_Y = -0.65
+const USERNAME_HEIGHT = 0.55
+const USERNAME_Y = -0.72
 const USERNAME_Z = PILLAR_RADIUS + 0.06
 const USERNAME_COLOUR = '#f4ecff'
+const TIME_COLOUR = '#34d399'
+const TIME_HEIGHT = 0.42
+const TIME_Y = USERNAME_Y - 0.62
 
-const MIDNIGHT_TOP = color('#2f244c') as unknown as Node<'vec3'>
-const MIDNIGHT_BOTTOM = color('#201934') as unknown as Node<'vec3'>
 const GOLD = color('#f1c73e') as unknown as Node<'vec3'>
 const SILVER = color('#c4a7ff') as unknown as Node<'vec3'>
 const BRONZE = color('#544018') as unknown as Node<'vec3'>
@@ -77,7 +92,58 @@ const PILLAR_X: Record<PodiumPlace, number> = {
   3: PILLAR_SPACING,
 }
 
+/**
+ * `emissiveNode` is read by NodeMaterial at render time but is not declared on the Lambert
+ * material's public type, so attach it the same way the gameplay marble publishes its glow.
+ */
+const useEmissiveRingAttachment = (emissiveNode: Node<'vec3'>) =>
+  useCallback(
+    (material: MeshLambertNodeMaterial | null) => {
+      if (!material) return
+      Object.assign(material, { emissiveNode })
+      material.needsUpdate = true
+    },
+    [emissiveNode],
+  )
+
+type PodiumLabelProps = {
+  billboard: boolean
+  colour: string
+  height: number
+  text: string
+  y: number
+}
+
+/** One line of winner text, pinned to the pillar face unless billboarding is enabled. */
+const PodiumLabel: FC<PodiumLabelProps> = ({ billboard, colour, height, text, y }) => {
+  const textTexture = useTextTexture(text, colour)
+  const textNode = useMemo(
+    () => (textTexture ? texture(textTexture.texture) : null),
+    [textTexture],
+  )
+  const vertexNode = useMemo(
+    () => (billboard ? billboarding({ horizontal: true }) : null),
+    [billboard],
+  )
+
+  if (textTexture === null || textNode === null) return null
+
+  return (
+    <mesh position={[0, y, USERNAME_Z]} renderOrder={2} frustumCulled={false}>
+      <planeGeometry args={[height * textTexture.aspect, height]} />
+      <meshBasicNodeMaterial
+        colorNode={textNode}
+        vertexNode={vertexNode}
+        transparent
+        depthWrite={false}
+      />
+    </mesh>
+  )
+}
+
 type PodiumPillarProps = {
+  billboardLabels: boolean
+  pillarExtension: number
   place: PodiumPlace
   ringColour: Node<'vec3'>
   ringEmissiveColour: Node<'vec3'>
@@ -86,6 +152,8 @@ type PodiumPillarProps = {
 }
 
 const PodiumPillar: FC<PodiumPillarProps> = ({
+  billboardLabels,
+  pillarExtension,
   place,
   ringColour,
   ringEmissiveColour,
@@ -93,12 +161,25 @@ const PodiumPillar: FC<PodiumPillarProps> = ({
   animationTime,
 }) => {
   const height = PILLAR_HEIGHTS[place]
+  const shaftHeight = height + pillarExtension
   const placeTexture = useTexture(PLACE_TEXTURES[place])
+  const { atlas: stoneAtlas, normals: stoneNormals } = useStoneTextures()
 
-  const cylinderColourNode = useMemo(
-    () => mix(MIDNIGHT_BOTTOM, MIDNIGHT_TOP, smoothstep(0.3, 1.0, uv().y)),
-    [],
-  )
+  const shaftSurface = useMemo(() => {
+    const panelsAround = uv().x.mul(PILLAR_PANELS_AROUND).add(PILLAR_PANEL_OFFSET).fract()
+    const panelsDown = float(1)
+      .sub(uv().y)
+      .mul(shaftHeight)
+      .div(PILLAR_PANEL_HEIGHT)
+      .fract()
+
+    return stoneSurface(
+      { atlas: stoneAtlas, normals: stoneNormals },
+      stoneAtlasUv(uv(), float(PILLAR_STONE_FRAME)),
+      vec2(panelsAround, panelsDown),
+      vec2(PILLAR_CIRCUMFERENCE / PILLAR_PANELS_AROUND, PILLAR_PANEL_HEIGHT),
+    )
+  }, [stoneAtlas, stoneNormals, shaftHeight])
 
   const { ringColourNode, ringEmissiveNode } = useMemo(() => {
     const isTopFace = vertexStage(step(0.6, normalLocal.y))
@@ -110,25 +191,17 @@ const PodiumPillar: FC<PodiumPillarProps> = ({
     }
   }, [placeTexture, ringColour, ringEmissiveColour])
 
-  // `emissiveNode` is read by NodeMaterial at render time but is not declared on the Lambert
-  // material's public type, so attach it the same way the gameplay marble publishes its glow.
-  const attachRingMaterial = useCallback(
-    (material: MeshLambertNodeMaterial | null) => {
-      if (!material) return
-      Object.assign(material, { emissiveNode: ringEmissiveNode })
-      material.needsUpdate = true
-    },
-    [ringEmissiveNode],
-  )
+  const attachRingMaterial = useEmissiveRingAttachment(ringEmissiveNode)
 
   return (
     <group position={[PILLAR_X[place], PILLAR_BASELINE_Y + height, 0]}>
-      <mesh position={[0, -height / 2, 0]}>
-        <cylinderGeometry args={[PILLAR_RADIUS, PILLAR_RADIUS, height, PILLAR_SEGMENTS]} />
-        <meshBasicNodeMaterial
-          key={cylinderColourNode.uuid}
-          colorNode={cylinderColourNode}
-          lights={false}
+      <mesh position={[0, -shaftHeight / 2, 0]}>
+        <cylinderGeometry args={[PILLAR_RADIUS, PILLAR_RADIUS, shaftHeight, PILLAR_SEGMENTS]} />
+        <meshPhongNodeMaterial
+          colorNode={shaftSurface.colorNode}
+          normalNode={shaftSurface.normalNode}
+          shininess={STONE_SHININESS}
+          specular={STONE_SPECULAR}
         />
       </mesh>
 
@@ -144,19 +217,26 @@ const PodiumPillar: FC<PodiumPillarProps> = ({
       </mesh>
 
       {winner !== null && (
-        <PodiumWinnerDisplay place={place} winner={winner} animationTime={animationTime} />
+        <PodiumWinnerDisplay
+          billboardLabels={billboardLabels}
+          place={place}
+          winner={winner}
+          animationTime={animationTime}
+        />
       )}
     </group>
   )
 }
 
 type PodiumWinnerDisplayProps = {
+  billboardLabels: boolean
   place: PodiumPlace
   winner: PodiumWinner
   animationTime: RefObject<number>
 }
 
 const PodiumWinnerDisplay: FC<PodiumWinnerDisplayProps> = ({
+  billboardLabels,
   place,
   winner,
   animationTime,
@@ -164,12 +244,6 @@ const PodiumWinnerDisplay: FC<PodiumWinnerDisplayProps> = ({
   const marble = useRef<Mesh>(null)
   const paletteIndex = clampPaletteIndexSafe(winner.paletteIndex)
   const settings = useMemo(() => ({ ...GALAXY_DEFAULTS, paletteIndex }), [paletteIndex])
-  const textTexture = useTextTexture(winner.username, USERNAME_COLOUR)
-  const textNode = useMemo(
-    () => (textTexture ? texture(textTexture.texture) : null),
-    [textTexture],
-  )
-  const billboardNode = useMemo(() => billboarding({ horizontal: true }), [])
 
   useFrame(() => {
     const marbleMesh = marble.current
@@ -193,27 +267,34 @@ const PodiumWinnerDisplay: FC<PodiumWinnerDisplayProps> = ({
         starCount={MARBLE_STAR_COUNT}
       />
 
-      {textTexture !== null && textNode !== null && (
-        <mesh position={[0, USERNAME_Y, USERNAME_Z]} renderOrder={2} frustumCulled={false}>
-          <planeGeometry args={[USERNAME_HEIGHT * textTexture.aspect, USERNAME_HEIGHT]} />
-          <meshBasicNodeMaterial
-            colorNode={textNode}
-            vertexNode={billboardNode}
-            transparent={true}
-            depthWrite={false}
-          />
-        </mesh>
-      )}
+      <PodiumLabel
+        billboard={billboardLabels}
+        colour={USERNAME_COLOUR}
+        height={USERNAME_HEIGHT}
+        text={winner.username}
+        y={USERNAME_Y}
+      />
+      <PodiumLabel
+        billboard={billboardLabels}
+        colour={TIME_COLOUR}
+        height={TIME_HEIGHT}
+        text={`${winner.timeSeconds.toFixed(2)}s`}
+        y={TIME_Y}
+      />
     </group>
   )
 }
 
 type PodiumProps = {
+  /** Extend the shafts beneath the lobby fog without moving the tops or labels. */
+  pillarExtension?: number
+  /** Turn the labels to face the camera; leave off so they stay pinned to the podium front. */
+  billboardLabels?: boolean
   winners: PodiumWinners
 }
 
 /** The three stepped pillars, with each winner's marble colour and username above their place. */
-export const Podium: FC<PodiumProps> = ({ winners }) => {
+export const Podium: FC<PodiumProps> = ({ winners, pillarExtension = 0, billboardLabels = true }) => {
   const animationTime = useRef(0)
   useFrame((_, deltaSeconds) => {
     animationTime.current += deltaSeconds
@@ -222,6 +303,8 @@ export const Podium: FC<PodiumProps> = ({ winners }) => {
   return (
     <group position={[0, PODIUM_Y_OFFSET, 0]}>
       <PodiumPillar
+        billboardLabels={billboardLabels}
+        pillarExtension={pillarExtension}
         place={2}
         ringColour={SILVER}
         ringEmissiveColour={SILVER}
@@ -229,6 +312,8 @@ export const Podium: FC<PodiumProps> = ({ winners }) => {
         animationTime={animationTime}
       />
       <PodiumPillar
+        billboardLabels={billboardLabels}
+        pillarExtension={pillarExtension}
         place={1}
         ringColour={GOLD}
         ringEmissiveColour={GOLD}
@@ -236,6 +321,8 @@ export const Podium: FC<PodiumProps> = ({ winners }) => {
         animationTime={animationTime}
       />
       <PodiumPillar
+        billboardLabels={billboardLabels}
+        pillarExtension={pillarExtension}
         place={3}
         ringColour={BRONZE}
         ringEmissiveColour={BRONZE_EMISSIVE}

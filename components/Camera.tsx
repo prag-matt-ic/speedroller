@@ -14,6 +14,7 @@ import useCameraControls from '@/hooks/cameraControls/useCameraControls'
 import { usePlayerInput } from '@/hooks/usePlayerInput'
 import { usePlayerPosition } from '@/hooks/usePlayerPosition'
 import useStage from '@/hooks/useStage'
+import { selectCameraPoseOverride } from '@/utils/camera/cameraPose'
 import { Overlay, SpeedRunStage } from '@/stores/types'
 
 type StageCameraPosition = {
@@ -111,7 +112,10 @@ const applyFarPlane = (camera: PerspectiveCamera): void => {
 }
 
 const FlatCamera: FC<Props> = ({ isMobile, position }) => {
-  const { setLookAt, setZoom } = useCameraControls()
+  const { setLookAt, setUp, setZoom } = useCameraControls()
+  const poseOverride = useGameStore(selectCameraPoseOverride)
+  const followZoom = useRef(isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE[Stage.HOME] : CAMERA_ZOOM_FOR_STAGE_DESKTOP[Stage.HOME])
+  const setFollowZoom = useCallback((zoom: number) => { followZoom.current = zoom }, [])
   const camera = useThree((s) => s.camera)
   const { playerPosition } = usePlayerPosition()
   const cameraLookAtPosition = useGameStore((s) => s.cameraLookAtPosition)
@@ -128,9 +132,18 @@ const FlatCamera: FC<Props> = ({ isMobile, position }) => {
   const { input } = usePlayerInput()
   const easedLookX = useRef(0)
 
-  useStageZoom(setZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
+  useStageZoom(setFollowZoom, isMobile ? CAMERA_ZOOM_FOR_STAGE_MOBILE : CAMERA_ZOOM_FOR_STAGE_DESKTOP)
 
   useFrame((_, deltaSeconds) => {
+    if (poseOverride) {
+      const { position: eye, target, up, zoom } = poseOverride.pose
+      setLookAt(...eye, ...target, true)
+      setUp(...up)
+      setZoom(zoom, true)
+      return
+    }
+    setUp(0, 1, 0)
+    setZoom(followZoom.current, true)
     const lookAt = cameraLookAtPosition ?? playerPosition.current
     // The race accelerates and brakes by itself, so racing input must not dolly the camera. The z
     // offsets stay for manual lobby travel, where up/down is real movement.
@@ -179,6 +192,7 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
   const overlay = useGameStore(s => s.overlay)
   const respawnTick = useGameStore(s => s.playerRespawnTick)
   const lookAtOverride = useGameStore(s => s.cameraLookAtPosition)
+  const poseOverride = useGameStore(selectCameraPoseOverride)
   const state = useRef({
     player: new Vector3(), course: new Vector3(), up: new Vector3(), right: new Vector3(),
     eye: new Vector3(), target: new Vector3(), matrix: new Matrix4(), rotation: new Quaternion(),
@@ -203,13 +217,19 @@ const CylinderRaceCamera: FC<Props> = ({ isMobile, position }) => {
     frame.lookX = easeLookAtX(frame.lookX, steeringX * LOOK_AT_X_RANGE, delta)
     frame.target.addScaledVector(frame.up, LOOK_AT_HEIGHT)
       .addScaledVector(frame.right, frame.lookX)
+    if (poseOverride) {
+      frame.eye.fromArray(poseOverride.pose.position)
+      frame.target.fromArray(poseOverride.pose.target)
+      frame.up.fromArray(poseOverride.pose.up)
+    }
     frame.matrix.lookAt(frame.eye, frame.target, frame.up)
     frame.rotation.setFromRotationMatrix(frame.matrix)
     const blend = frame.respawnTick !== respawnTick ? 1 : 1 - Math.exp(-8 * Math.min(delta, 1 / 15))
     camera.position.lerp(frame.eye, blend)
     camera.quaternion.slerp(frame.rotation, blend)
-    const easedZoom = camera.zoom + (frame.zoom - camera.zoom) * blend
-    const nextZoom = Math.abs(frame.zoom - easedZoom) < ZOOM_SNAP_THRESHOLD ? frame.zoom : easedZoom
+    const goalZoom = poseOverride?.pose.zoom ?? frame.zoom
+    const easedZoom = camera.zoom + (goalZoom - camera.zoom) * blend
+    const nextZoom = Math.abs(goalZoom - easedZoom) < ZOOM_SNAP_THRESHOLD ? goalZoom : easedZoom
     if (camera.zoom !== nextZoom) {
       camera.zoom = nextZoom
       camera.updateProjectionMatrix()

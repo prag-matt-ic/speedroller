@@ -1,3 +1,4 @@
+import { LOBBY_FEATURE_FOOTPRINTS } from '../platform/lobbyLayout'
 import { z } from 'zod'
 import { COLOUR_PICKER_COLUMN_OFFSETS } from '../platform/homeSection'
 import {
@@ -109,6 +110,13 @@ export function validateCourse(document: CourseDocument): CourseIssue[] {
   if (start && shop && shop.row >= start.row - 2) report(shop.row, shop.column, 'Paint shop must be before the start footprint')
   // These are the existing initial and cancel-to-lobby spawn cells.
   for (const row of [0, 22]) if (!isSolid(rows[row], 66)) report(row, 66, 'Keep the lobby spawn supported')
+  for (const feature of LOBBY_FEATURE_FOOTPRINTS) {
+    for (let row = feature.row - feature.halfDepth; row <= feature.row + feature.halfDepth; row++) {
+      for (let column = feature.column - feature.halfWidth; column <= feature.column + feature.halfWidth; column++) {
+        if (!isSolid(rows[row], column)) report(row, column, 'Keep the lobby feature footprint supported')
+      }
+    }
+  }
   const floor = new Set<number>()
   rows.forEach((row, index) => row.floor.forEach(column => {
     if (!row.ghosts.includes(column)) floor.add(index * COURSE_COLUMNS + column)

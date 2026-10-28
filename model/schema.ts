@@ -67,8 +67,11 @@ const databaseDateSchema = isoDateStringSchema.or(
   z.date().transform((date) => date.toISOString()),
 )
 
+export const paletteIndexSchema = z.number().int().min(0).max(7)
+
 export const speedRunSubmissionSchema = z.object({
   username: z.string().min(6).max(12),
+  palette_index: paletteIndexSchema.nullable().optional(),
   time: z.number(),
   attempt: z.number().min(1),
   date: isoDateStringSchema,
@@ -116,3 +119,6 @@ export type FeedbackSubmission = z.infer<typeof feedbackSubmissionSchema>
 export type FeedbackDatabase = z.infer<typeof feedbackDatabaseSchema>
 
 export type InsertFeedbackResponse = Promise<FeedbackDatabase | null>
+
+export const podiumEntrySchema = speedrunDatabaseSchema.pick({ id: true, username: true, time: true, palette_index: true })
+export type PodiumEntry = z.infer<typeof podiumEntrySchema>

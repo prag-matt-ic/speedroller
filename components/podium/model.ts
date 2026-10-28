@@ -4,6 +4,7 @@ export type PodiumPlace = 1 | 2 | 3
 export type PodiumWinner = {
   username: string
   paletteIndex: number
+  timeSeconds: number
 }
 
 /** Index 0 is first place, index 1 second, index 2 third. */

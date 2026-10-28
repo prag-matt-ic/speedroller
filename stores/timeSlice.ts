@@ -90,6 +90,7 @@ export const createTimeSlice =
         level_id: result.platformVersion,
         accidents: result.raceFalls,
         rings: result.rings,
+        palette_index: result.paletteIndex,
       }
 
       const appendRun = (run: SpeedRunDatabase) => {
@@ -144,6 +145,7 @@ export const createTimeSlice =
         multiplayerFinish: null,
         attemptStartedAtMs: null,
         attemptInputType: state.inputType,
+        attemptPaletteIndex: state.paletteIndex,
         attemptResult: null,
         savedRunId: null,
         saveStatus: 'idle',
@@ -156,6 +158,7 @@ export const createTimeSlice =
         confirmationProgress: 0,
         hudIndicator: null,
         cameraLookAtPosition: null,
+        cameraPoseOverrides: [],
         speedRunStage: phase,
         overlay: getOverlayForSpeedRunStage(phase),
         playerStatus: 'respawning',
@@ -179,6 +182,7 @@ export const createTimeSlice =
         multiplayerFinish: null,
         attemptStartedAtMs: null,
         attemptInputType: null,
+        attemptPaletteIndex: null,
         attemptResult: null,
         savedRunId: null,
         saveStatus: 'idle',
@@ -191,6 +195,7 @@ export const createTimeSlice =
         confirmationProgress: 0,
         hudIndicator,
         cameraLookAtPosition: null,
+        cameraPoseOverrides: [],
         speedRunStage: SpeedRunStage.LOBBY,
         overlay: Overlay.NONE,
         playerStatus: 'respawning',
@@ -206,6 +211,7 @@ export const createTimeSlice =
       ...RESET_TIME_STATE,
       attemptId: 0,
       attemptInputType: null,
+      attemptPaletteIndex: null,
       totalTimeS: 0,
       completedSpeedRuns: {},
       platformVersion: PLATFORM_VERSION,
@@ -233,6 +239,7 @@ export const createTimeSlice =
         if (state.overlay !== Overlay.MULTIPLAYER || state.speedRunStage !== SpeedRunStage.START) return
         set({ multiplayerRaceId: raceId, multiplayerStartAtMs: startAtMs, multiplayerFinish: null,
           attemptId: state.attemptId + 1, attemptStartedAtMs: null, attemptInputType: state.inputType,
+          attemptPaletteIndex: state.paletteIndex,
           speedRunStage: SpeedRunStage.COUNTDOWN, overlay: Overlay.MULTIPLAYER_COUNTDOWN })
       },
       startMultiplayerRace: (raceId, nowMs) => {
@@ -302,6 +309,7 @@ export const createTimeSlice =
           date: new Date().toISOString(),
           timeSeconds,
           inputType: state.attemptInputType ?? state.inputType,
+          paletteIndex: state.attemptPaletteIndex ?? state.paletteIndex,
           platformVersion: state.platformVersion,
           raceFalls: state.outOfBoundsEvents.length,
           rings: Object.keys(state.collectedRings).length,

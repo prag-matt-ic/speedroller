@@ -1,3 +1,4 @@
+import type { CameraPose, CameraPoseOverride } from '@/utils/camera/cameraPose'
 import { type LucideIcon } from 'lucide-react'
 import { type ReactNode } from 'react'
 import { type Vector3Tuple } from 'three'
@@ -64,6 +65,7 @@ export type RaceResult = {
   date: string
   timeSeconds: number
   inputType: InputType
+  paletteIndex: number
   platformVersion: string
   raceFalls: number
   rings: number
@@ -79,6 +81,7 @@ export type TimeSlice = {
   attemptId: number
   attemptStartedAtMs: number | null
   attemptInputType: InputType | null
+  attemptPaletteIndex: number | null
   attemptResult: RaceResult | null
   savedRunId: number | null
   saveStatus: SaveStatus
@@ -237,6 +240,8 @@ export type GameSlice = {
   /** Developer layout reset only; attempt retries must not replace terrain. */
   resetGame: (params: { mode: GameMode }) => void
 
+  cameraPoseOverrides: CameraPoseOverride[]
+  setCameraPoseOverride: (id: string, pose: CameraPose | null) => void
   cameraLookAtPosition: Vector3Tuple | null
   setCameraLookAtPosition: (pos: Vector3Tuple | null) => void
 

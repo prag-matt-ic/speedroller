@@ -143,11 +143,16 @@ test('a fall clears momentum and boost', () => {
     playerStatus: 'safe',
     playerSpeedUnits: 27,
     playerBoostUnits: 8,
+    cameraPoseOverrides: [{ id: 'podium', pose: {} }],
   })
 
   store.getState().onOutOfBounds()
 
   assert.equal(store.getState().playerStatus, 'out-of-bounds')
+  assert.deepEqual(store.getState().cameraPoseOverrides, [])
+  store.setState({ cameraPoseOverrides: [{ id: 'podium', pose: {} }] })
+  store.getState().respawnPlayer([0, 1, 0])
+  assert.deepEqual(store.getState().cameraPoseOverrides, [])
   assert.equal(store.getState().playerSpeedUnits, 0)
   assert.equal(store.getState().playerBoostUnits, 0)
 })

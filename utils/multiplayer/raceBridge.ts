@@ -26,7 +26,7 @@ export function bindMultiplayerRace(game: StoreApi<GameStore>, session: RoomSess
       state.stopConfirmation(); state.resetPlayerSpeedState()
       game.setState({ isSpectating: true, speedRunStage: SpeedRunStage.START, attemptId: state.attemptId + 1,
         attemptStartedAtMs: null, multiplayerRaceId: null, multiplayerFinish: null,
-        playerStatus: 'safe', spawnPosition: null, cameraLookAtPosition: null, ...getResetInputState() })
+        playerStatus: 'safe', spawnPosition: null, cameraLookAtPosition: null, cameraPoseOverrides: [], ...getResetInputState() })
     }
     if (game.getState().overlay !== Overlay.SPECTATING) game.setState({ overlay: Overlay.SPECTATING })
     const buffer = followId ? session.getPoseBuffer(followId) : undefined
